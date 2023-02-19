@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"><meta><title>一次Java字节码插桩实战 - 内森淼文</title><link rel="manifest" href="/manifest.json"><meta name="application-name" content="内森淼文"><meta name="msapplication-TileImage" content="/images/favicon.svg"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="内森淼文"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="description" content="理解本文需要一定的Java字节码指令基础，可以阅读笔者的另一篇文章：大话+图说：Java字节码指令——只为让你懂   利用Android字节码插桩技术可以很方便地帮助我们实现很多手术刀式的代码设计，如无埋点统计上报、轻量级AOP等。下面我们就通过一次实战，把这门技术真正用起来。  奇葩需求假设有这样一个需求，我们需要在本项目工程的所有组件（Activity&amp;#x2F;Receiver&amp;#x2F;"><meta property="og:type" content="blog"><meta property="og:title" content="一次Java字节码插桩实战"><meta property="og:url" content="https://hydraxman.github.io/2017/03/11/jvm-classcode-practice/"><meta property="og:site_name" content="内森淼文"><meta property="og:description" content="理解本文需要一定的Java字节码指令基础，可以阅读笔者的另一篇文章：大话+图说：Java字节码指令——只为让你懂   利用Android字节码插桩技术可以很方便地帮助我们实现很多手术刀式的代码设计，如无埋点统计上报、轻量级AOP等。下面我们就通过一次实战，把这门技术真正用起来。  奇葩需求假设有这样一个需求，我们需要在本项目工程的所有组件（Activity&amp;#x2F;Receiver&amp;#x2F;"><meta property="og:locale" content="zh_CN"><meta property="og:image" content="https://hydraxman.github.io/2017/03/11/jvm-classcode-practice/1.png"><meta property="og:image" content="https://hydraxman.github.io/2017/03/11/jvm-classcode-practice/2.png"><meta property="og:image" content="https://hydraxman.github.io/2017/03/11/jvm-classcode-practice/3.png"><meta property="og:image" content="https://hydraxman.github.io/2017/03/11/jvm-classcode-practice/4.png"><meta property="og:image" content="https://hydraxman.github.io/2017/03/11/jvm-classcode-practice/5.png"><meta property="og:image" content="https://hydraxman.github.io/2017/03/11/jvm-classcode-practice/6.png"><meta property="og:image" content="https://hydraxman.github.io/2017/03/11/jvm-classcode-practice/7.png"><meta property="og:image" content="https://hydraxman.github.io/2017/03/11/jvm-classcode-practice/8.png"><meta property="og:image" content="https://hydraxman.github.io/2017/03/11/jvm-classcode-practice/8-1.png"><meta property="og:image" content="https://hydraxman.github.io/2017/03/11/jvm-classcode-practice/9.png"><meta property="og:image" content="https://hydraxman.github.io/2017/03/11/jvm-classcode-practice/10.png"><meta property="og:image" content="https://hydraxman.github.io/2017/03/11/jvm-classcode-practice/11.png"><meta property="og:image" content="https://hydraxman.github.io/2017/03/11/jvm-classcode-practice/12.png"><meta property="og:image" content="https://hydraxman.github.io/2017/03/11/jvm-classcode-practice/13.png"><meta property="og:image" content="https://hydraxman.github.io/2017/03/11/jvm-classcode-practice/14.png"><meta property="og:image" content="https://hydraxman.github.io/2017/03/11/jvm-classcode-practice/15.png"><meta property="article:published_time" content="2017-03-10T23:46:06.000Z"><meta property="article:modified_time" content="2022-10-14T12:35:46.406Z"><meta property="article:author" content="Nathan"><meta property="article:tag" content="Gradle"><meta property="article:tag" content="Android"><meta property="article:tag" content="Java"><meta property="article:tag" content="JVM"><meta property="twitter:card" content="summary"><meta property="twitter:image:src" content="https://hydraxman.github.io/2017/03/11/jvm-classcode-practice/1.png"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"https://hydraxman.github.io/2017/03/11/jvm-classcode-practice/"},"headline":"一次Java字节码插桩实战","image":["https://hydraxman.github.io/2017/03/11/jvm-classcode-practice/1.png","https://hydraxman.github.io/2017/03/11/jvm-classcode-practice/2.png","https://hydraxman.github.io/2017/03/11/jvm-classcode-practice/3.png","https://hydraxman.github.io/2017/03/11/jvm-classcode-practice/4.png","https://hydraxman.github.io/2017/03/11/jvm-classcode-practice/5.png","https://hydraxman.github.io/2017/03/11/jvm-classcode-practice/6.png","https://hydraxman.github.io/2017/03/11/jvm-classcode-practice/7.png","https://hydraxman.github.io/2017/03/11/jvm-classcode-practice/8.png","https://hydraxman.github.io/2017/03/11/jvm-classcode-practice/8-1.png","https://hydraxman.github.io/2017/03/11/jvm-classcode-practice/9.png","https://hydraxman.github.io/2017/03/11/jvm-classcode-practice/10.png","https://hydraxman.github.io/2017/03/11/jvm-classcode-practice/11.png","https://hydraxman.github.io/2017/03/11/jvm-classcode-practice/12.png","https://hydraxman.github.io/2017/03/11/jvm-classcode-practice/13.png","https://hydraxman.github.io/2017/03/11/jvm-classcode-practice/14.png","https://hydraxman.github.io/2017/03/11/jvm-classcode-practice/15.png"],"datePublished":"2017-03-10T23:46:06.000Z","dateModified":"2022-10-14T12:35:46.406Z","author":{"@type":"Person","name":"Nathan"},"publisher":{"@type":"Organization","name":"内森淼文","logo":{"@type":"ImageObject","url":"https://hydraxman.github.io/images/logo.svg"}},"description":"理解本文需要一定的Java字节码指令基础，可以阅读笔者的另一篇文章：大话+图说：Java字节码指令——只为让你懂   利用Android字节码插桩技术可以很方便地帮助我们实现很多手术刀式的代码设计，如无埋点统计上报、轻量级AOP等。下面我们就通过一次实战，把这门技术真正用起来。  奇葩需求假设有这样一个需求，我们需要在本项目工程的所有组件（Activity&#x2F;Receiver&#x2F;"}</script><link rel="canonical" href="https://hydraxman.github.io/2017/03/11/jvm-classcode-practice/"><link rel="icon" href="/images/favicon.svg"><link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.0.0/css/all.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.12.0/styles/atom-one-light.css"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;600&amp;family=Source+Code+Pro"><link rel="stylesheet" href="/css/default.css"><style>body>.footer,body>.navbar,body>.section{opacity:0}</style><!--!--><!--!--><!--!--><!--!--><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cookieconsent@3.1.1/build/cookieconsent.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@1.10.0/dist/css/lightgallery.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/justifiedGallery@3.8.1/dist/css/justifiedGallery.min.css"><!--!--><!--!--><style>.pace{-webkit-pointer-events:none;pointer-events:none;-webkit-user-select:none;-moz-user-select:none;user-select:none}.pace-inactive{display:none}.pace .pace-progress{background:#3273dc;position:fixed;z-index:2000;top:0;right:100%;width:100%;height:2px}</style><script src="https://cdn.jsdelivr.net/npm/pace-js@1.2.4/pace.min.js"></script><!--!--><!--!--><!-- hexo injector head_end start --><script>
+  (function () {
+      function switchTab() {
+          if (!location.hash) {
+            return;
+          }
+
+          const id = '#' + CSS.escape(location.hash.substring(1));
+          const $tabMenu = document.querySelector(`.tabs a[href="${id}"]`);
+          if (!$tabMenu) {
+            return;
+          }
+
+          const $tabMenuContainer = $tabMenu.parentElement.parentElement;
+          Array.from($tabMenuContainer.children).forEach($menu => $menu.classList.remove('is-active'));
+          Array.from($tabMenuContainer.querySelectorAll('a'))
+              .map($menu => document.getElementById($menu.getAttribute("href").substring(1)))
+              .forEach($content => $content.classList.add('is-hidden'));
+
+          if ($tabMenu) {
+              $tabMenu.parentElement.classList.add('is-active');
+          }
+          const $activeTab = document.querySelector(id);
+          if ($activeTab) {
+              $activeTab.classList.remove('is-hidden');
+          }
+      }
+      switchTab();
+      window.addEventListener('hashchange', switchTab, false);
+  })();
+  </script><!-- hexo injector head_end end --><meta name="generator" content="Hexo 6.3.0"></head><body class="is-2-column"><nav class="navbar navbar-main"><div class="container navbar-container"><div class="navbar-brand justify-content-center"><a class="navbar-item navbar-logo" href="/"><img src="/images/logo.svg" alt="内森淼文" height="28"></a></div><div class="navbar-menu"><div class="navbar-start"><a class="navbar-item" href="/">Home</a><a class="navbar-item" href="/archives">Archives</a><a class="navbar-item" href="/categories">Categories</a><a class="navbar-item" href="/tags">Tags</a><a class="navbar-item" href="/about">About</a></div><div class="navbar-end"><a class="navbar-item" target="_blank" rel="noopener" title="My GitHub Index" href="https://github.com/hydraxman"><i class="fab fa-github"></i></a><a class="navbar-item search" title="搜索" href="javascript:;"><i class="fas fa-search"></i></a></div></div></div></nav><section class="section"><div class="container"><div class="columns"><div class="column order-2 column-main is-8-tablet is-8-desktop is-8-widescreen"><div class="card"><article class="card-content article" role="article"><div class="article-meta is-size-7 is-uppercase level is-mobile"><div class="level-left"><span class="level-item"><time dateTime="2017-03-10T23:46:06.000Z" title="3/11/2017, 7:46:06 AM">2017-03-11</time>发表</span><span class="level-item"><time dateTime="2022-10-14T12:35:46.406Z" title="10/14/2022, 8:35:46 PM">2022-10-14</time>更新</span><span class="level-item"><a class="link-muted" href="/categories/%E6%89%93%E7%A0%81%E8%A6%81%E4%B9%89/">打码要义</a></span><span class="level-item">16 分钟读完 (大约2424个字)</span></div></div><h1 class="title is-3 is-size-4-mobile">一次Java字节码插桩实战</h1><div class="content"><blockquote>
+<p>理解本文需要一定的Java字节码指令基础，可以阅读笔者的另一篇文章：<a target="_blank" rel="noopener" href="https://segmentfault.com/a/1190000008606277">大话+图说：Java字节码指令——只为让你懂</a></p>
+</blockquote>
+<blockquote>
+<p><strong>利用Android字节码插桩技术可以很方便地帮助我们实现很多手术刀式的代码设计，如无埋点统计上报、轻量级AOP等。下面我们就通过一次实战，把这门技术真正用起来。</strong></p>
+</blockquote>
+<h1 id="奇葩需求"><a href="#奇葩需求" class="headerlink" title="奇葩需求"></a>奇葩需求</h1><p>假设有这样一个需求，我们需要在本项目工程的所有组件（Activity&#x2F;Receiver&#x2F;Service&#x2F;Provider）的on系列生命周期类方法执行时，调用一个我们写好的方法，传入组件的实例对象，来对组件的相关状态进行监测，如何实现？</p>
+<span id="more"></span>
+
+<p>一般的思路有两种：</p>
+<ol>
+<li>通过Java继承体系，为我们实现的四大组件分别建立基类，在基类父方法里对监测方法进行调用。</li>
+<li>通过Android API Hook技术，即通过动态代理等方法替换关键节点，抓住组件的节点方法并调用我们的监测方法。</li>
+</ol>
+<p>上面的第一种方法比较麻烦，而且控制力较弱，也无法顾及我们所依赖的Jar或者aar中的组件，比如小米推送中自带的Service和Receiver，是完全无法触及的。第二种方法则比较强大，但是需要考虑兼容性问题，技术实现上的成本也比较高，毕竟有一些生命周期的节点不好找，难免焦头烂额。</p>
+<p>本文对此的实战即通过字节码插桩，在class文件编译成dex之前（同时也是proguard操作之前），遍历所有要编译的class文件并对其中符合条件的方法进行修改，注入我们要调用的监测方法的代码，从而实现这个需求。</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/BryanSharp/hibeaver">HiBeaver</a> 是目前这方面比较完善的字节码插桩Gradle插件，目前最新的1.2.4版本支持通过通配符或正则表达式的方法来匹配目标类和目标方法，进行方法的批量插桩注入和修改，非常灵活易用。对于类似上文提出的需求，实现起来非常方便，唯一前提的仅仅是：知道所有组件的类的全名就可以了。</p>
+<h1 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h1><p>好，基于这些，正式开始实战，牛刀小试一下：<br>首先建立一个工程，为便于演示，我们引入小米推送（接入方式不再赘述，详见<a target="_blank" rel="noopener" href="http://dev.xiaomi.com/doc/?p=3080">小米推送文档</a>），然后完善代码到如下状态：</p>
+<p><img src="/2017/03/11/jvm-classcode-practice/1.png" alt="图片描述"></p>
+<p>MainActivity内容很简单，注册了小米推送，有一个TextView点击后可以跳转到SecondActivity，仅此而已。具体如下：</p>
+<p><img src="/2017/03/11/jvm-classcode-practice/2.png" alt="图片描述"></p>
+<p>SecondActivity中一切从简：</p>
+<p><img src="/2017/03/11/jvm-classcode-practice/3.png" alt="图片描述"></p>
+<p>至于DemoMessageReceiver这个类里完全依照小米推送接入文档中的配置，没有实质改动，不再贴出。<br>注意到还有一个MonitorUtil的类，内容如下：</p>
+<p><img src="/2017/03/11/jvm-classcode-practice/4.png" alt="图片描述"></p>
+<p>其中的monitorThis的方法就是我们打算在各个生命周期方法里插入的调用方法。</p>
+<h1 id="开始实战"><a href="#开始实战" class="headerlink" title="开始实战"></a>开始实战</h1><p>下面我们就开始实现开头处提到的需求：通过字节码插桩的方法，本工程里的所有组件的生命周期方法return之前调用我们的monitorThis方法，传入组件实例等信息作为参数。</p>
+<p>首先，要引入<a target="_blank" rel="noopener" href="https://github.com/BryanSharp/hibeaver">HiBeaver</a>插件：<br>然后在项目的根build.gradle下面增加classpath如下：</p>
+<p><img src="/2017/03/11/jvm-classcode-practice/5.png" alt="图片描述"></p>
+<pre><code>classpath &#39;com.bryansharp:hibeaver:1.2.4&#39;
+</code></pre>
+<p>随后为我们工程的app&#x2F;build.gradle增加如下配置：</p>
+<pre><code>apply plugin: &#39;hiBeaver&#39;
+import com.bryansharp.gradle.hibeaver.utils.MethodLogAdapter
+import org.objectweb.asm.ClassVisitor
+import org.objectweb.asm.MethodVisitor
+import org.objectweb.asm.Opcodes
+
+hiBeaver &#123;
+    modifyMatchMaps = [
+            //类名称匹配规则，*表示任意长度任意字符，|为分隔符，可以理解为或
+            &#39;*Activity|*Receiver|*Service|!android*&#39;: [
+                    //方法名匹配规则与类名类似，同时也支持正则表达式匹配（需要加r:）；adapter后为一个闭包，进行具体的修改
+                    [&#39;methodName&#39;: &#39;on**&#39;, &#39;methodDesc&#39;: null, &#39;adapter&#39;: &#123;
+                        //下面这些为闭包传入的参数，可以帮助我们进行方法过滤，以及根据方法参数来调整字节码修改方式
+                        ClassVisitor cv, int access, String name, String desc, String signature, String[] exceptions -&gt;
+                            //这里我们有了ClassVisitor实例，其实可以为类添加新的方法。
+                            MethodVisitor methodVisitor = cv.visitMethod(access, name, desc, signature, exceptions);
+                            MethodVisitor adapter = new MethodLogAdapter(methodVisitor) &#123;
+
+                                @Override
+                                void visitCode() &#123;
+                                    super.visitCode();
+                                    //实例对象入栈
+                                    methodVisitor.visitVarInsn(Opcodes.ALOAD, 0);
+                                    //下面两句我们将方法的名称和描述作为常量入栈
+                                    methodVisitor.visitLdcInsn(name);
+                                    methodVisitor.visitLdcInsn(desc);
+                                    //调用我们的静态方法
+                                    methodVisitor.visitMethodInsn(Opcodes.INVOKESTATIC,
+                                            //下面这个MethodLogAdapter.className2Path(String)为
+                                            // hibeaver插件提供的方法，可以将类名转为路径名
+                                            MethodLogAdapter.className2Path(&quot;bruce.com.testhibeaver.MonitorUtil&quot;),
+                                            &quot;monitorThis&quot;, &quot;(Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)V&quot;);
+                                &#125;
+                            &#125;
+                            return adapter;
+                    &#125;]
+            ]
+    ]
+&#125;
+</code></pre>
+<p><a target="_blank" rel="noopener" href="https://github.com/BryanSharp/hibeaver">HiBeaver</a>在类名和方法名的匹配上非常灵活，可以非常方便地实现批量匹配，除了完整匹配外，还支持通配符匹配和正则表达式匹配两种模式。通配符匹配模式中主要可以使用两种符号，即 | 和<em>，</em>表示任意长度（&gt;0）的任意字符，而|表示分隔符，这里可以理解为或。因此，上面的：</p>
+<pre><code>*Activity|*Receiver|*Service
+</code></pre>
+<p>可以理解为，匹配任意全类名以Activity、Receiver或Service结尾的类。</p>
+<p>一般来讲，我们的Android组件在命名上都会遵从这个规范，即组件类名以相应的组件名结尾，对于个别不遵从这个原则的，也可以通过|分隔符来把特殊情况纳入进去。</p>
+<p>除此之外，如果存在更复杂的匹配规则，上述通配符已经无法满足，hiBeaver也支持正则表达式进行全类名匹配，只需要在表达式前加上“r:”就可以。比如：</p>
+<pre><code>r:.*D[a-zA-Z]*Client
+</code></pre>
+<p>表示匹配符合“.*D[a-zA-Z]*Client”这个正则表达式的类名。</p>
+<p>更进一步地，<a target="_blank" rel="noopener" href="https://github.com/BryanSharp/hibeaver">HiBeaver</a> <strong>未来</strong> 还将支持根据类的继承关系进行匹配，比如：</p>
+<pre><code>&gt;ext&gt;android.support.v4.app.FragmentActivity
+</code></pre>
+<p>表示匹配所有继承android.support.v4.app.FragmentActivity的类，而：</p>
+<pre><code>&gt;imp&gt;android.os.Handler.Callback
+</code></pre>
+<p>表示匹配所有实现android.os.Handler.Callback接口的类。<br>不过，目前这两个特性还没有支持，仅提上了其项目的<a target="_blank" rel="noopener" href="https://github.com/BryanSharp/hibeaver/issues/8">issue</a>中。<br>回到刚刚的配置中，下面的methodName方法的匹配规则与类名匹配用法一样，**和*是一样的效果，on**即表示名字以on开头的方法。<br>好了，编译运行工程，过程中在Gradle Console中可以看到hibeaver进行字节码插桩输出如下（局部）：</p>
+<p><img src="/2017/03/11/jvm-classcode-practice/6.png" alt="图片描述"></p>
+<p>程序运行起来，插桩成功，成功调用了monitorThis方法，但赫然发现输出如下：</p>
+<p><img src="/2017/03/11/jvm-classcode-practice/7.png" alt="图片描述"></p>
+<p>调用了三个onCreate和若干的onCreateView！这是为什么？我们的MainActivity也没有这个onCreateView的方法啊！</p>
+<p>结合之前Gradle编译日志，在仔细一琢磨，突然明白了：</p>
+<p><img src="/2017/03/11/jvm-classcode-practice/8.png" alt="图片描述"><br><img src="/2017/03/11/jvm-classcode-practice/8-1.png" alt="图片描述"><br><img src="/2017/03/11/jvm-classcode-practice/9.png" alt="图片描述"></p>
+<p>原来，我们的*Activity规则会匹配所有的Activity结尾的类，包括一些android v4支持包中的类，什么AppCompatActivity、FragmentActivity等继承链上的Activity通通被hook了一遍，难怪会有那么多输出了，可辛苦了我们的monitorThis方法。</p>
+<p>既然如此，如何是好？针对于当前的需求，我们当然不想匹配v4包里的组件类。</p>
+<p>所幸的是，<a target="_blank" rel="noopener" href="https://github.com/BryanSharp/hibeaver">HiBeaver</a>中还有另一种排除匹配，运用!符号改造如下即可：</p>
+<pre><code>*Activity|*Receiver|*Service|!android*
+</code></pre>
+<p>这样就表示，匹配前三种之一（或的关系）且不匹配第四个android*的全类名。<br>改好后，再次运行，并点击跳转到SecondActivity：</p>
+<p><img src="/2017/03/11/jvm-classcode-practice/10.png" alt="图片描述"></p>
+<p>可以看到log输出一下子少多了，证明没有再注入v4包里的类，同时，小米的组件也被正常注入了，我把网断掉，可以看到小米的Receiver被唤起：</p>
+<p><img src="/2017/03/11/jvm-classcode-practice/11.png" alt="图片描述"></p>
+<p>再开启调试，打开网，断点也可以正常进入：</p>
+<p><img src="/2017/03/11/jvm-classcode-practice/12.png" alt="图片描述"></p>
+<p>同时，每次<a target="_blank" rel="noopener" href="https://github.com/BryanSharp/hibeaver">HiBeaver</a>进行字节码插桩后还会把修改过、实际使用的字节码保存到build&#x2F;HiBeaver目录下，以便于查看：</p>
+<p><img src="/2017/03/11/jvm-classcode-practice/13.png" alt="clipboard.png"></p>
+<p>如下图为修改后的MainActivity类：</p>
+<p><img src="/2017/03/11/jvm-classcode-practice/14.png" alt="clipboard.png"></p>
+<p>修改后的小米推送里的某Receiver:</p>
+<p><img src="/2017/03/11/jvm-classcode-practice/15.png" alt="clipboard.png"></p>
+<p>这样，无论是进行节点控制还是研究其运行机制都大大地方便了。</p>
+<blockquote>
+<p><a target="_blank" rel="noopener" href="https://github.com/BryanSharp/hibeaver">HiBeaver</a></p>
+</blockquote>
+</div><div class="article-licensing box"><div class="licensing-title"><p>一次Java字节码插桩实战</p><p><a href="https://hydraxman.github.io/2017/03/11/jvm-classcode-practice/">https://hydraxman.github.io/2017/03/11/jvm-classcode-practice/</a></p></div><div class="licensing-meta level is-mobile"><div class="level-left"><div class="level-item is-narrow"><div><h6>作者</h6><p>Nathan</p></div></div><div class="level-item is-narrow"><div><h6>发布于</h6><p>2017-03-11</p></div></div><div class="level-item is-narrow"><div><h6>更新于</h6><p>2022-10-14</p></div></div><div class="level-item is-narrow"><div><h6>许可协议</h6><p><a class="icons" rel="noopener" target="_blank" title="Creative Commons" href="https://creativecommons.org/"><i class="icon fab fa-creative-commons"></i></a><a class="icons" rel="noopener" target="_blank" title="Attribution" href="https://creativecommons.org/licenses/by/4.0/"><i class="icon fab fa-creative-commons-by"></i></a><a class="icons" rel="noopener" target="_blank" title="Noncommercial" href="https://creativecommons.org/licenses/by-nc/4.0/"><i class="icon fab fa-creative-commons-nc"></i></a></p></div></div></div></div></div><div class="article-tags is-size-7 mb-4"><span class="mr-2">#</span><a class="link-muted mr-2" rel="tag" href="/tags/Gradle/">Gradle</a><a class="link-muted mr-2" rel="tag" href="/tags/Android/">Android</a><a class="link-muted mr-2" rel="tag" href="/tags/Java/">Java</a><a class="link-muted mr-2" rel="tag" href="/tags/JVM/">JVM</a></div><div class="sharethis-inline-share-buttons"></div><script src="https://platform-api.sharethis.com/js/sharethis.js#property=63f0be096a51ed001aa3655d&amp;product=inline-share-buttons" defer></script></article></div><!--!--><nav class="post-navigation mt-4 level is-mobile"><div class="level-start"><a class="article-nav-prev level level-item link-muted" href="/2018/07/13/java-calendar-story/"><i class="level-item fas fa-chevron-left"></i><span class="level-item">代码中的人文故事：从一个Java的“Bug”说起</span></a></div><div class="level-end"><a class="article-nav-next level level-item link-muted" href="/2017/03/07/jvm-classcode-tutorial/"><span class="level-item">白话Java字节码指令</span><i class="level-item fas fa-chevron-right"></i></a></div></nav><div class="card"><div class="card-content"><h3 class="title is-5">评论</h3><div id="disqus_thread"><noscript>Please enable JavaScript to view the <a target="_blank" rel="noopener" href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript></div><script>var disqus_config = function () {
+            this.page.url = 'https://hydraxman.github.io/2017/03/11/jvm-classcode-practice/';
+            this.page.identifier = '2017/03/11/jvm-classcode-practice/';
+        };
+        (function() {
+            var d = document, s = d.createElement('script');  
+            s.src = '//' + 'hydraxman-github-io' + '.disqus.com/embed.js';
+            s.setAttribute('data-timestamp', +new Date());
+            (d.head || d.body).appendChild(s);
+        })();</script></div></div></div><div class="column column-left is-4-tablet is-4-desktop is-4-widescreen  order-1"><div class="card widget" data-type="profile"><div class="card-content"><nav class="level"><div class="level-item has-text-centered flex-shrink-1"><div><figure class="image is-128x128 mx-auto mb-2"><img class="avatar is-rounded" src="/images/headshot.jpeg" alt="内森 Nathan"></figure><p class="title is-size-4 is-block" style="line-height:inherit;">内森 Nathan</p><p class="is-size-6 is-block">Senior Software Engineer Manager @ Microsoft</p><p class="is-size-6 is-flex justify-content-center"><i class="fas fa-map-marker-alt mr-1"></i><span>Beijing</span></p></div></div></nav><nav class="level is-mobile"><div class="level-item has-text-centered is-marginless"><div><p class="heading">文章</p><a href="/archives"><p class="title">23</p></a></div></div><div class="level-item has-text-centered is-marginless"><div><p class="heading">分类</p><a href="/categories"><p class="title">8</p></a></div></div><div class="level-item has-text-centered is-marginless"><div><p class="heading">标签</p><a href="/tags"><p class="title">26</p></a></div></div></nav><div class="level"><a class="level-item button is-primary is-rounded" href="https://github.com/hydraxman" target="_blank" rel="noopener">关注我</a></div><div class="level is-mobile is-multiline"><a class="level-item button is-transparent is-marginless" target="_blank" rel="noopener" title="Github" href="https://github.com/hydraxman"><i class="fab fa-github"></i></a><a class="level-item button is-transparent is-marginless" target="_blank" rel="noopener" title="Facebook" href="https://facebook.com"><i class="fab fa-facebook"></i></a><a class="level-item button is-transparent is-marginless" target="_blank" rel="noopener" title="Twitter" href="https://twitter.com"><i class="fab fa-twitter"></i></a><a class="level-item button is-transparent is-marginless" target="_blank" rel="noopener" title="RSS" href="/"><i class="fas fa-rss"></i></a></div></div></div><div class="card widget" data-type="categories"><div class="card-content"><div class="menu"><h3 class="menu-label">分类</h3><ul class="menu-list"><li><a class="level is-mobile" href="/categories/%E4%BA%BA%E7%94%9F%E6%9D%82%E8%B0%88/"><span class="level-start"><span class="level-item">人生杂谈</span></span><span class="level-end"><span class="level-item tag">4</span></span></a></li><li><a class="level is-mobile" href="/categories/%E5%81%A5%E5%BA%B7/"><span class="level-start"><span class="level-item">健康</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/categories/%E5%88%A8%E7%A0%81%E9%97%AE%E5%BA%95/"><span class="level-start"><span class="level-item">刨码问底</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li><li><a class="level is-mobile" href="/categories/%E5%B0%8F%E8%AF%B4/"><span class="level-start"><span class="level-item">小说</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/categories/%E6%89%93%E7%A0%81%E8%A6%81%E4%B9%89/"><span class="level-start"><span class="level-item">打码要义</span></span><span class="level-end"><span class="level-item tag">9</span></span></a></li><li><a class="level is-mobile" href="/categories/%E6%BC%94%E8%AE%B2%E6%8A%80%E5%B7%A7/"><span class="level-start"><span class="level-item">演讲技巧</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/categories/%E7%AE%A1%E7%90%86/"><span class="level-start"><span class="level-item">管理</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/categories/%E8%AF%BB%E4%B9%A6/"><span class="level-start"><span class="level-item">读书</span></span><span class="level-end"><span class="level-item tag">4</span></span></a></li></ul></div></div></div><!--!--><div class="card widget" data-type="recent-posts"><div class="card-content"><h3 class="menu-label">最新文章</h3><article class="media"><div class="media-content"><p class="date"><time dateTime="2022-11-01T00:38:30.000Z">2022-11-01</time></p><p class="title"><a href="/2022/11/01/the-nature-of-code/">编程的本质</a></p><p class="categories"><a href="/categories/%E5%88%A8%E7%A0%81%E9%97%AE%E5%BA%95/">刨码问底</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2022-11-01T00:38:30.000Z">2022-11-01</time></p><p class="title"><a href="/2022/11/01/plantuml-get-started/">PlantUML指北：用UML设计和规划你的项目</a></p><p class="categories"><a href="/categories/%E6%89%93%E7%A0%81%E8%A6%81%E4%B9%89/">打码要义</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2022-10-31T09:20:38.000Z">2022-10-31</time></p><p class="title"><a href="/2022/10/31/how-to-read-book/">如何阅读一本书</a></p><p class="categories"><a href="/categories/%E8%AF%BB%E4%B9%A6/">读书</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2022-10-15T11:07:30.000Z">2022-10-15</time></p><p class="title"><a href="/2022/10/15/design-patterns-all-in-one/">15分钟入门23种设计模式：图解，范例和对比</a></p><p class="categories"><a href="/categories/%E6%89%93%E7%A0%81%E8%A6%81%E4%B9%89/">打码要义</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2022-09-18T11:25:37.000Z">2022-09-18</time></p><p class="title"><a href="/2022/09/18/21-leadership-laws/">领导力21法则读书笔记</a></p><p class="categories"><a href="/categories/%E8%AF%BB%E4%B9%A6/">读书</a></p></div></article></div></div><div class="card widget" data-type="archives"><div class="card-content"><div class="menu"><h3 class="menu-label">归档</h3><ul class="menu-list"><li><a class="level is-mobile" href="/archives/2022/11/"><span class="level-start"><span class="level-item">十一月 2022</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li><li><a class="level is-mobile" href="/archives/2022/10/"><span class="level-start"><span class="level-item">十月 2022</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li><li><a class="level is-mobile" href="/archives/2022/09/"><span class="level-start"><span class="level-item">九月 2022</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li><li><a class="level is-mobile" href="/archives/2022/07/"><span class="level-start"><span class="level-item">七月 2022</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/archives/2022/02/"><span class="level-start"><span class="level-item">二月 2022</span></span><span class="level-end"><span class="level-item tag">3</span></span></a></li><li><a class="level is-mobile" href="/archives/2021/12/"><span class="level-start"><span class="level-item">十二月 2021</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/archives/2021/02/"><span class="level-start"><span class="level-item">二月 2021</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/archives/2020/12/"><span class="level-start"><span class="level-item">十二月 2020</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/archives/2019/02/"><span class="level-start"><span class="level-item">二月 2019</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/archives/2018/12/"><span class="level-start"><span class="level-item">十二月 2018</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li><li><a class="level is-mobile" href="/archives/2018/07/"><span class="level-start"><span class="level-item">七月 2018</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/archives/2017/03/"><span class="level-start"><span class="level-item">三月 2017</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li><li><a class="level is-mobile" href="/archives/2017/02/"><span class="level-start"><span class="level-item">二月 2017</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li><li><a class="level is-mobile" href="/archives/2016/11/"><span class="level-start"><span class="level-item">十一月 2016</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/archives/2012/02/"><span class="level-start"><span class="level-item">二月 2012</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li></ul></div></div></div><div class="card widget" data-type="tags"><div class="card-content"><div class="menu"><h3 class="menu-label">标签</h3><div class="field is-grouped is-grouped-multiline"><div class="control"><a class="tags has-addons" href="/tags/15%E5%88%86%E9%92%9F/"><span class="tag">15分钟</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/AOP/"><span class="tag">AOP</span><span class="tag">2</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Android/"><span class="tag">Android</span><span class="tag">3</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Code-design/"><span class="tag">Code design</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Debug/"><span class="tag">Debug</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Design-Patterns/"><span class="tag">Design Patterns</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/English/"><span class="tag">English</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/GoF/"><span class="tag">GoF</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Gradle/"><span class="tag">Gradle</span><span class="tag">3</span></a></div><div class="control"><a class="tags has-addons" href="/tags/JVM/"><span class="tag">JVM</span><span class="tag">4</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Java/"><span class="tag">Java</span><span class="tag">6</span></a></div><div class="control"><a class="tags has-addons" href="/tags/UML/"><span class="tag">UML</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/bytecode/"><span class="tag">bytecode</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E5%87%8F%E8%82%A5/"><span class="tag">减肥</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E5%8E%86%E5%8F%B2/"><span class="tag">历史</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E5%A4%8F%E4%BB%A4%E6%97%B6/"><span class="tag">夏令时</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E5%AD%97%E8%8A%82%E7%A0%81/"><span class="tag">字节码</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E5%BC%80%E5%8F%91%E5%B7%A5%E5%85%B7/"><span class="tag">开发工具</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E6%82%AC%E7%96%91/"><span class="tag">悬疑</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E6%96%B9%E6%B3%95%E8%AE%BA/"><span class="tag">方法论</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E8%82%B2%E5%84%BF/"><span class="tag">育儿</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E8%87%AA%E6%88%91%E7%AE%A1%E7%90%86/"><span class="tag">自我管理</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E8%89%BA%E6%9C%AF/"><span class="tag">艺术</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/"><span class="tag">读书笔记</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E9%9D%A2%E5%90%91%E5%88%87%E9%9D%A2/"><span class="tag">面向切面</span><span class="tag">2</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E9%A2%86%E5%AF%BC%E5%8A%9B/"><span class="tag">领导力</span><span class="tag">1</span></a></div></div></div></div></div><div class="card widget" data-type="subscribe-email"><div class="card-content"><div class="menu"><h3 class="menu-label">订阅更新</h3><form action="https://feedburner.google.com/fb/a/mailverify" method="post" target="popupwindow" onsubmit="window.open(&#039;https://feedburner.google.com/fb/a/mailverify?uri=&#039;,&#039;popupwindow&#039;,&#039;scrollbars=yes,width=550,height=520&#039;);return true"><input type="hidden" value="" name="uri"><input type="hidden" name="loc" value="en_US"><div class="field has-addons"><div class="control has-icons-left is-expanded"><input class="input" name="email" type="email" placeholder="Email"><span class="icon is-small is-left"><i class="fas fa-envelope"></i></span></div><div class="control"><input class="button" type="submit" value="订阅"></div></div></form></div></div></div><div class="card widget" data-type="links"><div class="card-content"><div class="menu"><h3 class="menu-label">链接</h3><ul class="menu-list"><li><a class="level is-mobile" href="https://hexo.io" target="_blank" rel="noopener"><span class="level-left"><span class="level-item">Hexo</span></span><span class="level-right"><span class="level-item tag">hexo.io</span></span></a></li></ul></div></div></div></div><!--!--></div></div></section><footer class="footer"><div class="container"><div class="level"><div class="level-start"><a class="footer-logo is-block mb-2" href="/"><img src="/images/logo.svg" alt="内森淼文" height="28"></a><p class="is-size-7"><span>&copy; 2023 Nathan</span>  Powered by <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a> &amp; <a href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank" rel="noopener">Icarus</a></p></div><div class="level-end"><div class="field has-addons"><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="My GitHub Index" href="https://github.com/hydraxman"><i class="fab fa-github"></i></a></p><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Creative Commons" href="https://creativecommons.org/"><i class="fab fa-creative-commons"></i></a></p></div></div></div></div></footer><script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/min/moment-with-locales.min.js"></script><script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.4/dist/clipboard.min.js" defer></script><script>moment.locale("zh-cn");</script><script>var IcarusThemeSettings = {
+            article: {
+                highlight: {
+                    clipboard: true,
+                    fold: 'unfolded'
+                }
+            }
+        };</script><script src="/js/column.js"></script><script src="/js/animation.js"></script><a id="back-to-top" title="回到顶端" href="javascript:;"><i class="fas fa-chevron-up"></i></a><script src="/js/back_to_top.js" defer></script><!--!--><!--!--><!--!--><script src="https://cdn.jsdelivr.net/npm/cookieconsent@3.1.1/build/cookieconsent.min.js" defer></script><script>window.addEventListener("load", () => {
+      window.cookieconsent.initialise({
+        type: "info",
+        theme: "edgeless",
+        static: false,
+        position: "bottom-left",
+        content: {
+          message: "此网站使用Cookie来改善您的体验。",
+          dismiss: "知道了！",
+          allow: "允许使用Cookie",
+          deny: "拒绝",
+          link: "了解更多",
+          policy: "Cookie政策",
+          href: "https://www.cookiesandyou.com/",
+        },
+        palette: {
+          popup: {
+            background: "#edeff5",
+            text: "#838391"
+          },
+          button: {
+            background: "#4b81e8"
+          },
+        },
+      });
+    });</script><script src="https://cdn.jsdelivr.net/npm/lightgallery@1.10.0/dist/js/lightgallery.min.js" defer></script><script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.8.1/dist/js/jquery.justifiedGallery.min.js" defer></script><script>window.addEventListener("load", () => {
+            if (typeof $.fn.lightGallery === 'function') {
+                $('.article').lightGallery({ selector: '.gallery-item' });
+            }
+            if (typeof $.fn.justifiedGallery === 'function') {
+                if ($('.justified-gallery > p > .gallery-item').length) {
+                    $('.justified-gallery > p > .gallery-item').unwrap();
+                }
+                $('.justified-gallery').justifiedGallery();
+            }
+        });</script><!--!--><!--!--><!--!--><!--!--><!--!--><script src="/js/main.js" defer></script><div class="searchbox"><div class="searchbox-container"><div class="searchbox-header"><div class="searchbox-input-container"><input class="searchbox-input" type="text" placeholder="想要查找什么..."></div><a class="searchbox-close" href="javascript:;">×</a></div><div class="searchbox-body"></div></div></div><script src="/js/insight.js" defer></script><script>document.addEventListener('DOMContentLoaded', function () {
+            loadInsight({"contentUrl":"/content.json"}, {"hint":"想要查找什么...","untitled":"(无标题)","posts":"文章","pages":"页面","categories":"分类","tags":"标签"});
+        });</script></body></html>
