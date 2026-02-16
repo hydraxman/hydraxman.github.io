@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"><meta><title>ZeroClaw 横空出世，它会取代 OpenClaw 吗？ - 内森淼文</title><link rel="manifest" href="/manifest.json"><meta name="application-name" content="内森淼文"><meta name="msapplication-TileImage" content="/images/favicon.svg"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="内森淼文"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="description" content="上周，一个叫 ZeroClaw 的项目突然出现在我的 GitHub Trending 里。Rust 写的、3.4MB 二进制、号称能跑在 10 美元的树莓派上。README 第一行就是对 OpenClaw 的挑衅：  ⚡️ Runs on $10 hardware with &amp;lt;5MB RAM: That’s 99% less memory than OpenClaw and 98% che"><meta property="og:type" content="blog"><meta property="og:title" content="ZeroClaw 横空出世，它会取代 OpenClaw 吗？"><meta property="og:url" content="https://hydraxman.github.io/2026/02/16/openclaw-vs-zeroclaw/"><meta property="og:site_name" content="内森淼文"><meta property="og:description" content="上周，一个叫 ZeroClaw 的项目突然出现在我的 GitHub Trending 里。Rust 写的、3.4MB 二进制、号称能跑在 10 美元的树莓派上。README 第一行就是对 OpenClaw 的挑衅：  ⚡️ Runs on $10 hardware with &amp;lt;5MB RAM: That’s 99% less memory than OpenClaw and 98% che"><meta property="og:locale" content="zh_CN"><meta property="og:image" content="https://hydraxman.github.io/images/openclaw-vs-zeroclaw-cover.png"><meta property="article:published_time" content="2026-02-15T16:00:00.000Z"><meta property="article:modified_time" content="2026-02-16T01:56:30.861Z"><meta property="article:author" content="Nathan"><meta property="article:tag" content="AI"><meta property="article:tag" content="Agent"><meta property="article:tag" content="OpenClaw"><meta property="article:tag" content="ZeroClaw"><meta property="article:tag" content="Rust"><meta property="twitter:card" content="summary"><meta property="twitter:image:src" content="https://hydraxman.github.io/images/openclaw-vs-zeroclaw-cover.png"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"https://hydraxman.github.io/2026/02/16/openclaw-vs-zeroclaw/"},"headline":"ZeroClaw 横空出世，它会取代 OpenClaw 吗？","image":["https://hydraxman.github.io/images/openclaw-vs-zeroclaw-cover.png"],"datePublished":"2026-02-15T16:00:00.000Z","dateModified":"2026-02-16T01:56:30.861Z","author":{"@type":"Person","name":"Nathan"},"publisher":{"@type":"Organization","name":"内森淼文","logo":{"@type":"ImageObject","url":"https://hydraxman.github.io/images/logo.svg"}},"description":"上周，一个叫 ZeroClaw 的项目突然出现在我的 GitHub Trending 里。Rust 写的、3.4MB 二进制、号称能跑在 10 美元的树莓派上。README 第一行就是对 OpenClaw 的挑衅：  ⚡️ Runs on $10 hardware with &lt;5MB RAM: That’s 99% less memory than OpenClaw and 98% che"}</script><link rel="canonical" href="https://hydraxman.github.io/2026/02/16/openclaw-vs-zeroclaw/"><link rel="icon" href="/images/favicon.svg"><link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.0.0/css/all.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.12.0/styles/atom-one-light.css"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;600&amp;family=Source+Code+Pro"><link rel="stylesheet" href="/css/default.css"><style>body>.footer,body>.navbar,body>.section{opacity:0}</style><!--!--><!--!--><!--!--><!--!--><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cookieconsent@3.1.1/build/cookieconsent.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@1.10.0/dist/css/lightgallery.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/justifiedGallery@3.8.1/dist/css/justifiedGallery.min.css"><!--!--><!--!--><style>.pace{-webkit-pointer-events:none;pointer-events:none;-webkit-user-select:none;-moz-user-select:none;user-select:none}.pace-inactive{display:none}.pace .pace-progress{background:#3273dc;position:fixed;z-index:2000;top:0;right:100%;width:100%;height:2px}</style><script src="https://cdn.jsdelivr.net/npm/pace-js@1.2.4/pace.min.js"></script><!--!--><!--!--><!-- hexo injector head_end start --><script>
+  (function () {
+      function switchTab() {
+          if (!location.hash) {
+            return;
+          }
+
+          const id = '#' + CSS.escape(location.hash.substring(1));
+          const $tabMenu = document.querySelector(`.tabs a[href="${id}"]`);
+          if (!$tabMenu) {
+            return;
+          }
+
+          const $tabMenuContainer = $tabMenu.parentElement.parentElement;
+          Array.from($tabMenuContainer.children).forEach($menu => $menu.classList.remove('is-active'));
+          Array.from($tabMenuContainer.querySelectorAll('a'))
+              .map($menu => document.getElementById($menu.getAttribute("href").substring(1)))
+              .forEach($content => $content.classList.add('is-hidden'));
+
+          if ($tabMenu) {
+              $tabMenu.parentElement.classList.add('is-active');
+          }
+          const $activeTab = document.querySelector(id);
+          if ($activeTab) {
+              $activeTab.classList.remove('is-hidden');
+          }
+      }
+      switchTab();
+      window.addEventListener('hashchange', switchTab, false);
+  })();
+  </script><!-- hexo injector head_end end --><meta name="generator" content="Hexo 6.3.0"></head><body class="is-2-column"><nav class="navbar navbar-main"><div class="container navbar-container"><div class="navbar-brand justify-content-center"><a class="navbar-item navbar-logo" href="/"><img src="/images/logo.svg" alt="内森淼文" height="28"></a></div><div class="navbar-menu"><div class="navbar-start"><a class="navbar-item" href="/">Home</a><a class="navbar-item" href="/archives">Archives</a><a class="navbar-item" href="/categories">Categories</a><a class="navbar-item" href="/tags">Tags</a><a class="navbar-item" href="/about">About</a></div><div class="navbar-end"><a class="navbar-item" target="_blank" rel="noopener" title="My GitHub Index" href="https://github.com/hydraxman"><i class="fab fa-github"></i></a><a class="navbar-item search" title="搜索" href="javascript:;"><i class="fas fa-search"></i></a></div></div></div></nav><section class="section"><div class="container"><div class="columns"><div class="column order-2 column-main is-8-tablet is-8-desktop is-8-widescreen"><div class="card"><div class="card-image"><span class="image is-7by3"><img class="fill" src="/images/openclaw-vs-zeroclaw-cover.png" alt="ZeroClaw 横空出世，它会取代 OpenClaw 吗？"></span></div><article class="card-content article" role="article"><div class="article-meta is-size-7 is-uppercase level is-mobile"><div class="level-left"><span class="level-item"><time dateTime="2026-02-15T16:00:00.000Z" title="2/16/2026, 12:00:00 AM">2026-02-16</time>发表</span><span class="level-item"><time dateTime="2026-02-16T01:56:30.861Z" title="2/16/2026, 9:56:30 AM">2026-02-16</time>更新</span><span class="level-item"><a class="link-muted" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/">技术分析</a></span><span class="level-item">22 分钟读完 (大约3285个字)</span></div></div><h1 class="title is-3 is-size-4-mobile">ZeroClaw 横空出世，它会取代 OpenClaw 吗？</h1><div class="content"><p><img src="/images/openclaw-vs-zeroclaw-cover.png" alt="封面"></p>
+<p>上周，一个叫 ZeroClaw 的项目突然出现在我的 GitHub Trending 里。Rust 写的、3.4MB 二进制、号称能跑在 10 美元的树莓派上。README 第一行就是对 OpenClaw 的挑衅：</p>
+<blockquote>
+<p>⚡️ Runs on $10 hardware with &lt;5MB RAM: That’s 99% less memory than OpenClaw and 98% cheaper than a Mac mini!</p>
+</blockquote>
+<p>说实话，看到这句话我的第一反应是——又一个「用 Rust 重写一切」的项目？</p>
+<p>但仔细看了它的架构和设计哲学之后，我觉得这事没那么简单。这篇文章聊聊我的实际体验和想法。</p>
+<span id="more"></span>
+
+<h2 id="它们到底在争什么？"><a href="#它们到底在争什么？" class="headerlink" title="它们到底在争什么？"></a>它们到底在争什么？</h2><p>先搞清楚一个基本事实：<strong>OpenClaw 和 ZeroClaw 回答的是完全不同的问题。</strong></p>
+<p>OpenClaw 问的是：<strong>「AI 助手的能力上限在哪？」</strong> 浏览器自动化、Canvas 渲染、子 Agent 编排、Cron 定时器、十几个 Channel 同时在线……你想得到的它都能做，想不到的它也做了。用一个形象的比喻：OpenClaw 就像一台功能齐全的工作站，什么都能干，代价是它确实需要一台像样的机器来跑。</p>
+<p>ZeroClaw 问的是：<strong>「AI 助手的存在感能低到什么程度？」</strong> 它追求的是你完全感知不到它在运行。5MB 内存，10 毫秒启动，像 Linux 里的一个 daemon 一样安安静静待在后台。你不找它的时候，它几乎不存在。</p>
+<p>Medium 上有个叫 Damon B. 的博主说了一句挺到位的话：</p>
+<blockquote>
+<p><em>“We are moving from the ‘look, it works on my MacBook’ phase to the ‘it should work like a daemon, not like a second operating system’ phase.”</em></p>
+</blockquote>
+<p>翻译一下：从「看，它在我 Mac 上跑起来了！」到「它应该像个 daemon，不应该像第二个操作系统」。</p>
+<p>这话有道理，但也不全对——后面再展开。</p>
+<h2 id="架构：全家桶-vs-乐高积木"><a href="#架构：全家桶-vs-乐高积木" class="headerlink" title="架构：全家桶 vs 乐高积木"></a>架构：全家桶 vs 乐高积木</h2><p><img src="/images/openclaw-vs-zeroclaw-arch.png" alt="架构对比"></p>
+<p>先上一张对比表，然后聊聊表面数据背后的东西：</p>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>OpenClaw</th>
+<th>ZeroClaw</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>语言</strong></td>
+<td>TypeScript &#x2F; Node.js</td>
+<td>100% Rust</td>
+</tr>
+<tr>
+<td><strong>运行时</strong></td>
+<td>需要 Node.js（~390MB 开销）</td>
+<td>无依赖，单个静态二进制</td>
+</tr>
+<tr>
+<td><strong>二进制大小</strong></td>
+<td>~28MB（dist）</td>
+<td>3.4MB</td>
+</tr>
+<tr>
+<td><strong>架构风格</strong></td>
+<td>插件 + 技能 + 事件驱动</td>
+<td>8 个 trait 接口，可插拔</td>
+</tr>
+<tr>
+<td><strong>执行模型</strong></td>
+<td>主 Agent + 子 Agent 派发</td>
+<td>Readonly &#x2F; Supervised &#x2F; Full 三档</td>
+</tr>
+<tr>
+<td><strong>浏览器控制</strong></td>
+<td>✅ Browser Relay + Canvas</td>
+<td>❌ 仅有基础 browser_open</td>
+</tr>
+<tr>
+<td><strong>定时任务</strong></td>
+<td>✅ Cron 系统</td>
+<td>✅ Heartbeat 周期任务</td>
+</tr>
+<tr>
+<td><strong>记忆系统</strong></td>
+<td>文件系统（Markdown）</td>
+<td>SQLite + FTS5 + 向量搜索</td>
+</tr>
+<tr>
+<td><strong>AI 模型</strong></td>
+<td>多模型，可切换</td>
+<td>22+ 提供商，OpenAI 兼容</td>
+</tr>
+<tr>
+<td><strong>Channel</strong></td>
+<td>Telegram&#x2F;Discord&#x2F;Slack&#x2F;飞书&#x2F;iMessage&#x2F;WhatsApp 等</td>
+<td>Telegram&#x2F;Discord&#x2F;Slack&#x2F;iMessage&#x2F;Matrix&#x2F;WhatsApp</td>
+</tr>
+<tr>
+<td><strong>安全</strong></td>
+<td>配对码 + 沙箱 + allowlist</td>
+<td>默认 localhost + 配对码 + 沙箱 + allowlist</td>
+</tr>
+<tr>
+<td><strong>身份系统</strong></td>
+<td>SOUL.md &#x2F; IDENTITY.md 等</td>
+<td>兼容 OpenClaw 格式 + JSON 格式</td>
+</tr>
+</tbody></table>
+<h3 id="几个值得注意的细节"><a href="#几个值得注意的细节" class="headerlink" title="几个值得注意的细节"></a>几个值得注意的细节</h3><p><strong>1. ZeroClaw 主动兼容 OpenClaw</strong></p>
+<p>ZeroClaw 直接支持 <code>IDENTITY.md</code>、<code>SOUL.md</code>、<code>USER.md</code>、<code>AGENTS.md</code> 这一套文件格式，甚至做了一个 <code>zeroclaw migrate openclaw</code> 的迁移命令。这说明它不想推翻 OpenClaw 的生态，而是想当一个「更轻的 OpenClaw」。</p>
+<p><strong>2. 记忆系统上 ZeroClaw 更有技术野心</strong></p>
+<p>OpenClaw 的记忆本质上是 Markdown 文件——简单粗暴但有效。ZeroClaw 搞了一套完整的检索引擎：SQLite 存储、FTS5 全文检索、向量相似度搜索、BM25 排序、混合加权……全部零外部依赖，不需要 Pinecone 也不需要 Elasticsearch。单纯从技术角度看，这个方案确实更优雅。</p>
+<p><strong>3. 但 OpenClaw 在能力上仍然领先一个身位</strong></p>
+<p>浏览器控制（Browser Relay）、Canvas 渲染、子 Agent 编排——这些 ZeroClaw 目前做不到或做不好。如果你需要一个 AI 助手帮你操作网页、生成可视化内容、或者同时派多个子任务并行处理，OpenClaw 仍然是唯一选择。</p>
+<h2 id="资源消耗：这差距真的有点离谱"><a href="#资源消耗：这差距真的有点离谱" class="headerlink" title="资源消耗：这差距真的有点离谱"></a>资源消耗：这差距真的有点离谱</h2><p><img src="/images/openclaw-vs-zeroclaw-resources.png" alt="资源对比"></p>
+<p>这是 ZeroClaw 最喜欢拿出来说的数据，也是最有说服力的部分：</p>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>OpenClaw</th>
+<th>ZeroClaw</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>空闲内存 (RSS)</strong></td>
+<td>~394MB</td>
+<td>~7-8MB</td>
+</tr>
+<tr>
+<td><strong>活跃内存</strong></td>
+<td>可达 1.5GB</td>
+<td>未公开（预计 &lt; 50MB）</td>
+</tr>
+<tr>
+<td><strong>冷启动</strong></td>
+<td>3-5 秒</td>
+<td>&lt;10ms</td>
+</tr>
+<tr>
+<td><strong>最低硬件要求</strong></td>
+<td>普通 PC &#x2F; Mac（建议 4GB+）</td>
+<td>树莓派 Zero（$10）</td>
+</tr>
+<tr>
+<td><strong>CPU 深度睡眠</strong></td>
+<td>Node.js 事件循环阻止</td>
+<td>✅ 支持</td>
+</tr>
+</tbody></table>
+<p>394MB vs 7MB。说实话，我第一次看到这个数字的时候觉得 ZeroClaw 在吹牛。但它给了复现方法：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">cargo build --release</span><br><span class="line">/usr/bin/time -l target/release/zeroclaw --<span class="built_in">help</span></span><br><span class="line">/usr/bin/time -l target/release/zeroclaw status</span><br></pre></td></tr></table></figure>
+
+<p>这个差距是 TypeScript&#x2F;Node.js vs Rust 的必然结果——Node.js 本身的 V8 引擎就要占几百 MB。这不是 OpenClaw 写得差，而是语言选择的固有开销。</p>
+<h3 id="但这真的重要吗？"><a href="#但这真的重要吗？" class="headerlink" title="但这真的重要吗？"></a>但这真的重要吗？</h3><p><strong>取决于你的场景。</strong> 如果你在 32GB 内存的 Mac mini 上跑 OpenClaw，394MB 只是 1.2% 的内存，你根本感觉不到。但如果你想在一台 512MB 的树莓派 Zero 上跑一个 24&#x2F;7 的 AI 助手——OpenClaw 连启动都够呛，ZeroClaw 则毫无压力。</p>
+<p>Damon B. 还算了一笔有意思的账：假设 OpenClaw 的 23 万 stars 都对应着实际用户，光是这些用户多占用的内存带来的额外功耗，一年就是 <strong>4,480 吨 CO₂</strong>——相当于 1,000 辆汽油车全年的排放。当然这个计算非常粗糙，实际活跃用户远没有 23 万，但思路是对的：<strong>当工具变成「始终运行」的基础设施，效率就不再是锦上添花，而是基本要求。</strong></p>
+<h2 id="实际部署指南"><a href="#实际部署指南" class="headerlink" title="实际部署指南"></a>实际部署指南</h2><p>说了这么多理论，来点实操的。</p>
+<h3 id="OpenClaw-部署（以-macOS-为例）"><a href="#OpenClaw-部署（以-macOS-为例）" class="headerlink" title="OpenClaw 部署（以 macOS 为例）"></a>OpenClaw 部署（以 macOS 为例）</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 安装 Node.js（如果没有的话）</span></span><br><span class="line">brew install node</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 全局安装 OpenClaw</span></span><br><span class="line">npm install -g openclaw</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 初始化配置</span></span><br><span class="line">openclaw init</span><br><span class="line"></span><br><span class="line"><span class="comment"># 4. 启动 Gateway</span></span><br><span class="line">openclaw gateway start</span><br><span class="line"></span><br><span class="line"><span class="comment"># 5. 检查状态</span></span><br><span class="line">openclaw status</span><br></pre></td></tr></table></figure>
+
+<p>OpenClaw 的配置在 <code>~/.openclaw/</code> 目录下，核心配置文件是 <code>openclaw.json</code>。你需要配置：</p>
+<ul>
+<li>AI 模型的 API Key（支持 OpenAI、Anthropic、GitHub Copilot 等）</li>
+<li>Channel（飞书、Telegram、Discord 等）</li>
+<li>技能和插件</li>
+</ul>
+<p>详细配置参考 <a target="_blank" rel="noopener" href="https://docs.openclaw.ai/">OpenClaw 官方文档</a>。</p>
+<h3 id="ZeroClaw-部署"><a href="#ZeroClaw-部署" class="headerlink" title="ZeroClaw 部署"></a>ZeroClaw 部署</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 方式 1：从源码编译（需要 Rust 工具链）</span></span><br><span class="line">git <span class="built_in">clone</span> https://github.com/zeroclaw-labs/zeroclaw.git</span><br><span class="line"><span class="built_in">cd</span> zeroclaw</span><br><span class="line">cargo build --release</span><br><span class="line">cargo install --path . --force</span><br><span class="line"></span><br><span class="line"><span class="comment"># 方式 2：下载预编译二进制（如果官方提供的话）</span></span><br><span class="line"><span class="comment"># 目前主要支持 macOS arm64 和 Linux</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 快速配置（非交互）</span></span><br><span class="line">zeroclaw onboard --api-key sk-... --provider openrouter</span><br><span class="line"></span><br><span class="line"><span class="comment"># 或交互式向导</span></span><br><span class="line">zeroclaw onboard --interactive</span><br><span class="line"></span><br><span class="line"><span class="comment"># 启动 daemon</span></span><br><span class="line">zeroclaw daemon</span><br><span class="line"></span><br><span class="line"><span class="comment"># 检查状态</span></span><br><span class="line">zeroclaw status</span><br><span class="line"></span><br><span class="line"><span class="comment"># 系统诊断</span></span><br><span class="line">zeroclaw doctor</span><br></pre></td></tr></table></figure>
+
+<h3 id="从-OpenClaw-迁移到-ZeroClaw"><a href="#从-OpenClaw-迁移到-ZeroClaw" class="headerlink" title="从 OpenClaw 迁移到 ZeroClaw"></a>从 OpenClaw 迁移到 ZeroClaw</h3><p>如果你已经是 OpenClaw 用户，ZeroClaw 提供了一键迁移：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 先预览迁移内容（不实际操作）</span></span><br><span class="line">zeroclaw migrate openclaw --dry-run</span><br><span class="line"></span><br><span class="line"><span class="comment"># 确认后执行迁移</span></span><br><span class="line">zeroclaw migrate openclaw</span><br></pre></td></tr></table></figure>
+
+<p>这会把你的 <code>SOUL.md</code>、<code>IDENTITY.md</code>、<code>USER.md</code>、<code>AGENTS.md</code> 以及记忆文件迁移过去。</p>
+<h3 id="Windows-用户怎么办？"><a href="#Windows-用户怎么办？" class="headerlink" title="Windows 用户怎么办？"></a>Windows 用户怎么办？</h3><p>这是个重要的问题，因为中国用户有很大比例在用 Windows。</p>
+<p><strong>OpenClaw 在 Windows 上：</strong></p>
+<ul>
+<li>✅ 可以运行。Node.js 本身跨平台，OpenClaw 在 Windows 上可用</li>
+<li>⚠️ 部分功能受限：iMessage Channel 不可用（苹果生态限制）、部分 shell 命令需要适配</li>
+<li>💡 推荐方案：使用 WSL2（Windows Subsystem for Linux）运行，体验与 Linux&#x2F;macOS 基本一致</li>
+<li>安装步骤：<code>wsl --install</code> → 在 WSL 内 <code>npm install -g openclaw</code> → 正常使用</li>
+</ul>
+<p><strong>ZeroClaw 在 Windows 上：</strong></p>
+<ul>
+<li>✅ Rust 支持 Windows 交叉编译，理论上可以生成 Windows 二进制</li>
+<li>⚠️ 目前官方文档主要针对 macOS&#x2F;Linux，Windows 支持标注为 <code>runtime.kind = &quot;native&quot;</code> 但实测案例较少</li>
+<li>💡 同样推荐 WSL2 作为首选方案</li>
+<li>如果你有 Rust 工具链，可以直接 <code>cargo build --release</code> 在 Windows 上编译</li>
+</ul>
+<p><strong>给 Windows 用户的建议：</strong> 不管选哪个，先装 WSL2。2026 年了，在 Windows 上跑任何开发者工具，WSL2 都是最省心的选择。</p>
+<h3 id="中国大陆网络环境"><a href="#中国大陆网络环境" class="headerlink" title="中国大陆网络环境"></a>中国大陆网络环境</h3><p>两者都面临同一个现实：<strong>主流 AI 模型提供商（OpenAI、Anthropic、Groq 等）需要国际网络才能访问。</strong> 这一点上两者没有本质区别。</p>
+<p>但部署过程中的差异是存在的：</p>
+<ul>
+<li><strong>OpenClaw</strong> 需要 <code>npm install</code>，拉取几百个 npm 包。虽然可以用淘宝镜像（<code>npx nrm use taobao</code>），但部分二进制依赖（如 Playwright 的 Chromium）仍然需要国际网络下载，速度可能只有 85KB&#x2F;s 左右</li>
+<li><strong>ZeroClaw</strong> 下载一个 3.4MB 的二进制文件就完事了。即使需要从 GitHub Releases 下载，也比拉几百个 npm 包快得多</li>
+</ul>
+<p>如果你在公司内网、不方便配置国际网络的环境下部署，ZeroClaw 的零依赖特性是实实在在的优势。</p>
+<h2 id="适用场景：它们不是竞品，是互补"><a href="#适用场景：它们不是竞品，是互补" class="headerlink" title="适用场景：它们不是竞品，是互补"></a>适用场景：它们不是竞品，是互补</h2><p><img src="/images/openclaw-vs-zeroclaw-deploy.png" alt="部署场景"></p>
+<p>我越看越觉得，把它们放在一起比较本身就有点不公平。它们适合的场景完全不一样。</p>
+<h3 id="选-OpenClaw-的理由"><a href="#选-OpenClaw-的理由" class="headerlink" title="选 OpenClaw 的理由"></a>选 OpenClaw 的理由</h3><ul>
+<li>🌐 <strong>你需要浏览器自动化</strong> —— Browser Relay、Canvas 这些能力目前没有替代</li>
+<li>🔄 <strong>你需要复杂的工作流编排</strong> —— 子 Agent、Cron、多 Channel 联动</li>
+<li>🛠️ <strong>你想快速搭建原型</strong> —— 技能系统 + 社区生态，很多轮子不用自己造</li>
+<li>👥 <strong>你重视社区支持</strong> —— 23 万 stars 的项目，遇到问题 Discord 里分分钟有人回</li>
+</ul>
+<h3 id="选-ZeroClaw-的理由"><a href="#选-ZeroClaw-的理由" class="headerlink" title="选 ZeroClaw 的理由"></a>选 ZeroClaw 的理由</h3><ul>
+<li>🍓 <strong>你要在低功耗设备上跑</strong> —— 树莓派、NAS、旧 ThinkPad、$5 的 VPS</li>
+<li>🤫 <strong>你想要一个安静的后台 daemon</strong> —— 不占内存，不阻止 CPU 睡眠，笔记本续航友好</li>
+<li>🔒 <strong>安全敏感场景</strong> —— 默认 localhost、最小权限、不暴露任何端口</li>
+<li>🏗️ <strong>你是 Rust 开发者</strong> —— trait 接口设计干净，二次开发体验好</li>
+</ul>
+<h3 id="速查选择表"><a href="#速查选择表" class="headerlink" title="速查选择表"></a>速查选择表</h3><table>
+<thead>
+<tr>
+<th>你是谁</th>
+<th>推荐</th>
+<th>一句话理由</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>全栈工程师，爱折腾</td>
+<td><strong>OpenClaw</strong></td>
+<td>能力天花板高，TypeScript 生态好，社区活跃</td>
+</tr>
+<tr>
+<td>运维 &#x2F; SRE</td>
+<td><strong>ZeroClaw</strong></td>
+<td>单二进制部署，资源占用约等于没有</td>
+</tr>
+<tr>
+<td>创业者，需要快速搭 AI 产品</td>
+<td><strong>OpenClaw</strong></td>
+<td>开箱即用的能力更多，不用重新造轮子</td>
+</tr>
+<tr>
+<td>公司内部工具</td>
+<td><strong>看场景</strong></td>
+<td>需要浏览器&#x2F;Canvas → OpenClaw；边缘设备 → ZeroClaw</td>
+</tr>
+<tr>
+<td>树莓派 &#x2F; NAS 玩家</td>
+<td><strong>ZeroClaw</strong></td>
+<td>OpenClaw 在这类设备上直接跑不动</td>
+</tr>
+<tr>
+<td>已有 OpenClaw 想试试新东西</td>
+<td><strong>先迁移试试</strong></td>
+<td><code>zeroclaw migrate openclaw</code> 低成本尝鲜</td>
+</tr>
+<tr>
+<td>Windows 用户</td>
+<td><strong>都行，先装 WSL2</strong></td>
+<td>两个项目在 WSL2 下体验都最好</td>
+</tr>
+</tbody></table>
+<h2 id="说点实话"><a href="#说点实话" class="headerlink" title="说点实话"></a>说点实话</h2><p>ZeroClaw 做得好的地方很明显：二进制小、启动快、内存省、安全默认值设计得好。它的 SQLite 记忆系统在技术上比 OpenClaw 的 Markdown 文件更先进。Rust 写的代码在性能和安全性上天然就有优势。</p>
+<p>但——</p>
+<p><strong>功能差距仍然巨大。</strong> 浏览器控制、Canvas 渲染、子 Agent 编排、飞书集成……这些 OpenClaw 的核心能力，ZeroClaw 目前一个都没有。对于需要这些功能的用户来说，ZeroClaw 根本不在考虑范围内。</p>
+<p><strong>生态差距更大。</strong> OpenClaw 有 23 万 stars、活跃的 Discord 社区、大量现成的技能包。ZeroClaw 还在 invite code 阶段，文档主要就是 README。这个差距不是代码能弥补的，需要时间。</p>
+<p><strong>「Rust 重写一切」不是万能药。</strong> 内存从 394MB 降到 7MB 确实令人印象深刻，但对于大多数用户来说，省下这 387MB 内存远不如多一个浏览器自动化功能来得有用。工具的价值在于它能帮你解决什么问题，不在于它占多少内存。</p>
+<h2 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h2><p><strong>ZeroClaw 会取代 OpenClaw 吗？不会。</strong></p>
+<p>但它值得关注。它代表的是 AI 助手领域的一个健康趋势：从「能不能跑」走向「跑得好不好」。就像 Linux 世界有 Ubuntu 也有 Alpine，桌面有 GNOME 也有 i3wm——全功能和极简主义完全可以共存。</p>
+<p>最务实的做法？<strong>主力机上跑 OpenClaw 享受全部功能，树莓派上跑 ZeroClaw 当一个安静的后台 daemon。</strong> 各司其职，各取所长。</p>
+<p>毕竟，Unix 哲学从来不是要你只用一个工具解决所有问题。</p>
+<hr>
+<p><em>本文基于 ZeroClaw GitHub 仓库（2026 年 2 月 16 日快照）、官网 zeroclaw.bot、以及 Medium 文章 “ZeroClaw vs OpenClaw” by Damon B. 的公开信息撰写。如有错误，欢迎指正。</em></p>
+</div><div class="article-licensing box"><div class="licensing-title"><p>ZeroClaw 横空出世，它会取代 OpenClaw 吗？</p><p><a href="https://hydraxman.github.io/2026/02/16/openclaw-vs-zeroclaw/">https://hydraxman.github.io/2026/02/16/openclaw-vs-zeroclaw/</a></p></div><div class="licensing-meta level is-mobile"><div class="level-left"><div class="level-item is-narrow"><div><h6>作者</h6><p>Nathan</p></div></div><div class="level-item is-narrow"><div><h6>发布于</h6><p>2026-02-16</p></div></div><div class="level-item is-narrow"><div><h6>更新于</h6><p>2026-02-16</p></div></div><div class="level-item is-narrow"><div><h6>许可协议</h6><p><a class="icons" rel="noopener" target="_blank" title="Creative Commons" href="https://creativecommons.org/"><i class="icon fab fa-creative-commons"></i></a><a class="icons" rel="noopener" target="_blank" title="Attribution" href="https://creativecommons.org/licenses/by/4.0/"><i class="icon fab fa-creative-commons-by"></i></a><a class="icons" rel="noopener" target="_blank" title="Noncommercial" href="https://creativecommons.org/licenses/by-nc/4.0/"><i class="icon fab fa-creative-commons-nc"></i></a></p></div></div></div></div></div><div class="article-tags is-size-7 mb-4"><span class="mr-2">#</span><a class="link-muted mr-2" rel="tag" href="/tags/AI/">AI</a><a class="link-muted mr-2" rel="tag" href="/tags/Agent/">Agent</a><a class="link-muted mr-2" rel="tag" href="/tags/OpenClaw/">OpenClaw</a><a class="link-muted mr-2" rel="tag" href="/tags/ZeroClaw/">ZeroClaw</a><a class="link-muted mr-2" rel="tag" href="/tags/Rust/">Rust</a></div><div class="notification is-danger">You need to set <code>install_url</code> to use ShareThis. Please set it in <code>_config.yml</code>.</div></article></div><div class="card"><div class="card-content"><h3 class="menu-label has-text-centered">喜欢这篇文章？打赏一下作者吧</h3><div class="buttons is-centered"><a class="button donate" href="/" target="_blank" rel="noopener" data-type="afdian"><span class="icon is-small"><i class="fas fa-charging-station"></i></span><span>爱发电</span></a><a class="button donate" data-type="alipay"><span class="icon is-small"><i class="fab fa-alipay"></i></span><span>支付宝</span><span class="qrcode"><img src="/" alt="支付宝"></span></a><a class="button donate" href="/" target="_blank" rel="noopener" data-type="buymeacoffee"><span class="icon is-small"><i class="fas fa-coffee"></i></span><span>送我杯咖啡</span></a><a class="button donate" href="/" target="_blank" rel="noopener" data-type="patreon"><span class="icon is-small"><i class="fab fa-patreon"></i></span><span>Patreon</span></a><div class="notification is-danger">You forgot to set the <code>business</code> or <code>currency_code</code> for Paypal. Please set it in <code>_config.yml</code>.</div><a class="button donate" data-type="wechat"><span class="icon is-small"><i class="fab fa-weixin"></i></span><span>微信</span><span class="qrcode"><img src="/" alt="微信"></span></a></div></div></div><nav class="post-navigation mt-4 level is-mobile"><div class="level-start"><a class="article-nav-prev level level-item link-muted" href="/2026/02/16/2026-02-16-morning-news/"><i class="level-item fas fa-chevron-left"></i><span class="level-item">2026年02月16日早间要闻</span></a></div><div class="level-end"><a class="article-nav-next level level-item link-muted" href="/2026/02/16/openclaw-founder-joins-openai/"><span class="level-item">OpenClaw 创始人加入 OpenAI：Agent 工程进入新阶段？</span><i class="level-item fas fa-chevron-right"></i></a></div></nav><div class="card"><div class="card-content"><h3 class="title is-5">评论</h3><div class="notification is-danger">You forgot to set the <code>shortname</code> for Disqus. Please set it in <code>_config.yml</code>.</div></div></div></div><div class="column column-left is-4-tablet is-4-desktop is-4-widescreen  order-1"><div class="card widget" data-type="profile"><div class="card-content"><nav class="level"><div class="level-item has-text-centered flex-shrink-1"><div><figure class="image is-128x128 mx-auto mb-2"><img class="avatar is-rounded" src="/images/headshot.jpeg" alt="内森 Nathan"></figure><p class="title is-size-4 is-block" style="line-height:inherit;">内森 Nathan</p><p class="is-size-6 is-block">Senior Software Engineer Manager @ Microsoft</p><p class="is-size-6 is-flex justify-content-center"><i class="fas fa-map-marker-alt mr-1"></i><span>Beijing</span></p></div></div></nav><nav class="level is-mobile"><div class="level-item has-text-centered is-marginless"><div><p class="heading">文章</p><a href="/archives"><p class="title">44</p></a></div></div><div class="level-item has-text-centered is-marginless"><div><p class="heading">分类</p><a href="/categories"><p class="title">17</p></a></div></div><div class="level-item has-text-centered is-marginless"><div><p class="heading">标签</p><a href="/tags"><p class="title">108</p></a></div></div></nav><div class="level"><a class="level-item button is-primary is-rounded" href="https://github.com/hydraxman" target="_blank" rel="noopener">关注我</a></div><div class="level is-mobile is-multiline"><a class="level-item button is-transparent is-marginless" target="_blank" rel="noopener" title="Github" href="https://github.com/hydraxman"><i class="fab fa-github"></i></a><a class="level-item button is-transparent is-marginless" target="_blank" rel="noopener" title="Facebook" href="https://facebook.com"><i class="fab fa-facebook"></i></a><a class="level-item button is-transparent is-marginless" target="_blank" rel="noopener" title="Twitter" href="https://twitter.com"><i class="fab fa-twitter"></i></a><a class="level-item button is-transparent is-marginless" target="_blank" rel="noopener" title="RSS" href="/"><i class="fas fa-rss"></i></a></div></div></div><div class="card widget" data-type="categories"><div class="card-content"><div class="menu"><h3 class="menu-label">分类</h3><ul class="menu-list"><li><a class="level is-mobile" href="/categories/AI/"><span class="level-start"><span class="level-item">AI</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/categories/AI-%E6%8A%80%E6%9C%AF%E6%B7%B1%E5%BA%A6/"><span class="level-start"><span class="level-item">AI 技术深度</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/categories/%E5%88%A8%E7%A0%81%E9%97%AE%E5%BA%95/"><span class="level-start"><span class="level-item">刨码问底</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/categories/%E5%AE%9E%E6%88%98/"><span class="level-start"><span class="level-item">实战</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li><li><a class="level is-mobile" href="/categories/%E6%89%93%E7%A0%81%E8%A6%81%E4%B9%89/"><span class="level-start"><span class="level-item">打码要义</span></span><span class="level-end"><span class="level-item tag">5</span></span></a></li><li><a class="level is-mobile" href="/categories/%E6%8A%80%E6%9C%AF/"><span class="level-start"><span class="level-item">技术</span></span><span class="level-end"><span class="level-item tag">3</span></span></a></li><li><a class="level is-mobile" href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/"><span class="level-start"><span class="level-item">技术分析</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li><li><a class="level is-mobile" href="/categories/%E6%8A%80%E6%9C%AF%E6%95%99%E7%A8%8B/"><span class="level-start"><span class="level-item">技术教程</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/categories/%E6%8A%80%E6%9C%AF%E6%B7%B1%E5%BA%A6/"><span class="level-start"><span class="level-item">技术深度</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/categories/%E6%8A%80%E6%9C%AF%E8%B0%83%E7%A0%94/"><span class="level-start"><span class="level-item">技术调研</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/categories/%E6%B7%B1%E5%BA%A6%E5%88%86%E6%9E%90/"><span class="level-start"><span class="level-item">深度分析</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/categories/%E6%B7%B1%E5%BA%A6%E6%8A%A5%E9%81%93/"><span class="level-start"><span class="level-item">深度报道</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li><li><a class="level is-mobile" href="/categories/%E7%A7%91%E6%8A%80/"><span class="level-start"><span class="level-item">科技</span></span><span class="level-end"><span class="level-item tag">1</span></span></a><ul><li><a class="level is-mobile" href="/categories/%E7%A7%91%E6%8A%80/AI%E4%B8%8E%E6%9C%BA%E5%99%A8%E4%BA%BA/"><span class="level-start"><span class="level-item">AI与机器人</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li></ul></li><li><a class="level is-mobile" href="/categories/%E7%A7%91%E6%8A%80%E8%B5%84%E8%AE%AF/"><span class="level-start"><span class="level-item">科技资讯</span></span><span class="level-end"><span class="level-item tag">3</span></span></a></li><li><a class="level is-mobile" href="/categories/%E7%A7%91%E6%8A%80%E9%80%9F%E9%80%92/"><span class="level-start"><span class="level-item">科技速递</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li><li><a class="level is-mobile" href="/categories/%E8%8B%B1%E8%AF%AD%E5%AD%A6%E4%B9%A0/"><span class="level-start"><span class="level-item">英语学习</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li></ul></div></div></div><!--!--><div class="card widget" data-type="recent-posts"><div class="card-content"><h3 class="menu-label">最新文章</h3><article class="media"><div class="media-content"><p class="date"><time dateTime="2026-02-16T02:00:00.000Z">2026-02-16</time></p><p class="title"><a href="/2026/02/16/2026-02-16-morning-news/">2026年02月16日早间要闻</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2026-02-15T16:00:00.000Z">2026-02-16</time></p><p class="title"><a href="/2026/02/16/openclaw-vs-zeroclaw/">ZeroClaw 横空出世，它会取代 OpenClaw 吗？</a></p><p class="categories"><a href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/">技术分析</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2026-02-15T16:00:00.000Z">2026-02-16</time></p><p class="title"><a href="/2026/02/16/openclaw-founder-joins-openai/">OpenClaw 创始人加入 OpenAI：Agent 工程进入新阶段？</a></p><p class="categories"><a href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/">技术分析</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2026-02-15T13:00:00.000Z">2026-02-15</time></p><p class="title"><a href="/2026/02/15/2026-02-15-frontend-prompt-styles/">AI网站生成必备：这 35 种 UI 风格直接抄，图文直给到全</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2026-02-15T02:00:00.000Z">2026-02-15</time></p><p class="title"><a href="/2026/02/15/2026-02-15-morning-news/">2月15日科技早报：OpenAI 联手 Cerebras 抛弃 Nvidia、16个 Claude 写出 C 编译器</a></p></div></article></div></div><div class="card widget" data-type="archives"><div class="card-content"><div class="menu"><h3 class="menu-label">归档</h3><ul class="menu-list"><li><a class="level is-mobile" href="/archives/2026/02/"><span class="level-start"><span class="level-item">二月 2026</span></span><span class="level-end"><span class="level-item tag">30</span></span></a></li><li><a class="level is-mobile" href="/archives/2025/02/"><span class="level-start"><span class="level-item">二月 2025</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li><li><a class="level is-mobile" href="/archives/2022/11/"><span class="level-start"><span class="level-item">十一月 2022</span></span><span class="level-end"><span class="level-item tag">3</span></span></a></li><li><a class="level is-mobile" href="/archives/2022/10/"><span class="level-start"><span class="level-item">十月 2022</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li><li><a class="level is-mobile" href="/archives/2018/12/"><span class="level-start"><span class="level-item">十二月 2018</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li><li><a class="level is-mobile" href="/archives/2018/07/"><span class="level-start"><span class="level-item">七月 2018</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/archives/2017/03/"><span class="level-start"><span class="level-item">三月 2017</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li><li><a class="level is-mobile" href="/archives/2017/02/"><span class="level-start"><span class="level-item">二月 2017</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li></ul></div></div></div><div class="card widget" data-type="tags"><div class="card-content"><div class="menu"><h3 class="menu-label">标签</h3><div class="field is-grouped is-grouped-multiline"><div class="control"><a class="tags has-addons" href="/tags/15%E5%88%86%E9%92%9F/"><span class="tag">15分钟</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/2026/"><span class="tag">2026</span><span class="tag">2</span></a></div><div class="control"><a class="tags has-addons" href="/tags/2026-Trends/"><span class="tag">2026 Trends</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/AI/"><span class="tag">AI</span><span class="tag">28</span></a></div><div class="control"><a class="tags has-addons" href="/tags/AI-Agent/"><span class="tag">AI Agent</span><span class="tag">2</span></a></div><div class="control"><a class="tags has-addons" href="/tags/AOP/"><span class="tag">AOP</span><span class="tag">2</span></a></div><div class="control"><a class="tags has-addons" href="/tags/AST/"><span class="tag">AST</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Agent/"><span class="tag">Agent</span><span class="tag">4</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Agentic-Engineering/"><span class="tag">Agentic Engineering</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Android/"><span class="tag">Android</span><span class="tag">4</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Claude/"><span class="tag">Claude</span><span class="tag">3</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Code-design/"><span class="tag">Code design</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Codex/"><span class="tag">Codex</span><span class="tag">2</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Copilot/"><span class="tag">Copilot</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Cursor/"><span class="tag">Cursor</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Debug/"><span class="tag">Debug</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/DeepSeek/"><span class="tag">DeepSeek</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Design-Patterns/"><span class="tag">Design Patterns</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/DevOps/"><span class="tag">DevOps</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/English-Learning/"><span class="tag">English-Learning</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/GLM-5/"><span class="tag">GLM-5</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/GPT/"><span class="tag">GPT</span><span class="tag">2</span></a></div><div class="control"><a class="tags has-addons" href="/tags/GUI-Agent/"><span class="tag">GUI Agent</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/GitHub/"><span class="tag">GitHub</span><span class="tag">4</span></a></div><div class="control"><a class="tags has-addons" href="/tags/GoF/"><span class="tag">GoF</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Gradle/"><span class="tag">Gradle</span><span class="tag">3</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Hacker-News/"><span class="tag">Hacker News</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Industry-Thoughts/"><span class="tag">Industry Thoughts</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/JVM/"><span class="tag">JVM</span><span class="tag">4</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Java/"><span class="tag">Java</span><span class="tag">6</span></a></div><div class="control"><a class="tags has-addons" href="/tags/LLM/"><span class="tag">LLM</span><span class="tag">2</span></a></div><div class="control"><a class="tags has-addons" href="/tags/LSP/"><span class="tag">LSP</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Lovart/"><span class="tag">Lovart</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/MCP/"><span class="tag">MCP</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/OpenAI/"><span class="tag">OpenAI</span><span class="tag">2</span></a></div><div class="control"><a class="tags has-addons" href="/tags/OpenClaw/"><span class="tag">OpenClaw</span><span class="tag">5</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Optimus/"><span class="tag">Optimus</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Prompt-Engineering/"><span class="tag">Prompt Engineering</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/React/"><span class="tag">React</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Reading/"><span class="tag">Reading</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Robotics/"><span class="tag">Robotics</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Rust/"><span class="tag">Rust</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Science/"><span class="tag">Science</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Seedance/"><span class="tag">Seedance</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/SpaceX/"><span class="tag">SpaceX</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Spring-Festival-Gala/"><span class="tag">Spring-Festival-Gala</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Technology/"><span class="tag">Technology</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Trending/"><span class="tag">Trending</span><span class="tag">3</span></a></div><div class="control"><a class="tags has-addons" href="/tags/UI%E8%AE%BE%E8%AE%A1/"><span class="tag">UI设计</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/UML/"><span class="tag">UML</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Unitree/"><span class="tag">Unitree</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Windows/"><span class="tag">Windows</span><span class="tag">3</span></a></div><div class="control"><a class="tags has-addons" href="/tags/ZeroClaw/"><span class="tag">ZeroClaw</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/bytecode/"><span class="tag">bytecode</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/macOS/"><span class="tag">macOS</span><span class="tag">2</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E4%B8%AD%E5%9B%BD%E5%88%B6%E9%80%A0/"><span class="tag">中国制造</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/"><span class="tag">人工智能</span><span class="tag">2</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E4%BA%BA%E5%BD%A2%E6%9C%BA%E5%99%A8%E4%BA%BA/"><span class="tag">人形机器人</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E4%BB%A3%E7%A0%81%E5%88%86%E6%9E%90/"><span class="tag">代码分析</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E4%BB%A3%E7%A0%81%E5%8F%AF%E8%A7%86%E5%8C%96/"><span class="tag">代码可视化</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E5%88%9B%E6%96%B0/"><span class="tag">创新</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E5%89%8D%E7%AB%AF/"><span class="tag">前端</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E5%8E%86%E5%8F%B2/"><span class="tag">历史</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E5%95%86%E4%B8%9A/"><span class="tag">商业</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E5%9B%BD%E5%86%85/"><span class="tag">国内</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E5%A4%8F%E4%BB%A4%E6%97%B6/"><span class="tag">夏令时</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E5%A4%9A%E6%A8%A1%E6%80%81%E5%A4%A7%E6%A8%A1%E5%9E%8B/"><span class="tag">多模态大模型</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E5%A4%A7%E6%A8%A1%E5%9E%8B/"><span class="tag">大模型</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E5%A4%AA%E7%A9%BA%E8%AE%A1%E7%AE%97/"><span class="tag">太空计算</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E5%AD%97%E8%8A%82%E7%A0%81/"><span class="tag">字节码</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8/"><span class="tag">字节跳动</span><span class="tag">2</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E5%AE%87%E6%A0%91%E7%A7%91%E6%8A%80/"><span class="tag">宇树科技</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E5%AE%89%E5%85%A8/"><span class="tag">安全</span><span class="tag">2</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E5%AF%B9%E6%AF%94%E8%AF%84%E6%B5%8B/"><span class="tag">对比评测</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E5%BC%80%E5%8F%91%E5%B7%A5%E5%85%B7/"><span class="tag">开发工具</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E5%BC%80%E6%BA%90/"><span class="tag">开源</span><span class="tag">7</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0/"><span class="tag">强化学习</span><span class="tag">2</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E5%BE%AE%E8%BD%AF/"><span class="tag">微软</span><span class="tag">2</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E6%8A%80%E6%9C%AF%E6%97%A5%E6%8A%A5/"><span class="tag">技术日报</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E6%8A%80%E6%9C%AF%E8%B6%8B%E5%8A%BF/"><span class="tag">技术趋势</span><span class="tag">2</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E6%8F%90%E7%A4%BA%E8%AF%8D/"><span class="tag">提示词</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E6%95%99%E7%A8%8B/"><span class="tag">教程</span><span class="tag">3</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E6%96%B0%E6%98%A5/"><span class="tag">新春</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E6%96%B0%E9%97%BB/"><span class="tag">新闻</span><span class="tag">4</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E6%97%A9%E6%8A%A5/"><span class="tag">早报</span><span class="tag">4</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E6%98%A5%E6%99%9A/"><span class="tag">春晚</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E6%99%BA%E8%B0%B1/"><span class="tag">智谱</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E6%9C%AC%E5%9C%B0%E9%83%A8%E7%BD%B2/"><span class="tag">本地部署</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E6%9C%BA%E5%99%A8%E4%BA%BA/"><span class="tag">机器人</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E6%B5%8B%E8%AF%95%E8%87%AA%E5%8A%A8%E5%8C%96/"><span class="tag">测试自动化</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E6%B7%B1%E5%BA%A6%E5%88%86%E6%9E%90/"><span class="tag">深度分析</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E6%B7%B1%E5%BA%A6%E7%A0%94%E7%A9%B6/"><span class="tag">深度研究</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E7%A7%91%E6%8A%80/"><span class="tag">科技</span><span class="tag">5</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E7%A7%91%E6%8A%80%E5%B1%95%E6%9C%9B/"><span class="tag">科技展望</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E7%A7%91%E6%8A%80%E7%83%AD%E6%A6%9C/"><span class="tag">科技热榜</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E7%A7%91%E6%8A%80%E8%B6%8B%E5%8A%BF/"><span class="tag">科技趋势</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E7%A8%8B%E5%BA%8F%E7%90%86%E8%A7%A3/"><span class="tag">程序理解</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E7%BC%96%E7%A8%8B/"><span class="tag">编程</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E7%BC%96%E7%A8%8B%E5%B7%A5%E5%85%B7/"><span class="tag">编程工具</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E7%BE%8E%E8%82%A1/"><span class="tag">美股</span><span class="tag">4</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E8%8B%B1%E8%AF%AD%E5%AD%A6%E4%B9%A0/"><span class="tag">英语学习</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E8%A7%86%E9%A2%91%E7%94%9F%E6%88%90/"><span class="tag">视频生成</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E8%AE%B0%E5%BF%86%E7%B3%BB%E7%BB%9F/"><span class="tag">记忆系统</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E8%AF%BB%E4%B9%A6/"><span class="tag">读书</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E8%B0%B7%E6%AD%8C/"><span class="tag">谷歌</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E9%9D%A2%E5%90%91%E5%88%87%E9%9D%A2/"><span class="tag">面向切面</span><span class="tag">2</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E9%A3%9E%E4%B9%A6/"><span class="tag">飞书</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E9%A9%AC%E6%96%AF%E5%85%8B/"><span class="tag">马斯克</span><span class="tag">1</span></a></div></div></div></div></div><div class="card widget" data-type="subscribe-email"><div class="card-content"><div class="menu"><h3 class="menu-label">订阅更新</h3><form action="https://feedburner.google.com/fb/a/mailverify" method="post" target="popupwindow" onsubmit="window.open(&#039;https://feedburner.google.com/fb/a/mailverify?uri=&#039;,&#039;popupwindow&#039;,&#039;scrollbars=yes,width=550,height=520&#039;);return true"><input type="hidden" value="" name="uri"><input type="hidden" name="loc" value="en_US"><div class="field has-addons"><div class="control has-icons-left is-expanded"><input class="input" name="email" type="email" placeholder="Email"><span class="icon is-small is-left"><i class="fas fa-envelope"></i></span></div><div class="control"><input class="button" type="submit" value="订阅"></div></div></form></div></div></div><div class="card widget" data-type="links"><div class="card-content"><div class="menu"><h3 class="menu-label">链接</h3><ul class="menu-list"><li><a class="level is-mobile" href="https://hexo.io" target="_blank" rel="noopener"><span class="level-left"><span class="level-item">Hexo</span></span><span class="level-right"><span class="level-item tag">hexo.io</span></span></a></li></ul></div></div></div></div><!--!--></div></div></section><footer class="footer"><div class="container"><div class="level"><div class="level-start"><a class="footer-logo is-block mb-2" href="/"><img src="/images/logo.svg" alt="内森淼文" height="28"></a><p class="is-size-7"><span>&copy; 2026 Nathan</span>  Powered by <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a> &amp; <a href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank" rel="noopener">Icarus</a></p></div><div class="level-end"><div class="field has-addons"><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="My GitHub Index" href="https://github.com/hydraxman"><i class="fab fa-github"></i></a></p><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Creative Commons" href="https://creativecommons.org/"><i class="fab fa-creative-commons"></i></a></p></div></div></div></div></footer><script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/min/moment-with-locales.min.js"></script><script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.4/dist/clipboard.min.js" defer></script><script>moment.locale("zh-cn");</script><script>var IcarusThemeSettings = {
+            article: {
+                highlight: {
+                    clipboard: true,
+                    fold: 'unfolded'
+                }
+            }
+        };</script><script src="/js/column.js"></script><script src="/js/animation.js"></script><a id="back-to-top" title="回到顶端" href="javascript:;"><i class="fas fa-chevron-up"></i></a><script src="/js/back_to_top.js" defer></script><!--!--><!--!--><!--!--><script src="https://cdn.jsdelivr.net/npm/cookieconsent@3.1.1/build/cookieconsent.min.js" defer></script><script>window.addEventListener("load", () => {
+      window.cookieconsent.initialise({
+        type: "info",
+        theme: "edgeless",
+        static: false,
+        position: "bottom-left",
+        content: {
+          message: "此网站使用Cookie来改善您的体验。",
+          dismiss: "知道了！",
+          allow: "允许使用Cookie",
+          deny: "拒绝",
+          link: "了解更多",
+          policy: "Cookie政策",
+          href: "https://www.cookiesandyou.com/",
+        },
+        palette: {
+          popup: {
+            background: "#edeff5",
+            text: "#838391"
+          },
+          button: {
+            background: "#4b81e8"
+          },
+        },
+      });
+    });</script><script src="https://cdn.jsdelivr.net/npm/lightgallery@1.10.0/dist/js/lightgallery.min.js" defer></script><script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.8.1/dist/js/jquery.justifiedGallery.min.js" defer></script><script>window.addEventListener("load", () => {
+            if (typeof $.fn.lightGallery === 'function') {
+                $('.article').lightGallery({ selector: '.gallery-item' });
+            }
+            if (typeof $.fn.justifiedGallery === 'function') {
+                if ($('.justified-gallery > p > .gallery-item').length) {
+                    $('.justified-gallery > p > .gallery-item').unwrap();
+                }
+                $('.justified-gallery').justifiedGallery();
+            }
+        });</script><!--!--><!--!--><!--!--><!--!--><!--!--><script src="/js/main.js" defer></script><div class="searchbox"><div class="searchbox-container"><div class="searchbox-header"><div class="searchbox-input-container"><input class="searchbox-input" type="text" placeholder="想要查找什么..."></div><a class="searchbox-close" href="javascript:;">×</a></div><div class="searchbox-body"></div></div></div><script src="/js/insight.js" defer></script><script>document.addEventListener('DOMContentLoaded', function () {
+            loadInsight({"contentUrl":"/content.json"}, {"hint":"想要查找什么...","untitled":"(无标题)","posts":"文章","pages":"页面","categories":"分类","tags":"标签"});
+        });</script></body></html>

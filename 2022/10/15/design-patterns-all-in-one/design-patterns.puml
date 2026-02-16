@@ -1,0 +1,317 @@
+@startuml strategy
+class SolutionContext {
+    IStrategy strategy
+    void solveProblem()
+}
+interface IStrategy {
+    int compute()
+}
+class StrategyA {
+    int compute()
+}
+class StrategyB {
+    int compute()
+}
+class StrategyC {
+    int compute()
+}
+
+SolutionContext o--> IStrategy
+IStrategy <|-- StrategyA
+IStrategy <|-- StrategyB
+IStrategy <|-- StrategyC
+@enduml
+
+@startuml state
+class TCPConnectionContext {
+    TCPState state
+    void request()
+}
+interface TCPState {
+    handle()
+}
+class TCPEstablished {
+    handle()
+}
+class TCPListen {
+    handle()
+}
+class TCPClosed {
+    handle()
+}
+
+TCPConnectionContext o--> TCPState
+TCPState <|-- TCPEstablished
+TCPState <|-- TCPListen
+TCPState <|-- TCPClosed
+@enduml
+
+
+@startuml abstract-factory
+class Client
+abstract class AbstractFactory {
+    createProductA()
+    createProductB()
+}
+class Factory1 {
+    createProductA()
+    createProductB()
+}
+class Factory2 {
+    createProductA()
+    createProductB()
+}
+abstract class AbstractProductA
+abstract class AbstractProductB
+class ProductA1
+class ProductB1
+class ProductA2
+class ProductB2
+
+ProductA1 -u-|> AbstractProductA
+ProductA2 -u-|> AbstractProductA
+ProductB1 -u-|> AbstractProductB
+ProductB2 -u-|> AbstractProductB
+
+Factory1 -u-|> AbstractFactory
+Factory2 -u-|> AbstractFactory
+
+Factory1 ...> ProductA1
+Factory1 ...> ProductB1
+Factory2 ...> ProductA2
+Factory2 ...> ProductB2
+
+Client --> AbstractProductA : creates
+Client --> AbstractProductB : creates
+Client --> AbstractFactory : holds
+
+@enduml
+
+@startuml memento
+class Originator{
+    State state
+    setMemento(Memento m)
+    createMemento()
+}
+
+class Memento {
+    State state
+}
+
+class Caretaker {
+    Memento memento
+}
+
+Originator .r.> Memento
+Caretaker o-l-> Memento
+
+@enduml
+
+@startuml observer
+class Observer {
+    update()
+}
+class ConcreteObserver {
+    observerState
+    update()
+}
+class Subject {
+    attach(Observer)
+    detach(Observer)
+    notify()
+}
+class ConcreteSubject {
+    subjectState
+    getState()
+    setState()
+}
+
+ConcreteObserver -u-|> Observer
+ConcreteSubject -u-|> Subject
+
+Subject o-r- Observer
+ConcreteSubject -r-o ConcreteObserver
+
+@enduml
+
+
+@startuml adapter
+
+class Context
+class Target {
+    request()
+}
+class Adapter {
+    request()
+}
+class Adaptee {
+    specificRequest()
+}
+
+Context -r-> Target
+Adapter -u-|> Target
+Adapter -r-> Adaptee
+
+@enduml
+
+@startuml bridge
+
+Phone o-- PhoneFunction
+
+iPhone --|> Phone
+AndroidPhone --|> Phone
+NonsmartPhone --|> Phone
+
+Call -u-|> PhoneFunction
+InstallApp -u-|> PhoneFunction
+
+@enduml
+
+@startuml command
+
+Client .r.> Invoker
+Client .r.> Receiver
+Invoker o-r- Command
+ConcreteCommand -u-|> Command
+ConcreteCommand o-l- Receiver
+
+@enduml
+
+@startuml chain-of-responsibility
+interface Handler {
+    setSuccessor(Handler)
+    handleRequest(...)
+}
+
+Client -r-> Handler
+ConcreteHandler1 -u-|> Handler
+ConcreteHandler2 -u-|> Handler
+ConcreteHandler2 o--> Handler: successor
+
+@enduml
+
+@startuml mediator
+
+Mediator <-r-o Colleague
+ConcreteColleague1 -u-|> Colleague
+ConcreteColleague2 -u-|> Colleague
+ConcreteMediator -u-|> Mediator
+
+ConcreteMediator -u-> ConcreteColleague1
+ConcreteMediator -r-> ConcreteColleague2
+
+@enduml
+
+@startuml visitor
+
+class Visitor {
+    +visitElement(Element element)
+}
+note top of Visitor
+Visitor design enables us to redefine the 
+action/operation on a object without changing it.
+end note
+
+class Element {
+    + accept(Visitor visitor)
+}
+
+ElementA -u-|> Element
+ElementB -u-|> Element
+
+ConcreteVisitorA -u-|> Visitor
+ConcreteVisitorB -u-|> Visitor
+
+Element --> Visitor
+
+@enduml
+
+@startuml facade
+
+Client --> Facade
+package SubSystem{
+    Facade --> SubSystemA
+    Facade --> SubSystemB
+    Facade --> SubSystemC
+    Facade --> SubSystemD
+}
+@enduml
+
+@startuml proxy
+
+class Subject {
+    request()
+}
+
+Proxy -u-|> Subject
+RealSubject -u-|> Subject
+
+Proxy o-r-> RealSubject
+
+@enduml
+
+@startuml decorator
+
+interface Subject {
+    +operate()
+}
+
+Decorator -u-|> Subject
+Decorator o--> Subject
+RealSubject -u-|> Subject
+
+
+ConcreteDecoratorA -r-|> Decorator
+ConcreteDecoratorB --|> Decorator
+
+class ConcreteDecoratorA {
+    +operate()
+    -addedState
+}
+class ConcreteDecoratorB {
+    +operate()
+    -addedBehavior
+}
+
+@enduml
+
+@startuml interpreter
+
+abstract Expression {
+    +interpret(Context context)
+}
+
+Client -u-> Context
+Client -r-> Expression
+TerminalExpression -u-|> Expression
+NonterminalExpression -u-|> Expression
+NonterminalExpression o--> Expression
+@enduml
+
+
+@startuml factory_method
+
+ConcreteCreator ..l.> ConcreteProduct
+ConcreteProduct -u-|> Product
+ConcreteCreator -u-|> Creator
+
+interface Creator {
+    +createProduct()
+}
+
+@enduml
+
+
+@startuml composite
+
+Client -r-> Component
+Leaf -u-|> Component
+Composite -u-|> Component
+Composite o-- Component
+
+interface Component {
+    +add(Component)
+    +remove(Component)
+}
+
+@enduml
