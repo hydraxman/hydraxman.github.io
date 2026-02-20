@@ -29,7 +29,231 @@
       switchTab();
       window.addEventListener('hashchange', switchTab, false);
   })();
-  </script><!-- hexo injector head_end end --><meta name="generator" content="Hexo 6.3.0"></head><body class="is-2-column"><nav class="navbar navbar-main"><div class="container navbar-container"><div class="navbar-brand justify-content-center"><a class="navbar-item navbar-logo" href="/"><img src="/images/logo.svg" alt="内森淼文" height="28"></a></div><div class="navbar-menu"><div class="navbar-start"><a class="navbar-item" href="/">Home</a><a class="navbar-item" href="/archives">Archives</a><a class="navbar-item" href="/categories">Categories</a><a class="navbar-item" href="/tags">Tags</a><a class="navbar-item" href="/about">About</a></div><div class="navbar-end"><a class="navbar-item" target="_blank" rel="noopener" title="My GitHub Index" href="https://github.com/hydraxman"><i class="fab fa-github"></i></a><a class="navbar-item search" title="搜索" href="javascript:;"><i class="fas fa-search"></i></a></div></div></div></nav><section class="section"><div class="container"><div class="columns"><div class="column order-2 column-main is-8-tablet is-8-desktop is-8-widescreen"><div class="card"><article class="card-content article" role="article"><div class="article-meta is-size-7 is-uppercase level is-mobile"><div class="level-left"><span class="level-item"><time dateTime="2026-02-12T16:00:00.000Z" title="2/13/2026, 12:00:00 AM">2026-02-13</time>发表</span><span class="level-item"><time dateTime="2026-02-20T09:22:12.121Z" title="2/20/2026, 5:22:12 PM">2026-02-20</time>更新</span><span class="level-item"><a class="link-muted" href="/categories/%E6%B7%B1%E5%BA%A6%E5%88%86%E6%9E%90/">深度分析</a></span><span class="level-item">19 分钟读完 (大约2900个字)</span></div></div><h1 class="title is-3 is-size-4-mobile">智谱 GLM-5 深度解析：744B 参数开源巨兽，从 Vibe Coding 迈向 Agentic Engineering</h1><div class="content"><blockquote>
+  </script><!-- hexo injector head_end end --><meta name="generator" content="Hexo 6.3.0"><style id="japandi-custom">
+/* Japandi Aesthetic — Muted Earth Tones */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&family=Inter:wght@300;400;500;600&display=swap');
+
+/* === Global === */
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+  line-height: 1.85;
+  background-color: #F5F0EB !important;
+  color: #2D2D2D;
+  background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.015'/%3E%3C/svg%3E");
+}
+
+/* === Typography === */
+h1, h2, h3, h4, h5, h6,
+.article-title,
+.card .card-content .title {
+  font-family: 'Noto Serif', Georgia, serif !important;
+  color: #2D2D2D !important;
+  font-weight: 700;
+}
+
+/* === Links === */
+a {
+  color: #6B7F63 !important;
+  transition: color 0.25s ease;
+}
+a:hover {
+  color: #4A5944 !important;
+}
+
+/* === Navbar === */
+.navbar {
+  background-color: #FFFDF9 !important;
+  box-shadow: 0 1px 0 #E5DED5 !important;
+  border-bottom: 1px solid #E5DED5;
+}
+.navbar .navbar-item,
+.navbar .navbar-link {
+  color: #2D2D2D !important;
+  font-family: 'Inter', sans-serif !important;
+  font-weight: 500;
+}
+.navbar .navbar-item:hover,
+.navbar .navbar-link:hover {
+  background-color: rgba(168,181,162,0.12) !important;
+}
+.navbar .navbar-burger span {
+  background-color: #2D2D2D !important;
+}
+.navbar .navbar-menu {
+  background-color: #FFFDF9 !important;
+}
+.navbar-brand .navbar-item {
+  font-family: 'Noto Serif', serif !important;
+  font-weight: 700 !important;
+  font-size: 1.3rem !important;
+}
+
+/* === Cards === */
+.card {
+  border-radius: 12px !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.06) !important;
+  border: 1px solid #E5DED5 !important;
+  background-color: #FFFDF9 !important;
+  transition: box-shadow 0.3s ease, transform 0.25s ease !important;
+  overflow: hidden;
+}
+.card:hover {
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06), 0 8px 20px rgba(0,0,0,0.08) !important;
+  transform: translateY(-2px);
+}
+.card + .card {
+  margin-top: 1.8rem;
+}
+article.article .card {
+  margin-bottom: 1.8rem;
+}
+
+/* === Article Content === */
+.content {
+  color: #2D2D2D;
+}
+.content h2 {
+  border-bottom: 1px solid #E5DED5;
+  padding-bottom: 0.4em;
+  margin-top: 2em;
+}
+.content blockquote {
+  border-left: 3px solid #A8B5A2 !important;
+  background-color: rgba(168,181,162,0.08) !important;
+  border-radius: 0 8px 8px 0;
+  padding: 1em 1.5em;
+}
+.content img {
+  border-radius: 8px;
+}
+.content hr {
+  border: none;
+  height: 1px;
+  background: linear-gradient(to right, transparent, #E5DED5, transparent);
+  margin: 2.5em 0;
+}
+
+/* === Cover image hover === */
+.card .card-image {
+  overflow: hidden;
+}
+.card .card-image img {
+  transition: transform 0.4s ease;
+}
+.card .card-image:hover img {
+  transform: scale(1.03);
+}
+
+/* === Buttons === */
+.button {
+  border-radius: 8px !important;
+  font-family: 'Inter', sans-serif !important;
+  font-weight: 500;
+  border-color: #E5DED5 !important;
+}
+.button.is-primary {
+  background-color: #A8B5A2 !important;
+  border-color: #A8B5A2 !important;
+  color: #fff !important;
+}
+.button.is-primary:hover {
+  background-color: #8FA389 !important;
+}
+
+/* === Tags === */
+.tag:not(body) {
+  border-radius: 20px !important;
+  padding-left: 14px;
+  padding-right: 14px;
+  background-color: rgba(168,181,162,0.15) !important;
+  color: #6B7F63 !important;
+  border: 1px solid rgba(168,181,162,0.3) !important;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+a.tag:hover {
+  background-color: rgba(168,181,162,0.25) !important;
+}
+
+/* === Sidebar === */
+.column-left .card,
+.column-right .card {
+  border: 1px solid #E5DED5 !important;
+  background-color: #FFFDF9 !important;
+}
+
+/* === Footer === */
+.footer {
+  background-color: #2D2D2D !important;
+  color: rgba(255,255,255,0.6) !important;
+}
+.footer a {
+  color: rgba(255,255,255,0.75) !important;
+}
+.footer a:hover {
+  color: #fff !important;
+}
+.footer .level-item {
+  color: rgba(255,255,255,0.4) !important;
+}
+
+/* === Pagination === */
+.pagination-link {
+  border-radius: 8px !important;
+  border-color: #E5DED5 !important;
+}
+.pagination-link.is-current {
+  background-color: #A8B5A2 !important;
+  border-color: #A8B5A2 !important;
+  color: #fff !important;
+}
+
+/* === Timeline markers === */
+.timeline-item .timeline-marker.is-primary {
+  background-color: #A8B5A2 !important;
+  border-color: #A8B5A2 !important;
+}
+
+/* === Progress bar === */
+.progressbar {
+  background-color: #A8B5A2 !important;
+}
+
+/* === Scrollbar === */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #F5F0EB; }
+::-webkit-scrollbar-thumb { background: #E5DED5; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #C5BEB5; }
+
+/* === Selection === */
+::selection {
+  background: rgba(168,181,162,0.3);
+  color: #2D2D2D;
+}
+
+/* === Whitespace === */
+.section {
+  padding: 2.5rem 1.5rem;
+}
+
+/* === Code blocks keep dark === */
+pre, code {
+  border-radius: 8px !important;
+}
+
+/* === Tables === */
+.content table th {
+  background-color: rgba(168,181,162,0.12) !important;
+  border-color: #E5DED5 !important;
+  font-family: 'Noto Serif', serif;
+  font-weight: 600;
+}
+.content table td {
+  border-color: #E5DED5 !important;
+}
+
+</style>
+</head><body class="is-2-column"><nav class="navbar navbar-main"><div class="container navbar-container"><div class="navbar-brand justify-content-center"><a class="navbar-item navbar-logo" href="/"><img src="/images/logo.svg" alt="内森淼文" height="28"></a></div><div class="navbar-menu"><div class="navbar-start"><a class="navbar-item" href="/">Home</a><a class="navbar-item" href="/archives">Archives</a><a class="navbar-item" href="/categories">Categories</a><a class="navbar-item" href="/tags">Tags</a><a class="navbar-item" href="/about">About</a></div><div class="navbar-end"><a class="navbar-item" target="_blank" rel="noopener" title="My GitHub Index" href="https://github.com/hydraxman"><i class="fab fa-github"></i></a><a class="navbar-item search" title="搜索" href="javascript:;"><i class="fas fa-search"></i></a></div></div></div></nav><section class="section"><div class="container"><div class="columns"><div class="column order-2 column-main is-8-tablet is-8-desktop is-8-widescreen"><div class="card"><article class="card-content article" role="article"><div class="article-meta is-size-7 is-uppercase level is-mobile"><div class="level-left"><span class="level-item"><time dateTime="2026-02-12T16:00:00.000Z" title="2/13/2026, 12:00:00 AM">2026-02-13</time>发表</span><span class="level-item"><time dateTime="2026-02-20T09:22:12.121Z" title="2/20/2026, 5:22:12 PM">2026-02-20</time>更新</span><span class="level-item"><a class="link-muted" href="/categories/%E6%B7%B1%E5%BA%A6%E5%88%86%E6%9E%90/">深度分析</a></span><span class="level-item">19 分钟读完 (大约2900个字)</span></div></div><h1 class="title is-3 is-size-4-mobile">智谱 GLM-5 深度解析：744B 参数开源巨兽，从 Vibe Coding 迈向 Agentic Engineering</h1><div class="content"><blockquote>
 <p>2026 年 2 月 11 日，智谱 AI 发布了新一代旗舰模型 GLM-5——一个 744B 参数的 MoE 开源模型，在编码和 Agent 能力上全面对齐 Claude Opus 4.5，并在多项关键指标上超越 GPT-5.2。这不只是又一个大模型的发布，而是一个信号：<strong>开源模型和闭源前沿之间的差距，正在以不可思议的速度消失。</strong></p>
 </blockquote>
 <p><img src="/images/glm-5-cover.png" alt="GLM-5 封面"></p>
