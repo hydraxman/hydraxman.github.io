@@ -1,0 +1,1760 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="keywords" content="计算机技术, 生活中的胡思乱想">
+    
+    <meta name="author" content="Nathan">
+    
+    <!-- Completely eliminate flash of wrong theme -->
+    <script>
+        (function() {
+            const THEME_KEY = "REDEFINE-THEME-STATUS";
+            const DARK = "dark", LIGHT = "light";
+            
+            // Get preferred theme
+            function getTheme() {
+                try {
+                    const saved = localStorage.getItem(THEME_KEY);
+                    if (saved) {
+                        const { isDark } = JSON.parse(saved);
+                        return isDark ? DARK : LIGHT;
+                    }
+                } catch (e) {}
+                
+                return matchMedia("(prefers-color-scheme: dark)").matches ? DARK : LIGHT;
+            }
+            
+            // Apply theme to document
+            function applyTheme(theme) {
+                const isDark = theme === DARK;
+                const root = document.documentElement;
+                
+                // Set data attribute for CSS variables
+                root.setAttribute("data-theme", theme);
+                
+                // Set classes for compatibility
+                root.classList.add(theme);
+                root.classList.remove(isDark ? LIGHT : DARK);
+                root.style.colorScheme = theme;
+            }
+            
+            // Initial application
+            const theme = getTheme();
+            applyTheme(theme);
+            
+            // Listen for system preference changes
+            matchMedia("(prefers-color-scheme: dark)").addEventListener("change", ({ matches }) => {
+                // Only update if using system preference (no localStorage entry)
+                if (!localStorage.getItem(THEME_KEY)) {
+                    applyTheme(matches ? DARK : LIGHT);
+                }
+            });
+            
+            // Set body classes once DOM is ready
+            if (document.readyState !== "loading") {
+                document.body.classList.add(theme + "-mode");
+            } else {
+                document.addEventListener("DOMContentLoaded", () => {
+                    document.body.classList.add(theme + "-mode");
+                    document.body.classList.remove((theme === DARK ? LIGHT : DARK) + "-mode");
+                });
+            }
+        })();
+    </script>
+    
+    <!-- Critical CSS to prevent flash -->
+    <style>
+        :root[data-theme="dark"] {
+            --background-color: #202124;
+            --background-color-transparent: rgba(32, 33, 36, 0.6);
+            --second-background-color: #2d2e32;
+            --third-background-color: #34353a;
+            --third-background-color-transparent: rgba(32, 33, 36, 0.6);
+            --primary-color: #0066CC;
+            --first-text-color: #ffffff;
+            --second-text-color: #eeeeee;
+            --third-text-color: #bebec6;
+            --fourth-text-color: #999999;
+            --default-text-color: #bebec6;
+            --invert-text-color: #373D3F;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --selection-color: #0066CC;
+            --shadow-color-1: rgba(255, 255, 255, 0.08);
+            --shadow-color-2: rgba(255, 255, 255, 0.05);
+        }
+        
+        :root[data-theme="light"] {
+            --background-color: #fff;
+            --background-color-transparent: rgba(255, 255, 255, 0.6);
+            --second-background-color: #f8f8f8;
+            --third-background-color: #f2f2f2;
+            --third-background-color-transparent: rgba(241, 241, 241, 0.6);
+            --primary-color: #0066CC;
+            --first-text-color: #16171a;
+            --second-text-color: #2f3037;
+            --third-text-color: #5e5e5e;
+            --fourth-text-color: #eeeeee;
+            --default-text-color: #373D3F;
+            --invert-text-color: #bebec6;
+            --border-color: rgba(0, 0, 0, 0.08);
+            --selection-color: #0066CC;
+            --shadow-color-1: rgba(0, 0, 0, 0.08);
+            --shadow-color-2: rgba(0, 0, 0, 0.05);
+        }
+        
+        body {
+            background-color: var(--background-color);
+            color: var(--default-text-color);
+        }
+        
+        /* Apply body classes as soon as DOM is ready */
+        :root[data-theme="dark"] body {
+            background-color: var(--background-color);
+            color: var(--default-text-color);
+        }
+    </style>
+    
+    <!-- preconnect -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    
+    <!--- Seo Part-->
+    
+    <link rel="canonical" href="https://hydraxman.github.io/2026/02/15/2026-02-15-frontend-prompt-styles/"/>
+    <meta name="robots" content="index,follow">
+    <meta name="googlebot" content="index,follow">
+    <meta name="revisit-after" content="1 days">
+    
+    
+    
+        
+        <meta name="description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AI网站生成必备：这 35 种 UI 风格直接抄，图文直给到全">
+<meta property="og:url" content="https://hydraxman.github.io/2026/02/15/2026-02-15-frontend-prompt-styles/index.html">
+<meta property="og:site_name" content="内森淼文">
+<meta property="og:description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://hydraxman.github.io/images/redefine-og.webp">
+<meta property="article:published_time" content="2026-02-15T13:00:00.000Z">
+<meta property="article:modified_time" content="2026-02-20T09:22:12.116Z">
+<meta property="article:author" content="Nathan">
+<meta property="article:tag" content="AI">
+<meta property="article:tag" content="前端">
+<meta property="article:tag" content="提示词">
+<meta property="article:tag" content="UI设计">
+<meta property="article:tag" content="Prompt Engineering">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://hydraxman.github.io/images/redefine-og.webp">
+    
+    
+    <!--- Icon Part-->
+    <link rel="icon" type="image/png" href="/images/favicon.svg" sizes="192x192">
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.svg">
+    <meta name="theme-color" content="#ffffff">
+    <link rel="shortcut icon" href="/images/favicon.svg">
+    <!--- Page Info-->
+    
+    <title>
+        
+            AI网站生成必备：这 35 种 UI 风格直接抄，图文直给到全 | 内森淼文
+        
+    </title>
+
+    
+<link rel="stylesheet" href="/fonts/Chillax/chillax.css">
+
+
+    <!--- Inject Part-->
+    
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    
+        
+<link rel="stylesheet" href="/css/build/tailwind.css">
+
+    
+
+    
+<link rel="stylesheet" href="/fonts/GeistMono/geist-mono.css">
+
+    
+<link rel="stylesheet" href="/fonts/Geist/geist.css">
+
+    <!--- Font Part-->
+    
+    
+    
+    
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&display=swap" rel="stylesheet">
+    
+    
+
+    <script id="hexo-configurations">
+    window.config = {"hostname":"hydraxman.github.io","root":"/","language":"zh-CN","path":"search.json"};
+    window.theme = {"articles":{"style":{"font_size":"16px","line_height":1.5,"image_border_radius":"14px","image_alignment":"center","image_caption":false,"link_icon":true,"delete_mask":false,"title_alignment":"left","headings_top_spacing":{"h1":"3.2rem","h2":"2.4rem","h3":"1.9rem","h4":"1.6rem","h5":"1.4rem","h6":"1.3rem"}},"word_count":{"enable":true,"count":true,"min2read":true},"author_label":{"enable":false,"auto":false,"list":[]},"code_block":{"copy":true,"style":"mac","highlight_theme":{"light":"github","dark":"vs2015"},"font":{"enable":false,"family":null,"url":null}},"toc":{"enable":true,"max_depth":3,"number":false,"expand":true,"init_open":true},"copyright":{"enable":true,"default":"cc_by_nc_sa"},"lazyload":true,"pangu_js":false,"recommendation":{"enable":false,"title":"推荐阅读","limit":3,"mobile_limit":2,"placeholder":"/images/wallhaven-wqery6-light.webp","skip_dirs":[]}},"colors":{"primary":"#ffffff","secondary":null,"default_mode":"light"},"global":{"fonts":{"chinese":{"enable":false,"family":null,"url":null},"english":{"enable":true,"family":"Inter","url":"https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"},"title":{"enable":true,"family":"Noto Serif","url":"https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&display=swap"}},"content_max_width":"1000px","sidebar_width":"210px","hover":{"shadow":true,"scale":false},"scroll_progress":{"bar":true,"percentage":true},"website_counter":{"url":"https://cn.vercount.one/js","enable":false,"site_pv":true,"site_uv":true,"post_pv":true},"single_page":true,"preloader":{"enable":false,"custom_message":null},"side_tools":{"gear_rotation":true,"auto_expand":false},"open_graph":{"enable":true,"image":"/images/redefine-og.webp","description":"Hexo Theme Redefine, Redefine Your Hexo Journey."},"google_analytics":{"enable":false,"id":null}},"home_banner":{"enable":true,"style":"fixed","image":{"light":"/images/banner-light.jpg","dark":"/images/banner-dark.jpg"},"title":"内森淼文","subtitle":{"text":["AI · 编程 · 科技见闻","Write Code, Read World"],"hitokoto":{"enable":false,"show_author":false,"api":"https://v1.hitokoto.cn"},"typing_speed":100,"backing_speed":80,"starting_delay":500,"backing_delay":1500,"loop":true,"smart_backspace":true},"text_color":{"light":"#fff","dark":"#d1d1b6"},"text_style":{"title_size":"2.8rem","subtitle_size":"1.5rem","line_height":1.2},"custom_font":{"enable":false,"family":null,"url":null},"social_links":{"enable":true,"style":"default","links":{"github":"https://github.com/hydraxman","instagram":null,"zhihu":null,"twitter":null,"email":null},"qrs":{"weixin":null}}},"plugins":{"feed":{"enable":false},"aplayer":{"enable":false,"type":"fixed","audios":[{"name":null,"artist":null,"url":null,"cover":null,"lrc":null}]},"mermaid":{"enable":false,"version":"11.4.1"}},"version":"2.8.5","navbar":{"auto_hide":false,"color":{"left":"#333333","right":"#555555","transparency":35},"width":{"home":"1200px","pages":"1000px"},"links":{"Home":{"path":"/","icon":"fa-regular fa-house"},"Archives":{"path":"/archives","icon":"fa-regular fa-archive"},"Categories":{"path":"/categories","icon":"fa-regular fa-folder"},"Tags":{"path":"/tags","icon":"fa-regular fa-tags"},"About":{"path":"/about","icon":"fa-regular fa-user"}},"search":{"enable":true,"preload":true}},"page_templates":{"friends_column":2,"tags_style":"blur"},"home":{"sidebar":{"enable":true,"position":"left","first_item":"menu","announcement":"AI · 编程 · 科技","show_on_mobile":true,"links":{"Archives":{"path":"/archives","icon":"fa-regular fa-archive"},"Tags":{"path":"/tags","icon":"fa-regular fa-tags"},"Categories":{"path":"/categories","icon":"fa-regular fa-folder"}}},"article_date_format":"auto","excerpt_length":200,"categories":{"enable":true,"limit":3},"tags":{"enable":true,"limit":3}},"footerStart":"2024/01/01 00:00:00"};
+    window.lang_ago = {"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"};
+    window.data = {"masonry":false};
+  </script>
+    
+    <!--- Fontawesome Part-->
+    
+<link rel="stylesheet" href="/fontawesome/fontawesome.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/brands.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/solid.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/regular.min.css">
+
+    
+    
+    
+    
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+
+<body>
+	<div class="progress-bar-container">
+	
+	<span class="scroll-progress-bar"></span>
+	
+
+	
+	<span class="pjax-progress-bar"></span>
+	<!--        <span class="swup-progress-icon">-->
+	<!--            <i class="fa-solid fa-circle-notch fa-spin"></i>-->
+	<!--        </span>-->
+	
+</div>
+
+<main class="page-container" id="swup">
+
+	
+
+	<div class="main-content-container flex flex-col justify-between min-h-dvh">
+		<div class="main-content-header">
+			<header class="navbar-container px-6 md:px-12">
+    <div class="navbar-content transition-navbar ">
+        <div class="left">
+            
+            <a class="logo-title" href="/">
+                
+                内森淼文
+                
+            </a>
+        </div>
+
+        <div class="right">
+            <!-- PC -->
+            <div class="desktop">
+                <ul class="navbar-list">
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/"
+                                        >
+                                    <i class="fa-regular fa-house fa-fw"></i>
+                                    首页
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/archives"
+                                        >
+                                    <i class="fa-regular fa-archive fa-fw"></i>
+                                    归档
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/categories"
+                                        >
+                                    <i class="fa-regular fa-folder fa-fw"></i>
+                                    分类
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/tags"
+                                        >
+                                    <i class="fa-regular fa-tags fa-fw"></i>
+                                    标签
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/about"
+                                        >
+                                    <i class="fa-regular fa-user fa-fw"></i>
+                                    关于
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                    
+                        <li class="navbar-item search search-popup-trigger">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </li>
+                    
+                </ul>
+            </div>
+            <!-- Mobile -->
+            <div class="mobile">
+                
+                    <div class="icon-item search search-popup-trigger"><i class="fa-solid fa-magnifying-glass"></i>
+                    </div>
+                
+                <div class="icon-item navbar-bar">
+                    <div class="navbar-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile sheet -->
+    <div class="navbar-drawer h-dvh w-full absolute top-0 left-0 bg-background-color flex flex-col justify-between">
+        <ul class="drawer-navbar-list flex flex-col px-4 justify-center items-start">
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/"
+                        >
+                            <span>
+                                首页
+                            </span>
+                            
+                                <i class="fa-regular fa-house fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/archives"
+                        >
+                            <span>
+                                归档
+                            </span>
+                            
+                                <i class="fa-regular fa-archive fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/categories"
+                        >
+                            <span>
+                                分类
+                            </span>
+                            
+                                <i class="fa-regular fa-folder fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/tags"
+                        >
+                            <span>
+                                标签
+                            </span>
+                            
+                                <i class="fa-regular fa-tags fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/about"
+                        >
+                            <span>
+                                关于
+                            </span>
+                            
+                                <i class="fa-regular fa-user fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+
+            
+            
+                
+                    
+                    
+                    
+            
+        </ul>
+
+        <div class="statistics flex justify-around my-2.5">
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/tags">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">115</div>
+        <div class="label text-third-text-color text-sm">标签</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/categories">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">5</div>
+        <div class="label text-third-text-color text-sm">分类</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/archives">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">52</div>
+        <div class="label text-third-text-color text-sm">文章</div>
+    </a>
+</div>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+		</div>
+
+		<div class="main-content-body transition-fade-up">
+			
+
+			<div class="main-content">
+				<div class="post-page-container flex relative justify-between box-border w-full h-full">
+	<div class="article-content-container">
+
+		<div class="article-title relative w-full">
+			
+			
+			
+			<img src="/images/ui-styles/cover-frontend-styles.jpg" alt="AI网站生成必备：这 35 种 UI 风格直接抄，图文直给到全" class="w-full h-60 sm:h-72 md:h-80 object-cover sm:rounded-t-large dark:brightness-75" />
+			
+			<div class="w-full flex items-center absolute bottom-0 justify-start">
+				<h1 class="article-title-cover text-center mx-6 my-6 text-second-text-color bg-background-color-transparent px-4 py-3 text-3xl sm:text-4xl md:text-5xl font-semibold backdrop-blur-lg rounded-xl border border-border-color ">AI网站生成必备：这 35 种 UI 风格直接抄，图文直给到全</h1>
+			</div>
+			
+		</div>
+
+		
+		<div class="article-header flex flex-row gap-2 items-center px-2 sm:px-6 md:px-8">
+			<div class="avatar w-[46px] h-[46px] flex-shrink-0 rounded-medium border border-border-color p-[1px]">
+				<img src="/images/avatar.png">
+			</div>
+			<div class="info flex flex-col justify-between">
+				<div class="author flex items-center">
+					<span class="name text-default-text-color text-lg font-semibold">Nathan</span>
+					
+				</div>
+				<div class="meta-info">
+					<div class="article-meta-info">
+    <span class="article-date article-meta-item">
+        <i class="fa-regular fa-pen-fancy"></i>&nbsp;
+        <span class="desktop">2026-02-15 21:00</span>
+        <span class="mobile">2026-02-15 21:00</span>
+        <span class="hover-info">创建</span>
+    </span>
+    
+        <span class="article-date article-meta-item">
+            <i class="fa-regular fa-wrench"></i>&nbsp;
+            <span class="desktop">2026-02-20 17:22:12</span>
+            <span class="mobile">2026-02-20 17:22:12</span>
+            <span class="hover-info">更新</span>
+        </span>
+    
+
+    
+        <span class="article-categories article-meta-item">
+            <i class="fa-regular fa-folders"></i>&nbsp;
+            <ul>
+                
+                
+                    
+                        
+                        <li>
+                            <a href="/categories/%E6%8A%80%E6%9C%AF%E5%AE%9E%E6%88%98/">技术实战</a>&nbsp;
+                        </li>
+                    
+                    
+                
+            </ul>
+        </span>
+    
+    
+        <span class="article-tags article-meta-item">
+            <i class="fa-regular fa-tags"></i>&nbsp;
+            <ul>
+                
+                    <li>
+                        <a href="/tags/AI/">AI</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/%E5%89%8D%E7%AB%AF/">前端</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/%E6%8F%90%E7%A4%BA%E8%AF%8D/">提示词</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/UI%E8%AE%BE%E8%AE%A1/">UI设计</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/Prompt-Engineering/">Prompt Engineering</a>&nbsp;
+                    </li>
+                
+            </ul>
+        </span>
+    
+
+    
+    
+        <span class="article-wordcount article-meta-item">
+            <i class="fa-regular fa-typewriter"></i>&nbsp;<span>4.5k 字</span>
+        </span>
+    
+    
+        <span class="article-min2read article-meta-item">
+            <i class="fa-regular fa-clock"></i>&nbsp;<span>20 分钟</span>
+        </span>
+    
+    
+</div>
+
+				</div>
+			</div>
+		</div>
+		
+
+		
+
+
+		<div class="article-content markdown-body px-2 sm:px-6 md:px-8 pb-8">
+			<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/ui-styles/cover-frontend-styles.jpg"
+                      alt="封面"
+                ></p>
+<p>用 AI（如 Claude、GPT、Cursor、v0.dev）生成前端页面时，精准描述你想要的视觉风格至关重要。同样是”帮我做一个 Dashboard”，加上不同的风格关键词，出来的效果天差地别。</p>
+<p>本文总结了 <strong>35 种</strong>主流前端 UI 设计风格及其英文关键词、视觉特征和适用场景，帮你在 AI 编程时精准表达想要的效果。</p>
+<hr>
+<h2 id="一、玻璃与透明系"><a href="#一、玻璃与透明系" class="headerlink" title="一、玻璃与透明系"></a>一、玻璃与透明系</h2><h3 id="1-Glassmorphism（玻璃拟态）"><a href="#1-Glassmorphism（玻璃拟态）" class="headerlink" title="1. Glassmorphism（玻璃拟态）"></a>1. Glassmorphism（玻璃拟态）</h3><p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/ui-styles/01-glassmorphism.jpg"
+                      alt="Glassmorphism 示例"
+                ><br><strong>关键词：</strong> <code>glassmorphism, frosted glass, backdrop-blur, translucent cards, glass UI</code></p>
+<p><strong>视觉特征：</strong> 毛玻璃效果、半透明层叠、柔和边框、背景模糊</p>
+<p><strong>提示词示例：</strong></p>
+<blockquote>
+<p>“Build a dashboard with glassmorphism style — frosted glass cards with backdrop-blur, translucent panels over a gradient background”</p>
+</blockquote>
+<p><strong>适用场景：</strong> Dashboard、卡片布局、SaaS 产品、Hero Section</p>
+<h3 id="2-Frost-UI-x2F-Soft-Glass（霜冻风）"><a href="#2-Frost-UI-x2F-Soft-Glass（霜冻风）" class="headerlink" title="2. Frost UI &#x2F; Soft Glass（霜冻风）"></a>2. Frost UI &#x2F; Soft Glass（霜冻风）</h3><p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/ui-styles/02-frost-ui.jpg"
+                      alt="Frost UI 示例"
+                ><br><strong>关键词：</strong> <code>frost UI, soft glass, subtle transparency, muted blur</code></p>
+<p><strong>视觉特征：</strong> 比 Glassmorphism 更轻柔，低模糊度、中性色调、更克制</p>
+<p><strong>提示词示例：</strong></p>
+<blockquote>
+<p>“Create a mobile-style settings page with frost UI — soft glass panels, low blur, neutral tones”</p>
+</blockquote>
+<p><strong>适用场景：</strong> 移动端 UI、高端应用、金融类产品</p>
+<h3 id="3-Aurora-UI（极光风）"><a href="#3-Aurora-UI（极光风）" class="headerlink" title="3. Aurora UI（极光风）"></a>3. Aurora UI（极光风）</h3><p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/ui-styles/03-aurora-ui.jpg"
+                      alt="Aurora UI 示例"
+                ><br><strong>关键词：</strong> <code>aurora background, gradient mesh, colorful blurred shapes, ambient glow</code></p>
+<p><strong>视觉特征：</strong> 多彩渐变光晕、极光色背景、漂浮的模糊色块</p>
+<p><strong>提示词示例：</strong></p>
+<blockquote>
+<p>“Design a landing page with aurora UI — colorful gradient mesh background, floating blurred shapes, white text overlays”</p>
+</blockquote>
+<p><strong>适用场景：</strong> 品牌官网、创意产品首页、发布会页面</p>
+<hr>
+<h2 id="二、立体与质感系"><a href="#二、立体与质感系" class="headerlink" title="二、立体与质感系"></a>二、立体与质感系</h2><h3 id="4-Neumorphism-x2F-Soft-UI（新拟态）"><a href="#4-Neumorphism-x2F-Soft-UI（新拟态）" class="headerlink" title="4. Neumorphism &#x2F; Soft UI（新拟态）"></a>4. Neumorphism &#x2F; Soft UI（新拟态）</h3><p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/ui-styles/04-neumorphism.jpg"
+                      alt="Neumorphism 示例"
+                ><br><strong>关键词：</strong> <code>neumorphism, soft UI, inner shadow, extruded elements, soft 3D</code></p>
+<p><strong>视觉特征：</strong> 柔和凸起&#x2F;凹陷感、双层阴影（亮+暗）、触感按钮</p>
+<p><strong>提示词示例：</strong></p>
+<blockquote>
+<p>“Build a calculator app with neumorphism style — soft extruded buttons, inner shadows, monochrome palette”</p>
+</blockquote>
+<p><strong>适用场景：</strong> 工具类应用、按钮&#x2F;开关组件、极简 Dashboard</p>
+<h3 id="5-Claymorphism（黏土风）"><a href="#5-Claymorphism（黏土风）" class="headerlink" title="5. Claymorphism（黏土风）"></a>5. Claymorphism（黏土风）</h3><p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/ui-styles/05-claymorphism.jpg"
+                      alt="Claymorphism 示例"
+                ><br><strong>关键词：</strong> <code>claymorphism, clay UI, 3D cartoon, soft rounded, playful shadows</code></p>
+<p><strong>视觉特征：</strong> 3D 卡通质感、厚重柔和阴影、圆润形状、明亮配色</p>
+<p><strong>提示词示例：</strong></p>
+<blockquote>
+<p>“Create a pricing page with claymorphism — 3D clay-like cards, bright colors, thick soft shadows, playful and rounded”</p>
+</blockquote>
+<p><strong>适用场景：</strong> 儿童产品、创意作品集、趣味落地页</p>
+<h3 id="6-Skeuomorphism（拟物化）"><a href="#6-Skeuomorphism（拟物化）" class="headerlink" title="6. Skeuomorphism（拟物化）"></a>6. Skeuomorphism（拟物化）</h3><p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/ui-styles/06-skeuomorphism.jpg"
+                      alt="Skeuomorphism 示例"
+                ><br><strong>关键词：</strong> <code>skeuomorphic, realistic textures, leather, wood grain, physical metaphor</code></p>
+<p><strong>视觉特征：</strong> 模拟真实材质（皮革、木纹、金属）、逼真光影</p>
+<p><strong>提示词示例：</strong></p>
+<blockquote>
+<p>“Design a note-taking app with skeuomorphic style — leather texture background, realistic paper notepad, metal clasps”</p>
+</blockquote>
+<p><strong>适用场景：</strong> 经典iOS风应用、音乐&#x2F;音频软件、复古主题</p>
+<hr>
+<h2 id="三、极简与留白系"><a href="#三、极简与留白系" class="headerlink" title="三、极简与留白系"></a>三、极简与留白系</h2><h3 id="7-Minimalist-UI（极简风）"><a href="#7-Minimalist-UI（极简风）" class="headerlink" title="7. Minimalist UI（极简风）"></a>7. Minimalist UI（极简风）</h3><p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/ui-styles/07-minimalist.jpg"
+                      alt="Minimalist UI 示例"
+                ><br><strong>关键词：</strong> <code>minimalist, clean UI, whitespace, simple typography, less is more</code></p>
+<p><strong>视觉特征：</strong> 大量留白、细体字、去装饰化、极少视觉干扰</p>
+<p><strong>提示词示例：</strong></p>
+<blockquote>
+<p>“Build a blog homepage with minimalist design — lots of whitespace, thin sans-serif typography, no decorative elements”</p>
+</blockquote>
+<p><strong>适用场景：</strong> 博客、银行&#x2F;金融应用、生产力工具</p>
+<h3 id="8-Swiss-x2F-International-Style（瑞士风格）"><a href="#8-Swiss-x2F-International-Style（瑞士风格）" class="headerlink" title="8. Swiss &#x2F; International Style（瑞士风格）"></a>8. Swiss &#x2F; International Style（瑞士风格）</h3><p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/ui-styles/08-swiss-design.jpg"
+                      alt="Swiss Design 示例"
+                ><br><strong>关键词：</strong> <code>swiss design, international typographic style, grid-based, Helvetica, clean layout</code></p>
+<p><strong>视觉特征：</strong> 严格网格系统、无衬线字体、信息层次清晰、不对称排版</p>
+<p><strong>提示词示例：</strong></p>
+<blockquote>
+<p>“Create a portfolio page in Swiss design style — strict grid layout, Helvetica typography, asymmetric composition, bold headings”</p>
+</blockquote>
+<p><strong>适用场景：</strong> 作品集、企业官网、信息展示</p>
+<h3 id="9-Scandinavian-x2F-Nordic-UI（北欧风）"><a href="#9-Scandinavian-x2F-Nordic-UI（北欧风）" class="headerlink" title="9. Scandinavian &#x2F; Nordic UI（北欧风）"></a>9. Scandinavian &#x2F; Nordic UI（北欧风）</h3><p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/ui-styles/09-scandinavian.jpg"
+                      alt="Scandinavian UI 示例"
+                ><br><strong>关键词：</strong> <code>scandinavian design, nordic UI, muted colors, warm neutrals, cozy minimal</code></p>
+<p><strong>视觉特征：</strong> 柔和中性色（米色、灰白）、自然材质感、温暖极简</p>
+<p><strong>提示词示例：</strong></p>
+<blockquote>
+<p>“Design an e-commerce page with Scandinavian style — warm neutral palette, soft shadows, rounded corners, cozy and clean”</p>
+</blockquote>
+<p><strong>适用场景：</strong> 生活方式品牌、电商、家居产品</p>
+<hr>
+<h2 id="四、大胆与张力系"><a href="#四、大胆与张力系" class="headerlink" title="四、大胆与张力系"></a>四、大胆与张力系</h2><h3 id="10-Neo-Brutalism（新野蛮主义）"><a href="#10-Neo-Brutalism（新野蛮主义）" class="headerlink" title="10. Neo-Brutalism（新野蛮主义）"></a>10. Neo-Brutalism（新野蛮主义）</h3><p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/ui-styles/10-neo-brutalism.jpg"
+                      alt="Neo-Brutalism 示例"
+                ><br><strong>关键词：</strong> <code>neo-brutalism, bold borders, raw design, high contrast, thick outlines, no rounded corners</code></p>
+<p><strong>视觉特征：</strong> 粗黑边框、强烈撞色、故意”粗糙”、无圆角、反精致</p>
+<p><strong>提示词示例：</strong></p>
+<blockquote>
+<p>“Build a personal blog with neo-brutalism — thick black borders, bright clashing colors, raw typography, no border-radius”</p>
+</blockquote>
+<p><strong>适用场景：</strong> 个人作品集、创意机构、独立项目</p>
+<h3 id="11-Memphis-Design（孟菲斯风格）"><a href="#11-Memphis-Design（孟菲斯风格）" class="headerlink" title="11. Memphis Design（孟菲斯风格）"></a>11. Memphis Design（孟菲斯风格）</h3><p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/ui-styles/11-memphis.jpg"
+                      alt="Memphis Design 示例"
+                ><br><strong>关键词：</strong> <code>memphis design, geometric shapes, bold patterns, 80s retro, squiggles and dots</code></p>
+<p><strong>视觉特征：</strong> 几何图形拼贴、波浪线和圆点、80年代复古色彩、反对称</p>
+<p><strong>提示词示例：</strong></p>
+<blockquote>
+<p>“Create a fun event landing page with Memphis design — scattered geometric shapes, squiggles, bold primary colors, 80s vibe”</p>
+</blockquote>
+<p><strong>适用场景：</strong> 活动页面、创意品牌、年轻化产品</p>
+<h3 id="12-Maximalist-UI（极繁风）"><a href="#12-Maximalist-UI（极繁风）" class="headerlink" title="12. Maximalist UI（极繁风）"></a>12. Maximalist UI（极繁风）</h3><p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/ui-styles/12-maximalist.jpg"
+                      alt="Maximalist UI 示例"
+                ><br><strong>关键词：</strong> <code>maximalist, dense layout, rich visuals, layered elements, information-heavy</code></p>
+<p><strong>视觉特征：</strong> 信息密集、多层叠加、丰富视觉元素、”更多即更好”</p>
+<p><strong>提示词示例：</strong></p>
+<blockquote>
+<p>“Design a news portal with maximalist approach — dense grid, multiple columns, rich media, layered navigation”</p>
+</blockquote>
+<p><strong>适用场景：</strong> 新闻门户、社交媒体、内容聚合平台</p>
+<hr>
+<h2 id="五、暗色与科技系"><a href="#五、暗色与科技系" class="headerlink" title="五、暗色与科技系"></a>五、暗色与科技系</h2><h3 id="13-Dark-Mode-UI（暗色模式）"><a href="#13-Dark-Mode-UI（暗色模式）" class="headerlink" title="13. Dark Mode UI（暗色模式）"></a>13. Dark Mode UI（暗色模式）</h3><p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/ui-styles/13-dark-mode.jpg"
+                      alt="Dark Mode UI 示例"
+                ><br><strong>关键词：</strong> <code>dark mode, dark theme, dark background, light text, reduced eye strain</code></p>
+<p><strong>视觉特征：</strong> 深色背景（#121212）、亮色文字、柔和强调色</p>
+<p><strong>提示词示例：</strong></p>
+<blockquote>
+<p>“Build a code editor dashboard in dark mode — #121212 background, syntax-highlighted code blocks, subtle borders”</p>
+</blockquote>
+<p><strong>适用场景：</strong> 开发工具、夜间模式、专业软件</p>
+<h3 id="14-Cyberpunk-UI（赛博朋克）"><a href="#14-Cyberpunk-UI（赛博朋克）" class="headerlink" title="14. Cyberpunk UI（赛博朋克）"></a>14. Cyberpunk UI（赛博朋克）</h3><p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/ui-styles/14-cyberpunk.jpg"
+                      alt="Cyberpunk UI 示例"
+                ><br><strong>关键词：</strong> <code>cyberpunk, neon glow, dark tech, futuristic HUD, sci-fi interface, glitch effect</code></p>
+<p><strong>视觉特征：</strong> 霓虹灯光效、暗色基底、故障艺术、HUD 风格元素</p>
+<p><strong>提示词示例：</strong></p>
+<blockquote>
+<p>“Create a futuristic dashboard with cyberpunk aesthetic — dark background, neon cyan and magenta accents, glitch effects, HUD-style data panels”</p>
+</blockquote>
+<p><strong>适用场景：</strong> 游戏界面、科技展示、概念Demo</p>
+<h3 id="15-Terminal-x2F-Hacker-UI（终端风）"><a href="#15-Terminal-x2F-Hacker-UI（终端风）" class="headerlink" title="15. Terminal &#x2F; Hacker UI（终端风）"></a>15. Terminal &#x2F; Hacker UI（终端风）</h3><p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/ui-styles/15-terminal.jpg"
+                      alt="Terminal UI 示例"
+                ><br><strong>关键词：</strong> <code>terminal UI, hacker aesthetic, monospace font, green-on-black, CLI style, matrix-like</code></p>
+<p><strong>视觉特征：</strong> 等宽字体、黑底绿字、命令行风格、闪烁光标</p>
+<p><strong>提示词示例：</strong></p>
+<blockquote>
+<p>“Build a portfolio that looks like a terminal — black background, green monospace text, blinking cursor, command-line navigation”</p>
+</blockquote>
+<p><strong>适用场景：</strong> 开发者个人站、技术博客、极客风格展示</p>
+<h3 id="16-Sci-Fi-x2F-HUD-Interface（科幻HUD）"><a href="#16-Sci-Fi-x2F-HUD-Interface（科幻HUD）" class="headerlink" title="16. Sci-Fi &#x2F; HUD Interface（科幻HUD）"></a>16. Sci-Fi &#x2F; HUD Interface（科幻HUD）</h3><p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/ui-styles/16-sci-fi-hud.jpg"
+                      alt="Sci-Fi HUD 示例"
+                ><br><strong>关键词：</strong> <code>sci-fi HUD, heads-up display, holographic UI, transparent overlays, futuristic gauges</code></p>
+<p><strong>视觉特征：</strong> 全息投影感、透明叠层、圆形仪表盘、数据流动画</p>
+<p><strong>提示词示例：</strong></p>
+<blockquote>
+<p>“Design a monitoring dashboard with sci-fi HUD style — circular gauges, holographic overlays, data streams, blue-tinted interface”</p>
+</blockquote>
+<p><strong>适用场景：</strong> 数据监控、IoT 面板、演示&#x2F;展会屏幕</p>
+<hr>
+<h2 id="六、复古与怀旧系"><a href="#六、复古与怀旧系" class="headerlink" title="六、复古与怀旧系"></a>六、复古与怀旧系</h2><h3 id="17-Retro-x2F-Vintage（复古风）"><a href="#17-Retro-x2F-Vintage（复古风）" class="headerlink" title="17. Retro &#x2F; Vintage（复古风）"></a>17. Retro &#x2F; Vintage（复古风）</h3><p><img src="/images/ui-styles/17-retro-vintage.jpg" alt="Retro/Vintage 示例"><br><strong>关键词：</strong> <code>retro design, vintage UI, old-school web, muted earth tones, paper texture</code></p>
+<p><strong>视觉特征：</strong> 旧报纸&#x2F;海报风、做旧纹理、复古配色（棕&#x2F;米&#x2F;墨绿）</p>
+<p><strong>提示词示例：</strong></p>
+<blockquote>
+<p>“Create a restaurant website with vintage style — paper texture background, serif fonts, muted earth tones, hand-drawn illustrations”</p>
+</blockquote>
+<p><strong>适用场景：</strong> 餐饮、手工品牌、文艺社区</p>
+<h3 id="18-Pixel-Art-x2F-8-bit（像素风）"><a href="#18-Pixel-Art-x2F-8-bit（像素风）" class="headerlink" title="18. Pixel Art &#x2F; 8-bit（像素风）"></a>18. Pixel Art &#x2F; 8-bit（像素风）</h3><p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/ui-styles/18-pixel-art.jpg"
+                      alt="Pixel Art 示例"
+                ><br><strong>关键词：</strong> <code>pixel art UI, 8-bit style, retro gaming, pixelated icons, chiptune aesthetic</code></p>
+<p><strong>视觉特征：</strong> 像素化图标和字体、低分辨率质感、游戏机配色</p>
+<p><strong>提示词示例：</strong></p>
+<blockquote>
+<p>“Build a personal homepage in pixel art style — 8-bit character avatar, pixelated navigation buttons, retro game color palette”</p>
+</blockquote>
+<p><strong>适用场景：</strong> 游戏相关网站、个人趣味主页、怀旧社区</p>
+<h3 id="19-Vaporwave-x2F-Synthwave（蒸汽波）"><a href="#19-Vaporwave-x2F-Synthwave（蒸汽波）" class="headerlink" title="19. Vaporwave &#x2F; Synthwave（蒸汽波）"></a>19. Vaporwave &#x2F; Synthwave（蒸汽波）</h3><p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/ui-styles/19-vaporwave.jpg"
+                      alt="Vaporwave 示例"
+                ><br><strong>关键词：</strong> <code>vaporwave, synthwave, retrowave, purple gradient, 80s neon, grid perspective</code></p>
+<p><strong>视觉特征：</strong> 紫粉渐变、透视网格线、80年代霓虹、日落天空、古典雕塑</p>
+<p><strong>提示词示例：</strong></p>
+<blockquote>
+<p>“Design a music streaming page with vaporwave aesthetic — pink-purple gradients, perspective grid, neon sunset, retro Japanese text accents”</p>
+</blockquote>
+<p><strong>适用场景：</strong> 音乐平台、创意展示、个人博客</p>
+<h3 id="20-Y2K-Aesthetic（千禧风）"><a href="#20-Y2K-Aesthetic（千禧风）" class="headerlink" title="20. Y2K Aesthetic（千禧风）"></a>20. Y2K Aesthetic（千禧风）</h3><p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/ui-styles/20-y2k.jpg"
+                      alt="Y2K Aesthetic 示例"
+                ><br><strong>关键词：</strong> <code>Y2K design, early 2000s web, bubble fonts, chrome effects, iridescent, futuristic retro</code></p>
+<p><strong>视觉特征：</strong> 气泡字体、金属光泽、虹彩效果、太空&#x2F;未来复古</p>
+<p><strong>提示词示例：</strong></p>
+<blockquote>
+<p>“Create a fashion brand page with Y2K aesthetic — chrome text effects, iridescent gradients, bubble typography, early 2000s vibes”</p>
+</blockquote>
+<p><strong>适用场景：</strong> 时尚品牌、潮流文化、社交媒体</p>
+<hr>
+<h2 id="七、卡片与布局系"><a href="#七、卡片与布局系" class="headerlink" title="七、卡片与布局系"></a>七、卡片与布局系</h2><h3 id="21-Bento-Grid（便当盒布局）"><a href="#21-Bento-Grid（便当盒布局）" class="headerlink" title="21. Bento Grid（便当盒布局）"></a>21. Bento Grid（便当盒布局）</h3><p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/ui-styles/21-bento-grid.jpg"
+                      alt="Bento Grid 示例"
+                ><br><strong>关键词：</strong> <code>bento grid, bento box layout, modular grid, asymmetric cards, Apple-style grid</code></p>
+<p><strong>视觉特征：</strong> 大小不一的卡片网格（如苹果发布会风格）、模块化、呼吸感</p>
+<p><strong>提示词示例：</strong></p>
+<blockquote>
+<p>“Build a product feature page with bento grid layout — asymmetric card sizes, rounded corners, clean icons in each cell, Apple keynote style”</p>
+</blockquote>
+<p><strong>适用场景：</strong> 产品特性展示、个人简介、公司官网</p>
+<h3 id="22-Card-based-UI（卡片式布局）"><a href="#22-Card-based-UI（卡片式布局）" class="headerlink" title="22. Card-based UI（卡片式布局）"></a>22. Card-based UI（卡片式布局）</h3><p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/ui-styles/22-card-based.jpg"
+                      alt="Card-based UI 示例"
+                ><br><strong>关键词：</strong> <code>card-based layout, material cards, content cards, grid of cards</code></p>
+<p><strong>视觉特征：</strong> 统一尺寸卡片、轻微阴影、规整网格排列</p>
+<p><strong>提示词示例：</strong></p>
+<blockquote>
+<p>“Design a news aggregator with card-based UI — uniform cards with thumbnail, title, and metadata, subtle shadows, responsive grid”</p>
+</blockquote>
+<p><strong>适用场景：</strong> 新闻聚合、电商产品列表、社交 Feed</p>
+<h3 id="23-Magazine-Layout（杂志排版）"><a href="#23-Magazine-Layout（杂志排版）" class="headerlink" title="23. Magazine Layout（杂志排版）"></a>23. Magazine Layout（杂志排版）</h3><p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/ui-styles/23-magazine.jpg"
+                      alt="Magazine Layout 示例"
+                ><br><strong>关键词：</strong> <code>magazine layout, editorial design, multi-column, large typography, feature article</code></p>
+<p><strong>视觉特征：</strong> 多栏排版、大标题、图文混排、杂志感版面</p>
+<p><strong>提示词示例：</strong></p>
+<blockquote>
+<p>“Create a long-form article page with magazine layout — large hero image, drop cap, multi-column text, pull quotes, editorial typography”</p>
+</blockquote>
+<p><strong>适用场景：</strong> 媒体网站、长文博客、品牌故事</p>
+<hr>
+<h2 id="八、数据与专业系"><a href="#八、数据与专业系" class="headerlink" title="八、数据与专业系"></a>八、数据与专业系</h2><h3 id="24-Data-dense-Dashboard（数据密集型面板）"><a href="#24-Data-dense-Dashboard（数据密集型面板）" class="headerlink" title="24. Data-dense Dashboard（数据密集型面板）"></a>24. Data-dense Dashboard（数据密集型面板）</h3><p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/ui-styles/24-dashboard.jpg"
+                      alt="Data Dashboard 示例"
+                ><br><strong>关键词：</strong> <code>data dashboard, analytics panel, KPI metrics, charts and graphs, data visualization</code></p>
+<p><strong>视觉特征：</strong> 多图表并列、KPI 卡片、深色背景、数据可视化组件</p>
+<p><strong>提示词示例：</strong></p>
+<blockquote>
+<p>“Build an analytics dashboard — dark theme, KPI cards at top, line charts, bar charts, data tables, sidebar navigation, real-time feel”</p>
+</blockquote>
+<p><strong>适用场景：</strong> 商业智能、运营监控、数据分析平台</p>
+<h3 id="25-Admin-Panel-x2F-Back-office（后台管理）"><a href="#25-Admin-Panel-x2F-Back-office（后台管理）" class="headerlink" title="25. Admin Panel &#x2F; Back-office（后台管理）"></a>25. Admin Panel &#x2F; Back-office（后台管理）</h3><p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/ui-styles/25-admin-panel.jpg"
+                      alt="Admin Panel 示例"
+                ><br><strong>关键词：</strong> <code>admin panel, back-office UI, CRUD interface, sidebar navigation, data tables</code></p>
+<p><strong>视觉特征：</strong> 左侧菜单栏、面包屑导航、数据表格、表单编辑</p>
+<p><strong>提示词示例：</strong></p>
+<blockquote>
+<p>“Create an admin panel with sidebar navigation, breadcrumbs, searchable data tables, and modal forms for CRUD operations”</p>
+</blockquote>
+<p><strong>适用场景：</strong> CMS、ERP、内部管理系统</p>
+<h3 id="26-SaaS-Landing-Page（SaaS-产品首页）"><a href="#26-SaaS-Landing-Page（SaaS-产品首页）" class="headerlink" title="26. SaaS Landing Page（SaaS 产品首页）"></a>26. SaaS Landing Page（SaaS 产品首页）</h3><p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/ui-styles/26-saas-landing.jpg"
+                      alt="SaaS Landing Page 示例"
+                ><br><strong>关键词：</strong> <code>SaaS landing page, hero section, feature grid, pricing table, CTA buttons, social proof</code></p>
+<p><strong>视觉特征：</strong> Hero 区 + 特性展示 + 定价表 + 客户 Logo + CTA 按钮</p>
+<p><strong>提示词示例：</strong></p>
+<blockquote>
+<p>“Design a modern SaaS landing page — bold hero with headline and CTA, feature grid with icons, pricing cards, testimonials section, gradient accents”</p>
+</blockquote>
+<p><strong>适用场景：</strong> 软件产品官网、创业项目、B2B 服务</p>
+<hr>
+<h2 id="九、动态与交互系"><a href="#九、动态与交互系" class="headerlink" title="九、动态与交互系"></a>九、动态与交互系</h2><h3 id="27-Micro-interaction-Rich（微交互丰富型）"><a href="#27-Micro-interaction-Rich（微交互丰富型）" class="headerlink" title="27. Micro-interaction Rich（微交互丰富型）"></a>27. Micro-interaction Rich（微交互丰富型）</h3><p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/ui-styles/27-micro-interaction.jpg"
+                      alt="Micro-interaction 示例"
+                ><br><strong>关键词：</strong> <code>micro-interactions, hover effects, animated transitions, interactive feedback, motion UI</code></p>
+<p><strong>视觉特征：</strong> 悬停动效、点击反馈、平滑过渡、加载动画</p>
+<p><strong>提示词示例：</strong></p>
+<blockquote>
+<p>“Build a portfolio with rich micro-interactions — hover reveals, smooth page transitions, animated skill bars, interactive project cards”</p>
+</blockquote>
+<p><strong>适用场景：</strong> 个人作品集、互动体验、品牌展示</p>
+<h3 id="28-Scroll-driven-x2F-Storytelling（滚动叙事）"><a href="#28-Scroll-driven-x2F-Storytelling（滚动叙事）" class="headerlink" title="28. Scroll-driven &#x2F; Storytelling（滚动叙事）"></a>28. Scroll-driven &#x2F; Storytelling（滚动叙事）</h3><p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/ui-styles/28-scroll-driven.jpg"
+                      alt="Scroll-driven 示例"
+                ><br><strong>关键词：</strong> <code>scroll-driven animation, parallax scrolling, storytelling layout, scroll-triggered, one-page narrative</code></p>
+<p><strong>视觉特征：</strong> 滚动触发动画、视差效果、线性叙事、全屏分段</p>
+<p><strong>提示词示例：</strong></p>
+<blockquote>
+<p>“Create a brand story page with scroll-driven animations — parallax hero, content reveals on scroll, full-screen sections, narrative flow”</p>
+</blockquote>
+<p><strong>适用场景：</strong> 品牌故事、产品发布、年度报告</p>
+<h3 id="29-3D-x2F-Immersive-Web（3D沉浸式）"><a href="#29-3D-x2F-Immersive-Web（3D沉浸式）" class="headerlink" title="29. 3D &#x2F; Immersive Web（3D沉浸式）"></a>29. 3D &#x2F; Immersive Web（3D沉浸式）</h3><p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/ui-styles/29-3d-immersive.jpg"
+                      alt="3D Immersive 示例"
+                ><br><strong>关键词：</strong> <code>3D web, Three.js, WebGL, immersive experience, 3D product viewer, spatial UI</code></p>
+<p><strong>视觉特征：</strong> 3D 模型展示、空间交互、沉浸式体验</p>
+<p><strong>提示词示例：</strong></p>
+<blockquote>
+<p>“Design a product showcase with 3D immersive elements — rotating 3D model viewer, spatial depth, interactive camera angles”</p>
+</blockquote>
+<p><strong>适用场景：</strong> 产品展示、虚拟展厅、游戏官网</p>
+<hr>
+<h2 id="十、特殊风格系"><a href="#十、特殊风格系" class="headerlink" title="十、特殊风格系"></a>十、特殊风格系</h2><h3 id="30-Notion-like-x2F-Block-Editor（Notion风）"><a href="#30-Notion-like-x2F-Block-Editor（Notion风）" class="headerlink" title="30. Notion-like &#x2F; Block Editor（Notion风）"></a>30. Notion-like &#x2F; Block Editor（Notion风）</h3><p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/ui-styles/30-notion-like.jpg"
+                      alt="Notion-like 示例"
+                ><br><strong>关键词：</strong> <code>notion-style, block editor UI, inline editing, slash commands, clean document view</code></p>
+<p><strong>视觉特征：</strong> 块编辑器、行内编辑、斜杠命令、简洁文档视图</p>
+<p><strong>提示词示例：</strong></p>
+<blockquote>
+<p>“Build a knowledge base app with Notion-like UI — block-based editor, slash command menu, clean serif headings, toggle sections”</p>
+</blockquote>
+<p><strong>适用场景：</strong> 笔记应用、知识库、文档协作工具</p>
+<h3 id="31-Figma-x2F-Design-Tool-UI（设计工具风）"><a href="#31-Figma-x2F-Design-Tool-UI（设计工具风）" class="headerlink" title="31. Figma &#x2F; Design Tool UI（设计工具风）"></a>31. Figma &#x2F; Design Tool UI（设计工具风）</h3><p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/ui-styles/31-figma-ui.jpg"
+                      alt="Figma UI 示例"
+                ><br><strong>关键词：</strong> <code>design tool UI, canvas interface, floating panels, toolbar, properties panel, infinite canvas</code></p>
+<p><strong>视觉特征：</strong> 无限画布、浮动面板、顶部工具栏、右侧属性栏</p>
+<p><strong>提示词示例：</strong></p>
+<blockquote>
+<p>“Create a whiteboard app with design tool UI — infinite canvas, floating toolbar, right-side properties panel, zoom controls”</p>
+</blockquote>
+<p><strong>适用场景：</strong> 在线设计工具、白板应用、流程图编辑器</p>
+<h3 id="32-E-ink-x2F-Paper-like（电子墨水风）"><a href="#32-E-ink-x2F-Paper-like（电子墨水风）" class="headerlink" title="32. E-ink &#x2F; Paper-like（电子墨水风）"></a>32. E-ink &#x2F; Paper-like（电子墨水风）</h3><p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/ui-styles/32-eink.jpg"
+                      alt="E-ink 示例"
+                ><br><strong>关键词：</strong> <code>e-ink style, paper-like UI, low contrast, reading-optimized, book layout, serif typography</code></p>
+<p><strong>视觉特征：</strong> 低对比度、纸张质感、衬线字体、阅读优化</p>
+<p><strong>提示词示例：</strong></p>
+<blockquote>
+<p>“Design a reading app with e-ink aesthetic — paper-white background, low contrast, comfortable serif font, no decorations, focus on text”</p>
+</blockquote>
+<p><strong>适用场景：</strong> 阅读器、文档查看、学术论文</p>
+<h3 id="33-Gradient-Mesh-x2F-Liquid（渐变流体）"><a href="#33-Gradient-Mesh-x2F-Liquid（渐变流体）" class="headerlink" title="33. Gradient Mesh &#x2F; Liquid（渐变流体）"></a>33. Gradient Mesh &#x2F; Liquid（渐变流体）</h3><p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/ui-styles/33-gradient-mesh.jpg"
+                      alt="Gradient Mesh 示例"
+                ><br><strong>关键词：</strong> <code>gradient mesh, liquid design, fluid shapes, organic blobs, flowing gradients</code></p>
+<p><strong>视觉特征：</strong> 流体形状、有机色块、柔和渐变过渡</p>
+<p><strong>提示词示例：</strong></p>
+<blockquote>
+<p>“Build a creative agency homepage with liquid design — flowing gradient blobs, organic shapes, smooth color transitions, modern sans-serif”</p>
+</blockquote>
+<p><strong>适用场景：</strong> 创意机构、艺术展示、音乐平台</p>
+<h3 id="34-Monochrome-x2F-Grayscale（单色风）"><a href="#34-Monochrome-x2F-Grayscale（单色风）" class="headerlink" title="34. Monochrome &#x2F; Grayscale（单色风）"></a>34. Monochrome &#x2F; Grayscale（单色风）</h3><p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/ui-styles/34-monochrome.jpg"
+                      alt="Monochrome 示例"
+                ><br><strong>关键词：</strong> <code>monochrome design, grayscale UI, black and white, single accent color</code></p>
+<p><strong>视觉特征：</strong> 黑白灰为主、至多一个强调色、高级感</p>
+<p><strong>提示词示例：</strong></p>
+<blockquote>
+<p>“Create a photography portfolio in monochrome — all grayscale layout, single red accent for CTAs, large image grids, minimal text”</p>
+</blockquote>
+<p><strong>适用场景：</strong> 摄影作品集、奢侈品牌、高端产品</p>
+<h3 id="35-Japandi-x2F-Wabi-sabi（日式侘寂风）"><a href="#35-Japandi-x2F-Wabi-sabi（日式侘寂风）" class="headerlink" title="35. Japandi &#x2F; Wabi-sabi（日式侘寂风）"></a>35. Japandi &#x2F; Wabi-sabi（日式侘寂风）</h3><p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/ui-styles/35-japandi.jpg"
+                      alt="Japandi 示例"
+                ><br><strong>关键词：</strong> <code>japandi design, wabi-sabi, natural textures, imperfect beauty, zen aesthetic, earth tones</code></p>
+<p><strong>视觉特征：</strong> 自然材质、不完美之美、禅意留白、大地色系</p>
+<p><strong>提示词示例：</strong></p>
+<blockquote>
+<p>“Design a tea shop website with Japandi aesthetic — natural wood textures, earth tones, asymmetric layout, zen-like whitespace, organic shapes”</p>
+</blockquote>
+<p><strong>适用场景：</strong> 生活方式品牌、茶&#x2F;咖啡、家居设计</p>
+<hr>
+<h2 id="速查表：风格-×-场景匹配"><a href="#速查表：风格-×-场景匹配" class="headerlink" title="速查表：风格 × 场景匹配"></a>速查表：风格 × 场景匹配</h2><table>
+<thead>
+<tr>
+<th>你要做什么</th>
+<th>推荐风格</th>
+<th>关键词</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>数据大屏</td>
+<td>Cyberpunk &#x2F; HUD &#x2F; Dark Dashboard</td>
+<td><code>dark theme, neon accents, HUD gauges</code></td>
+</tr>
+<tr>
+<td>SaaS 官网</td>
+<td>Minimalist + Gradient</td>
+<td><code>clean hero, feature grid, CTA buttons</code></td>
+</tr>
+<tr>
+<td>个人博客</td>
+<td>Neo-Brutalism &#x2F; E-ink &#x2F; Minimalist</td>
+<td><code>bold borders</code> 或 <code>paper-like reading</code></td>
+</tr>
+<tr>
+<td>后台管理</td>
+<td>Admin Panel</td>
+<td><code>sidebar nav, data tables, CRUD forms</code></td>
+</tr>
+<tr>
+<td>产品展示</td>
+<td>Bento Grid &#x2F; 3D Immersive</td>
+<td><code>bento layout, 3D viewer</code></td>
+</tr>
+<tr>
+<td>创意作品集</td>
+<td>Vaporwave &#x2F; Memphis &#x2F; Maximalist</td>
+<td><code>retro neon, geometric shapes</code></td>
+</tr>
+<tr>
+<td>移动端应用</td>
+<td>Glassmorphism &#x2F; Frost UI</td>
+<td><code>frosted glass, backdrop-blur</code></td>
+</tr>
+<tr>
+<td>电商页面</td>
+<td>Card-based &#x2F; Scandinavian</td>
+<td><code>product cards, warm neutrals</code></td>
+</tr>
+<tr>
+<td>文档&#x2F;笔记</td>
+<td>Notion-like &#x2F; E-ink</td>
+<td><code>block editor, clean document</code></td>
+</tr>
+<tr>
+<td>游戏相关</td>
+<td>Pixel Art &#x2F; Cyberpunk</td>
+<td><code>8-bit style, neon glow</code></td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="提示词组合公式"><a href="#提示词组合公式" class="headerlink" title="提示词组合公式"></a>提示词组合公式</h2><p>生成前端页面时，可以用这个公式组合提示词：</p>
+<div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Build a [页面类型] with [风格名] style —</span><br><span class="line">[特征1], [特征2], [特征3],</span><br><span class="line">[配色方案], [字体风格]</span><br></pre></td></tr></table></figure></div>
+
+<p><strong>示例：</strong></p>
+<blockquote>
+<p>“Build a <strong>SaaS dashboard</strong> with <strong>glassmorphism</strong> style — frosted glass cards, backdrop-blur panels, dark gradient background, blue accent color, Inter font family, responsive sidebar navigation”</p>
+</blockquote>
+<p>风格可以混搭！比如 <code>glassmorphism + dark mode + data dashboard</code> 就是一个很常见的高端组合。</p>
+<hr>
+<hr>
+<h2 id="风格总览"><a href="#风格总览" class="headerlink" title="风格总览"></a>风格总览</h2><p>一图看完 35 种前端 UI 设计风格：</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/ui-styles/overview-all-styles.jpg"
+                      alt="35种UI设计风格总览"
+                ></p>
+<hr>
+<h2 id="十一、颜色与配色提示词"><a href="#十一、颜色与配色提示词" class="headerlink" title="十一、颜色与配色提示词"></a>十一、颜色与配色提示词</h2><p>光有风格不够，<strong>颜色描述</strong>决定了页面的最终调性。以下是 AI 前端生成中最实用的颜色关键词体系。</p>
+<h3 id="基础色调描述"><a href="#基础色调描述" class="headerlink" title="基础色调描述"></a>基础色调描述</h3><table>
+<thead>
+<tr>
+<th>英文关键词</th>
+<th>含义</th>
+<th>适用场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>warm tones</code></td>
+<td>暖色调（红&#x2F;橙&#x2F;黄）</td>
+<td>餐饮、社交、活力品牌</td>
+</tr>
+<tr>
+<td><code>cool tones</code></td>
+<td>冷色调（蓝&#x2F;青&#x2F;紫）</td>
+<td>科技、金融、医疗</td>
+</tr>
+<tr>
+<td><code>neutral palette</code></td>
+<td>中性色板（灰&#x2F;米&#x2F;棕）</td>
+<td>企业官网、极简风</td>
+</tr>
+<tr>
+<td><code>earth tones</code></td>
+<td>大地色系（棕&#x2F;绿&#x2F;米）</td>
+<td>环保、咖啡、家居</td>
+</tr>
+<tr>
+<td><code>pastel colors</code></td>
+<td>粉彩色&#x2F;马卡龙色</td>
+<td>母婴、甜品、轻量应用</td>
+</tr>
+<tr>
+<td><code>muted colors</code></td>
+<td>灰调&#x2F;低饱和度色</td>
+<td>高端品牌、北欧风</td>
+</tr>
+<tr>
+<td><code>vibrant / saturated</code></td>
+<td>高饱和度鲜艳色</td>
+<td>年轻品牌、娱乐、游戏</td>
+</tr>
+<tr>
+<td><code>monochrome</code></td>
+<td>单色系</td>
+<td>摄影、奢侈品、极简</td>
+</tr>
+<tr>
+<td><code>jewel tones</code></td>
+<td>宝石色（翡翠绿&#x2F;宝石蓝&#x2F;红宝石）</td>
+<td>奢华品牌、高端产品</td>
+</tr>
+<tr>
+<td><code>neon colors</code></td>
+<td>霓虹色</td>
+<td>夜店、电竞、赛博朋克</td>
+</tr>
+</tbody></table>
+<h3 id="渐变与色彩效果"><a href="#渐变与色彩效果" class="headerlink" title="渐变与色彩效果"></a>渐变与色彩效果</h3><table>
+<thead>
+<tr>
+<th>英文关键词</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>linear gradient from A to B</code></td>
+<td>从A色到B色的线性渐变</td>
+</tr>
+<tr>
+<td><code>radial gradient</code></td>
+<td>径向渐变（中心向外）</td>
+</tr>
+<tr>
+<td><code>gradient mesh</code></td>
+<td>网格渐变（多点混合）</td>
+</tr>
+<tr>
+<td><code>duotone</code></td>
+<td>双色调（两种颜色叠加）</td>
+</tr>
+<tr>
+<td><code>tricolor scheme</code></td>
+<td>三色配色方案</td>
+</tr>
+<tr>
+<td><code>iridescent / holographic</code></td>
+<td>虹彩&#x2F;全息效果</td>
+</tr>
+<tr>
+<td><code>aurora gradient</code></td>
+<td>极光渐变</td>
+</tr>
+<tr>
+<td><code>sunset gradient</code></td>
+<td>日落渐变（橙→粉→紫）</td>
+</tr>
+<tr>
+<td><code>ocean gradient</code></td>
+<td>海洋渐变（深蓝→青→浅蓝）</td>
+</tr>
+<tr>
+<td><code>frosted overlay</code></td>
+<td>毛玻璃叠加层</td>
+</tr>
+</tbody></table>
+<h3 id="经典配色方案关键词"><a href="#经典配色方案关键词" class="headerlink" title="经典配色方案关键词"></a>经典配色方案关键词</h3><table>
+<thead>
+<tr>
+<th>配色方案</th>
+<th>英文描述</th>
+<th>色值参考</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>科技蓝</td>
+<td><code>tech blue, #2563EB accent, slate gray background</code></td>
+<td>蓝+灰</td>
+</tr>
+<tr>
+<td>暗夜紫</td>
+<td><code>deep purple and indigo, dark violet theme</code></td>
+<td>紫+靛</td>
+</tr>
+<tr>
+<td>森林绿</td>
+<td><code>forest green, emerald accent, dark green palette</code></td>
+<td>绿+深绿</td>
+</tr>
+<tr>
+<td>珊瑚粉</td>
+<td><code>coral pink, soft rose, warm blush tones</code></td>
+<td>粉+珊瑚</td>
+</tr>
+<tr>
+<td>黑金</td>
+<td><code>black and gold, luxury dark theme, gold accents on black</code></td>
+<td>黑+金</td>
+</tr>
+<tr>
+<td>红白</td>
+<td><code>red and white, bold crimson on clean white</code></td>
+<td>红+白</td>
+</tr>
+<tr>
+<td>蓝橙撞色</td>
+<td><code>complementary blue-orange, electric blue with warm orange</code></td>
+<td>蓝+橙</td>
+</tr>
+<tr>
+<td>灰白极简</td>
+<td><code>off-white and light gray, paper-like neutral tones</code></td>
+<td>灰+白</td>
+</tr>
+<tr>
+<td>深色科技</td>
+<td><code>#0F172A background, cyan-400 accent, dark slate</code></td>
+<td>深蓝+青</td>
+</tr>
+<tr>
+<td>奶茶色</td>
+<td><code>cream and caramel, latte palette, warm beige tones</code></td>
+<td>米+棕</td>
+</tr>
+</tbody></table>
+<h3 id="颜色修饰词（让描述更精准）"><a href="#颜色修饰词（让描述更精准）" class="headerlink" title="颜色修饰词（让描述更精准）"></a>颜色修饰词（让描述更精准）</h3><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">亮度：bright / light / dark / deep / pale / faint</span><br><span class="line">饱和度：vivid / saturated / muted / desaturated / washed-out</span><br><span class="line">温度：warm / cool / icy / fiery / sunny</span><br><span class="line">质感：metallic / glossy / matte / satin / frosted</span><br><span class="line">透明度：transparent / translucent / opaque / semi-transparent</span><br></pre></td></tr></table></figure></div>
+
+<p><strong>组合示例：</strong></p>
+<ul>
+<li><code>muted warm beige</code> — 低饱和暖米色</li>
+<li><code>deep saturated indigo</code> — 深饱和靛蓝</li>
+<li><code>pale frosted lilac</code> — 浅霜丁香紫</li>
+<li><code>bright metallic gold</code> — 明亮金属金</li>
+</ul>
+<hr>
+<h2 id="十二、高级组合提示词模板"><a href="#十二、高级组合提示词模板" class="headerlink" title="十二、高级组合提示词模板"></a>十二、高级组合提示词模板</h2><p>当你需要更精确的效果，可以用以下复合提示词模板：</p>
+<h3 id="模板-1：风格-配色-布局"><a href="#模板-1：风格-配色-布局" class="headerlink" title="模板 1：风格 + 配色 + 布局"></a>模板 1：风格 + 配色 + 布局</h3><blockquote>
+<p>“Build a <strong>fintech dashboard</strong> with <strong>glassmorphism</strong> style and <strong>dark slate blue</strong> color scheme — <code>#0F172A</code> background, frosted glass cards with <code>backdrop-blur(16px)</code>, <strong>cyan-400</strong> accent color for charts, <strong>Inter</strong> font family, sidebar navigation with <code>rgba(255,255,255,0.05)</code> hover states”</p>
+</blockquote>
+<h3 id="模板-2：多风格混搭"><a href="#模板-2：多风格混搭" class="headerlink" title="模板 2：多风格混搭"></a>模板 2：多风格混搭</h3><blockquote>
+<p>“Create a <strong>portfolio page</strong> combining <strong>neo-brutalism</strong> structure with <strong>monochrome</strong> palette — thick 3px black borders, <strong>off-white (#FAFAFA)</strong> background, single <strong>electric red (#FF3B30)</strong> accent for CTAs, bold sans-serif headings, asymmetric grid layout, no border-radius”</p>
+</blockquote>
+<h3 id="模板-3：氛围-细节"><a href="#模板-3：氛围-细节" class="headerlink" title="模板 3：氛围 + 细节"></a>模板 3：氛围 + 细节</h3><blockquote>
+<p>“Design a <strong>meditation app</strong> landing page with <strong>Japandi</strong> aesthetic and <strong>muted earth tones</strong> — warm beige <code>#F5F0EB</code> background, charcoal <code>#2D2D2D</code> text, sage green <code>#A8B5A2</code> accent, generous whitespace, organic rounded shapes, subtle paper texture overlay, <code>Noto Serif</code> for headings, <code>Inter</code> for body”</p>
+</blockquote>
+<h3 id="模板-4：数据面板-科技风"><a href="#模板-4：数据面板-科技风" class="headerlink" title="模板 4：数据面板 + 科技风"></a>模板 4：数据面板 + 科技风</h3><blockquote>
+<p>“Build a <strong>real-time monitoring dashboard</strong> with <strong>cyberpunk</strong> aesthetic and <strong>neon-on-dark</strong> color scheme — <code>#0A0A0A</code> deep black background, <strong>neon cyan <code>#00FFE5</code></strong> for primary data, <strong>neon magenta <code>#FF00FF</code></strong> for alerts, <strong>amber <code>#FFB800</code></strong> for warnings, glowing box-shadows, monospace font for numbers, animated data tickers, HUD-style circular gauges”</p>
+</blockquote>
+<h3 id="模板-5：电商-品牌感"><a href="#模板-5：电商-品牌感" class="headerlink" title="模板 5：电商 + 品牌感"></a>模板 5：电商 + 品牌感</h3><blockquote>
+<p>“Create a <strong>luxury e-commerce</strong> product page with <strong>minimalist</strong> layout and <strong>black-gold</strong> palette — pure white background, product images with soft shadow, <strong>matte black <code>#1A1A1A</code></strong> text, <strong>champagne gold <code>#C9A96E</code></strong> for CTAs and price tags, thin serif headings (<code>Playfair Display</code>), generous padding, subtle hover animations on product cards”</p>
+</blockquote>
+<h3 id="模板-6：完整页面规格"><a href="#模板-6：完整页面规格" class="headerlink" title="模板 6：完整页面规格"></a>模板 6：完整页面规格</h3><blockquote>
+<p>“Build a complete <strong>SaaS landing page</strong>:</p>
+<ul>
+<li><strong>Style:</strong> clean minimalist with glassmorphism cards</li>
+<li><strong>Colors:</strong> <code>#FFFFFF</code> background, <code>#1E293B</code> text, <code>#6366F1</code> (indigo) primary, <code>#EC4899</code> (pink) secondary accent</li>
+<li><strong>Typography:</strong> <code>Inter</code> 16px body, <code>Plus Jakarta Sans</code> bold headings</li>
+<li><strong>Layout:</strong> centered max-width 1200px, hero with gradient mesh background, 3-column feature grid, pricing table with highlighted popular plan, testimonial carousel, footer with 4-column links</li>
+<li><strong>Effects:</strong> subtle card hover lift (<code>translateY(-4px)</code>), smooth scroll, <code>backdrop-blur</code> on navbar”</li>
+</ul>
+</blockquote>
+<hr>
+<h2 id="提示词精度等级"><a href="#提示词精度等级" class="headerlink" title="提示词精度等级"></a>提示词精度等级</h2><table>
+<thead>
+<tr>
+<th>等级</th>
+<th>描述</th>
+<th>示例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>⭐ 基础</td>
+<td>只说风格名</td>
+<td>“Make a glassmorphism dashboard”</td>
+</tr>
+<tr>
+<td>⭐⭐ 进阶</td>
+<td>风格 + 配色</td>
+<td>“Glassmorphism dashboard with dark blue theme”</td>
+</tr>
+<tr>
+<td>⭐⭐⭐ 精准</td>
+<td>风格 + 具体色值 + 字体</td>
+<td>“Glassmorphism, #0F172A bg, cyan-400 accent, Inter font”</td>
+</tr>
+<tr>
+<td>⭐⭐⭐⭐ 专业</td>
+<td>完整设计规格</td>
+<td>上面模板 6 的写法</td>
+</tr>
+</tbody></table>
+<p><strong>越精确的提示词 &#x3D; 越少的来回修改。</strong> 当你对效果有明确预期时，直接给色值和字体名比用形容词更有效。</p>
+<hr>
+<p><em>本文持续更新，欢迎补充更多 UI 风格关键词和配色方案。掌握这些关键词，让 AI 生成的前端页面不再千篇一律。</em></p>
+
+		</div>
+
+		
+		<div class="post-copyright-info w-full my-8 px-2 sm:px-6 md:px-8">
+			<div class="article-copyright-info-container">
+    <ul>
+        <li><strong>标题:</strong> AI网站生成必备：这 35 种 UI 风格直接抄，图文直给到全</li>
+        <li><strong>作者:</strong> Nathan</li>
+        <li><strong>创建于
+                :</strong> 2026-02-15 21:00:00</li>
+        
+            <li>
+                <strong>更新于
+                    :</strong> 2026-02-20 17:22:12
+            </li>
+        
+        <li>
+            <strong>链接:</strong> https://hydraxman.github.io/2026/02/15/2026-02-15-frontend-prompt-styles/
+        </li>
+        <li>
+            <strong>
+                版权声明:
+            </strong>
+            
+
+            
+                本文章采用 <a class="license" target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0">CC BY-NC-SA 4.0</a> 进行许可。
+            
+        </li>
+    </ul>
+</div>
+
+		</div>
+		
+
+		
+		<ul class="post-tags-box text-lg mt-1.5 flex-wrap justify-center flex md:hidden">
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/AI/">#AI</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/%E5%89%8D%E7%AB%AF/">#前端</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/%E6%8F%90%E7%A4%BA%E8%AF%8D/">#提示词</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/UI%E8%AE%BE%E8%AE%A1/">#UI设计</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/Prompt-Engineering/">#Prompt Engineering</a>&nbsp;
+			</li>
+			
+		</ul>
+		
+
+		
+
+		
+		<div class="article-nav my-8 flex justify-between items-center px-2 sm:px-6 md:px-8">
+			
+			<div class="article-prev border-border-color shadow-redefine-flat shadow-shadow-color-2 rounded-medium px-4 py-2 hover:shadow-redefine-flat-hover hover:shadow-shadow-color-2">
+				<a class="prev" rel="prev" href="/2026/02/16/openclaw-vs-zeroclaw/">
+					<span class="left arrow-icon flex justify-center items-center">
+						<i class="fa-solid fa-chevron-left"></i>
+					</span>
+					<span class="title flex justify-center items-center">
+						<span class="post-nav-title-item truncate max-w-48">ZeroClaw 横空出世，它会取代 OpenClaw 吗？</span>
+						<span class="post-nav-item">上一篇</span>
+					</span>
+				</a>
+			</div>
+			
+			
+			<div class="article-next border-border-color shadow-redefine-flat shadow-shadow-color-2 rounded-medium px-4 py-2 hover:shadow-redefine-flat-hover hover:shadow-shadow-color-2">
+				<a class="next" rel="next" href="/2026/02/15/2026-02-15-morning-news/">
+					<span class="title flex justify-center items-center">
+						<span class="post-nav-title-item truncate max-w-48">2月15日科技早报：OpenAI 联手 Cerebras 抛弃 Nvidia、16个 Claude 写出 C 编译器</span>
+						<span class="post-nav-item">下一篇</span>
+					</span>
+					<span class="right arrow-icon flex justify-center items-center">
+						<i class="fa-solid fa-chevron-right"></i>
+					</span>
+				</a>
+			</div>
+			
+		</div>
+		
+
+
+		
+	</div>
+
+	
+	<div class="toc-content-container">
+		<div class="post-toc-wrap">
+	<div class="post-toc">
+		<div class="toc-title">目录</div>
+		<div class="page-title">AI网站生成必备：这 35 种 UI 风格直接抄，图文直给到全</div>
+		<ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E7%8E%BB%E7%92%83%E4%B8%8E%E9%80%8F%E6%98%8E%E7%B3%BB"><span class="nav-text">一、玻璃与透明系</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Glassmorphism%EF%BC%88%E7%8E%BB%E7%92%83%E6%8B%9F%E6%80%81%EF%BC%89"><span class="nav-text">1. Glassmorphism（玻璃拟态）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Frost-UI-x2F-Soft-Glass%EF%BC%88%E9%9C%9C%E5%86%BB%E9%A3%8E%EF%BC%89"><span class="nav-text">2. Frost UI &#x2F; Soft Glass（霜冻风）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Aurora-UI%EF%BC%88%E6%9E%81%E5%85%89%E9%A3%8E%EF%BC%89"><span class="nav-text">3. Aurora UI（极光风）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E7%AB%8B%E4%BD%93%E4%B8%8E%E8%B4%A8%E6%84%9F%E7%B3%BB"><span class="nav-text">二、立体与质感系</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#4-Neumorphism-x2F-Soft-UI%EF%BC%88%E6%96%B0%E6%8B%9F%E6%80%81%EF%BC%89"><span class="nav-text">4. Neumorphism &#x2F; Soft UI（新拟态）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-Claymorphism%EF%BC%88%E9%BB%8F%E5%9C%9F%E9%A3%8E%EF%BC%89"><span class="nav-text">5. Claymorphism（黏土风）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-Skeuomorphism%EF%BC%88%E6%8B%9F%E7%89%A9%E5%8C%96%EF%BC%89"><span class="nav-text">6. Skeuomorphism（拟物化）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E6%9E%81%E7%AE%80%E4%B8%8E%E7%95%99%E7%99%BD%E7%B3%BB"><span class="nav-text">三、极简与留白系</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#7-Minimalist-UI%EF%BC%88%E6%9E%81%E7%AE%80%E9%A3%8E%EF%BC%89"><span class="nav-text">7. Minimalist UI（极简风）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#8-Swiss-x2F-International-Style%EF%BC%88%E7%91%9E%E5%A3%AB%E9%A3%8E%E6%A0%BC%EF%BC%89"><span class="nav-text">8. Swiss &#x2F; International Style（瑞士风格）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-Scandinavian-x2F-Nordic-UI%EF%BC%88%E5%8C%97%E6%AC%A7%E9%A3%8E%EF%BC%89"><span class="nav-text">9. Scandinavian &#x2F; Nordic UI（北欧风）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E5%A4%A7%E8%83%86%E4%B8%8E%E5%BC%A0%E5%8A%9B%E7%B3%BB"><span class="nav-text">四、大胆与张力系</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#10-Neo-Brutalism%EF%BC%88%E6%96%B0%E9%87%8E%E8%9B%AE%E4%B8%BB%E4%B9%89%EF%BC%89"><span class="nav-text">10. Neo-Brutalism（新野蛮主义）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#11-Memphis-Design%EF%BC%88%E5%AD%9F%E8%8F%B2%E6%96%AF%E9%A3%8E%E6%A0%BC%EF%BC%89"><span class="nav-text">11. Memphis Design（孟菲斯风格）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#12-Maximalist-UI%EF%BC%88%E6%9E%81%E7%B9%81%E9%A3%8E%EF%BC%89"><span class="nav-text">12. Maximalist UI（极繁风）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%94%E3%80%81%E6%9A%97%E8%89%B2%E4%B8%8E%E7%A7%91%E6%8A%80%E7%B3%BB"><span class="nav-text">五、暗色与科技系</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#13-Dark-Mode-UI%EF%BC%88%E6%9A%97%E8%89%B2%E6%A8%A1%E5%BC%8F%EF%BC%89"><span class="nav-text">13. Dark Mode UI（暗色模式）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#14-Cyberpunk-UI%EF%BC%88%E8%B5%9B%E5%8D%9A%E6%9C%8B%E5%85%8B%EF%BC%89"><span class="nav-text">14. Cyberpunk UI（赛博朋克）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#15-Terminal-x2F-Hacker-UI%EF%BC%88%E7%BB%88%E7%AB%AF%E9%A3%8E%EF%BC%89"><span class="nav-text">15. Terminal &#x2F; Hacker UI（终端风）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#16-Sci-Fi-x2F-HUD-Interface%EF%BC%88%E7%A7%91%E5%B9%BBHUD%EF%BC%89"><span class="nav-text">16. Sci-Fi &#x2F; HUD Interface（科幻HUD）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AD%E3%80%81%E5%A4%8D%E5%8F%A4%E4%B8%8E%E6%80%80%E6%97%A7%E7%B3%BB"><span class="nav-text">六、复古与怀旧系</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#17-Retro-x2F-Vintage%EF%BC%88%E5%A4%8D%E5%8F%A4%E9%A3%8E%EF%BC%89"><span class="nav-text">17. Retro &#x2F; Vintage（复古风）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#18-Pixel-Art-x2F-8-bit%EF%BC%88%E5%83%8F%E7%B4%A0%E9%A3%8E%EF%BC%89"><span class="nav-text">18. Pixel Art &#x2F; 8-bit（像素风）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#19-Vaporwave-x2F-Synthwave%EF%BC%88%E8%92%B8%E6%B1%BD%E6%B3%A2%EF%BC%89"><span class="nav-text">19. Vaporwave &#x2F; Synthwave（蒸汽波）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#20-Y2K-Aesthetic%EF%BC%88%E5%8D%83%E7%A6%A7%E9%A3%8E%EF%BC%89"><span class="nav-text">20. Y2K Aesthetic（千禧风）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%83%E3%80%81%E5%8D%A1%E7%89%87%E4%B8%8E%E5%B8%83%E5%B1%80%E7%B3%BB"><span class="nav-text">七、卡片与布局系</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#21-Bento-Grid%EF%BC%88%E4%BE%BF%E5%BD%93%E7%9B%92%E5%B8%83%E5%B1%80%EF%BC%89"><span class="nav-text">21. Bento Grid（便当盒布局）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#22-Card-based-UI%EF%BC%88%E5%8D%A1%E7%89%87%E5%BC%8F%E5%B8%83%E5%B1%80%EF%BC%89"><span class="nav-text">22. Card-based UI（卡片式布局）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#23-Magazine-Layout%EF%BC%88%E6%9D%82%E5%BF%97%E6%8E%92%E7%89%88%EF%BC%89"><span class="nav-text">23. Magazine Layout（杂志排版）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AB%E3%80%81%E6%95%B0%E6%8D%AE%E4%B8%8E%E4%B8%93%E4%B8%9A%E7%B3%BB"><span class="nav-text">八、数据与专业系</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#24-Data-dense-Dashboard%EF%BC%88%E6%95%B0%E6%8D%AE%E5%AF%86%E9%9B%86%E5%9E%8B%E9%9D%A2%E6%9D%BF%EF%BC%89"><span class="nav-text">24. Data-dense Dashboard（数据密集型面板）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#25-Admin-Panel-x2F-Back-office%EF%BC%88%E5%90%8E%E5%8F%B0%E7%AE%A1%E7%90%86%EF%BC%89"><span class="nav-text">25. Admin Panel &#x2F; Back-office（后台管理）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#26-SaaS-Landing-Page%EF%BC%88SaaS-%E4%BA%A7%E5%93%81%E9%A6%96%E9%A1%B5%EF%BC%89"><span class="nav-text">26. SaaS Landing Page（SaaS 产品首页）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B9%9D%E3%80%81%E5%8A%A8%E6%80%81%E4%B8%8E%E4%BA%A4%E4%BA%92%E7%B3%BB"><span class="nav-text">九、动态与交互系</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#27-Micro-interaction-Rich%EF%BC%88%E5%BE%AE%E4%BA%A4%E4%BA%92%E4%B8%B0%E5%AF%8C%E5%9E%8B%EF%BC%89"><span class="nav-text">27. Micro-interaction Rich（微交互丰富型）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#28-Scroll-driven-x2F-Storytelling%EF%BC%88%E6%BB%9A%E5%8A%A8%E5%8F%99%E4%BA%8B%EF%BC%89"><span class="nav-text">28. Scroll-driven &#x2F; Storytelling（滚动叙事）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#29-3D-x2F-Immersive-Web%EF%BC%883D%E6%B2%89%E6%B5%B8%E5%BC%8F%EF%BC%89"><span class="nav-text">29. 3D &#x2F; Immersive Web（3D沉浸式）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%81%E3%80%81%E7%89%B9%E6%AE%8A%E9%A3%8E%E6%A0%BC%E7%B3%BB"><span class="nav-text">十、特殊风格系</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#30-Notion-like-x2F-Block-Editor%EF%BC%88Notion%E9%A3%8E%EF%BC%89"><span class="nav-text">30. Notion-like &#x2F; Block Editor（Notion风）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#31-Figma-x2F-Design-Tool-UI%EF%BC%88%E8%AE%BE%E8%AE%A1%E5%B7%A5%E5%85%B7%E9%A3%8E%EF%BC%89"><span class="nav-text">31. Figma &#x2F; Design Tool UI（设计工具风）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#32-E-ink-x2F-Paper-like%EF%BC%88%E7%94%B5%E5%AD%90%E5%A2%A8%E6%B0%B4%E9%A3%8E%EF%BC%89"><span class="nav-text">32. E-ink &#x2F; Paper-like（电子墨水风）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#33-Gradient-Mesh-x2F-Liquid%EF%BC%88%E6%B8%90%E5%8F%98%E6%B5%81%E4%BD%93%EF%BC%89"><span class="nav-text">33. Gradient Mesh &#x2F; Liquid（渐变流体）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#34-Monochrome-x2F-Grayscale%EF%BC%88%E5%8D%95%E8%89%B2%E9%A3%8E%EF%BC%89"><span class="nav-text">34. Monochrome &#x2F; Grayscale（单色风）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#35-Japandi-x2F-Wabi-sabi%EF%BC%88%E6%97%A5%E5%BC%8F%E4%BE%98%E5%AF%82%E9%A3%8E%EF%BC%89"><span class="nav-text">35. Japandi &#x2F; Wabi-sabi（日式侘寂风）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%80%9F%E6%9F%A5%E8%A1%A8%EF%BC%9A%E9%A3%8E%E6%A0%BC-%C3%97-%E5%9C%BA%E6%99%AF%E5%8C%B9%E9%85%8D"><span class="nav-text">速查表：风格 × 场景匹配</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8F%90%E7%A4%BA%E8%AF%8D%E7%BB%84%E5%90%88%E5%85%AC%E5%BC%8F"><span class="nav-text">提示词组合公式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%A3%8E%E6%A0%BC%E6%80%BB%E8%A7%88"><span class="nav-text">风格总览</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%81%E4%B8%80%E3%80%81%E9%A2%9C%E8%89%B2%E4%B8%8E%E9%85%8D%E8%89%B2%E6%8F%90%E7%A4%BA%E8%AF%8D"><span class="nav-text">十一、颜色与配色提示词</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E7%A1%80%E8%89%B2%E8%B0%83%E6%8F%8F%E8%BF%B0"><span class="nav-text">基础色调描述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B8%90%E5%8F%98%E4%B8%8E%E8%89%B2%E5%BD%A9%E6%95%88%E6%9E%9C"><span class="nav-text">渐变与色彩效果</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%8F%E5%85%B8%E9%85%8D%E8%89%B2%E6%96%B9%E6%A1%88%E5%85%B3%E9%94%AE%E8%AF%8D"><span class="nav-text">经典配色方案关键词</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A2%9C%E8%89%B2%E4%BF%AE%E9%A5%B0%E8%AF%8D%EF%BC%88%E8%AE%A9%E6%8F%8F%E8%BF%B0%E6%9B%B4%E7%B2%BE%E5%87%86%EF%BC%89"><span class="nav-text">颜色修饰词（让描述更精准）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%81%E4%BA%8C%E3%80%81%E9%AB%98%E7%BA%A7%E7%BB%84%E5%90%88%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%A8%A1%E6%9D%BF"><span class="nav-text">十二、高级组合提示词模板</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E6%9D%BF-1%EF%BC%9A%E9%A3%8E%E6%A0%BC-%E9%85%8D%E8%89%B2-%E5%B8%83%E5%B1%80"><span class="nav-text">模板 1：风格 + 配色 + 布局</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E6%9D%BF-2%EF%BC%9A%E5%A4%9A%E9%A3%8E%E6%A0%BC%E6%B7%B7%E6%90%AD"><span class="nav-text">模板 2：多风格混搭</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E6%9D%BF-3%EF%BC%9A%E6%B0%9B%E5%9B%B4-%E7%BB%86%E8%8A%82"><span class="nav-text">模板 3：氛围 + 细节</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E6%9D%BF-4%EF%BC%9A%E6%95%B0%E6%8D%AE%E9%9D%A2%E6%9D%BF-%E7%A7%91%E6%8A%80%E9%A3%8E"><span class="nav-text">模板 4：数据面板 + 科技风</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E6%9D%BF-5%EF%BC%9A%E7%94%B5%E5%95%86-%E5%93%81%E7%89%8C%E6%84%9F"><span class="nav-text">模板 5：电商 + 品牌感</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E6%9D%BF-6%EF%BC%9A%E5%AE%8C%E6%95%B4%E9%A1%B5%E9%9D%A2%E8%A7%84%E6%A0%BC"><span class="nav-text">模板 6：完整页面规格</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8F%90%E7%A4%BA%E8%AF%8D%E7%B2%BE%E5%BA%A6%E7%AD%89%E7%BA%A7"><span class="nav-text">提示词精度等级</span></a></li></ol>
+
+	</div>
+</div>
+	</div>
+	
+</div>
+			</div>
+
+			
+		</div>
+
+		<div class="main-content-footer">
+			<footer class="footer mt-5 py-5 h-auto text-base text-third-text-color relative border-t-2 border-t-border-color">
+    <div class="info-container py-3 text-center">
+        
+        <div class="text-center">
+            &copy;
+            
+              <span>2024</span>
+              -
+            
+            2026&nbsp;&nbsp;<i class="fa-solid fa-heart fa-beat" style="--fa-animation-duration: 0.5s; color: #333"></i>&nbsp;&nbsp;<a href="/">Nathan</a>
+            
+                
+                <p class="post-count space-x-0.5">
+                    <span>
+                        共撰写了 52 篇文章
+                    </span>
+                    
+                        <span>
+                            共 111.8k 字
+                        </span>
+                    
+                </p>
+            
+        </div>
+        
+        <div class="relative text-center lg:absolute lg:left-[20px] lg:top-1/2 lg:-translate-y-1/2 lg:text-left">
+            <span class="lg:block text-sm">由 <?xml version="1.0" encoding="utf-8"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg class="relative top-[2px] inline-block align-baseline" version="1.1" id="圖層_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="1rem" height="1rem" viewBox="0 0 512 512" enable-background="new 0 0 512 512" xml:space="preserve"><path fill="#0E83CD" d="M256.4,25.8l-200,115.5L56,371.5l199.6,114.7l200-115.5l0.4-230.2L256.4,25.8z M349,354.6l-18.4,10.7l-18.6-11V275H200v79.6l-18.4,10.7l-18.6-11v-197l18.5-10.6l18.5,10.8V237h112v-79.6l18.5-10.6l18.5,10.8V354.6z"/></svg><a target="_blank" class="text-base" href="https://hexo.io">Hexo</a> 驱动</span>
+            <span class="text-sm lg:block">主题&nbsp;<a class="text-base" target="_blank" href="https://github.com/EvanNotFound/hexo-theme-redefine">Redefine v2.8.5</a></span>
+        </div>
+        
+        
+            <div>
+                博客已运行 <span class="odometer" id="runtime_days" ></span> 天 <span class="odometer" id="runtime_hours"></span> 小时 <span class="odometer" id="runtime_minutes"></span> 分钟 <span class="odometer" id="runtime_seconds"></span> 秒
+            </div>
+        
+        
+            <script data-swup-reload-script>
+                try {
+                    function odometer_init() {
+                    const elements = document.querySelectorAll('.odometer');
+                    elements.forEach(el => {
+                        new Odometer({
+                            el,
+                            format: '( ddd).dd',
+                            duration: 200
+                        });
+                    });
+                    }
+                    odometer_init();
+                } catch (error) {}
+            </script>
+        
+        
+        
+    </div>  
+</footer>
+		</div>
+	</div>
+
+	
+	<div class="post-tools">
+		<div class="post-tools-container">
+	<ul class="article-tools-list">
+		<!-- TOC aside toggle -->
+		
+		<li class="right-bottom-tools page-aside-toggle">
+			<i class="fa-regular fa-outdent"></i>
+		</li>
+		
+
+		<!-- go comment -->
+		
+	</ul>
+</div>
+	</div>
+	
+
+	<div class="right-side-tools-container">
+		<div class="side-tools-container">
+	<ul class="hidden-tools-list">
+		<li class="right-bottom-tools tool-font-adjust-plus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-plus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-font-adjust-minus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-minus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-dark-light-toggle flex justify-center items-center">
+			<i class="fa-regular fa-moon"></i>
+		</li>
+
+		<!-- rss -->
+		
+
+		
+
+		<li class="right-bottom-tools tool-scroll-to-bottom flex justify-center items-center">
+			<i class="fa-regular fa-arrow-down"></i>
+		</li>
+	</ul>
+
+	<ul class="visible-tools-list">
+		<li class="right-bottom-tools toggle-tools-list flex justify-center items-center">
+			<i class="fa-regular fa-cog fa-spin"></i>
+		</li>
+		
+		<li class="right-bottom-tools tool-scroll-to-top flex justify-center items-center">
+			<i class="arrow-up fas fa-arrow-up"></i>
+			<span class="percent"></span>
+		</li>
+		
+		
+	</ul>
+</div>
+	</div>
+
+	<div class="image-viewer-container">
+	<img src="">
+</div>
+
+	
+	<div class="search-pop-overlay">
+	<div class="popup search-popup">
+		<div class="search-header">
+			<span class="search-input-field-pre">
+				<i class="fa-solid fa-keyboard"></i>
+			</span>
+			<div class="search-input-container">
+				<input autocomplete="off" autocorrect="off" autocapitalize="off" placeholder="站内搜索您需要的内容..." spellcheck="false" type="search" class="search-input">
+			</div>
+			<span class="popup-btn-close">
+				<i class="fa-solid fa-times"></i>
+			</span>
+		</div>
+		<div id="search-result">
+			<div id="no-result">
+				<i class="fa-solid fa-spinner fa-spin-pulse fa-5x fa-fw"></i>
+			</div>
+		</div>
+	</div>
+</div>
+	
+
+</main>
+
+
+
+<script src="/js/build/libs/Swup.min.js"></script>
+
+<script src="/js/build/libs/SwupSlideTheme.min.js"></script>
+
+<script src="/js/build/libs/SwupScriptsPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupProgressPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupScrollPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupPreloadPlugin.min.js"></script>
+
+<script>
+    const swup = new Swup({
+        plugins: [
+            new SwupScriptsPlugin({
+                optin: true,
+            }),
+            new SwupProgressPlugin(),
+            new SwupScrollPlugin({
+                offset: 80,
+            }),
+            new SwupSlideTheme({
+                mainElement: ".main-content-body",
+            }),
+            new SwupPreloadPlugin(),
+        ],
+        containers: ["#swup"],
+    });
+</script>
+
+
+
+
+	
+<script src="/js/build/tools/imageViewer.js" type="module"></script>
+
+<script src="/js/build/utils.js" type="module"></script>
+
+<script src="/js/build/main.js" type="module"></script>
+
+<script src="/js/build/layouts/navbarShrink.js" type="module"></script>
+
+<script src="/js/build/tools/scrollTopBottom.js" type="module"></script>
+
+<script src="/js/build/tools/lightDarkSwitch.js" type="module"></script>
+
+<script src="/js/build/layouts/categoryList.js" type="module"></script>
+
+
+
+    
+<script src="/js/build/tools/localSearch.js" type="module"></script>
+
+
+
+
+    
+<script src="/js/build/tools/codeBlock.js" type="module"></script>
+
+
+
+
+    
+<script src="/js/build/layouts/lazyload.js" type="module"></script>
+
+
+
+
+    
+<script src="/js/build/tools/runtime.js"></script>
+
+    
+<script src="/js/build/libs/odometer.min.js"></script>
+
+    
+<link rel="stylesheet" href="/assets/odometer-theme-minimal.css">
+
+
+
+
+  
+<script src="/js/build/libs/Typed.min.js"></script>
+
+  
+<script src="/js/build/plugins/typed.js" type="module"></script>
+
+
+
+
+
+
+
+
+    
+<script src="/js/build/libs/anime.min.js"></script>
+
+
+
+
+
+    
+<script src="/js/build/tools/tocToggle.js" type="module" data-swup-reload-script=""></script>
+
+<script src="/js/build/layouts/toc.js" type="module" data-swup-reload-script=""></script>
+
+<script src="/js/build/plugins/tabs.js" type="module" data-swup-reload-script=""></script>
+
+
+
+
+<script src="/js/build/libs/moment-with-locales.min.js" data-swup-reload-script=""></script>
+
+
+<script src="/js/build/layouts/essays.js" type="module" data-swup-reload-script=""></script>
+
+
+
+
+
+	
+</body>
+
+</html>

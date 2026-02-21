@@ -1,0 +1,1294 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="keywords" content="计算机技术, 生活中的胡思乱想">
+    
+    <meta name="author" content="Nathan">
+    
+    <!-- Completely eliminate flash of wrong theme -->
+    <script>
+        (function() {
+            const THEME_KEY = "REDEFINE-THEME-STATUS";
+            const DARK = "dark", LIGHT = "light";
+            
+            // Get preferred theme
+            function getTheme() {
+                try {
+                    const saved = localStorage.getItem(THEME_KEY);
+                    if (saved) {
+                        const { isDark } = JSON.parse(saved);
+                        return isDark ? DARK : LIGHT;
+                    }
+                } catch (e) {}
+                
+                return matchMedia("(prefers-color-scheme: dark)").matches ? DARK : LIGHT;
+            }
+            
+            // Apply theme to document
+            function applyTheme(theme) {
+                const isDark = theme === DARK;
+                const root = document.documentElement;
+                
+                // Set data attribute for CSS variables
+                root.setAttribute("data-theme", theme);
+                
+                // Set classes for compatibility
+                root.classList.add(theme);
+                root.classList.remove(isDark ? LIGHT : DARK);
+                root.style.colorScheme = theme;
+            }
+            
+            // Initial application
+            const theme = getTheme();
+            applyTheme(theme);
+            
+            // Listen for system preference changes
+            matchMedia("(prefers-color-scheme: dark)").addEventListener("change", ({ matches }) => {
+                // Only update if using system preference (no localStorage entry)
+                if (!localStorage.getItem(THEME_KEY)) {
+                    applyTheme(matches ? DARK : LIGHT);
+                }
+            });
+            
+            // Set body classes once DOM is ready
+            if (document.readyState !== "loading") {
+                document.body.classList.add(theme + "-mode");
+            } else {
+                document.addEventListener("DOMContentLoaded", () => {
+                    document.body.classList.add(theme + "-mode");
+                    document.body.classList.remove((theme === DARK ? LIGHT : DARK) + "-mode");
+                });
+            }
+        })();
+    </script>
+    
+    <!-- Critical CSS to prevent flash -->
+    <style>
+        :root[data-theme="dark"] {
+            --background-color: #202124;
+            --background-color-transparent: rgba(32, 33, 36, 0.6);
+            --second-background-color: #2d2e32;
+            --third-background-color: #34353a;
+            --third-background-color-transparent: rgba(32, 33, 36, 0.6);
+            --primary-color: #0066CC;
+            --first-text-color: #ffffff;
+            --second-text-color: #eeeeee;
+            --third-text-color: #bebec6;
+            --fourth-text-color: #999999;
+            --default-text-color: #bebec6;
+            --invert-text-color: #373D3F;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --selection-color: #0066CC;
+            --shadow-color-1: rgba(255, 255, 255, 0.08);
+            --shadow-color-2: rgba(255, 255, 255, 0.05);
+        }
+        
+        :root[data-theme="light"] {
+            --background-color: #fff;
+            --background-color-transparent: rgba(255, 255, 255, 0.6);
+            --second-background-color: #f8f8f8;
+            --third-background-color: #f2f2f2;
+            --third-background-color-transparent: rgba(241, 241, 241, 0.6);
+            --primary-color: #0066CC;
+            --first-text-color: #16171a;
+            --second-text-color: #2f3037;
+            --third-text-color: #5e5e5e;
+            --fourth-text-color: #eeeeee;
+            --default-text-color: #373D3F;
+            --invert-text-color: #bebec6;
+            --border-color: rgba(0, 0, 0, 0.08);
+            --selection-color: #0066CC;
+            --shadow-color-1: rgba(0, 0, 0, 0.08);
+            --shadow-color-2: rgba(0, 0, 0, 0.05);
+        }
+        
+        body {
+            background-color: var(--background-color);
+            color: var(--default-text-color);
+        }
+        
+        /* Apply body classes as soon as DOM is ready */
+        :root[data-theme="dark"] body {
+            background-color: var(--background-color);
+            color: var(--default-text-color);
+        }
+    </style>
+    
+    <!-- preconnect -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    
+    <!--- Seo Part-->
+    
+    <link rel="canonical" href="https://hydraxman.github.io/2026/02/10/seedance-2-guide/"/>
+    <meta name="robots" content="index,follow">
+    <meta name="googlebot" content="index,follow">
+    <meta name="revisit-after" content="1 days">
+    
+    
+    
+        
+        <meta name="description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Seedance 2.0 深度解析：字节跳动&quot;杀死比赛&quot;的 AI 视频模型，附免费试用全攻略">
+<meta property="og:url" content="https://hydraxman.github.io/2026/02/10/seedance-2-guide/index.html">
+<meta property="og:site_name" content="内森淼文">
+<meta property="og:description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://hydraxman.github.io/images/redefine-og.webp">
+<meta property="article:published_time" content="2026-02-10T08:00:00.000Z">
+<meta property="article:modified_time" content="2026-02-20T09:22:12.124Z">
+<meta property="article:author" content="Nathan">
+<meta property="article:tag" content="AI">
+<meta property="article:tag" content="教程">
+<meta property="article:tag" content="视频生成">
+<meta property="article:tag" content="字节跳动">
+<meta property="article:tag" content="Seedance">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://hydraxman.github.io/images/redefine-og.webp">
+    
+    
+    <!--- Icon Part-->
+    <link rel="icon" type="image/png" href="/images/favicon.svg" sizes="192x192">
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.svg">
+    <meta name="theme-color" content="#ffffff">
+    <link rel="shortcut icon" href="/images/favicon.svg">
+    <!--- Page Info-->
+    
+    <title>
+        
+            Seedance 2.0 深度解析：字节跳动&#34;杀死比赛&#34;的 AI 视频模型，附免费试用全攻略 | 内森淼文
+        
+    </title>
+
+    
+<link rel="stylesheet" href="/fonts/Chillax/chillax.css">
+
+
+    <!--- Inject Part-->
+    
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    
+        
+<link rel="stylesheet" href="/css/build/tailwind.css">
+
+    
+
+    
+<link rel="stylesheet" href="/fonts/GeistMono/geist-mono.css">
+
+    
+<link rel="stylesheet" href="/fonts/Geist/geist.css">
+
+    <!--- Font Part-->
+    
+    
+    
+    
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&display=swap" rel="stylesheet">
+    
+    
+
+    <script id="hexo-configurations">
+    window.config = {"hostname":"hydraxman.github.io","root":"/","language":"zh-CN","path":"search.json"};
+    window.theme = {"articles":{"style":{"font_size":"16px","line_height":1.5,"image_border_radius":"14px","image_alignment":"center","image_caption":false,"link_icon":true,"delete_mask":false,"title_alignment":"left","headings_top_spacing":{"h1":"3.2rem","h2":"2.4rem","h3":"1.9rem","h4":"1.6rem","h5":"1.4rem","h6":"1.3rem"}},"word_count":{"enable":true,"count":true,"min2read":true},"author_label":{"enable":false,"auto":false,"list":[]},"code_block":{"copy":true,"style":"mac","highlight_theme":{"light":"github","dark":"vs2015"},"font":{"enable":false,"family":null,"url":null}},"toc":{"enable":true,"max_depth":3,"number":false,"expand":true,"init_open":true},"copyright":{"enable":true,"default":"cc_by_nc_sa"},"lazyload":true,"pangu_js":false,"recommendation":{"enable":false,"title":"推荐阅读","limit":3,"mobile_limit":2,"placeholder":"/images/wallhaven-wqery6-light.webp","skip_dirs":[]}},"colors":{"primary":"#ffffff","secondary":null,"default_mode":"light"},"global":{"fonts":{"chinese":{"enable":false,"family":null,"url":null},"english":{"enable":true,"family":"Inter","url":"https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"},"title":{"enable":true,"family":"Noto Serif","url":"https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&display=swap"}},"content_max_width":"1000px","sidebar_width":"210px","hover":{"shadow":true,"scale":false},"scroll_progress":{"bar":true,"percentage":true},"website_counter":{"url":"https://cn.vercount.one/js","enable":false,"site_pv":true,"site_uv":true,"post_pv":true},"single_page":true,"preloader":{"enable":false,"custom_message":null},"side_tools":{"gear_rotation":true,"auto_expand":false},"open_graph":{"enable":true,"image":"/images/redefine-og.webp","description":"Hexo Theme Redefine, Redefine Your Hexo Journey."},"google_analytics":{"enable":false,"id":null}},"home_banner":{"enable":true,"style":"fixed","image":{"light":"/images/banner-light.jpg","dark":"/images/banner-dark.jpg"},"title":"内森淼文","subtitle":{"text":["AI · 编程 · 科技见闻","Write Code, Read World"],"hitokoto":{"enable":false,"show_author":false,"api":"https://v1.hitokoto.cn"},"typing_speed":100,"backing_speed":80,"starting_delay":500,"backing_delay":1500,"loop":true,"smart_backspace":true},"text_color":{"light":"#fff","dark":"#d1d1b6"},"text_style":{"title_size":"2.8rem","subtitle_size":"1.5rem","line_height":1.2},"custom_font":{"enable":false,"family":null,"url":null},"social_links":{"enable":true,"style":"default","links":{"github":"https://github.com/hydraxman","instagram":null,"zhihu":null,"twitter":null,"email":null},"qrs":{"weixin":null}}},"plugins":{"feed":{"enable":false},"aplayer":{"enable":false,"type":"fixed","audios":[{"name":null,"artist":null,"url":null,"cover":null,"lrc":null}]},"mermaid":{"enable":false,"version":"11.4.1"}},"version":"2.8.5","navbar":{"auto_hide":false,"color":{"left":"#333333","right":"#555555","transparency":35},"width":{"home":"1200px","pages":"1000px"},"links":{"Home":{"path":"/","icon":"fa-regular fa-house"},"Archives":{"path":"/archives","icon":"fa-regular fa-archive"},"Categories":{"path":"/categories","icon":"fa-regular fa-folder"},"Tags":{"path":"/tags","icon":"fa-regular fa-tags"},"About":{"path":"/about","icon":"fa-regular fa-user"}},"search":{"enable":true,"preload":true}},"page_templates":{"friends_column":2,"tags_style":"blur"},"home":{"sidebar":{"enable":true,"position":"left","first_item":"menu","announcement":"AI · 编程 · 科技","show_on_mobile":true,"links":{"Archives":{"path":"/archives","icon":"fa-regular fa-archive"},"Tags":{"path":"/tags","icon":"fa-regular fa-tags"},"Categories":{"path":"/categories","icon":"fa-regular fa-folder"}}},"article_date_format":"auto","excerpt_length":200,"categories":{"enable":true,"limit":3},"tags":{"enable":true,"limit":3}},"footerStart":"2024/01/01 00:00:00"};
+    window.lang_ago = {"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"};
+    window.data = {"masonry":false};
+  </script>
+    
+    <!--- Fontawesome Part-->
+    
+<link rel="stylesheet" href="/fontawesome/fontawesome.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/brands.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/solid.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/regular.min.css">
+
+    
+    
+    
+    
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+
+<body>
+	<div class="progress-bar-container">
+	
+	<span class="scroll-progress-bar"></span>
+	
+
+	
+	<span class="pjax-progress-bar"></span>
+	<!--        <span class="swup-progress-icon">-->
+	<!--            <i class="fa-solid fa-circle-notch fa-spin"></i>-->
+	<!--        </span>-->
+	
+</div>
+
+<main class="page-container" id="swup">
+
+	
+
+	<div class="main-content-container flex flex-col justify-between min-h-dvh">
+		<div class="main-content-header">
+			<header class="navbar-container px-6 md:px-12">
+    <div class="navbar-content transition-navbar ">
+        <div class="left">
+            
+            <a class="logo-title" href="/">
+                
+                内森淼文
+                
+            </a>
+        </div>
+
+        <div class="right">
+            <!-- PC -->
+            <div class="desktop">
+                <ul class="navbar-list">
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/"
+                                        >
+                                    <i class="fa-regular fa-house fa-fw"></i>
+                                    首页
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/archives"
+                                        >
+                                    <i class="fa-regular fa-archive fa-fw"></i>
+                                    归档
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/categories"
+                                        >
+                                    <i class="fa-regular fa-folder fa-fw"></i>
+                                    分类
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/tags"
+                                        >
+                                    <i class="fa-regular fa-tags fa-fw"></i>
+                                    标签
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/about"
+                                        >
+                                    <i class="fa-regular fa-user fa-fw"></i>
+                                    关于
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                    
+                        <li class="navbar-item search search-popup-trigger">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </li>
+                    
+                </ul>
+            </div>
+            <!-- Mobile -->
+            <div class="mobile">
+                
+                    <div class="icon-item search search-popup-trigger"><i class="fa-solid fa-magnifying-glass"></i>
+                    </div>
+                
+                <div class="icon-item navbar-bar">
+                    <div class="navbar-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile sheet -->
+    <div class="navbar-drawer h-dvh w-full absolute top-0 left-0 bg-background-color flex flex-col justify-between">
+        <ul class="drawer-navbar-list flex flex-col px-4 justify-center items-start">
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/"
+                        >
+                            <span>
+                                首页
+                            </span>
+                            
+                                <i class="fa-regular fa-house fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/archives"
+                        >
+                            <span>
+                                归档
+                            </span>
+                            
+                                <i class="fa-regular fa-archive fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/categories"
+                        >
+                            <span>
+                                分类
+                            </span>
+                            
+                                <i class="fa-regular fa-folder fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/tags"
+                        >
+                            <span>
+                                标签
+                            </span>
+                            
+                                <i class="fa-regular fa-tags fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/about"
+                        >
+                            <span>
+                                关于
+                            </span>
+                            
+                                <i class="fa-regular fa-user fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+
+            
+            
+                
+                    
+                    
+                    
+            
+        </ul>
+
+        <div class="statistics flex justify-around my-2.5">
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/tags">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">115</div>
+        <div class="label text-third-text-color text-sm">标签</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/categories">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">5</div>
+        <div class="label text-third-text-color text-sm">分类</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/archives">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">52</div>
+        <div class="label text-third-text-color text-sm">文章</div>
+    </a>
+</div>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+		</div>
+
+		<div class="main-content-body transition-fade-up">
+			
+
+			<div class="main-content">
+				<div class="post-page-container flex relative justify-between box-border w-full h-full">
+	<div class="article-content-container">
+
+		<div class="article-title relative w-full">
+			
+			
+			
+			<img src="/images/seedance-2/cover.png" alt="Seedance 2.0 深度解析：字节跳动&#34;杀死比赛&#34;的 AI 视频模型，附免费试用全攻略" class="w-full h-60 sm:h-72 md:h-80 object-cover sm:rounded-t-large dark:brightness-75" />
+			
+			<div class="w-full flex items-center absolute bottom-0 justify-start">
+				<h1 class="article-title-cover text-center mx-6 my-6 text-second-text-color bg-background-color-transparent px-4 py-3 text-3xl sm:text-4xl md:text-5xl font-semibold backdrop-blur-lg rounded-xl border border-border-color ">Seedance 2.0 深度解析：字节跳动&#34;杀死比赛&#34;的 AI 视频模型，附免费试用全攻略</h1>
+			</div>
+			
+		</div>
+
+		
+		<div class="article-header flex flex-row gap-2 items-center px-2 sm:px-6 md:px-8">
+			<div class="avatar w-[46px] h-[46px] flex-shrink-0 rounded-medium border border-border-color p-[1px]">
+				<img src="/images/avatar.png">
+			</div>
+			<div class="info flex flex-col justify-between">
+				<div class="author flex items-center">
+					<span class="name text-default-text-color text-lg font-semibold">Nathan</span>
+					
+				</div>
+				<div class="meta-info">
+					<div class="article-meta-info">
+    <span class="article-date article-meta-item">
+        <i class="fa-regular fa-pen-fancy"></i>&nbsp;
+        <span class="desktop">2026-02-10 16:00</span>
+        <span class="mobile">2026-02-10 16:00</span>
+        <span class="hover-info">创建</span>
+    </span>
+    
+        <span class="article-date article-meta-item">
+            <i class="fa-regular fa-wrench"></i>&nbsp;
+            <span class="desktop">2026-02-20 17:22:12</span>
+            <span class="mobile">2026-02-20 17:22:12</span>
+            <span class="hover-info">更新</span>
+        </span>
+    
+
+    
+        <span class="article-categories article-meta-item">
+            <i class="fa-regular fa-folders"></i>&nbsp;
+            <ul>
+                
+                
+                    
+                        
+                        <li>
+                            <a href="/categories/%E6%8A%80%E6%9C%AF%E5%AE%9E%E6%88%98/">技术实战</a>&nbsp;
+                        </li>
+                    
+                    
+                
+            </ul>
+        </span>
+    
+    
+        <span class="article-tags article-meta-item">
+            <i class="fa-regular fa-tags"></i>&nbsp;
+            <ul>
+                
+                    <li>
+                        <a href="/tags/AI/">AI</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/%E6%95%99%E7%A8%8B/">教程</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/%E8%A7%86%E9%A2%91%E7%94%9F%E6%88%90/">视频生成</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8/">字节跳动</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/Seedance/">Seedance</a>&nbsp;
+                    </li>
+                
+            </ul>
+        </span>
+    
+
+    
+    
+        <span class="article-wordcount article-meta-item">
+            <i class="fa-regular fa-typewriter"></i>&nbsp;<span>2.8k 字</span>
+        </span>
+    
+    
+        <span class="article-min2read article-meta-item">
+            <i class="fa-regular fa-clock"></i>&nbsp;<span>9 分钟</span>
+        </span>
+    
+    
+</div>
+
+				</div>
+			</div>
+		</div>
+		
+
+		
+
+
+		<div class="article-content markdown-body px-2 sm:px-6 md:px-8 pb-8">
+			<blockquote>
+<p>Kill the Game — 字节跳动内部文档标题</p>
+</blockquote>
+<p>2月6日，字节跳动悄然在即梦 AI 平台上线了新一代视频生成模型 <strong>Seedance 2.0</strong>。没有发布会，没有官宣，只有一份飞书文档——标题赫然写着 <strong>“Kill the Game”（杀死比赛）</strong>。</p>
+<p>这份文档同时在线人数一度超过 300 人，凌晨四点还有 90 多人在读。一份产品说明书被几百人围观十几个小时，这大概是前所未有的。</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/seedance-2/cover.png"
+                      alt="Seedance 2.0 封面"
+                ></p>
+<p>AI 视频圈的评价近乎疯狂：</p>
+<blockquote>
+<p>“Seedance 2.0 是我 26 年来最大的震撼” —— AI 视频博主海辛<br>“碾压 Sora 2” —— 多位从业者评价<br>“AI 视频第一阶段的比赛，结束了” —— 极客公园</p>
+</blockquote>
+<p>那么，这个模型到底做到了什么？普通人怎么用？本文带你一次搞清楚。</p>
+<span id="more"></span>
+
+<hr>
+<h2 id="一、四大核心能力：从”素材生成器”到”AI-导演”"><a href="#一、四大核心能力：从”素材生成器”到”AI-导演”" class="headerlink" title="一、四大核心能力：从”素材生成器”到”AI 导演”"></a>一、四大核心能力：从”素材生成器”到”AI 导演”</h2><h3 id="1-自分镜-自运镜：告别手动控制"><a href="#1-自分镜-自运镜：告别手动控制" class="headerlink" title="1. 自分镜 + 自运镜：告别手动控制"></a>1. 自分镜 + 自运镜：告别手动控制</h3><p>以前用 AI 生成视频，你需要精确描述”镜头从左向右平移”、”先全景再推特写”。稍微复杂一点，模型就犯迷糊。</p>
+<p><strong>Seedance 2.0 可以根据情节自动规划分镜和运镜。</strong> 你只需要告诉它故事是什么，它自己决定怎么拍。</p>
+<p>例如，输入：</p>
+<blockquote>
+<p>“镜头跟随黑衣男子快速逃亡，后面一群人在追，镜头转为侧面跟拍，人物惊慌撞倒路边的水果摊爬起来继续逃”</p>
+</blockquote>
+<p>模型自动理解了：跟拍 → 侧拍 → 碰撞 → 继续逃跑的镜头语言。这是以前需要导演经验才能做到的事。</p>
+<h3 id="2-多模态参考：最多-12-个素材同时输入"><a href="#2-多模态参考：最多-12-个素材同时输入" class="headerlink" title="2. 多模态参考：最多 12 个素材同时输入"></a>2. 多模态参考：最多 12 个素材同时输入</h3><p>你可以同时给它：</p>
+<ul>
+<li><strong>最多 9 张图片</strong>（角色、场景、风格参考）</li>
+<li><strong>最多 3 段视频</strong>（动作参考）</li>
+<li><strong>最多 3 段音频</strong>（语音或音乐参考）</li>
+</ul>
+<p>总计 12 个参考文件。模型自动学习这些素材的特征，融合到生成结果中。等于给了用户一个**”导演工具箱”**。</p>
+<h3 id="3-原生音画同步：告别”配音感”"><a href="#3-原生音画同步：告别”配音感”" class="headerlink" title="3. 原生音画同步：告别”配音感”"></a>3. 原生音画同步：告别”配音感”</h3><p>这是 Seedance 2.0 最让人惊艳的能力之一：</p>
+<ul>
+<li><strong>口型同步</strong>：角色说话时嘴型准确，支持多语言</li>
+<li><strong>情绪匹配</strong>：角色说到激动的台词时，眉毛上挑、眼神变凌厉</li>
+<li><strong>环境音效</strong>：自动生成匹配的背景音乐和音效</li>
+<li><strong>音乐卡点</strong>：理解参考视频中的音乐节奏，生成对应动作</li>
+</ul>
+<p>不再是”视频+后期配音”的拼凑感，而是原生一体化。</p>
+<h3 id="4-多镜头叙事-角色一致性"><a href="#4-多镜头叙事-角色一致性" class="headerlink" title="4. 多镜头叙事 + 角色一致性"></a>4. 多镜头叙事 + 角色一致性</h3><p>从头到尾，角色不会换脸。这意味着你可以生成包含多个镜头切换的完整叙事片段。</p>
+<p>有测试者用 Seedance 2.0 做了一个 <strong>60 秒的 AI 动漫短剧</strong>——只花了 15 分钟，4 段 15 秒视频拼接，全程角色一致，中间没有抽过一次卡。</p>
+<hr>
+<h2 id="二、数据说话：为什么说”杀死比赛”？"><a href="#二、数据说话：为什么说”杀死比赛”？" class="headerlink" title="二、数据说话：为什么说”杀死比赛”？"></a>二、数据说话：为什么说”杀死比赛”？</h2><table>
+<thead>
+<tr>
+<th>指标</th>
+<th>行业平均（此前）</th>
+<th>Seedance 2.0</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>单次生成可用率</td>
+<td>~20%（需抽卡5次+）</td>
+<td>**90%+**（一次出片）</td>
+</tr>
+<tr>
+<td>90分钟项目实际成本</td>
+<td>~10,000 元</td>
+<td>~2,000 元</td>
+</tr>
+<tr>
+<td>5秒特效镜头制作</td>
+<td>传统：1人×1个月</td>
+<td>AI：2分钟×3元</td>
+</tr>
+<tr>
+<td>支持时长</td>
+<td>5-10秒</td>
+<td><strong>4-15秒</strong>（精确到1秒）</td>
+</tr>
+<tr>
+<td>分辨率</td>
+<td>720p</td>
+<td>720p-2K</td>
+</tr>
+<tr>
+<td>多模态输入</td>
+<td>文本&#x2F;图片</td>
+<td><strong>文本+图片+视频+音频</strong></td>
+</tr>
+</tbody></table>
+<p><strong>成本降低 5 倍，效率提升上万倍，可用率从 20% 飙升到 90%+。</strong> 这就是为什么大家说”比赛结束了”。</p>
+<hr>
+<h2 id="三、版权争议：影视飓风事件"><a href="#三、版权争议：影视飓风事件" class="headerlink" title="三、版权争议：影视飓风事件"></a>三、版权争议：影视飓风事件</h2><p>但 Seedance 2.0 上线后也引发了争议。</p>
+<p>知名科技博主影视飓风创始人潘天鸿（Tim）在评测中发现：<strong>仅上传一张面部照片，Seedance 2.0 就生成了带有他个人音色的声音和公司大楼画面。</strong></p>
+<p>他表示：”这基本上可以确定，Seedance 2.0 大量训练了我们公司的视频。我明确没有进行授权。”</p>
+<p>此事引发了 AI 训练数据版权问题的广泛讨论。随后，<strong>字节跳动暂停了 Seedance 2.0 的真人素材参考能力</strong>，正在加强安全防护措施。</p>
+<blockquote>
+<p>目前涉及名人或知名 IP 的视频生成会被审核拦截，提示”视频未通过审核，本次不消耗积分”。</p>
+</blockquote>
+<hr>
+<h2 id="四、试用全攻略：5-种免费渠道"><a href="#四、试用全攻略：5-种免费渠道" class="headerlink" title="四、试用全攻略：5 种免费渠道"></a>四、试用全攻略：5 种免费渠道</h2><p>好消息是，Seedance 2.0 有多个免费使用渠道。以下是完整攻略：</p>
+<h3 id="渠道一：即梦网页版（⭐-质量最好）"><a href="#渠道一：即梦网页版（⭐-质量最好）" class="headerlink" title="渠道一：即梦网页版（⭐ 质量最好）"></a>渠道一：即梦网页版（⭐ 质量最好）</h3><p><strong>地址</strong>：<code>jimeng.jianying.com</code></p>
+<p><strong>步骤</strong>：</p>
+<ol>
+<li>手机号注册账号</li>
+<li>购买 <strong>¥1 试用会员</strong>（解锁 2.0 必须步骤）</li>
+<li>⚠️ <strong>立即取消订阅</strong>（避免自动续费）</li>
+<li>进入视频生成页面，选择 Seedance 2.0 模型</li>
+</ol>
+<p><strong>积分规则</strong>：</p>
+<ul>
+<li>注册送 2 次免费体验 + 260 积分</li>
+<li>每天登录送积分</li>
+<li>生成 1 秒视频消耗 6 积分</li>
+<li>充值：69 元&#x2F;月送 1080 积分</li>
+</ul>
+<p><strong>优势</strong>：时长 4-15 秒可精确选择，质量最佳</p>
+<hr>
+<h3 id="渠道二：小云雀网页版（⭐-性价比最高）"><a href="#渠道二：小云雀网页版（⭐-性价比最高）" class="headerlink" title="渠道二：小云雀网页版（⭐ 性价比最高）"></a>渠道二：小云雀网页版（⭐ 性价比最高）</h3><p><strong>地址</strong>：<code>xyq.jianying.com</code></p>
+<p>字节内部赛马产品，主打 Agent 一键出长片。</p>
+<p><strong>步骤</strong>：</p>
+<ol>
+<li><strong>先手机下载小云雀 App 注册</strong>（网页版无法直接注册）</li>
+<li>用同一账号登录网页版</li>
+<li>注册送 3 次 + 1200 积分，<strong>不需要充钱就能用 2.0！</strong></li>
+</ol>
+<p><strong>积分规则</strong>：</p>
+<ul>
+<li>注册送 1200 积分（约 120 秒视频）</li>
+<li>每天登录送 120 积分</li>
+<li>生成 1 秒视频消耗 10 积分</li>
+<li>会员首月 39 元&#x2F;月送 1200 积分</li>
+</ul>
+<p><strong>优势</strong>：注册即送最多积分，门槛最低</p>
+<blockquote>
+<p>🎬 <strong>实拍演示</strong>：下面这段视频是我用 Seedance 2.0 通过小云雀平台生成的，感受一下效果：</p>
+</blockquote>
+<p>!video<a href="/images/seedance-2/xiaoyunque-demo.mp4">Seedance 2.0 小云雀生成演示</a></p>
+<hr>
+<h3 id="渠道三：豆包-App（⭐-最方便）"><a href="#渠道三：豆包-App（⭐-最方便）" class="headerlink" title="渠道三：豆包 App（⭐ 最方便）"></a>渠道三：豆包 App（⭐ 最方便）</h3><p>字节旗下 AI 助手，很多人已经装了。</p>
+<p><strong>步骤</strong>：</p>
+<ol>
+<li>打开豆包 App</li>
+<li>访问 <code>doubao.com/chat/settings</code> 获取 UID</li>
+<li>加入豆包官方飞书群，填写 UID</li>
+<li>等管理员通过（1-2 天）</li>
+<li>通过后即可使用 Seedance 2.0</li>
+</ol>
+<p><strong>额度</strong>：每天 10 次免费（5 秒或 10 秒）</p>
+<p><strong>注意</strong>：App 版有 2.0，网页版暂时没有</p>
+<hr>
+<h3 id="渠道四：Dreamina-国际版（海外用户）"><a href="#渠道四：Dreamina-国际版（海外用户）" class="headerlink" title="渠道四：Dreamina 国际版（海外用户）"></a>渠道四：Dreamina 国际版（海外用户）</h3><p><strong>地址</strong>：<code>dreamina.capcut.com</code></p>
+<p>需要美金信用卡或 PayPal，面向海外用户。</p>
+<hr>
+<h3 id="渠道五：Pippit-国际版（7-天免费试用）"><a href="#渠道五：Pippit-国际版（7-天免费试用）" class="headerlink" title="渠道五：Pippit 国际版（7 天免费试用）"></a>渠道五：Pippit 国际版（7 天免费试用）</h3><p><strong>地址</strong>：<code>pippit.ai</code></p>
+<ul>
+<li>注册送 520 积分 + 每天 120 积分</li>
+<li>7 天免费试用（<strong>记得提前取消！</strong>）</li>
+<li>需要开 Global 模式访问</li>
+</ul>
+<hr>
+<h3 id="🎯-新手推荐组合"><a href="#🎯-新手推荐组合" class="headerlink" title="🎯 新手推荐组合"></a>🎯 新手推荐组合</h3><table>
+<thead>
+<tr>
+<th>需求</th>
+<th>推荐方案</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>零成本体验</td>
+<td>小云雀（送1200积分）+ 豆包（每天10次）</td>
+</tr>
+<tr>
+<td>追求质量</td>
+<td>即梦网页版（¥1解锁）</td>
+</tr>
+<tr>
+<td>批量生产</td>
+<td>即梦 + 小云雀双平台</td>
+</tr>
+<tr>
+<td>海外用户</td>
+<td>Dreamina 或 Pippit</td>
+</tr>
+</tbody></table>
+<p><strong>第一天注册全部平台，可获得约 213 秒（3.5 分钟）的免费 AI 视频额度。</strong></p>
+<p>之后每天至少 60+ 秒免费额度。</p>
+<hr>
+<h2 id="五、提示词技巧：怎么写才能出好片？"><a href="#五、提示词技巧：怎么写才能出好片？" class="headerlink" title="五、提示词技巧：怎么写才能出好片？"></a>五、提示词技巧：怎么写才能出好片？</h2><h3 id="基础模板"><a href="#基础模板" class="headerlink" title="基础模板"></a>基础模板</h3><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[场景描述]，[角色描述]，[动作描述]，[镜头运动]，[氛围/光线]</span><br></pre></td></tr></table></figure></div>
+
+<h3 id="示例-1：电影感镜头"><a href="#示例-1：电影感镜头" class="headerlink" title="示例 1：电影感镜头"></a>示例 1：电影感镜头</h3><blockquote>
+<p>樱花树下，一个女孩扭头看向一只猫，花瓣飘落，微风吹过她的头发。女孩摸了摸猫的头，对猫说”你好呀小家伙”，最后画面定格在女孩上。</p>
+</blockquote>
+<h3 id="示例-2：动作场景"><a href="#示例-2：动作场景" class="headerlink" title="示例 2：动作场景"></a>示例 2：动作场景</h3><blockquote>
+<p>少年主角在战斗中被击倒，在伙伴呼喊声中觉醒隐藏力量。身体周围爆发金色气场，头发变色竖起。随后以超高速冲向敌人，释放巨大的能量斩击，斩击波横切整个天空。</p>
+</blockquote>
+<h3 id="示例-3：多角度追逐"><a href="#示例-3：多角度追逐" class="headerlink" title="示例 3：多角度追逐"></a>示例 3：多角度追逐</h3><blockquote>
+<p>以这张照片为开头，图中人物扔掉纸板摆功夫起手式，与机器人激战。低角度跟拍侧闪 + 机器人横扫，中景快切拳掌撞金属，特写火花 + 镜头微震。</p>
+</blockquote>
+<h3 id="进阶技巧"><a href="#进阶技巧" class="headerlink" title="进阶技巧"></a>进阶技巧</h3><ol>
+<li><strong>描述越具体越好</strong>：不要写”一个人在走路”，写”穿着深蓝色风衣的中年男人在雨中的东京街头快步行走，霓虹灯映在湿漉漉的地面上”</li>
+<li><strong>用分镜思维</strong>：描述镜头的切换——“先远景 → 中景 → 特写”</li>
+<li><strong>加入情绪词</strong>：紧张、温馨、史诗、孤独——模型会自动匹配色调和节奏</li>
+<li><strong>善用参考素材</strong>：上传风格参考图比文字描述更精准</li>
+<li><strong>短视频（4-5秒）质量最稳定</strong>，长视频更容易出瑕疵</li>
+</ol>
+<hr>
+<h2 id="六、与竞品对比"><a href="#六、与竞品对比" class="headerlink" title="六、与竞品对比"></a>六、与竞品对比</h2><table>
+<thead>
+<tr>
+<th>能力</th>
+<th>Seedance 2.0</th>
+<th>Sora 2</th>
+<th>Veo 3.1</th>
+<th>可灵</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>自运镜</td>
+<td>✅ 自动</td>
+<td>❌ 需手动描述</td>
+<td>部分</td>
+<td>部分</td>
+</tr>
+<tr>
+<td>音画同步</td>
+<td>✅ 原生</td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>多模态输入</td>
+<td>✅ 文&#x2F;图&#x2F;视频&#x2F;音频</td>
+<td>文&#x2F;图</td>
+<td>文&#x2F;图</td>
+<td>文&#x2F;图</td>
+</tr>
+<tr>
+<td>角色一致性</td>
+<td>⭐⭐⭐⭐⭐</td>
+<td>⭐⭐⭐⭐</td>
+<td>⭐⭐⭐⭐</td>
+<td>⭐⭐⭐</td>
+</tr>
+<tr>
+<td>单次可用率</td>
+<td>90%+</td>
+<td>50-60%</td>
+<td>60-70%</td>
+<td>30-40%</td>
+</tr>
+<tr>
+<td>最长时长</td>
+<td>15秒</td>
+<td>15秒</td>
+<td>8秒</td>
+<td>10秒</td>
+</tr>
+<tr>
+<td>免费额度</td>
+<td>多渠道</td>
+<td>无（$200&#x2F;月）</td>
+<td>有限</td>
+<td>有限</td>
+</tr>
+<tr>
+<td>物理真实感</td>
+<td>⭐⭐⭐⭐⭐</td>
+<td>⭐⭐⭐⭐</td>
+<td>⭐⭐⭐⭐</td>
+<td>⭐⭐⭐</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="七、行业影响：谁会被颠覆？"><a href="#七、行业影响：谁会被颠覆？" class="headerlink" title="七、行业影响：谁会被颠覆？"></a>七、行业影响：谁会被颠覆？</h2><h3 id="1-短剧行业"><a href="#1-短剧行业" class="headerlink" title="1. 短剧行业"></a>1. 短剧行业</h3><p>短剧制作成本中，演员、场地、摄像团队占大头。如果 AI 能生成足够质量的视频，这些成本可能被<strong>削减 90% 以上</strong>。更重要的是，制作周期的缩短意味着可以快速 A&#x2F;B 测试，用数据驱动内容迭代。</p>
+<h3 id="2-动漫-x2F-动画行业"><a href="#2-动漫-x2F-动画行业" class="headerlink" title="2. 动漫&#x2F;动画行业"></a>2. 动漫&#x2F;动画行业</h3><p>传统动画中耗时的关键帧绘制、中间画填充、口型同步等环节，现在可以极大提速。一位做了 10 年院线电影的从业者说：</p>
+<blockquote>
+<p>“5 秒特效镜头传统流程需要一个高级制作人员花近一个月。现在 3 块钱，2 分钟搞定。数千倍成本下降，上万倍效率提升。”</p>
+</blockquote>
+<h3 id="3-视频-Agent-赛道"><a href="#3-视频-Agent-赛道" class="headerlink" title="3. 视频 Agent 赛道"></a>3. 视频 Agent 赛道</h3><p>AI 视频 Agent 以前靠”拆解工作流 + 工程优化”弥补模型不足。<strong>但当模型本身足够强时，工程层面能优化的空间就很小了。</strong> 未来比的是谁对 Seedance 2.0 理解更深，能把这套理解做进产品。</p>
+<h3 id="4-广告行业"><a href="#4-广告行业" class="headerlink" title="4. 广告行业"></a>4. 广告行业</h3><p>一条 30 秒广告片，传统制作可能需要几十万和数周时间。Seedance 2.0 让个人创作者也能产出商业级质量的视频，广告行业的门槛正在被拉平。</p>
+<hr>
+<h2 id="八、写在最后"><a href="#八、写在最后" class="headerlink" title="八、写在最后"></a>八、写在最后</h2><p>有人说 Seedance 2.0 是第一个展现出”世界模型”雏形的视频生成产品。它不只是在”画”你描述的场景，它在<strong>构建一个有内在逻辑的世界</strong>：花瓣飘落方向和风向一致，物体重力表现合理，角色情绪和语气匹配。</p>
+<p>当工具强大到一定程度，**你不再想”这个模型能不能做到”，而是开始想”我要讲一个什么样的故事”**。</p>
+<p>工具退到了幕后，创作者走到了台前。</p>
+<p>2026 年 AI 视频市场规模预计突破 300 亿美元。在这场革命中，<strong>真正稀缺的不是工具，而是你脑子里那个还没被讲出来的故事。</strong></p>
+<hr>
+<p><em>参考来源：极客公园、新京报贝壳财经、AI工具集、36氪、掘金社区</em></p>
+
+		</div>
+
+		
+		<div class="post-copyright-info w-full my-8 px-2 sm:px-6 md:px-8">
+			<div class="article-copyright-info-container">
+    <ul>
+        <li><strong>标题:</strong> Seedance 2.0 深度解析：字节跳动&#34;杀死比赛&#34;的 AI 视频模型，附免费试用全攻略</li>
+        <li><strong>作者:</strong> Nathan</li>
+        <li><strong>创建于
+                :</strong> 2026-02-10 16:00:00</li>
+        
+            <li>
+                <strong>更新于
+                    :</strong> 2026-02-20 17:22:12
+            </li>
+        
+        <li>
+            <strong>链接:</strong> https://hydraxman.github.io/2026/02/10/seedance-2-guide/
+        </li>
+        <li>
+            <strong>
+                版权声明:
+            </strong>
+            
+
+            
+                本文章采用 <a class="license" target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0">CC BY-NC-SA 4.0</a> 进行许可。
+            
+        </li>
+    </ul>
+</div>
+
+		</div>
+		
+
+		
+		<ul class="post-tags-box text-lg mt-1.5 flex-wrap justify-center flex md:hidden">
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/AI/">#AI</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/%E6%95%99%E7%A8%8B/">#教程</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/%E8%A7%86%E9%A2%91%E7%94%9F%E6%88%90/">#视频生成</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8/">#字节跳动</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/Seedance/">#Seedance</a>&nbsp;
+			</li>
+			
+		</ul>
+		
+
+		
+
+		
+		<div class="article-nav my-8 flex justify-between items-center px-2 sm:px-6 md:px-8">
+			
+			<div class="article-prev border-border-color shadow-redefine-flat shadow-shadow-color-2 rounded-medium px-4 py-2 hover:shadow-redefine-flat-hover hover:shadow-shadow-color-2">
+				<a class="prev" rel="prev" href="/2026/02/11/github-trending/2026-02-11/">
+					<span class="left arrow-icon flex justify-center items-center">
+						<i class="fa-solid fa-chevron-left"></i>
+					</span>
+					<span class="title flex justify-center items-center">
+						<span class="post-nav-title-item truncate max-w-48">GitHub Trending 日报：今日最火的 5 个开源项目深度解析</span>
+						<span class="post-nav-item">上一篇</span>
+					</span>
+				</a>
+			</div>
+			
+			
+			<div class="article-next border-border-color shadow-redefine-flat shadow-shadow-color-2 rounded-medium px-4 py-2 hover:shadow-redefine-flat-hover hover:shadow-shadow-color-2">
+				<a class="next" rel="next" href="/2026/02/10/ai-agent-era-2026/">
+					<span class="title flex justify-center items-center">
+						<span class="post-nav-title-item truncate max-w-48">2026年，AI Agent 时代真的来了</span>
+						<span class="post-nav-item">下一篇</span>
+					</span>
+					<span class="right arrow-icon flex justify-center items-center">
+						<i class="fa-solid fa-chevron-right"></i>
+					</span>
+				</a>
+			</div>
+			
+		</div>
+		
+
+
+		
+	</div>
+
+	
+	<div class="toc-content-container">
+		<div class="post-toc-wrap">
+	<div class="post-toc">
+		<div class="toc-title">目录</div>
+		<div class="page-title">Seedance 2.0 深度解析：字节跳动&#34;杀死比赛&#34;的 AI 视频模型，附免费试用全攻略</div>
+		<ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E5%9B%9B%E5%A4%A7%E6%A0%B8%E5%BF%83%E8%83%BD%E5%8A%9B%EF%BC%9A%E4%BB%8E%E2%80%9D%E7%B4%A0%E6%9D%90%E7%94%9F%E6%88%90%E5%99%A8%E2%80%9D%E5%88%B0%E2%80%9DAI-%E5%AF%BC%E6%BC%94%E2%80%9D"><span class="nav-text">一、四大核心能力：从”素材生成器”到”AI 导演”</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E8%87%AA%E5%88%86%E9%95%9C-%E8%87%AA%E8%BF%90%E9%95%9C%EF%BC%9A%E5%91%8A%E5%88%AB%E6%89%8B%E5%8A%A8%E6%8E%A7%E5%88%B6"><span class="nav-text">1. 自分镜 + 自运镜：告别手动控制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E5%A4%9A%E6%A8%A1%E6%80%81%E5%8F%82%E8%80%83%EF%BC%9A%E6%9C%80%E5%A4%9A-12-%E4%B8%AA%E7%B4%A0%E6%9D%90%E5%90%8C%E6%97%B6%E8%BE%93%E5%85%A5"><span class="nav-text">2. 多模态参考：最多 12 个素材同时输入</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E5%8E%9F%E7%94%9F%E9%9F%B3%E7%94%BB%E5%90%8C%E6%AD%A5%EF%BC%9A%E5%91%8A%E5%88%AB%E2%80%9D%E9%85%8D%E9%9F%B3%E6%84%9F%E2%80%9D"><span class="nav-text">3. 原生音画同步：告别”配音感”</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E5%A4%9A%E9%95%9C%E5%A4%B4%E5%8F%99%E4%BA%8B-%E8%A7%92%E8%89%B2%E4%B8%80%E8%87%B4%E6%80%A7"><span class="nav-text">4. 多镜头叙事 + 角色一致性</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E6%95%B0%E6%8D%AE%E8%AF%B4%E8%AF%9D%EF%BC%9A%E4%B8%BA%E4%BB%80%E4%B9%88%E8%AF%B4%E2%80%9D%E6%9D%80%E6%AD%BB%E6%AF%94%E8%B5%9B%E2%80%9D%EF%BC%9F"><span class="nav-text">二、数据说话：为什么说”杀死比赛”？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E7%89%88%E6%9D%83%E4%BA%89%E8%AE%AE%EF%BC%9A%E5%BD%B1%E8%A7%86%E9%A3%93%E9%A3%8E%E4%BA%8B%E4%BB%B6"><span class="nav-text">三、版权争议：影视飓风事件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E8%AF%95%E7%94%A8%E5%85%A8%E6%94%BB%E7%95%A5%EF%BC%9A5-%E7%A7%8D%E5%85%8D%E8%B4%B9%E6%B8%A0%E9%81%93"><span class="nav-text">四、试用全攻略：5 种免费渠道</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B8%A0%E9%81%93%E4%B8%80%EF%BC%9A%E5%8D%B3%E6%A2%A6%E7%BD%91%E9%A1%B5%E7%89%88%EF%BC%88%E2%AD%90-%E8%B4%A8%E9%87%8F%E6%9C%80%E5%A5%BD%EF%BC%89"><span class="nav-text">渠道一：即梦网页版（⭐ 质量最好）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B8%A0%E9%81%93%E4%BA%8C%EF%BC%9A%E5%B0%8F%E4%BA%91%E9%9B%80%E7%BD%91%E9%A1%B5%E7%89%88%EF%BC%88%E2%AD%90-%E6%80%A7%E4%BB%B7%E6%AF%94%E6%9C%80%E9%AB%98%EF%BC%89"><span class="nav-text">渠道二：小云雀网页版（⭐ 性价比最高）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B8%A0%E9%81%93%E4%B8%89%EF%BC%9A%E8%B1%86%E5%8C%85-App%EF%BC%88%E2%AD%90-%E6%9C%80%E6%96%B9%E4%BE%BF%EF%BC%89"><span class="nav-text">渠道三：豆包 App（⭐ 最方便）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B8%A0%E9%81%93%E5%9B%9B%EF%BC%9ADreamina-%E5%9B%BD%E9%99%85%E7%89%88%EF%BC%88%E6%B5%B7%E5%A4%96%E7%94%A8%E6%88%B7%EF%BC%89"><span class="nav-text">渠道四：Dreamina 国际版（海外用户）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B8%A0%E9%81%93%E4%BA%94%EF%BC%9APippit-%E5%9B%BD%E9%99%85%E7%89%88%EF%BC%887-%E5%A4%A9%E5%85%8D%E8%B4%B9%E8%AF%95%E7%94%A8%EF%BC%89"><span class="nav-text">渠道五：Pippit 国际版（7 天免费试用）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%F0%9F%8E%AF-%E6%96%B0%E6%89%8B%E6%8E%A8%E8%8D%90%E7%BB%84%E5%90%88"><span class="nav-text">🎯 新手推荐组合</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%94%E3%80%81%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%8A%80%E5%B7%A7%EF%BC%9A%E6%80%8E%E4%B9%88%E5%86%99%E6%89%8D%E8%83%BD%E5%87%BA%E5%A5%BD%E7%89%87%EF%BC%9F"><span class="nav-text">五、提示词技巧：怎么写才能出好片？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E7%A1%80%E6%A8%A1%E6%9D%BF"><span class="nav-text">基础模板</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A4%BA%E4%BE%8B-1%EF%BC%9A%E7%94%B5%E5%BD%B1%E6%84%9F%E9%95%9C%E5%A4%B4"><span class="nav-text">示例 1：电影感镜头</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A4%BA%E4%BE%8B-2%EF%BC%9A%E5%8A%A8%E4%BD%9C%E5%9C%BA%E6%99%AF"><span class="nav-text">示例 2：动作场景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A4%BA%E4%BE%8B-3%EF%BC%9A%E5%A4%9A%E8%A7%92%E5%BA%A6%E8%BF%BD%E9%80%90"><span class="nav-text">示例 3：多角度追逐</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%9B%E9%98%B6%E6%8A%80%E5%B7%A7"><span class="nav-text">进阶技巧</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AD%E3%80%81%E4%B8%8E%E7%AB%9E%E5%93%81%E5%AF%B9%E6%AF%94"><span class="nav-text">六、与竞品对比</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%83%E3%80%81%E8%A1%8C%E4%B8%9A%E5%BD%B1%E5%93%8D%EF%BC%9A%E8%B0%81%E4%BC%9A%E8%A2%AB%E9%A2%A0%E8%A6%86%EF%BC%9F"><span class="nav-text">七、行业影响：谁会被颠覆？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E7%9F%AD%E5%89%A7%E8%A1%8C%E4%B8%9A"><span class="nav-text">1. 短剧行业</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E5%8A%A8%E6%BC%AB-x2F-%E5%8A%A8%E7%94%BB%E8%A1%8C%E4%B8%9A"><span class="nav-text">2. 动漫&#x2F;动画行业</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E8%A7%86%E9%A2%91-Agent-%E8%B5%9B%E9%81%93"><span class="nav-text">3. 视频 Agent 赛道</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E5%B9%BF%E5%91%8A%E8%A1%8C%E4%B8%9A"><span class="nav-text">4. 广告行业</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AB%E3%80%81%E5%86%99%E5%9C%A8%E6%9C%80%E5%90%8E"><span class="nav-text">八、写在最后</span></a></li></ol>
+
+	</div>
+</div>
+	</div>
+	
+</div>
+			</div>
+
+			
+		</div>
+
+		<div class="main-content-footer">
+			<footer class="footer mt-5 py-5 h-auto text-base text-third-text-color relative border-t-2 border-t-border-color">
+    <div class="info-container py-3 text-center">
+        
+        <div class="text-center">
+            &copy;
+            
+              <span>2024</span>
+              -
+            
+            2026&nbsp;&nbsp;<i class="fa-solid fa-heart fa-beat" style="--fa-animation-duration: 0.5s; color: #333"></i>&nbsp;&nbsp;<a href="/">Nathan</a>
+            
+                
+                <p class="post-count space-x-0.5">
+                    <span>
+                        共撰写了 52 篇文章
+                    </span>
+                    
+                        <span>
+                            共 111.8k 字
+                        </span>
+                    
+                </p>
+            
+        </div>
+        
+        <div class="relative text-center lg:absolute lg:left-[20px] lg:top-1/2 lg:-translate-y-1/2 lg:text-left">
+            <span class="lg:block text-sm">由 <?xml version="1.0" encoding="utf-8"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg class="relative top-[2px] inline-block align-baseline" version="1.1" id="圖層_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="1rem" height="1rem" viewBox="0 0 512 512" enable-background="new 0 0 512 512" xml:space="preserve"><path fill="#0E83CD" d="M256.4,25.8l-200,115.5L56,371.5l199.6,114.7l200-115.5l0.4-230.2L256.4,25.8z M349,354.6l-18.4,10.7l-18.6-11V275H200v79.6l-18.4,10.7l-18.6-11v-197l18.5-10.6l18.5,10.8V237h112v-79.6l18.5-10.6l18.5,10.8V354.6z"/></svg><a target="_blank" class="text-base" href="https://hexo.io">Hexo</a> 驱动</span>
+            <span class="text-sm lg:block">主题&nbsp;<a class="text-base" target="_blank" href="https://github.com/EvanNotFound/hexo-theme-redefine">Redefine v2.8.5</a></span>
+        </div>
+        
+        
+            <div>
+                博客已运行 <span class="odometer" id="runtime_days" ></span> 天 <span class="odometer" id="runtime_hours"></span> 小时 <span class="odometer" id="runtime_minutes"></span> 分钟 <span class="odometer" id="runtime_seconds"></span> 秒
+            </div>
+        
+        
+            <script data-swup-reload-script>
+                try {
+                    function odometer_init() {
+                    const elements = document.querySelectorAll('.odometer');
+                    elements.forEach(el => {
+                        new Odometer({
+                            el,
+                            format: '( ddd).dd',
+                            duration: 200
+                        });
+                    });
+                    }
+                    odometer_init();
+                } catch (error) {}
+            </script>
+        
+        
+        
+    </div>  
+</footer>
+		</div>
+	</div>
+
+	
+	<div class="post-tools">
+		<div class="post-tools-container">
+	<ul class="article-tools-list">
+		<!-- TOC aside toggle -->
+		
+		<li class="right-bottom-tools page-aside-toggle">
+			<i class="fa-regular fa-outdent"></i>
+		</li>
+		
+
+		<!-- go comment -->
+		
+	</ul>
+</div>
+	</div>
+	
+
+	<div class="right-side-tools-container">
+		<div class="side-tools-container">
+	<ul class="hidden-tools-list">
+		<li class="right-bottom-tools tool-font-adjust-plus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-plus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-font-adjust-minus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-minus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-dark-light-toggle flex justify-center items-center">
+			<i class="fa-regular fa-moon"></i>
+		</li>
+
+		<!-- rss -->
+		
+
+		
+
+		<li class="right-bottom-tools tool-scroll-to-bottom flex justify-center items-center">
+			<i class="fa-regular fa-arrow-down"></i>
+		</li>
+	</ul>
+
+	<ul class="visible-tools-list">
+		<li class="right-bottom-tools toggle-tools-list flex justify-center items-center">
+			<i class="fa-regular fa-cog fa-spin"></i>
+		</li>
+		
+		<li class="right-bottom-tools tool-scroll-to-top flex justify-center items-center">
+			<i class="arrow-up fas fa-arrow-up"></i>
+			<span class="percent"></span>
+		</li>
+		
+		
+	</ul>
+</div>
+	</div>
+
+	<div class="image-viewer-container">
+	<img src="">
+</div>
+
+	
+	<div class="search-pop-overlay">
+	<div class="popup search-popup">
+		<div class="search-header">
+			<span class="search-input-field-pre">
+				<i class="fa-solid fa-keyboard"></i>
+			</span>
+			<div class="search-input-container">
+				<input autocomplete="off" autocorrect="off" autocapitalize="off" placeholder="站内搜索您需要的内容..." spellcheck="false" type="search" class="search-input">
+			</div>
+			<span class="popup-btn-close">
+				<i class="fa-solid fa-times"></i>
+			</span>
+		</div>
+		<div id="search-result">
+			<div id="no-result">
+				<i class="fa-solid fa-spinner fa-spin-pulse fa-5x fa-fw"></i>
+			</div>
+		</div>
+	</div>
+</div>
+	
+
+</main>
+
+
+
+<script src="/js/build/libs/Swup.min.js"></script>
+
+<script src="/js/build/libs/SwupSlideTheme.min.js"></script>
+
+<script src="/js/build/libs/SwupScriptsPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupProgressPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupScrollPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupPreloadPlugin.min.js"></script>
+
+<script>
+    const swup = new Swup({
+        plugins: [
+            new SwupScriptsPlugin({
+                optin: true,
+            }),
+            new SwupProgressPlugin(),
+            new SwupScrollPlugin({
+                offset: 80,
+            }),
+            new SwupSlideTheme({
+                mainElement: ".main-content-body",
+            }),
+            new SwupPreloadPlugin(),
+        ],
+        containers: ["#swup"],
+    });
+</script>
+
+
+
+
+	
+<script src="/js/build/tools/imageViewer.js" type="module"></script>
+
+<script src="/js/build/utils.js" type="module"></script>
+
+<script src="/js/build/main.js" type="module"></script>
+
+<script src="/js/build/layouts/navbarShrink.js" type="module"></script>
+
+<script src="/js/build/tools/scrollTopBottom.js" type="module"></script>
+
+<script src="/js/build/tools/lightDarkSwitch.js" type="module"></script>
+
+<script src="/js/build/layouts/categoryList.js" type="module"></script>
+
+
+
+    
+<script src="/js/build/tools/localSearch.js" type="module"></script>
+
+
+
+
+    
+<script src="/js/build/tools/codeBlock.js" type="module"></script>
+
+
+
+
+    
+<script src="/js/build/layouts/lazyload.js" type="module"></script>
+
+
+
+
+    
+<script src="/js/build/tools/runtime.js"></script>
+
+    
+<script src="/js/build/libs/odometer.min.js"></script>
+
+    
+<link rel="stylesheet" href="/assets/odometer-theme-minimal.css">
+
+
+
+
+  
+<script src="/js/build/libs/Typed.min.js"></script>
+
+  
+<script src="/js/build/plugins/typed.js" type="module"></script>
+
+
+
+
+
+
+
+
+    
+<script src="/js/build/libs/anime.min.js"></script>
+
+
+
+
+
+    
+<script src="/js/build/tools/tocToggle.js" type="module" data-swup-reload-script=""></script>
+
+<script src="/js/build/layouts/toc.js" type="module" data-swup-reload-script=""></script>
+
+<script src="/js/build/plugins/tabs.js" type="module" data-swup-reload-script=""></script>
+
+
+
+
+<script src="/js/build/libs/moment-with-locales.min.js" data-swup-reload-script=""></script>
+
+
+<script src="/js/build/layouts/essays.js" type="module" data-swup-reload-script=""></script>
+
+
+
+
+
+	
+</body>
+
+</html>

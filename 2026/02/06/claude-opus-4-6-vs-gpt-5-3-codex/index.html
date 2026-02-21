@@ -1,0 +1,1415 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="keywords" content="计算机技术, 生活中的胡思乱想">
+    
+    <meta name="author" content="Nathan">
+    
+    <!-- Completely eliminate flash of wrong theme -->
+    <script>
+        (function() {
+            const THEME_KEY = "REDEFINE-THEME-STATUS";
+            const DARK = "dark", LIGHT = "light";
+            
+            // Get preferred theme
+            function getTheme() {
+                try {
+                    const saved = localStorage.getItem(THEME_KEY);
+                    if (saved) {
+                        const { isDark } = JSON.parse(saved);
+                        return isDark ? DARK : LIGHT;
+                    }
+                } catch (e) {}
+                
+                return matchMedia("(prefers-color-scheme: dark)").matches ? DARK : LIGHT;
+            }
+            
+            // Apply theme to document
+            function applyTheme(theme) {
+                const isDark = theme === DARK;
+                const root = document.documentElement;
+                
+                // Set data attribute for CSS variables
+                root.setAttribute("data-theme", theme);
+                
+                // Set classes for compatibility
+                root.classList.add(theme);
+                root.classList.remove(isDark ? LIGHT : DARK);
+                root.style.colorScheme = theme;
+            }
+            
+            // Initial application
+            const theme = getTheme();
+            applyTheme(theme);
+            
+            // Listen for system preference changes
+            matchMedia("(prefers-color-scheme: dark)").addEventListener("change", ({ matches }) => {
+                // Only update if using system preference (no localStorage entry)
+                if (!localStorage.getItem(THEME_KEY)) {
+                    applyTheme(matches ? DARK : LIGHT);
+                }
+            });
+            
+            // Set body classes once DOM is ready
+            if (document.readyState !== "loading") {
+                document.body.classList.add(theme + "-mode");
+            } else {
+                document.addEventListener("DOMContentLoaded", () => {
+                    document.body.classList.add(theme + "-mode");
+                    document.body.classList.remove((theme === DARK ? LIGHT : DARK) + "-mode");
+                });
+            }
+        })();
+    </script>
+    
+    <!-- Critical CSS to prevent flash -->
+    <style>
+        :root[data-theme="dark"] {
+            --background-color: #202124;
+            --background-color-transparent: rgba(32, 33, 36, 0.6);
+            --second-background-color: #2d2e32;
+            --third-background-color: #34353a;
+            --third-background-color-transparent: rgba(32, 33, 36, 0.6);
+            --primary-color: #0066CC;
+            --first-text-color: #ffffff;
+            --second-text-color: #eeeeee;
+            --third-text-color: #bebec6;
+            --fourth-text-color: #999999;
+            --default-text-color: #bebec6;
+            --invert-text-color: #373D3F;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --selection-color: #0066CC;
+            --shadow-color-1: rgba(255, 255, 255, 0.08);
+            --shadow-color-2: rgba(255, 255, 255, 0.05);
+        }
+        
+        :root[data-theme="light"] {
+            --background-color: #fff;
+            --background-color-transparent: rgba(255, 255, 255, 0.6);
+            --second-background-color: #f8f8f8;
+            --third-background-color: #f2f2f2;
+            --third-background-color-transparent: rgba(241, 241, 241, 0.6);
+            --primary-color: #0066CC;
+            --first-text-color: #16171a;
+            --second-text-color: #2f3037;
+            --third-text-color: #5e5e5e;
+            --fourth-text-color: #eeeeee;
+            --default-text-color: #373D3F;
+            --invert-text-color: #bebec6;
+            --border-color: rgba(0, 0, 0, 0.08);
+            --selection-color: #0066CC;
+            --shadow-color-1: rgba(0, 0, 0, 0.08);
+            --shadow-color-2: rgba(0, 0, 0, 0.05);
+        }
+        
+        body {
+            background-color: var(--background-color);
+            color: var(--default-text-color);
+        }
+        
+        /* Apply body classes as soon as DOM is ready */
+        :root[data-theme="dark"] body {
+            background-color: var(--background-color);
+            color: var(--default-text-color);
+        }
+    </style>
+    
+    <!-- preconnect -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    
+    <!--- Seo Part-->
+    
+    <link rel="canonical" href="https://hydraxman.github.io/2026/02/06/claude-opus-4-6-vs-gpt-5-3-codex/"/>
+    <meta name="robots" content="index,follow">
+    <meta name="googlebot" content="index,follow">
+    <meta name="revisit-after" content="1 days">
+    
+    
+    
+        
+        <meta name="description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Claude Opus 4.6 vs GPT-5.3-Codex：2026年AI编程双雄同日对决">
+<meta property="og:url" content="https://hydraxman.github.io/2026/02/06/claude-opus-4-6-vs-gpt-5-3-codex/index.html">
+<meta property="og:site_name" content="内森淼文">
+<meta property="og:description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://hydraxman.github.io/images/redefine-og.webp">
+<meta property="article:published_time" content="2026-02-06T00:00:00.000Z">
+<meta property="article:modified_time" content="2026-02-20T09:22:12.123Z">
+<meta property="article:author" content="Nathan">
+<meta property="article:tag" content="AI">
+<meta property="article:tag" content="GPT">
+<meta property="article:tag" content="Claude">
+<meta property="article:tag" content="编程">
+<meta property="article:tag" content="对比评测">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://hydraxman.github.io/images/redefine-og.webp">
+    
+    
+    <!--- Icon Part-->
+    <link rel="icon" type="image/png" href="/images/favicon.svg" sizes="192x192">
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.svg">
+    <meta name="theme-color" content="#ffffff">
+    <link rel="shortcut icon" href="/images/favicon.svg">
+    <!--- Page Info-->
+    
+    <title>
+        
+            Claude Opus 4.6 vs GPT-5.3-Codex：2026年AI编程双雄同日对决 | 内森淼文
+        
+    </title>
+
+    
+<link rel="stylesheet" href="/fonts/Chillax/chillax.css">
+
+
+    <!--- Inject Part-->
+    
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    
+        
+<link rel="stylesheet" href="/css/build/tailwind.css">
+
+    
+
+    
+<link rel="stylesheet" href="/fonts/GeistMono/geist-mono.css">
+
+    
+<link rel="stylesheet" href="/fonts/Geist/geist.css">
+
+    <!--- Font Part-->
+    
+    
+    
+    
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&display=swap" rel="stylesheet">
+    
+    
+
+    <script id="hexo-configurations">
+    window.config = {"hostname":"hydraxman.github.io","root":"/","language":"zh-CN","path":"search.json"};
+    window.theme = {"articles":{"style":{"font_size":"16px","line_height":1.5,"image_border_radius":"14px","image_alignment":"center","image_caption":false,"link_icon":true,"delete_mask":false,"title_alignment":"left","headings_top_spacing":{"h1":"3.2rem","h2":"2.4rem","h3":"1.9rem","h4":"1.6rem","h5":"1.4rem","h6":"1.3rem"}},"word_count":{"enable":true,"count":true,"min2read":true},"author_label":{"enable":false,"auto":false,"list":[]},"code_block":{"copy":true,"style":"mac","highlight_theme":{"light":"github","dark":"vs2015"},"font":{"enable":false,"family":null,"url":null}},"toc":{"enable":true,"max_depth":3,"number":false,"expand":true,"init_open":true},"copyright":{"enable":true,"default":"cc_by_nc_sa"},"lazyload":true,"pangu_js":false,"recommendation":{"enable":false,"title":"推荐阅读","limit":3,"mobile_limit":2,"placeholder":"/images/wallhaven-wqery6-light.webp","skip_dirs":[]}},"colors":{"primary":"#ffffff","secondary":null,"default_mode":"light"},"global":{"fonts":{"chinese":{"enable":false,"family":null,"url":null},"english":{"enable":true,"family":"Inter","url":"https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"},"title":{"enable":true,"family":"Noto Serif","url":"https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&display=swap"}},"content_max_width":"1000px","sidebar_width":"210px","hover":{"shadow":true,"scale":false},"scroll_progress":{"bar":true,"percentage":true},"website_counter":{"url":"https://cn.vercount.one/js","enable":false,"site_pv":true,"site_uv":true,"post_pv":true},"single_page":true,"preloader":{"enable":false,"custom_message":null},"side_tools":{"gear_rotation":true,"auto_expand":false},"open_graph":{"enable":true,"image":"/images/redefine-og.webp","description":"Hexo Theme Redefine, Redefine Your Hexo Journey."},"google_analytics":{"enable":false,"id":null}},"home_banner":{"enable":true,"style":"fixed","image":{"light":"/images/banner-light.jpg","dark":"/images/banner-dark.jpg"},"title":"内森淼文","subtitle":{"text":["AI · 编程 · 科技见闻","Write Code, Read World"],"hitokoto":{"enable":false,"show_author":false,"api":"https://v1.hitokoto.cn"},"typing_speed":100,"backing_speed":80,"starting_delay":500,"backing_delay":1500,"loop":true,"smart_backspace":true},"text_color":{"light":"#fff","dark":"#d1d1b6"},"text_style":{"title_size":"2.8rem","subtitle_size":"1.5rem","line_height":1.2},"custom_font":{"enable":false,"family":null,"url":null},"social_links":{"enable":true,"style":"default","links":{"github":"https://github.com/hydraxman","instagram":null,"zhihu":null,"twitter":null,"email":null},"qrs":{"weixin":null}}},"plugins":{"feed":{"enable":false},"aplayer":{"enable":false,"type":"fixed","audios":[{"name":null,"artist":null,"url":null,"cover":null,"lrc":null}]},"mermaid":{"enable":false,"version":"11.4.1"}},"version":"2.8.5","navbar":{"auto_hide":false,"color":{"left":"#333333","right":"#555555","transparency":35},"width":{"home":"1200px","pages":"1000px"},"links":{"Home":{"path":"/","icon":"fa-regular fa-house"},"Archives":{"path":"/archives","icon":"fa-regular fa-archive"},"Categories":{"path":"/categories","icon":"fa-regular fa-folder"},"Tags":{"path":"/tags","icon":"fa-regular fa-tags"},"About":{"path":"/about","icon":"fa-regular fa-user"}},"search":{"enable":true,"preload":true}},"page_templates":{"friends_column":2,"tags_style":"blur"},"home":{"sidebar":{"enable":true,"position":"left","first_item":"menu","announcement":"AI · 编程 · 科技","show_on_mobile":true,"links":{"Archives":{"path":"/archives","icon":"fa-regular fa-archive"},"Tags":{"path":"/tags","icon":"fa-regular fa-tags"},"Categories":{"path":"/categories","icon":"fa-regular fa-folder"}}},"article_date_format":"auto","excerpt_length":200,"categories":{"enable":true,"limit":3},"tags":{"enable":true,"limit":3}},"footerStart":"2024/01/01 00:00:00"};
+    window.lang_ago = {"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"};
+    window.data = {"masonry":false};
+  </script>
+    
+    <!--- Fontawesome Part-->
+    
+<link rel="stylesheet" href="/fontawesome/fontawesome.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/brands.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/solid.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/regular.min.css">
+
+    
+    
+    
+    
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+
+<body>
+	<div class="progress-bar-container">
+	
+	<span class="scroll-progress-bar"></span>
+	
+
+	
+	<span class="pjax-progress-bar"></span>
+	<!--        <span class="swup-progress-icon">-->
+	<!--            <i class="fa-solid fa-circle-notch fa-spin"></i>-->
+	<!--        </span>-->
+	
+</div>
+
+<main class="page-container" id="swup">
+
+	
+
+	<div class="main-content-container flex flex-col justify-between min-h-dvh">
+		<div class="main-content-header">
+			<header class="navbar-container px-6 md:px-12">
+    <div class="navbar-content transition-navbar ">
+        <div class="left">
+            
+            <a class="logo-title" href="/">
+                
+                内森淼文
+                
+            </a>
+        </div>
+
+        <div class="right">
+            <!-- PC -->
+            <div class="desktop">
+                <ul class="navbar-list">
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/"
+                                        >
+                                    <i class="fa-regular fa-house fa-fw"></i>
+                                    首页
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/archives"
+                                        >
+                                    <i class="fa-regular fa-archive fa-fw"></i>
+                                    归档
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/categories"
+                                        >
+                                    <i class="fa-regular fa-folder fa-fw"></i>
+                                    分类
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/tags"
+                                        >
+                                    <i class="fa-regular fa-tags fa-fw"></i>
+                                    标签
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/about"
+                                        >
+                                    <i class="fa-regular fa-user fa-fw"></i>
+                                    关于
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                    
+                        <li class="navbar-item search search-popup-trigger">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </li>
+                    
+                </ul>
+            </div>
+            <!-- Mobile -->
+            <div class="mobile">
+                
+                    <div class="icon-item search search-popup-trigger"><i class="fa-solid fa-magnifying-glass"></i>
+                    </div>
+                
+                <div class="icon-item navbar-bar">
+                    <div class="navbar-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile sheet -->
+    <div class="navbar-drawer h-dvh w-full absolute top-0 left-0 bg-background-color flex flex-col justify-between">
+        <ul class="drawer-navbar-list flex flex-col px-4 justify-center items-start">
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/"
+                        >
+                            <span>
+                                首页
+                            </span>
+                            
+                                <i class="fa-regular fa-house fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/archives"
+                        >
+                            <span>
+                                归档
+                            </span>
+                            
+                                <i class="fa-regular fa-archive fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/categories"
+                        >
+                            <span>
+                                分类
+                            </span>
+                            
+                                <i class="fa-regular fa-folder fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/tags"
+                        >
+                            <span>
+                                标签
+                            </span>
+                            
+                                <i class="fa-regular fa-tags fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/about"
+                        >
+                            <span>
+                                关于
+                            </span>
+                            
+                                <i class="fa-regular fa-user fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+
+            
+            
+                
+                    
+                    
+                    
+            
+        </ul>
+
+        <div class="statistics flex justify-around my-2.5">
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/tags">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">115</div>
+        <div class="label text-third-text-color text-sm">标签</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/categories">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">5</div>
+        <div class="label text-third-text-color text-sm">分类</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/archives">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">52</div>
+        <div class="label text-third-text-color text-sm">文章</div>
+    </a>
+</div>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+		</div>
+
+		<div class="main-content-body transition-fade-up">
+			
+
+			<div class="main-content">
+				<div class="post-page-container flex relative justify-between box-border w-full h-full">
+	<div class="article-content-container">
+
+		<div class="article-title relative w-full">
+			
+			
+			
+			<img src="/images/claude-opus-vs-gpt-codex/cover.png" alt="Claude Opus 4.6 vs GPT-5.3-Codex：2026年AI编程双雄同日对决" class="w-full h-60 sm:h-72 md:h-80 object-cover sm:rounded-t-large dark:brightness-75" />
+			
+			<div class="w-full flex items-center absolute bottom-0 justify-start">
+				<h1 class="article-title-cover text-center mx-6 my-6 text-second-text-color bg-background-color-transparent px-4 py-3 text-3xl sm:text-4xl md:text-5xl font-semibold backdrop-blur-lg rounded-xl border border-border-color ">Claude Opus 4.6 vs GPT-5.3-Codex：2026年AI编程双雄同日对决</h1>
+			</div>
+			
+		</div>
+
+		
+		<div class="article-header flex flex-row gap-2 items-center px-2 sm:px-6 md:px-8">
+			<div class="avatar w-[46px] h-[46px] flex-shrink-0 rounded-medium border border-border-color p-[1px]">
+				<img src="/images/avatar.png">
+			</div>
+			<div class="info flex flex-col justify-between">
+				<div class="author flex items-center">
+					<span class="name text-default-text-color text-lg font-semibold">Nathan</span>
+					
+				</div>
+				<div class="meta-info">
+					<div class="article-meta-info">
+    <span class="article-date article-meta-item">
+        <i class="fa-regular fa-pen-fancy"></i>&nbsp;
+        <span class="desktop">2026-02-06 08:00</span>
+        <span class="mobile">2026-02-06 08:00</span>
+        <span class="hover-info">创建</span>
+    </span>
+    
+        <span class="article-date article-meta-item">
+            <i class="fa-regular fa-wrench"></i>&nbsp;
+            <span class="desktop">2026-02-20 17:22:12</span>
+            <span class="mobile">2026-02-20 17:22:12</span>
+            <span class="hover-info">更新</span>
+        </span>
+    
+
+    
+        <span class="article-categories article-meta-item">
+            <i class="fa-regular fa-folders"></i>&nbsp;
+            <ul>
+                
+                
+                    
+                        
+                        <li>
+                            <a href="/categories/AI-%E5%89%8D%E6%B2%BF/">AI 前沿</a>&nbsp;
+                        </li>
+                    
+                    
+                
+            </ul>
+        </span>
+    
+    
+        <span class="article-tags article-meta-item">
+            <i class="fa-regular fa-tags"></i>&nbsp;
+            <ul>
+                
+                    <li>
+                        <a href="/tags/AI/">AI</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/GPT/">GPT</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/Claude/">Claude</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/%E7%BC%96%E7%A8%8B/">编程</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/%E5%AF%B9%E6%AF%94%E8%AF%84%E6%B5%8B/">对比评测</a>&nbsp;
+                    </li>
+                
+            </ul>
+        </span>
+    
+
+    
+    
+        <span class="article-wordcount article-meta-item">
+            <i class="fa-regular fa-typewriter"></i>&nbsp;<span>1.5k 字</span>
+        </span>
+    
+    
+        <span class="article-min2read article-meta-item">
+            <i class="fa-regular fa-clock"></i>&nbsp;<span>6 分钟</span>
+        </span>
+    
+    
+</div>
+
+				</div>
+			</div>
+		</div>
+		
+
+		
+
+
+		<div class="article-content markdown-body px-2 sm:px-6 md:px-8 pb-8">
+			<blockquote>
+<p>2026年2月5日，Anthropic与OpenAI同日发布新一代旗舰模型，AI编程领域迎来史诗级对决。</p>
+</blockquote>
+<hr>
+<h2 id="📅-发布概览"><a href="#📅-发布概览" class="headerlink" title="📅 发布概览"></a>📅 发布概览</h2><table>
+<thead>
+<tr>
+<th>项目</th>
+<th>Claude Opus 4.6</th>
+<th>GPT-5.3-Codex</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>发布日期</strong></td>
+<td>2026年2月5日</td>
+<td>2026年2月5日</td>
+</tr>
+<tr>
+<td><strong>开发商</strong></td>
+<td>Anthropic</td>
+<td>OpenAI</td>
+</tr>
+<tr>
+<td><strong>定位</strong></td>
+<td>旗舰级知识工作与编程模型</td>
+<td>顶级智能编程代理</td>
+</tr>
+<tr>
+<td><strong>上下文窗口</strong></td>
+<td>200K 标准 &#x2F; <strong>100万 Beta</strong></td>
+<td>未公布（沿用前代）</td>
+</tr>
+<tr>
+<td><strong>最大输出</strong></td>
+<td><strong>128K tokens</strong></td>
+<td>未公布</td>
+</tr>
+<tr>
+<td><strong>推理速度</strong></td>
+<td>未公布</td>
+<td>比前代快25%</td>
+</tr>
+</tbody></table>
+<p>两家同时发布，简直是AI界的”神仙打架”。</p>
+<span id="more"></span>
+
+<hr>
+<h2 id="🔥-Claude-Opus-4-6-亮点"><a href="#🔥-Claude-Opus-4-6-亮点" class="headerlink" title="🔥 Claude Opus 4.6 亮点"></a>🔥 Claude Opus 4.6 亮点</h2><h3 id="1-100万Token上下文窗口（Beta）"><a href="#1-100万Token上下文窗口（Beta）" class="headerlink" title="1. 100万Token上下文窗口（Beta）"></a>1. 100万Token上下文窗口（Beta）</h3><p>这是Opus系列首个支持超长上下文的模型：</p>
+<ul>
+<li>可处理约<strong>1,500页文本</strong></li>
+<li>或<strong>30,000行代码</strong></li>
+<li>或<strong>1小时以上视频</strong></li>
+</ul>
+<p>在 MRCR v2 长文档检索测试中：</p>
+<ul>
+<li>256K 上下文：93% 准确率</li>
+<li>1M 上下文：76% 准确率</li>
+<li>比 Sonnet 4.5 提升 <strong>4-9倍</strong></li>
+</ul>
+<h3 id="2-自适应思考（Adaptive-Thinking）"><a href="#2-自适应思考（Adaptive-Thinking）" class="headerlink" title="2. 自适应思考（Adaptive Thinking）"></a>2. 自适应思考（Adaptive Thinking）</h3><p>取代旧版 Extended Thinking，四档努力级别：</p>
+<ul>
+<li><strong>low</strong> - 跳过思考，适合简单任务</li>
+<li><strong>medium</strong> - 适度推理，速度与质量平衡</li>
+<li><strong>high</strong>（默认）- 大多数生产环境推荐</li>
+<li><strong>max</strong> - 最高能力，适合最难问题（Opus 4.6 新增）</li>
+</ul>
+<h3 id="3-Agent-Teams（智能体团队）"><a href="#3-Agent-Teams（智能体团队）" class="headerlink" title="3. Agent Teams（智能体团队）"></a>3. Agent Teams（智能体团队）</h3><p>Claude Code 现支持多代理并行协作：</p>
+<ul>
+<li>一个代理处理前端</li>
+<li>一个代理处理后端</li>
+<li>一个代理管理测试</li>
+<li>全部在监督控制下同时工作</li>
+</ul>
+<h3 id="4-Claude-in-PowerPoint（研究预览）"><a href="#4-Claude-in-PowerPoint（研究预览）" class="headerlink" title="4. Claude in PowerPoint（研究预览）"></a>4. Claude in PowerPoint（研究预览）</h3><p>直接在 Microsoft PowerPoint 中工作：</p>
+<ul>
+<li>理解版式、字体、母版</li>
+<li>保持品牌一致性</li>
+<li>从描述生成完整演示文稿</li>
+</ul>
+<h3 id="5-Compaction-API（Beta）"><a href="#5-Compaction-API（Beta）" class="headerlink" title="5. Compaction API（Beta）"></a>5. Compaction API（Beta）</h3><p>服务端上下文压缩，实现<strong>无限对话</strong>：</p>
+<ul>
+<li>自动总结旧对话内容</li>
+<li>无需手动管理上下文</li>
+<li>对长链路代理工作流特别有用</li>
+</ul>
+<hr>
+<h2 id="🚀-GPT-5-3-Codex-亮点"><a href="#🚀-GPT-5-3-Codex-亮点" class="headerlink" title="🚀 GPT-5.3-Codex 亮点"></a>🚀 GPT-5.3-Codex 亮点</h2><h3 id="1-统一旗舰架构"><a href="#1-统一旗舰架构" class="headerlink" title="1. 统一旗舰架构"></a>1. 统一旗舰架构</h3><p>融合了：</p>
+<ul>
+<li>GPT-5.2-Codex 的<strong>编程能力</strong></li>
+<li>GPT-5.2 的<strong>推理与专业知识</strong></li>
+</ul>
+<p>单一模型完成所有工作，无需切换。</p>
+<h3 id="2-25-速度提升"><a href="#2-25-速度提升" class="headerlink" title="2. 25%速度提升"></a>2. 25%速度提升</h3><p>基础设施和推理优化带来显著提速，而且<strong>更少的token消耗</strong>就能达成同等效果。</p>
+<h3 id="3-自我参与开发"><a href="#3-自我参与开发" class="headerlink" title="3. 自我参与开发"></a>3. 自我参与开发</h3><p>这是首个”参与自身创建”的 Codex 模型：</p>
+<ul>
+<li>用于调试训练过程</li>
+<li>管理部署</li>
+<li>诊断测试结果</li>
+<li>构建数据管道和可视化工具</li>
+</ul>
+<h3 id="4-高级网络安全能力"><a href="#4-高级网络安全能力" class="headerlink" title="4. 高级网络安全能力"></a>4. 高级网络安全能力</h3><ul>
+<li>OpenAI Preparedness Framework 下<strong>首个”高能力”网络安全模型</strong></li>
+<li>首个直接训练识别软件漏洞的模型</li>
+<li>已发现<strong>500+开源项目零日漏洞</strong></li>
+<li>推出 Trusted Access for Cyber 试点</li>
+<li>$1000万 API 积分投入开源安全防护</li>
+</ul>
+<hr>
+<h2 id="📊-基准测试对比（官方数据）"><a href="#📊-基准测试对比（官方数据）" class="headerlink" title="📊 基准测试对比（官方数据）"></a>📊 基准测试对比（官方数据）</h2><h3 id="编程与代理能力"><a href="#编程与代理能力" class="headerlink" title="编程与代理能力"></a>编程与代理能力</h3><table>
+<thead>
+<tr>
+<th>基准测试</th>
+<th>Claude Opus 4.6</th>
+<th>GPT-5.3-Codex</th>
+<th>GPT-5.2</th>
+<th>Gemini 3 Pro</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>SWE-bench Verified</strong></td>
+<td><strong>80.8%</strong></td>
+<td>56.8%*</td>
+<td>80.0%</td>
+<td>76.2%</td>
+</tr>
+<tr>
+<td><strong>Terminal-Bench 2.0</strong></td>
+<td>65.4%</td>
+<td><strong>77.3%</strong></td>
+<td>64.7%</td>
+<td>56.2%</td>
+</tr>
+<tr>
+<td><strong>OSWorld</strong></td>
+<td><strong>72.7%</strong></td>
+<td>64.7%</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>SWE-Bench Pro</strong></td>
+<td>—</td>
+<td><strong>56.8%</strong></td>
+<td>56.4%</td>
+<td>—</td>
+</tr>
+</tbody></table>
+<p>*注：GPT-5.3-Codex 使用的是 SWE-Bench Pro（不同版本），非 Verified</p>
+<h3 id="推理与知识能力"><a href="#推理与知识能力" class="headerlink" title="推理与知识能力"></a>推理与知识能力</h3><table>
+<thead>
+<tr>
+<th>基准测试</th>
+<th>Claude Opus 4.6</th>
+<th>GPT-5.2</th>
+<th>Gemini 3 Pro</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>GDPval-AA Elo</strong></td>
+<td><strong>1606</strong></td>
+<td>1462</td>
+<td>1195</td>
+</tr>
+<tr>
+<td><strong>GPQA Diamond</strong></td>
+<td>91.3%</td>
+<td><strong>93.2%</strong></td>
+<td>91.9%</td>
+</tr>
+<tr>
+<td><strong>ARC AGI 2</strong></td>
+<td><strong>68.8%</strong></td>
+<td>54.2%</td>
+<td>45.1%</td>
+</tr>
+<tr>
+<td><strong>HLE (with tools)</strong></td>
+<td><strong>53.1%</strong></td>
+<td>50.0%</td>
+<td>45.8%</td>
+</tr>
+<tr>
+<td><strong>MMMLU</strong></td>
+<td>91.1%</td>
+<td>89.6%</td>
+<td><strong>91.8%</strong></td>
+</tr>
+</tbody></table>
+<h3 id="代理与工具使用"><a href="#代理与工具使用" class="headerlink" title="代理与工具使用"></a>代理与工具使用</h3><table>
+<thead>
+<tr>
+<th>基准测试</th>
+<th>Claude Opus 4.6</th>
+<th>GPT-5.2</th>
+<th>Gemini 3 Pro</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>BrowseComp</strong></td>
+<td><strong>84.0%</strong></td>
+<td>77.9%</td>
+<td>59.2%</td>
+</tr>
+<tr>
+<td><strong>Finance Agent</strong></td>
+<td><strong>60.7%</strong></td>
+<td>56.6%</td>
+<td>44.1%</td>
+</tr>
+<tr>
+<td><strong>τ2-bench Retail</strong></td>
+<td><strong>91.9%</strong></td>
+<td>82.0%</td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>τ2-bench Telecom</strong></td>
+<td><strong>99.3%</strong></td>
+<td>—</td>
+<td>—</td>
+</tr>
+</tbody></table>
+<h3 id="GPT-5-3-Codex-相对-GPT-5-2-Codex-提升"><a href="#GPT-5-3-Codex-相对-GPT-5-2-Codex-提升" class="headerlink" title="GPT-5.3-Codex 相对 GPT-5.2-Codex 提升"></a>GPT-5.3-Codex 相对 GPT-5.2-Codex 提升</h3><table>
+<thead>
+<tr>
+<th>基准测试</th>
+<th>提升幅度</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>OSWorld-Verified</strong></td>
+<td><strong>+26.5</strong></td>
+</tr>
+<tr>
+<td><strong>Terminal-Bench 2.0</strong></td>
+<td><strong>+13.3</strong></td>
+</tr>
+<tr>
+<td>网络安全 CTF</td>
+<td>+10.2</td>
+</tr>
+<tr>
+<td>SWE-Lancer IC Diamond</td>
+<td>+5.4</td>
+</tr>
+<tr>
+<td>SWE-Bench Pro</td>
+<td>+0.4</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="🎯-综合能力对比"><a href="#🎯-综合能力对比" class="headerlink" title="🎯 综合能力对比"></a>🎯 综合能力对比</h2><table>
+<thead>
+<tr>
+<th>维度</th>
+<th>Claude Opus 4.6</th>
+<th>GPT-5.3-Codex</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>上下文长度</strong></td>
+<td>⭐⭐⭐⭐⭐ (100万 Beta)</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>SWE-bench 编程</strong></td>
+<td>⭐⭐⭐⭐⭐ (80.8%)</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>终端能力</strong></td>
+<td>⭐⭐⭐⭐ (65.4%)</td>
+<td>⭐⭐⭐⭐⭐ (77.3%)</td>
+</tr>
+<tr>
+<td><strong>计算机使用</strong></td>
+<td>⭐⭐⭐⭐⭐ (72.7%)</td>
+<td>⭐⭐⭐⭐ (64.7%)</td>
+</tr>
+<tr>
+<td><strong>推理速度</strong></td>
+<td>⭐⭐⭐⭐</td>
+<td>⭐⭐⭐⭐⭐ (+25%)</td>
+</tr>
+<tr>
+<td><strong>知识工作</strong></td>
+<td>⭐⭐⭐⭐⭐ (1606 Elo)</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>网络安全</strong></td>
+<td>⭐⭐⭐⭐</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>多代理协作</strong></td>
+<td>⭐⭐⭐⭐⭐</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="🎮-怎么选？"><a href="#🎮-怎么选？" class="headerlink" title="🎮 怎么选？"></a>🎮 怎么选？</h2><h3 id="选择-Claude-Opus-4-6"><a href="#选择-Claude-Opus-4-6" class="headerlink" title="选择 Claude Opus 4.6"></a>选择 Claude Opus 4.6</h3><ul>
+<li>✅ 需要处理超长文档（100万 token 上下文）</li>
+<li>✅ SWE-bench 类型的真实 GitHub Issue 修复（80.8%）</li>
+<li>✅ 团队协作型 AI 代理工作流（Agent Teams）</li>
+<li>✅ PowerPoint&#x2F;Office 办公场景深度集成</li>
+<li>✅ 知识密集型工作（GDPval-AA 领先）</li>
+<li>✅ 代理搜索与研究（BrowseComp 84%）</li>
+</ul>
+<h3 id="选择-GPT-5-3-Codex"><a href="#选择-GPT-5-3-Codex" class="headerlink" title="选择 GPT-5.3-Codex"></a>选择 GPT-5.3-Codex</h3><ul>
+<li>✅ 高强度终端&#x2F;命令行操作（Terminal-Bench 77.3%）</li>
+<li>✅ 网络安全研究与漏洞挖掘</li>
+<li>✅ 追求极致推理速度（+25%）</li>
+<li>✅ 长周期、多步骤的编程项目</li>
+<li>✅ 需要模型”自我调试”能力</li>
+</ul>
+<hr>
+<h2 id="💰-定价与可用性"><a href="#💰-定价与可用性" class="headerlink" title="💰 定价与可用性"></a>💰 定价与可用性</h2><table>
+<thead>
+<tr>
+<th>渠道</th>
+<th>Claude Opus 4.6</th>
+<th>GPT-5.3-Codex</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>API 定价</strong></td>
+<td>$5&#x2F;$25 per MTok（输入&#x2F;输出）</td>
+<td>待公布</td>
+</tr>
+<tr>
+<td><strong>长上下文溢价</strong></td>
+<td>$10&#x2F;$37.50 per MTok (&gt;200K)</td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>消费者端</strong></td>
+<td>Claude Pro&#x2F;Team&#x2F;Enterprise</td>
+<td>ChatGPT Plus 付费版</td>
+</tr>
+<tr>
+<td><strong>开发者 API</strong></td>
+<td>立即可用</td>
+<td>即将推出（数周内）</td>
+</tr>
+<tr>
+<td><strong>IDE 集成</strong></td>
+<td>Claude Code</td>
+<td>Codex（App&#x2F;CLI&#x2F;IDE插件&#x2F;Web）</td>
+</tr>
+<tr>
+<td><strong>GitHub Copilot</strong></td>
+<td>✅ 已集成</td>
+<td>预计后续集成</td>
+</tr>
+<tr>
+<td><strong>云平台</strong></td>
+<td>AWS Bedrock, Vertex AI, Azure</td>
+<td>—</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="🔒-安全特性"><a href="#🔒-安全特性" class="headerlink" title="🔒 安全特性"></a>🔒 安全特性</h2><h3 id="Claude-Opus-4-6"><a href="#Claude-Opus-4-6" class="headerlink" title="Claude Opus 4.6"></a>Claude Opus 4.6</h3><ul>
+<li><strong>最低错误对齐分数</strong>：约1.8&#x2F;10（所有 Claude 模型中最低）</li>
+<li><strong>最低过度拒绝率</strong>：合理请求更少被拒绝</li>
+<li><strong>数据驻留控制</strong>：<code>inference_geo</code> 参数指定推理区域</li>
+</ul>
+<h3 id="GPT-5-3-Codex"><a href="#GPT-5-3-Codex" class="headerlink" title="GPT-5.3-Codex"></a>GPT-5.3-Codex</h3><ul>
+<li><strong>首个”高能力”网络安全模型</strong></li>
+<li>Trusted Access for Cyber 试点项目</li>
+<li>Aardvark 安全研究代理扩展测试</li>
+<li>为 Next.js 等开源项目提供免费代码扫描</li>
+</ul>
+<hr>
+<h2 id="💡-结语"><a href="#💡-结语" class="headerlink" title="💡 结语"></a>💡 结语</h2><p>2026年2月5日将被铭记为AI编程领域的里程碑日——两大巨头同日亮剑，各有千秋：</p>
+<table>
+<thead>
+<tr>
+<th>领先领域</th>
+<th>Claude Opus 4.6</th>
+<th>GPT-5.3-Codex</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>最强项</strong></td>
+<td>SWE-bench (80.8%), 上下文 (1M), 知识工作 (1606 Elo)</td>
+<td>Terminal-Bench (77.3%), 速度 (+25%), 网络安全</td>
+</tr>
+</tbody></table>
+<p><strong>总结</strong>：</p>
+<ul>
+<li><strong>选 Claude Opus 4.6</strong>：你需要处理大型代码库、长文档、真实 GitHub Issue，或者重视知识工作能力</li>
+<li><strong>选 GPT-5.3-Codex</strong>：你主要在终端环境工作、追求速度、或需要网络安全能力</li>
+</ul>
+<p>对于开发者而言，这是一个前所未有的好时代——两款顶尖模型竞相进化，最终受益的是整个技术社区。</p>
+<hr>
+<p><em>本文基于2026年2月5日官方发布数据撰写</em></p>
+<p><strong>数据来源</strong>：</p>
+<ul>
+<li><a class="link"   target="_blank" rel="noopener" href="https://anthropic.com/" >Anthropic Claude Opus 4.6 发布<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://openai.com/index/introducing-gpt-5-3-codex/" >OpenAI GPT-5.3-Codex 发布<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://www.digitalapplied.com/" >DigitalApplied 基准测试汇总<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+</ul>
+
+		</div>
+
+		
+		<div class="post-copyright-info w-full my-8 px-2 sm:px-6 md:px-8">
+			<div class="article-copyright-info-container">
+    <ul>
+        <li><strong>标题:</strong> Claude Opus 4.6 vs GPT-5.3-Codex：2026年AI编程双雄同日对决</li>
+        <li><strong>作者:</strong> Nathan</li>
+        <li><strong>创建于
+                :</strong> 2026-02-06 08:00:00</li>
+        
+            <li>
+                <strong>更新于
+                    :</strong> 2026-02-20 17:22:12
+            </li>
+        
+        <li>
+            <strong>链接:</strong> https://hydraxman.github.io/2026/02/06/claude-opus-4-6-vs-gpt-5-3-codex/
+        </li>
+        <li>
+            <strong>
+                版权声明:
+            </strong>
+            
+
+            
+                本文章采用 <a class="license" target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0">CC BY-NC-SA 4.0</a> 进行许可。
+            
+        </li>
+    </ul>
+</div>
+
+		</div>
+		
+
+		
+		<ul class="post-tags-box text-lg mt-1.5 flex-wrap justify-center flex md:hidden">
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/AI/">#AI</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/GPT/">#GPT</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/Claude/">#Claude</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/%E7%BC%96%E7%A8%8B/">#编程</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/%E5%AF%B9%E6%AF%94%E8%AF%84%E6%B5%8B/">#对比评测</a>&nbsp;
+			</li>
+			
+		</ul>
+		
+
+		
+
+		
+		<div class="article-nav my-8 flex justify-between items-center px-2 sm:px-6 md:px-8">
+			
+			<div class="article-prev border-border-color shadow-redefine-flat shadow-shadow-color-2 rounded-medium px-4 py-2 hover:shadow-redefine-flat-hover hover:shadow-shadow-color-2">
+				<a class="prev" rel="prev" href="/2026/02/07/ai-giants-dilemma/">
+					<span class="left arrow-icon flex justify-center items-center">
+						<i class="fa-solid fa-chevron-left"></i>
+					</span>
+					<span class="title flex justify-center items-center">
+						<span class="post-nav-title-item truncate max-w-48">AI时代的巨人困局：当创新成为微软谷歌的抵颈之刃</span>
+						<span class="post-nav-item">上一篇</span>
+					</span>
+				</a>
+			</div>
+			
+			
+			<div class="article-next border-border-color shadow-redefine-flat shadow-shadow-color-2 rounded-medium px-4 py-2 hover:shadow-redefine-flat-hover hover:shadow-shadow-color-2">
+				<a class="next" rel="next" href="/2026/02/06/codex-desktop/">
+					<span class="title flex justify-center items-center">
+						<span class="post-nav-title-item truncate max-w-48">OpenAI 发布 Codex 桌面应用：让你同时指挥多个 AI 写代码</span>
+						<span class="post-nav-item">下一篇</span>
+					</span>
+					<span class="right arrow-icon flex justify-center items-center">
+						<i class="fa-solid fa-chevron-right"></i>
+					</span>
+				</a>
+			</div>
+			
+		</div>
+		
+
+
+		
+	</div>
+
+	
+	<div class="toc-content-container">
+		<div class="post-toc-wrap">
+	<div class="post-toc">
+		<div class="toc-title">目录</div>
+		<div class="page-title">Claude Opus 4.6 vs GPT-5.3-Codex：2026年AI编程双雄同日对决</div>
+		<ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%F0%9F%93%85-%E5%8F%91%E5%B8%83%E6%A6%82%E8%A7%88"><span class="nav-text">📅 发布概览</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%F0%9F%94%A5-Claude-Opus-4-6-%E4%BA%AE%E7%82%B9"><span class="nav-text">🔥 Claude Opus 4.6 亮点</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-100%E4%B8%87Token%E4%B8%8A%E4%B8%8B%E6%96%87%E7%AA%97%E5%8F%A3%EF%BC%88Beta%EF%BC%89"><span class="nav-text">1. 100万Token上下文窗口（Beta）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E8%87%AA%E9%80%82%E5%BA%94%E6%80%9D%E8%80%83%EF%BC%88Adaptive-Thinking%EF%BC%89"><span class="nav-text">2. 自适应思考（Adaptive Thinking）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Agent-Teams%EF%BC%88%E6%99%BA%E8%83%BD%E4%BD%93%E5%9B%A2%E9%98%9F%EF%BC%89"><span class="nav-text">3. Agent Teams（智能体团队）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-Claude-in-PowerPoint%EF%BC%88%E7%A0%94%E7%A9%B6%E9%A2%84%E8%A7%88%EF%BC%89"><span class="nav-text">4. Claude in PowerPoint（研究预览）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-Compaction-API%EF%BC%88Beta%EF%BC%89"><span class="nav-text">5. Compaction API（Beta）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%F0%9F%9A%80-GPT-5-3-Codex-%E4%BA%AE%E7%82%B9"><span class="nav-text">🚀 GPT-5.3-Codex 亮点</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E7%BB%9F%E4%B8%80%E6%97%97%E8%88%B0%E6%9E%B6%E6%9E%84"><span class="nav-text">1. 统一旗舰架构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-25-%E9%80%9F%E5%BA%A6%E6%8F%90%E5%8D%87"><span class="nav-text">2. 25%速度提升</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E8%87%AA%E6%88%91%E5%8F%82%E4%B8%8E%E5%BC%80%E5%8F%91"><span class="nav-text">3. 自我参与开发</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E9%AB%98%E7%BA%A7%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8%E8%83%BD%E5%8A%9B"><span class="nav-text">4. 高级网络安全能力</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%F0%9F%93%8A-%E5%9F%BA%E5%87%86%E6%B5%8B%E8%AF%95%E5%AF%B9%E6%AF%94%EF%BC%88%E5%AE%98%E6%96%B9%E6%95%B0%E6%8D%AE%EF%BC%89"><span class="nav-text">📊 基准测试对比（官方数据）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BC%96%E7%A8%8B%E4%B8%8E%E4%BB%A3%E7%90%86%E8%83%BD%E5%8A%9B"><span class="nav-text">编程与代理能力</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8E%A8%E7%90%86%E4%B8%8E%E7%9F%A5%E8%AF%86%E8%83%BD%E5%8A%9B"><span class="nav-text">推理与知识能力</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%A3%E7%90%86%E4%B8%8E%E5%B7%A5%E5%85%B7%E4%BD%BF%E7%94%A8"><span class="nav-text">代理与工具使用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#GPT-5-3-Codex-%E7%9B%B8%E5%AF%B9-GPT-5-2-Codex-%E6%8F%90%E5%8D%87"><span class="nav-text">GPT-5.3-Codex 相对 GPT-5.2-Codex 提升</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%F0%9F%8E%AF-%E7%BB%BC%E5%90%88%E8%83%BD%E5%8A%9B%E5%AF%B9%E6%AF%94"><span class="nav-text">🎯 综合能力对比</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%F0%9F%8E%AE-%E6%80%8E%E4%B9%88%E9%80%89%EF%BC%9F"><span class="nav-text">🎮 怎么选？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%89%E6%8B%A9-Claude-Opus-4-6"><span class="nav-text">选择 Claude Opus 4.6</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%89%E6%8B%A9-GPT-5-3-Codex"><span class="nav-text">选择 GPT-5.3-Codex</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%F0%9F%92%B0-%E5%AE%9A%E4%BB%B7%E4%B8%8E%E5%8F%AF%E7%94%A8%E6%80%A7"><span class="nav-text">💰 定价与可用性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%F0%9F%94%92-%E5%AE%89%E5%85%A8%E7%89%B9%E6%80%A7"><span class="nav-text">🔒 安全特性</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Claude-Opus-4-6"><span class="nav-text">Claude Opus 4.6</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#GPT-5-3-Codex"><span class="nav-text">GPT-5.3-Codex</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%F0%9F%92%A1-%E7%BB%93%E8%AF%AD"><span class="nav-text">💡 结语</span></a></li></ol>
+
+	</div>
+</div>
+	</div>
+	
+</div>
+			</div>
+
+			
+		</div>
+
+		<div class="main-content-footer">
+			<footer class="footer mt-5 py-5 h-auto text-base text-third-text-color relative border-t-2 border-t-border-color">
+    <div class="info-container py-3 text-center">
+        
+        <div class="text-center">
+            &copy;
+            
+              <span>2024</span>
+              -
+            
+            2026&nbsp;&nbsp;<i class="fa-solid fa-heart fa-beat" style="--fa-animation-duration: 0.5s; color: #333"></i>&nbsp;&nbsp;<a href="/">Nathan</a>
+            
+                
+                <p class="post-count space-x-0.5">
+                    <span>
+                        共撰写了 52 篇文章
+                    </span>
+                    
+                        <span>
+                            共 111.8k 字
+                        </span>
+                    
+                </p>
+            
+        </div>
+        
+        <div class="relative text-center lg:absolute lg:left-[20px] lg:top-1/2 lg:-translate-y-1/2 lg:text-left">
+            <span class="lg:block text-sm">由 <?xml version="1.0" encoding="utf-8"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg class="relative top-[2px] inline-block align-baseline" version="1.1" id="圖層_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="1rem" height="1rem" viewBox="0 0 512 512" enable-background="new 0 0 512 512" xml:space="preserve"><path fill="#0E83CD" d="M256.4,25.8l-200,115.5L56,371.5l199.6,114.7l200-115.5l0.4-230.2L256.4,25.8z M349,354.6l-18.4,10.7l-18.6-11V275H200v79.6l-18.4,10.7l-18.6-11v-197l18.5-10.6l18.5,10.8V237h112v-79.6l18.5-10.6l18.5,10.8V354.6z"/></svg><a target="_blank" class="text-base" href="https://hexo.io">Hexo</a> 驱动</span>
+            <span class="text-sm lg:block">主题&nbsp;<a class="text-base" target="_blank" href="https://github.com/EvanNotFound/hexo-theme-redefine">Redefine v2.8.5</a></span>
+        </div>
+        
+        
+            <div>
+                博客已运行 <span class="odometer" id="runtime_days" ></span> 天 <span class="odometer" id="runtime_hours"></span> 小时 <span class="odometer" id="runtime_minutes"></span> 分钟 <span class="odometer" id="runtime_seconds"></span> 秒
+            </div>
+        
+        
+            <script data-swup-reload-script>
+                try {
+                    function odometer_init() {
+                    const elements = document.querySelectorAll('.odometer');
+                    elements.forEach(el => {
+                        new Odometer({
+                            el,
+                            format: '( ddd).dd',
+                            duration: 200
+                        });
+                    });
+                    }
+                    odometer_init();
+                } catch (error) {}
+            </script>
+        
+        
+        
+    </div>  
+</footer>
+		</div>
+	</div>
+
+	
+	<div class="post-tools">
+		<div class="post-tools-container">
+	<ul class="article-tools-list">
+		<!-- TOC aside toggle -->
+		
+		<li class="right-bottom-tools page-aside-toggle">
+			<i class="fa-regular fa-outdent"></i>
+		</li>
+		
+
+		<!-- go comment -->
+		
+	</ul>
+</div>
+	</div>
+	
+
+	<div class="right-side-tools-container">
+		<div class="side-tools-container">
+	<ul class="hidden-tools-list">
+		<li class="right-bottom-tools tool-font-adjust-plus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-plus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-font-adjust-minus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-minus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-dark-light-toggle flex justify-center items-center">
+			<i class="fa-regular fa-moon"></i>
+		</li>
+
+		<!-- rss -->
+		
+
+		
+
+		<li class="right-bottom-tools tool-scroll-to-bottom flex justify-center items-center">
+			<i class="fa-regular fa-arrow-down"></i>
+		</li>
+	</ul>
+
+	<ul class="visible-tools-list">
+		<li class="right-bottom-tools toggle-tools-list flex justify-center items-center">
+			<i class="fa-regular fa-cog fa-spin"></i>
+		</li>
+		
+		<li class="right-bottom-tools tool-scroll-to-top flex justify-center items-center">
+			<i class="arrow-up fas fa-arrow-up"></i>
+			<span class="percent"></span>
+		</li>
+		
+		
+	</ul>
+</div>
+	</div>
+
+	<div class="image-viewer-container">
+	<img src="">
+</div>
+
+	
+	<div class="search-pop-overlay">
+	<div class="popup search-popup">
+		<div class="search-header">
+			<span class="search-input-field-pre">
+				<i class="fa-solid fa-keyboard"></i>
+			</span>
+			<div class="search-input-container">
+				<input autocomplete="off" autocorrect="off" autocapitalize="off" placeholder="站内搜索您需要的内容..." spellcheck="false" type="search" class="search-input">
+			</div>
+			<span class="popup-btn-close">
+				<i class="fa-solid fa-times"></i>
+			</span>
+		</div>
+		<div id="search-result">
+			<div id="no-result">
+				<i class="fa-solid fa-spinner fa-spin-pulse fa-5x fa-fw"></i>
+			</div>
+		</div>
+	</div>
+</div>
+	
+
+</main>
+
+
+
+<script src="/js/build/libs/Swup.min.js"></script>
+
+<script src="/js/build/libs/SwupSlideTheme.min.js"></script>
+
+<script src="/js/build/libs/SwupScriptsPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupProgressPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupScrollPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupPreloadPlugin.min.js"></script>
+
+<script>
+    const swup = new Swup({
+        plugins: [
+            new SwupScriptsPlugin({
+                optin: true,
+            }),
+            new SwupProgressPlugin(),
+            new SwupScrollPlugin({
+                offset: 80,
+            }),
+            new SwupSlideTheme({
+                mainElement: ".main-content-body",
+            }),
+            new SwupPreloadPlugin(),
+        ],
+        containers: ["#swup"],
+    });
+</script>
+
+
+
+
+	
+<script src="/js/build/tools/imageViewer.js" type="module"></script>
+
+<script src="/js/build/utils.js" type="module"></script>
+
+<script src="/js/build/main.js" type="module"></script>
+
+<script src="/js/build/layouts/navbarShrink.js" type="module"></script>
+
+<script src="/js/build/tools/scrollTopBottom.js" type="module"></script>
+
+<script src="/js/build/tools/lightDarkSwitch.js" type="module"></script>
+
+<script src="/js/build/layouts/categoryList.js" type="module"></script>
+
+
+
+    
+<script src="/js/build/tools/localSearch.js" type="module"></script>
+
+
+
+
+    
+<script src="/js/build/tools/codeBlock.js" type="module"></script>
+
+
+
+
+    
+<script src="/js/build/layouts/lazyload.js" type="module"></script>
+
+
+
+
+    
+<script src="/js/build/tools/runtime.js"></script>
+
+    
+<script src="/js/build/libs/odometer.min.js"></script>
+
+    
+<link rel="stylesheet" href="/assets/odometer-theme-minimal.css">
+
+
+
+
+  
+<script src="/js/build/libs/Typed.min.js"></script>
+
+  
+<script src="/js/build/plugins/typed.js" type="module"></script>
+
+
+
+
+
+
+
+
+    
+<script src="/js/build/libs/anime.min.js"></script>
+
+
+
+
+
+    
+<script src="/js/build/tools/tocToggle.js" type="module" data-swup-reload-script=""></script>
+
+<script src="/js/build/layouts/toc.js" type="module" data-swup-reload-script=""></script>
+
+<script src="/js/build/plugins/tabs.js" type="module" data-swup-reload-script=""></script>
+
+
+
+
+<script src="/js/build/libs/moment-with-locales.min.js" data-swup-reload-script=""></script>
+
+
+<script src="/js/build/layouts/essays.js" type="module" data-swup-reload-script=""></script>
+
+
+
+
+
+	
+</body>
+
+</html>

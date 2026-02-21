@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="keywords" content="计算机技术, 生活中的胡思乱想">
+    
+    <meta name="author" content="Nathan">
+    
+    <!-- Completely eliminate flash of wrong theme -->
+    <script>
+        (function() {
+            const THEME_KEY = "REDEFINE-THEME-STATUS";
+            const DARK = "dark", LIGHT = "light";
+            
+            // Get preferred theme
+            function getTheme() {
+                try {
+                    const saved = localStorage.getItem(THEME_KEY);
+                    if (saved) {
+                        const { isDark } = JSON.parse(saved);
+                        return isDark ? DARK : LIGHT;
+                    }
+                } catch (e) {}
+                
+                return matchMedia("(prefers-color-scheme: dark)").matches ? DARK : LIGHT;
+            }
+            
+            // Apply theme to document
+            function applyTheme(theme) {
+                const isDark = theme === DARK;
+                const root = document.documentElement;
+                
+                // Set data attribute for CSS variables
+                root.setAttribute("data-theme", theme);
+                
+                // Set classes for compatibility
+                root.classList.add(theme);
+                root.classList.remove(isDark ? LIGHT : DARK);
+                root.style.colorScheme = theme;
+            }
+            
+            // Initial application
+            const theme = getTheme();
+            applyTheme(theme);
+            
+            // Listen for system preference changes
+            matchMedia("(prefers-color-scheme: dark)").addEventListener("change", ({ matches }) => {
+                // Only update if using system preference (no localStorage entry)
+                if (!localStorage.getItem(THEME_KEY)) {
+                    applyTheme(matches ? DARK : LIGHT);
+                }
+            });
+            
+            // Set body classes once DOM is ready
+            if (document.readyState !== "loading") {
+                document.body.classList.add(theme + "-mode");
+            } else {
+                document.addEventListener("DOMContentLoaded", () => {
+                    document.body.classList.add(theme + "-mode");
+                    document.body.classList.remove((theme === DARK ? LIGHT : DARK) + "-mode");
+                });
+            }
+        })();
+    </script>
+    
+    <!-- Critical CSS to prevent flash -->
+    <style>
+        :root[data-theme="dark"] {
+            --background-color: #202124;
+            --background-color-transparent: rgba(32, 33, 36, 0.6);
+            --second-background-color: #2d2e32;
+            --third-background-color: #34353a;
+            --third-background-color-transparent: rgba(32, 33, 36, 0.6);
+            --primary-color: #0066CC;
+            --first-text-color: #ffffff;
+            --second-text-color: #eeeeee;
+            --third-text-color: #bebec6;
+            --fourth-text-color: #999999;
+            --default-text-color: #bebec6;
+            --invert-text-color: #373D3F;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --selection-color: #0066CC;
+            --shadow-color-1: rgba(255, 255, 255, 0.08);
+            --shadow-color-2: rgba(255, 255, 255, 0.05);
+        }
+        
+        :root[data-theme="light"] {
+            --background-color: #fff;
+            --background-color-transparent: rgba(255, 255, 255, 0.6);
+            --second-background-color: #f8f8f8;
+            --third-background-color: #f2f2f2;
+            --third-background-color-transparent: rgba(241, 241, 241, 0.6);
+            --primary-color: #0066CC;
+            --first-text-color: #16171a;
+            --second-text-color: #2f3037;
+            --third-text-color: #5e5e5e;
+            --fourth-text-color: #eeeeee;
+            --default-text-color: #373D3F;
+            --invert-text-color: #bebec6;
+            --border-color: rgba(0, 0, 0, 0.08);
+            --selection-color: #0066CC;
+            --shadow-color-1: rgba(0, 0, 0, 0.08);
+            --shadow-color-2: rgba(0, 0, 0, 0.05);
+        }
+        
+        body {
+            background-color: var(--background-color);
+            color: var(--default-text-color);
+        }
+        
+        /* Apply body classes as soon as DOM is ready */
+        :root[data-theme="dark"] body {
+            background-color: var(--background-color);
+            color: var(--default-text-color);
+        }
+    </style>
+    
+    <!-- preconnect -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    
+    <!--- Seo Part-->
+    
+    <link rel="canonical" href="https://hydraxman.github.io/2026/02/07/ai-giants-dilemma/"/>
+    <meta name="robots" content="index,follow">
+    <meta name="googlebot" content="index,follow">
+    <meta name="revisit-after" content="1 days">
+    
+    
+    
+        
+        <meta name="description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AI时代的巨人困局：当创新成为微软谷歌的抵颈之刃">
+<meta property="og:url" content="https://hydraxman.github.io/2026/02/07/ai-giants-dilemma/index.html">
+<meta property="og:site_name" content="内森淼文">
+<meta property="og:description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://hydraxman.github.io/images/redefine-og.webp">
+<meta property="article:published_time" content="2026-02-07T09:30:00.000Z">
+<meta property="article:modified_time" content="2026-02-20T09:22:12.116Z">
+<meta property="article:author" content="Nathan">
+<meta property="article:tag" content="AI">
+<meta property="article:tag" content="科技">
+<meta property="article:tag" content="微软">
+<meta property="article:tag" content="商业">
+<meta property="article:tag" content="创新">
+<meta property="article:tag" content="谷歌">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://hydraxman.github.io/images/redefine-og.webp">
+    
+    
+    <!--- Icon Part-->
+    <link rel="icon" type="image/png" href="/images/favicon.svg" sizes="192x192">
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.svg">
+    <meta name="theme-color" content="#ffffff">
+    <link rel="shortcut icon" href="/images/favicon.svg">
+    <!--- Page Info-->
+    
+    <title>
+        
+            AI时代的巨人困局：当创新成为微软谷歌的抵颈之刃 | 内森淼文
+        
+    </title>
+
+    
+<link rel="stylesheet" href="/fonts/Chillax/chillax.css">
+
+
+    <!--- Inject Part-->
+    
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    
+        
+<link rel="stylesheet" href="/css/build/tailwind.css">
+
+    
+
+    
+<link rel="stylesheet" href="/fonts/GeistMono/geist-mono.css">
+
+    
+<link rel="stylesheet" href="/fonts/Geist/geist.css">
+
+    <!--- Font Part-->
+    
+    
+    
+    
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&display=swap" rel="stylesheet">
+    
+    
+
+    <script id="hexo-configurations">
+    window.config = {"hostname":"hydraxman.github.io","root":"/","language":"zh-CN","path":"search.json"};
+    window.theme = {"articles":{"style":{"font_size":"16px","line_height":1.5,"image_border_radius":"14px","image_alignment":"center","image_caption":false,"link_icon":true,"delete_mask":false,"title_alignment":"left","headings_top_spacing":{"h1":"3.2rem","h2":"2.4rem","h3":"1.9rem","h4":"1.6rem","h5":"1.4rem","h6":"1.3rem"}},"word_count":{"enable":true,"count":true,"min2read":true},"author_label":{"enable":false,"auto":false,"list":[]},"code_block":{"copy":true,"style":"mac","highlight_theme":{"light":"github","dark":"vs2015"},"font":{"enable":false,"family":null,"url":null}},"toc":{"enable":true,"max_depth":3,"number":false,"expand":true,"init_open":true},"copyright":{"enable":true,"default":"cc_by_nc_sa"},"lazyload":true,"pangu_js":false,"recommendation":{"enable":false,"title":"推荐阅读","limit":3,"mobile_limit":2,"placeholder":"/images/wallhaven-wqery6-light.webp","skip_dirs":[]}},"colors":{"primary":"#ffffff","secondary":null,"default_mode":"light"},"global":{"fonts":{"chinese":{"enable":false,"family":null,"url":null},"english":{"enable":true,"family":"Inter","url":"https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"},"title":{"enable":true,"family":"Noto Serif","url":"https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&display=swap"}},"content_max_width":"1000px","sidebar_width":"210px","hover":{"shadow":true,"scale":false},"scroll_progress":{"bar":true,"percentage":true},"website_counter":{"url":"https://cn.vercount.one/js","enable":false,"site_pv":true,"site_uv":true,"post_pv":true},"single_page":true,"preloader":{"enable":false,"custom_message":null},"side_tools":{"gear_rotation":true,"auto_expand":false},"open_graph":{"enable":true,"image":"/images/redefine-og.webp","description":"Hexo Theme Redefine, Redefine Your Hexo Journey."},"google_analytics":{"enable":false,"id":null}},"home_banner":{"enable":true,"style":"fixed","image":{"light":"/images/banner-light.jpg","dark":"/images/banner-dark.jpg"},"title":"内森淼文","subtitle":{"text":["AI · 编程 · 科技见闻","Write Code, Read World"],"hitokoto":{"enable":false,"show_author":false,"api":"https://v1.hitokoto.cn"},"typing_speed":100,"backing_speed":80,"starting_delay":500,"backing_delay":1500,"loop":true,"smart_backspace":true},"text_color":{"light":"#fff","dark":"#d1d1b6"},"text_style":{"title_size":"2.8rem","subtitle_size":"1.5rem","line_height":1.2},"custom_font":{"enable":false,"family":null,"url":null},"social_links":{"enable":true,"style":"default","links":{"github":"https://github.com/hydraxman","instagram":null,"zhihu":null,"twitter":null,"email":null},"qrs":{"weixin":null}}},"plugins":{"feed":{"enable":false},"aplayer":{"enable":false,"type":"fixed","audios":[{"name":null,"artist":null,"url":null,"cover":null,"lrc":null}]},"mermaid":{"enable":false,"version":"11.4.1"}},"version":"2.8.5","navbar":{"auto_hide":false,"color":{"left":"#333333","right":"#555555","transparency":35},"width":{"home":"1200px","pages":"1000px"},"links":{"Home":{"path":"/","icon":"fa-regular fa-house"},"Archives":{"path":"/archives","icon":"fa-regular fa-archive"},"Categories":{"path":"/categories","icon":"fa-regular fa-folder"},"Tags":{"path":"/tags","icon":"fa-regular fa-tags"},"About":{"path":"/about","icon":"fa-regular fa-user"}},"search":{"enable":true,"preload":true}},"page_templates":{"friends_column":2,"tags_style":"blur"},"home":{"sidebar":{"enable":true,"position":"left","first_item":"menu","announcement":"AI · 编程 · 科技","show_on_mobile":true,"links":{"Archives":{"path":"/archives","icon":"fa-regular fa-archive"},"Tags":{"path":"/tags","icon":"fa-regular fa-tags"},"Categories":{"path":"/categories","icon":"fa-regular fa-folder"}}},"article_date_format":"auto","excerpt_length":200,"categories":{"enable":true,"limit":3},"tags":{"enable":true,"limit":3}},"footerStart":"2024/01/01 00:00:00"};
+    window.lang_ago = {"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"};
+    window.data = {"masonry":false};
+  </script>
+    
+    <!--- Fontawesome Part-->
+    
+<link rel="stylesheet" href="/fontawesome/fontawesome.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/brands.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/solid.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/regular.min.css">
+
+    
+    
+    
+    
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+
+<body>
+	<div class="progress-bar-container">
+	
+	<span class="scroll-progress-bar"></span>
+	
+
+	
+	<span class="pjax-progress-bar"></span>
+	<!--        <span class="swup-progress-icon">-->
+	<!--            <i class="fa-solid fa-circle-notch fa-spin"></i>-->
+	<!--        </span>-->
+	
+</div>
+
+<main class="page-container" id="swup">
+
+	
+
+	<div class="main-content-container flex flex-col justify-between min-h-dvh">
+		<div class="main-content-header">
+			<header class="navbar-container px-6 md:px-12">
+    <div class="navbar-content transition-navbar ">
+        <div class="left">
+            
+            <a class="logo-title" href="/">
+                
+                内森淼文
+                
+            </a>
+        </div>
+
+        <div class="right">
+            <!-- PC -->
+            <div class="desktop">
+                <ul class="navbar-list">
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/"
+                                        >
+                                    <i class="fa-regular fa-house fa-fw"></i>
+                                    首页
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/archives"
+                                        >
+                                    <i class="fa-regular fa-archive fa-fw"></i>
+                                    归档
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/categories"
+                                        >
+                                    <i class="fa-regular fa-folder fa-fw"></i>
+                                    分类
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/tags"
+                                        >
+                                    <i class="fa-regular fa-tags fa-fw"></i>
+                                    标签
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/about"
+                                        >
+                                    <i class="fa-regular fa-user fa-fw"></i>
+                                    关于
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                    
+                        <li class="navbar-item search search-popup-trigger">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </li>
+                    
+                </ul>
+            </div>
+            <!-- Mobile -->
+            <div class="mobile">
+                
+                    <div class="icon-item search search-popup-trigger"><i class="fa-solid fa-magnifying-glass"></i>
+                    </div>
+                
+                <div class="icon-item navbar-bar">
+                    <div class="navbar-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile sheet -->
+    <div class="navbar-drawer h-dvh w-full absolute top-0 left-0 bg-background-color flex flex-col justify-between">
+        <ul class="drawer-navbar-list flex flex-col px-4 justify-center items-start">
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/"
+                        >
+                            <span>
+                                首页
+                            </span>
+                            
+                                <i class="fa-regular fa-house fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/archives"
+                        >
+                            <span>
+                                归档
+                            </span>
+                            
+                                <i class="fa-regular fa-archive fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/categories"
+                        >
+                            <span>
+                                分类
+                            </span>
+                            
+                                <i class="fa-regular fa-folder fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/tags"
+                        >
+                            <span>
+                                标签
+                            </span>
+                            
+                                <i class="fa-regular fa-tags fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/about"
+                        >
+                            <span>
+                                关于
+                            </span>
+                            
+                                <i class="fa-regular fa-user fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+
+            
+            
+                
+                    
+                    
+                    
+            
+        </ul>
+
+        <div class="statistics flex justify-around my-2.5">
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/tags">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">115</div>
+        <div class="label text-third-text-color text-sm">标签</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/categories">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">5</div>
+        <div class="label text-third-text-color text-sm">分类</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/archives">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">52</div>
+        <div class="label text-third-text-color text-sm">文章</div>
+    </a>
+</div>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+		</div>
+
+		<div class="main-content-body transition-fade-up">
+			
+
+			<div class="main-content">
+				<div class="post-page-container flex relative justify-between box-border w-full h-full">
+	<div class="article-content-container">
+
+		<div class="article-title relative w-full">
+			
+			
+			
+			<img src="/images/ai-giants-dilemma-cover.png" alt="AI时代的巨人困局：当创新成为微软谷歌的抵颈之刃" class="w-full h-60 sm:h-72 md:h-80 object-cover sm:rounded-t-large dark:brightness-75" />
+			
+			<div class="w-full flex items-center absolute bottom-0 justify-start">
+				<h1 class="article-title-cover text-center mx-6 my-6 text-second-text-color bg-background-color-transparent px-4 py-3 text-3xl sm:text-4xl md:text-5xl font-semibold backdrop-blur-lg rounded-xl border border-border-color ">AI时代的巨人困局：当创新成为微软谷歌的抵颈之刃</h1>
+			</div>
+			
+		</div>
+
+		
+		<div class="article-header flex flex-row gap-2 items-center px-2 sm:px-6 md:px-8">
+			<div class="avatar w-[46px] h-[46px] flex-shrink-0 rounded-medium border border-border-color p-[1px]">
+				<img src="/images/avatar.png">
+			</div>
+			<div class="info flex flex-col justify-between">
+				<div class="author flex items-center">
+					<span class="name text-default-text-color text-lg font-semibold">Nathan</span>
+					
+				</div>
+				<div class="meta-info">
+					<div class="article-meta-info">
+    <span class="article-date article-meta-item">
+        <i class="fa-regular fa-pen-fancy"></i>&nbsp;
+        <span class="desktop">2026-02-07 17:30</span>
+        <span class="mobile">2026-02-07 17:30</span>
+        <span class="hover-info">创建</span>
+    </span>
+    
+        <span class="article-date article-meta-item">
+            <i class="fa-regular fa-wrench"></i>&nbsp;
+            <span class="desktop">2026-02-20 17:22:12</span>
+            <span class="mobile">2026-02-20 17:22:12</span>
+            <span class="hover-info">更新</span>
+        </span>
+    
+
+    
+        <span class="article-categories article-meta-item">
+            <i class="fa-regular fa-folders"></i>&nbsp;
+            <ul>
+                
+                
+                    
+                        
+                        <li>
+                            <a href="/categories/%E6%B7%B1%E5%BA%A6%E5%88%86%E6%9E%90/">深度分析</a>&nbsp;
+                        </li>
+                    
+                    
+                
+            </ul>
+        </span>
+    
+    
+        <span class="article-tags article-meta-item">
+            <i class="fa-regular fa-tags"></i>&nbsp;
+            <ul>
+                
+                    <li>
+                        <a href="/tags/AI/">AI</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/%E7%A7%91%E6%8A%80/">科技</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/%E5%BE%AE%E8%BD%AF/">微软</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/%E5%95%86%E4%B8%9A/">商业</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/%E5%88%9B%E6%96%B0/">创新</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/%E8%B0%B7%E6%AD%8C/">谷歌</a>&nbsp;
+                    </li>
+                
+            </ul>
+        </span>
+    
+
+    
+    
+        <span class="article-wordcount article-meta-item">
+            <i class="fa-regular fa-typewriter"></i>&nbsp;<span>2.6k 字</span>
+        </span>
+    
+    
+        <span class="article-min2read article-meta-item">
+            <i class="fa-regular fa-clock"></i>&nbsp;<span>8 分钟</span>
+        </span>
+    
+    
+</div>
+
+				</div>
+			</div>
+		</div>
+		
+
+		
+
+
+		<div class="article-content markdown-body px-2 sm:px-6 md:px-8 pb-8">
+			<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/ai-giants-dilemma-cover.png"
+                      alt="AI与人类共存的温馨愿景"
+                ></p>
+<blockquote>
+<p>“成功企业失败的原因，往往正是因为它们做对了所有事情。” —— 克莱顿·克里斯坦森</p>
+</blockquote>
+<h2 id="创新者的困境：历史的回响"><a href="#创新者的困境：历史的回响" class="headerlink" title="创新者的困境：历史的回响"></a>创新者的困境：历史的回响</h2><p>1997年，哈佛商学院教授克莱顿·克里斯坦森（Clayton Christensen）在《创新者的窘境》中提出了一个令人不安的悖论：<strong>伟大的公司之所以失败，恰恰是因为它们太过优秀</strong>。它们精准地满足现有客户的需求，高效地分配资源，按部就班地改进产品——然而，当颠覆性技术从边缘崛起时，这些曾经的优势反而成为了致命的枷锁。</p>
+<p>克里斯坦森将这种现象归结为”价值网络”的锁定效应。大公司深嵌于由客户、供应商、投资者构成的利益网络中，每一个决策都需要向这个网络负责。当新技术的早期形态无法满足主流市场的需求时，大公司往往选择理性地忽视它——直到为时已晚。</p>
+<p>柯达发明了数码相机却死于数码时代，诺基亚主导了功能机市场却在智能机时代溃败，这些前车之鉴如今正在AI时代重演。而这一次，站在十字路口的是微软和谷歌——两家掌握着AI时代”金钥匙”的巨头。</p>
+<h2 id="谷歌：广告帝国的AI转型之痛"><a href="#谷歌：广告帝国的AI转型之痛" class="headerlink" title="谷歌：广告帝国的AI转型之痛"></a>谷歌：广告帝国的AI转型之痛</h2><p>谷歌是这个时代最成功的广告公司。2025年第一季度，其广告收入高达<strong>668.9亿美元</strong>，搜索业务贡献了其中的绝大部分。按照行业估算，谷歌从每位活跃用户身上获取的年均广告收入约为<strong>400美元</strong>——这是一个令人惊叹的数字，也是一个沉重的包袱。</p>
+<p>问题在于：<strong>AI正在颠覆搜索的底层逻辑</strong>。</p>
+<p>传统搜索的商业模式建立在”信息不对称”之上——用户提问，谷歌返回十个蓝色链接，用户点击，广告主付费。这个模式运转了二十年，养活了整个互联网生态。但当AI能够直接给出答案时，用户还需要点击那些链接吗？</p>
+<p>谷歌的应对策略是”AI Overview”——在搜索结果顶部直接展示AI生成的答案。截至2025年底，这项功能已覆盖超过<strong>20亿用户</strong>。谷歌甚至开始在AI答案中插入广告。但这带来了新的困境：</p>
+<ul>
+<li>如果AI答案太好，用户不再点击链接，广告点击量下降</li>
+<li>如果AI答案不够好，用户转向ChatGPT或Perplexity</li>
+<li>如果AI答案中的广告太多，用户体验下降，信任流失</li>
+</ul>
+<p>2025年第四季度财报后，尽管谷歌交出了亮眼的数字——市值一度突破4万亿美元大关——但市场的质疑声不绝于耳：<strong>谷歌能否在AI时代保持其搜索霸主地位？从以链接为中心的广告模式，如何平稳过渡到AI优先的新范式？</strong></p>
+<p>到目前为止，谷歌还没有给市场一个完美的答案。</p>
+<h2 id="微软：十面埋伏中的求生战"><a href="#微软：十面埋伏中的求生战" class="headerlink" title="微软：十面埋伏中的求生战"></a>微软：十面埋伏中的求生战</h2><p>如果说谷歌面临的是”如何保护现金牛”的问题，那么微软面临的困境更加复杂：<strong>它正在被自己曾经的盟友和模式所反噬</strong>。</p>
+<p>2023年，微软押注OpenAI，将ChatGPT整合进Bing搜索和Office套件，推出Copilot品牌，一度被视为AI时代的先行者。然而两年后的今天，形势已经逆转：</p>
+<p><strong>Claude Code的崛起正在动摇Copilot的根基。</strong> 根据SemiAnalysis最新报告，Claude Code目前已占据GitHub代码提交量的**4%<strong>，预计到2026年底将超过</strong>20%**。这款产品被认为是”AI Agent时代的拐点”——它不仅能写代码，还能理解项目上下文、执行复杂任务、自主完成工作流程。</p>
+<p>这对微软意味着什么？GitHub是微软旗下的平台，GitHub Copilot是微软的AI编程产品，但最受欢迎的AI编程工具却是Anthropic的Claude Code。微软正在自己的地盘上输给竞争对手。</p>
+<p>更糟糕的是，OpenAI也在推出自己的Codex产品，与Copilot形成竞争。微软投资了OpenAI数百亿美元，却无法阻止后者成为自己的竞争对手。这种”合纵连横”的复杂关系，让微软的战略布局充满了不确定性。</p>
+<p>市场已经用脚投票。微软的市盈率从2024年高点的<strong>35倍</strong>左右，一路下滑至目前的<strong>26-28倍</strong>。按照当前约3万亿美元的市值计算，<strong>这意味着近万亿美元的估值蒸发</strong>。</p>
+<p>2026年1月的最新财报显示，Azure云业务增速放缓至37-38%，低于市场预期。股价应声下跌7%。财报收入依然强劲，但市场关心的是：<strong>在AI重构一切的时代，微软的护城河还有多宽？</strong></p>
+<h2 id="大公司的本质困境：无法革自己的命"><a href="#大公司的本质困境：无法革自己的命" class="headerlink" title="大公司的本质困境：无法革自己的命"></a>大公司的本质困境：无法革自己的命</h2><p>为什么这些明明看到了AI浪潮的巨头，依然举步维艰？</p>
+<p>答案藏在克里斯坦森的理论中：**颠覆性创新要求的不仅是技术能力，更是对现有价值网络的”连根拔起”**。</p>
+<p>谷歌要真正拥抱AI，就必须接受搜索广告收入可能下降的现实。但每当财报季来临，华尔街分析师们盯着的是广告收入同比增长了多少，是每用户收入有没有提升。股东们不会允许谷歌”牺牲今天的利润去换取不确定的明天”。</p>
+<p>微软要真正转型为AI公司，就必须接受自己不再是技术的中心，而是平台和基础设施的提供者。但当GitHub上最火的AI工具不是自家的Copilot，当Office的用户开始使用Claude来写文档，当Azure的大客户开始自研AI能力时，微软的管理层该如何向董事会解释这一切？</p>
+<p>这不是能力问题，甚至不是战略问题——<strong>这是结构性问题</strong>。大公司被它们的成功所绑架，被它们的利益相关者所牵制，被它们的组织惯性所拖累。</p>
+<h2 id="技术的异化：从工具到主宰"><a href="#技术的异化：从工具到主宰" class="headerlink" title="技术的异化：从工具到主宰"></a>技术的异化：从工具到主宰</h2><p>让我们把视角拉高一些。</p>
+<p>如果AI的发展方向是正确的——如果AI真的能够在一两年内达到甚至超越人类在大多数认知任务上的能力——那么我们面临的不仅是几家大公司的商业困境，而是整个经济体系的根本性重构。</p>
+<p>Anthropic CEO Dario Amodei曾警告：<strong>AI可能在未来1-5年内消灭一半的入门级白领岗位，导致美国失业率上升至10-20%<strong>。世界经济论坛的报告指出，</strong>41%的雇主计划在2030年前因AI而裁员</strong>。</p>
+<p>这不是遥远的未来，这是正在发生的现实。</p>
+<p>根据马克思的理论，生产工具的进步必然带来生产关系的变革。蒸汽机带来了工厂制度，电力带来了流水线，互联网带来了平台经济。那么AI会带来什么？</p>
+<p>当一个AI Agent可以在几小时内完成一个初级程序员一周的工作量，当Claude Code开始占据GitHub提交量的五分之一，当AI助手可以撰写研究报告、分析财务数据、设计营销方案时——<strong>我们还需要那么多”知识工作者”吗？</strong></p>
+<p>资本和利益正在加速向少数人聚集。AI公司的估值飙升，而传统企业的员工面临失业；技术精英的收入水涨船高，而普通劳动者的议价能力持续下降。生产效率提高了，但财富分配的不平等也在加剧。</p>
+<h2 id="一个更根本的问题"><a href="#一个更根本的问题" class="headerlink" title="一个更根本的问题"></a>一个更根本的问题</h2><p>回到克里斯坦森的框架。他说大公司死于”对现有价值网络的过度忠诚”。但如果整个经济体系都是一个巨大的”价值网络”呢？如果我们所有人——消费者、劳动者、投资者——都被锁定在这个网络中呢？</p>
+<p>AI解决了生产效率的问题，但它还没有解决——甚至可能加剧了——<strong>财富分配和消费循环的问题</strong>。</p>
+<p>生产工具进步了，但生产出来的东西卖给谁？如果AI取代了大量工作岗位，失去收入的人如何消费？如果财富集中在少数AI公司和技术精英手中，庞大的中产阶级市场如何维持？</p>
+<p>这是一个充满挑战和智慧的问题。AI自己如果足够聪明，或许应该先想办法解决这个问题——因为没有消费者，就没有市场；没有市场，AI再强大也无法创造真正的价值。</p>
+<h2 id="结语：在颠覆与被颠覆之间"><a href="#结语：在颠覆与被颠覆之间" class="headerlink" title="结语：在颠覆与被颠覆之间"></a>结语：在颠覆与被颠覆之间</h2><p>2025年是AI能力爆发的一年。越来越多的人开始相信AI不是泡沫，它是真实的、正在发生的技术革命。</p>
+<p>但这不代表那些大公司不是泡沫。它们拖着庞大的躯体追赶前沿，而前沿的企业——Anthropic、OpenAI、还有无数创业公司——尚未证明自己的盈利模式。</p>
+<p>市场还有多少耐心？</p>
+<p>或者说，市场最终会被驯服吗？</p>
+<p>也许AI会成为新的基础设施，像电力和互联网一样，不以盈利为目的，而是作为一切经济活动的底层支撑。也许人类会找到新的财富分配方式，让AI的生产力惠及所有人。也许碳基生命会与硅基智能达成某种共生关系，而不是被后者取代。</p>
+<p>但这些”也许”都需要我们去争取，去构建，去实现。</p>
+<p>在此之前，谷歌和微软们将继续在颠覆与被颠覆之间挣扎。它们的困境，也是我们所有人的困境。</p>
+<hr>
+<p><em>本文引用了克莱顿·克里斯坦森的《创新者的窘境》理论、SemiAnalysis关于Claude Code的市场分析、以及多家机构对AI就业影响的研究报告。</em></p>
+
+		</div>
+
+		
+		<div class="post-copyright-info w-full my-8 px-2 sm:px-6 md:px-8">
+			<div class="article-copyright-info-container">
+    <ul>
+        <li><strong>标题:</strong> AI时代的巨人困局：当创新成为微软谷歌的抵颈之刃</li>
+        <li><strong>作者:</strong> Nathan</li>
+        <li><strong>创建于
+                :</strong> 2026-02-07 17:30:00</li>
+        
+            <li>
+                <strong>更新于
+                    :</strong> 2026-02-20 17:22:12
+            </li>
+        
+        <li>
+            <strong>链接:</strong> https://hydraxman.github.io/2026/02/07/ai-giants-dilemma/
+        </li>
+        <li>
+            <strong>
+                版权声明:
+            </strong>
+            
+
+            
+                本文章采用 <a class="license" target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0">CC BY-NC-SA 4.0</a> 进行许可。
+            
+        </li>
+    </ul>
+</div>
+
+		</div>
+		
+
+		
+		<ul class="post-tags-box text-lg mt-1.5 flex-wrap justify-center flex md:hidden">
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/AI/">#AI</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/%E7%A7%91%E6%8A%80/">#科技</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/%E5%BE%AE%E8%BD%AF/">#微软</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/%E5%95%86%E4%B8%9A/">#商业</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/%E5%88%9B%E6%96%B0/">#创新</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/%E8%B0%B7%E6%AD%8C/">#谷歌</a>&nbsp;
+			</li>
+			
+		</ul>
+		
+
+		
+
+		
+		<div class="article-nav my-8 flex justify-between items-center px-2 sm:px-6 md:px-8">
+			
+			<div class="article-prev border-border-color shadow-redefine-flat shadow-shadow-color-2 rounded-medium px-4 py-2 hover:shadow-redefine-flat-hover hover:shadow-shadow-color-2">
+				<a class="prev" rel="prev" href="/2026/02/08/musk-dwarkesh-podcast-2026/">
+					<span class="left arrow-icon flex justify-center items-center">
+						<i class="fa-solid fa-chevron-left"></i>
+					</span>
+					<span class="title flex justify-center items-center">
+						<span class="post-nav-title-item truncate max-w-48">马斯克三小时酒馆畅聊纪要：大吹中国赢麻论，要把GPU搬上天</span>
+						<span class="post-nav-item">上一篇</span>
+					</span>
+				</a>
+			</div>
+			
+			
+			<div class="article-next border-border-color shadow-redefine-flat shadow-shadow-color-2 rounded-medium px-4 py-2 hover:shadow-redefine-flat-hover hover:shadow-shadow-color-2">
+				<a class="next" rel="next" href="/2026/02/06/claude-opus-4-6-vs-gpt-5-3-codex/">
+					<span class="title flex justify-center items-center">
+						<span class="post-nav-title-item truncate max-w-48">Claude Opus 4.6 vs GPT-5.3-Codex：2026年AI编程双雄同日对决</span>
+						<span class="post-nav-item">下一篇</span>
+					</span>
+					<span class="right arrow-icon flex justify-center items-center">
+						<i class="fa-solid fa-chevron-right"></i>
+					</span>
+				</a>
+			</div>
+			
+		</div>
+		
+
+
+		
+	</div>
+
+	
+	<div class="toc-content-container">
+		<div class="post-toc-wrap">
+	<div class="post-toc">
+		<div class="toc-title">目录</div>
+		<div class="page-title">AI时代的巨人困局：当创新成为微软谷歌的抵颈之刃</div>
+		<ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%9B%E6%96%B0%E8%80%85%E7%9A%84%E5%9B%B0%E5%A2%83%EF%BC%9A%E5%8E%86%E5%8F%B2%E7%9A%84%E5%9B%9E%E5%93%8D"><span class="nav-text">创新者的困境：历史的回响</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B0%B7%E6%AD%8C%EF%BC%9A%E5%B9%BF%E5%91%8A%E5%B8%9D%E5%9B%BD%E7%9A%84AI%E8%BD%AC%E5%9E%8B%E4%B9%8B%E7%97%9B"><span class="nav-text">谷歌：广告帝国的AI转型之痛</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BE%AE%E8%BD%AF%EF%BC%9A%E5%8D%81%E9%9D%A2%E5%9F%8B%E4%BC%8F%E4%B8%AD%E7%9A%84%E6%B1%82%E7%94%9F%E6%88%98"><span class="nav-text">微软：十面埋伏中的求生战</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A4%A7%E5%85%AC%E5%8F%B8%E7%9A%84%E6%9C%AC%E8%B4%A8%E5%9B%B0%E5%A2%83%EF%BC%9A%E6%97%A0%E6%B3%95%E9%9D%A9%E8%87%AA%E5%B7%B1%E7%9A%84%E5%91%BD"><span class="nav-text">大公司的本质困境：无法革自己的命</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8A%80%E6%9C%AF%E7%9A%84%E5%BC%82%E5%8C%96%EF%BC%9A%E4%BB%8E%E5%B7%A5%E5%85%B7%E5%88%B0%E4%B8%BB%E5%AE%B0"><span class="nav-text">技术的异化：从工具到主宰</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E4%B8%AA%E6%9B%B4%E6%A0%B9%E6%9C%AC%E7%9A%84%E9%97%AE%E9%A2%98"><span class="nav-text">一个更根本的问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%93%E8%AF%AD%EF%BC%9A%E5%9C%A8%E9%A2%A0%E8%A6%86%E4%B8%8E%E8%A2%AB%E9%A2%A0%E8%A6%86%E4%B9%8B%E9%97%B4"><span class="nav-text">结语：在颠覆与被颠覆之间</span></a></li></ol>
+
+	</div>
+</div>
+	</div>
+	
+</div>
+			</div>
+
+			
+		</div>
+
+		<div class="main-content-footer">
+			<footer class="footer mt-5 py-5 h-auto text-base text-third-text-color relative border-t-2 border-t-border-color">
+    <div class="info-container py-3 text-center">
+        
+        <div class="text-center">
+            &copy;
+            
+              <span>2024</span>
+              -
+            
+            2026&nbsp;&nbsp;<i class="fa-solid fa-heart fa-beat" style="--fa-animation-duration: 0.5s; color: #333"></i>&nbsp;&nbsp;<a href="/">Nathan</a>
+            
+                
+                <p class="post-count space-x-0.5">
+                    <span>
+                        共撰写了 52 篇文章
+                    </span>
+                    
+                        <span>
+                            共 111.8k 字
+                        </span>
+                    
+                </p>
+            
+        </div>
+        
+        <div class="relative text-center lg:absolute lg:left-[20px] lg:top-1/2 lg:-translate-y-1/2 lg:text-left">
+            <span class="lg:block text-sm">由 <?xml version="1.0" encoding="utf-8"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg class="relative top-[2px] inline-block align-baseline" version="1.1" id="圖層_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="1rem" height="1rem" viewBox="0 0 512 512" enable-background="new 0 0 512 512" xml:space="preserve"><path fill="#0E83CD" d="M256.4,25.8l-200,115.5L56,371.5l199.6,114.7l200-115.5l0.4-230.2L256.4,25.8z M349,354.6l-18.4,10.7l-18.6-11V275H200v79.6l-18.4,10.7l-18.6-11v-197l18.5-10.6l18.5,10.8V237h112v-79.6l18.5-10.6l18.5,10.8V354.6z"/></svg><a target="_blank" class="text-base" href="https://hexo.io">Hexo</a> 驱动</span>
+            <span class="text-sm lg:block">主题&nbsp;<a class="text-base" target="_blank" href="https://github.com/EvanNotFound/hexo-theme-redefine">Redefine v2.8.5</a></span>
+        </div>
+        
+        
+            <div>
+                博客已运行 <span class="odometer" id="runtime_days" ></span> 天 <span class="odometer" id="runtime_hours"></span> 小时 <span class="odometer" id="runtime_minutes"></span> 分钟 <span class="odometer" id="runtime_seconds"></span> 秒
+            </div>
+        
+        
+            <script data-swup-reload-script>
+                try {
+                    function odometer_init() {
+                    const elements = document.querySelectorAll('.odometer');
+                    elements.forEach(el => {
+                        new Odometer({
+                            el,
+                            format: '( ddd).dd',
+                            duration: 200
+                        });
+                    });
+                    }
+                    odometer_init();
+                } catch (error) {}
+            </script>
+        
+        
+        
+    </div>  
+</footer>
+		</div>
+	</div>
+
+	
+	<div class="post-tools">
+		<div class="post-tools-container">
+	<ul class="article-tools-list">
+		<!-- TOC aside toggle -->
+		
+		<li class="right-bottom-tools page-aside-toggle">
+			<i class="fa-regular fa-outdent"></i>
+		</li>
+		
+
+		<!-- go comment -->
+		
+	</ul>
+</div>
+	</div>
+	
+
+	<div class="right-side-tools-container">
+		<div class="side-tools-container">
+	<ul class="hidden-tools-list">
+		<li class="right-bottom-tools tool-font-adjust-plus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-plus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-font-adjust-minus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-minus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-dark-light-toggle flex justify-center items-center">
+			<i class="fa-regular fa-moon"></i>
+		</li>
+
+		<!-- rss -->
+		
+
+		
+
+		<li class="right-bottom-tools tool-scroll-to-bottom flex justify-center items-center">
+			<i class="fa-regular fa-arrow-down"></i>
+		</li>
+	</ul>
+
+	<ul class="visible-tools-list">
+		<li class="right-bottom-tools toggle-tools-list flex justify-center items-center">
+			<i class="fa-regular fa-cog fa-spin"></i>
+		</li>
+		
+		<li class="right-bottom-tools tool-scroll-to-top flex justify-center items-center">
+			<i class="arrow-up fas fa-arrow-up"></i>
+			<span class="percent"></span>
+		</li>
+		
+		
+	</ul>
+</div>
+	</div>
+
+	<div class="image-viewer-container">
+	<img src="">
+</div>
+
+	
+	<div class="search-pop-overlay">
+	<div class="popup search-popup">
+		<div class="search-header">
+			<span class="search-input-field-pre">
+				<i class="fa-solid fa-keyboard"></i>
+			</span>
+			<div class="search-input-container">
+				<input autocomplete="off" autocorrect="off" autocapitalize="off" placeholder="站内搜索您需要的内容..." spellcheck="false" type="search" class="search-input">
+			</div>
+			<span class="popup-btn-close">
+				<i class="fa-solid fa-times"></i>
+			</span>
+		</div>
+		<div id="search-result">
+			<div id="no-result">
+				<i class="fa-solid fa-spinner fa-spin-pulse fa-5x fa-fw"></i>
+			</div>
+		</div>
+	</div>
+</div>
+	
+
+</main>
+
+
+
+<script src="/js/build/libs/Swup.min.js"></script>
+
+<script src="/js/build/libs/SwupSlideTheme.min.js"></script>
+
+<script src="/js/build/libs/SwupScriptsPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupProgressPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupScrollPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupPreloadPlugin.min.js"></script>
+
+<script>
+    const swup = new Swup({
+        plugins: [
+            new SwupScriptsPlugin({
+                optin: true,
+            }),
+            new SwupProgressPlugin(),
+            new SwupScrollPlugin({
+                offset: 80,
+            }),
+            new SwupSlideTheme({
+                mainElement: ".main-content-body",
+            }),
+            new SwupPreloadPlugin(),
+        ],
+        containers: ["#swup"],
+    });
+</script>
+
+
+
+
+	
+<script src="/js/build/tools/imageViewer.js" type="module"></script>
+
+<script src="/js/build/utils.js" type="module"></script>
+
+<script src="/js/build/main.js" type="module"></script>
+
+<script src="/js/build/layouts/navbarShrink.js" type="module"></script>
+
+<script src="/js/build/tools/scrollTopBottom.js" type="module"></script>
+
+<script src="/js/build/tools/lightDarkSwitch.js" type="module"></script>
+
+<script src="/js/build/layouts/categoryList.js" type="module"></script>
+
+
+
+    
+<script src="/js/build/tools/localSearch.js" type="module"></script>
+
+
+
+
+    
+<script src="/js/build/tools/codeBlock.js" type="module"></script>
+
+
+
+
+    
+<script src="/js/build/layouts/lazyload.js" type="module"></script>
+
+
+
+
+    
+<script src="/js/build/tools/runtime.js"></script>
+
+    
+<script src="/js/build/libs/odometer.min.js"></script>
+
+    
+<link rel="stylesheet" href="/assets/odometer-theme-minimal.css">
+
+
+
+
+  
+<script src="/js/build/libs/Typed.min.js"></script>
+
+  
+<script src="/js/build/plugins/typed.js" type="module"></script>
+
+
+
+
+
+
+
+
+    
+<script src="/js/build/libs/anime.min.js"></script>
+
+
+
+
+
+    
+<script src="/js/build/tools/tocToggle.js" type="module" data-swup-reload-script=""></script>
+
+<script src="/js/build/layouts/toc.js" type="module" data-swup-reload-script=""></script>
+
+<script src="/js/build/plugins/tabs.js" type="module" data-swup-reload-script=""></script>
+
+
+
+
+<script src="/js/build/libs/moment-with-locales.min.js" data-swup-reload-script=""></script>
+
+
+<script src="/js/build/layouts/essays.js" type="module" data-swup-reload-script=""></script>
+
+
+
+
+
+	
+</body>
+
+</html>

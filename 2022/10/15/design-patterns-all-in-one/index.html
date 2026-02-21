@@ -1,0 +1,1489 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="keywords" content="计算机技术, 生活中的胡思乱想">
+    
+    <meta name="author" content="Nathan">
+    
+    <!-- Completely eliminate flash of wrong theme -->
+    <script>
+        (function() {
+            const THEME_KEY = "REDEFINE-THEME-STATUS";
+            const DARK = "dark", LIGHT = "light";
+            
+            // Get preferred theme
+            function getTheme() {
+                try {
+                    const saved = localStorage.getItem(THEME_KEY);
+                    if (saved) {
+                        const { isDark } = JSON.parse(saved);
+                        return isDark ? DARK : LIGHT;
+                    }
+                } catch (e) {}
+                
+                return matchMedia("(prefers-color-scheme: dark)").matches ? DARK : LIGHT;
+            }
+            
+            // Apply theme to document
+            function applyTheme(theme) {
+                const isDark = theme === DARK;
+                const root = document.documentElement;
+                
+                // Set data attribute for CSS variables
+                root.setAttribute("data-theme", theme);
+                
+                // Set classes for compatibility
+                root.classList.add(theme);
+                root.classList.remove(isDark ? LIGHT : DARK);
+                root.style.colorScheme = theme;
+            }
+            
+            // Initial application
+            const theme = getTheme();
+            applyTheme(theme);
+            
+            // Listen for system preference changes
+            matchMedia("(prefers-color-scheme: dark)").addEventListener("change", ({ matches }) => {
+                // Only update if using system preference (no localStorage entry)
+                if (!localStorage.getItem(THEME_KEY)) {
+                    applyTheme(matches ? DARK : LIGHT);
+                }
+            });
+            
+            // Set body classes once DOM is ready
+            if (document.readyState !== "loading") {
+                document.body.classList.add(theme + "-mode");
+            } else {
+                document.addEventListener("DOMContentLoaded", () => {
+                    document.body.classList.add(theme + "-mode");
+                    document.body.classList.remove((theme === DARK ? LIGHT : DARK) + "-mode");
+                });
+            }
+        })();
+    </script>
+    
+    <!-- Critical CSS to prevent flash -->
+    <style>
+        :root[data-theme="dark"] {
+            --background-color: #202124;
+            --background-color-transparent: rgba(32, 33, 36, 0.6);
+            --second-background-color: #2d2e32;
+            --third-background-color: #34353a;
+            --third-background-color-transparent: rgba(32, 33, 36, 0.6);
+            --primary-color: #0066CC;
+            --first-text-color: #ffffff;
+            --second-text-color: #eeeeee;
+            --third-text-color: #bebec6;
+            --fourth-text-color: #999999;
+            --default-text-color: #bebec6;
+            --invert-text-color: #373D3F;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --selection-color: #0066CC;
+            --shadow-color-1: rgba(255, 255, 255, 0.08);
+            --shadow-color-2: rgba(255, 255, 255, 0.05);
+        }
+        
+        :root[data-theme="light"] {
+            --background-color: #fff;
+            --background-color-transparent: rgba(255, 255, 255, 0.6);
+            --second-background-color: #f8f8f8;
+            --third-background-color: #f2f2f2;
+            --third-background-color-transparent: rgba(241, 241, 241, 0.6);
+            --primary-color: #0066CC;
+            --first-text-color: #16171a;
+            --second-text-color: #2f3037;
+            --third-text-color: #5e5e5e;
+            --fourth-text-color: #eeeeee;
+            --default-text-color: #373D3F;
+            --invert-text-color: #bebec6;
+            --border-color: rgba(0, 0, 0, 0.08);
+            --selection-color: #0066CC;
+            --shadow-color-1: rgba(0, 0, 0, 0.08);
+            --shadow-color-2: rgba(0, 0, 0, 0.05);
+        }
+        
+        body {
+            background-color: var(--background-color);
+            color: var(--default-text-color);
+        }
+        
+        /* Apply body classes as soon as DOM is ready */
+        :root[data-theme="dark"] body {
+            background-color: var(--background-color);
+            color: var(--default-text-color);
+        }
+    </style>
+    
+    <!-- preconnect -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    
+    <!--- Seo Part-->
+    
+    <link rel="canonical" href="https://hydraxman.github.io/2022/10/15/design-patterns-all-in-one/"/>
+    <meta name="robots" content="index,follow">
+    <meta name="googlebot" content="index,follow">
+    <meta name="revisit-after" content="1 days">
+    
+    
+    
+        
+        <meta name="description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="15分钟入门23种设计模式：图解，范例和对比">
+<meta property="og:url" content="https://hydraxman.github.io/2022/10/15/design-patterns-all-in-one/index.html">
+<meta property="og:site_name" content="内森淼文">
+<meta property="og:description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://hydraxman.github.io/images/redefine-og.webp">
+<meta property="article:published_time" content="2022-10-15T11:07:30.000Z">
+<meta property="article:modified_time" content="2026-02-20T09:22:12.122Z">
+<meta property="article:author" content="Nathan">
+<meta property="article:tag" content="Code design">
+<meta property="article:tag" content="Design Patterns">
+<meta property="article:tag" content="GoF">
+<meta property="article:tag" content="15分钟">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://hydraxman.github.io/images/redefine-og.webp">
+    
+    
+    <!--- Icon Part-->
+    <link rel="icon" type="image/png" href="/images/favicon.svg" sizes="192x192">
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.svg">
+    <meta name="theme-color" content="#ffffff">
+    <link rel="shortcut icon" href="/images/favicon.svg">
+    <!--- Page Info-->
+    
+    <title>
+        
+            15分钟入门23种设计模式：图解，范例和对比 | 内森淼文
+        
+    </title>
+
+    
+<link rel="stylesheet" href="/fonts/Chillax/chillax.css">
+
+
+    <!--- Inject Part-->
+    
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    
+        
+<link rel="stylesheet" href="/css/build/tailwind.css">
+
+    
+
+    
+<link rel="stylesheet" href="/fonts/GeistMono/geist-mono.css">
+
+    
+<link rel="stylesheet" href="/fonts/Geist/geist.css">
+
+    <!--- Font Part-->
+    
+    
+    
+    
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&display=swap" rel="stylesheet">
+    
+    
+
+    <script id="hexo-configurations">
+    window.config = {"hostname":"hydraxman.github.io","root":"/","language":"zh-CN","path":"search.json"};
+    window.theme = {"articles":{"style":{"font_size":"16px","line_height":1.5,"image_border_radius":"14px","image_alignment":"center","image_caption":false,"link_icon":true,"delete_mask":false,"title_alignment":"left","headings_top_spacing":{"h1":"3.2rem","h2":"2.4rem","h3":"1.9rem","h4":"1.6rem","h5":"1.4rem","h6":"1.3rem"}},"word_count":{"enable":true,"count":true,"min2read":true},"author_label":{"enable":false,"auto":false,"list":[]},"code_block":{"copy":true,"style":"mac","highlight_theme":{"light":"github","dark":"vs2015"},"font":{"enable":false,"family":null,"url":null}},"toc":{"enable":true,"max_depth":3,"number":false,"expand":true,"init_open":true},"copyright":{"enable":true,"default":"cc_by_nc_sa"},"lazyload":true,"pangu_js":false,"recommendation":{"enable":false,"title":"推荐阅读","limit":3,"mobile_limit":2,"placeholder":"/images/wallhaven-wqery6-light.webp","skip_dirs":[]}},"colors":{"primary":"#ffffff","secondary":null,"default_mode":"light"},"global":{"fonts":{"chinese":{"enable":false,"family":null,"url":null},"english":{"enable":true,"family":"Inter","url":"https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"},"title":{"enable":true,"family":"Noto Serif","url":"https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&display=swap"}},"content_max_width":"1000px","sidebar_width":"210px","hover":{"shadow":true,"scale":false},"scroll_progress":{"bar":true,"percentage":true},"website_counter":{"url":"https://cn.vercount.one/js","enable":false,"site_pv":true,"site_uv":true,"post_pv":true},"single_page":true,"preloader":{"enable":false,"custom_message":null},"side_tools":{"gear_rotation":true,"auto_expand":false},"open_graph":{"enable":true,"image":"/images/redefine-og.webp","description":"Hexo Theme Redefine, Redefine Your Hexo Journey."},"google_analytics":{"enable":false,"id":null}},"home_banner":{"enable":true,"style":"fixed","image":{"light":"/images/banner-light.jpg","dark":"/images/banner-dark.jpg"},"title":"内森淼文","subtitle":{"text":["AI · 编程 · 科技见闻","Write Code, Read World"],"hitokoto":{"enable":false,"show_author":false,"api":"https://v1.hitokoto.cn"},"typing_speed":100,"backing_speed":80,"starting_delay":500,"backing_delay":1500,"loop":true,"smart_backspace":true},"text_color":{"light":"#fff","dark":"#d1d1b6"},"text_style":{"title_size":"2.8rem","subtitle_size":"1.5rem","line_height":1.2},"custom_font":{"enable":false,"family":null,"url":null},"social_links":{"enable":true,"style":"default","links":{"github":"https://github.com/hydraxman","instagram":null,"zhihu":null,"twitter":null,"email":null},"qrs":{"weixin":null}}},"plugins":{"feed":{"enable":false},"aplayer":{"enable":false,"type":"fixed","audios":[{"name":null,"artist":null,"url":null,"cover":null,"lrc":null}]},"mermaid":{"enable":false,"version":"11.4.1"}},"version":"2.8.5","navbar":{"auto_hide":false,"color":{"left":"#333333","right":"#555555","transparency":35},"width":{"home":"1200px","pages":"1000px"},"links":{"Home":{"path":"/","icon":"fa-regular fa-house"},"Archives":{"path":"/archives","icon":"fa-regular fa-archive"},"Categories":{"path":"/categories","icon":"fa-regular fa-folder"},"Tags":{"path":"/tags","icon":"fa-regular fa-tags"},"About":{"path":"/about","icon":"fa-regular fa-user"}},"search":{"enable":true,"preload":true}},"page_templates":{"friends_column":2,"tags_style":"blur"},"home":{"sidebar":{"enable":true,"position":"left","first_item":"menu","announcement":"AI · 编程 · 科技","show_on_mobile":true,"links":{"Archives":{"path":"/archives","icon":"fa-regular fa-archive"},"Tags":{"path":"/tags","icon":"fa-regular fa-tags"},"Categories":{"path":"/categories","icon":"fa-regular fa-folder"}}},"article_date_format":"auto","excerpt_length":200,"categories":{"enable":true,"limit":3},"tags":{"enable":true,"limit":3}},"footerStart":"2024/01/01 00:00:00"};
+    window.lang_ago = {"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"};
+    window.data = {"masonry":false};
+  </script>
+    
+    <!--- Fontawesome Part-->
+    
+<link rel="stylesheet" href="/fontawesome/fontawesome.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/brands.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/solid.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/regular.min.css">
+
+    
+    
+    
+    
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+
+<body>
+	<div class="progress-bar-container">
+	
+	<span class="scroll-progress-bar"></span>
+	
+
+	
+	<span class="pjax-progress-bar"></span>
+	<!--        <span class="swup-progress-icon">-->
+	<!--            <i class="fa-solid fa-circle-notch fa-spin"></i>-->
+	<!--        </span>-->
+	
+</div>
+
+<main class="page-container" id="swup">
+
+	
+
+	<div class="main-content-container flex flex-col justify-between min-h-dvh">
+		<div class="main-content-header">
+			<header class="navbar-container px-6 md:px-12">
+    <div class="navbar-content transition-navbar ">
+        <div class="left">
+            
+            <a class="logo-title" href="/">
+                
+                内森淼文
+                
+            </a>
+        </div>
+
+        <div class="right">
+            <!-- PC -->
+            <div class="desktop">
+                <ul class="navbar-list">
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/"
+                                        >
+                                    <i class="fa-regular fa-house fa-fw"></i>
+                                    首页
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/archives"
+                                        >
+                                    <i class="fa-regular fa-archive fa-fw"></i>
+                                    归档
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/categories"
+                                        >
+                                    <i class="fa-regular fa-folder fa-fw"></i>
+                                    分类
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/tags"
+                                        >
+                                    <i class="fa-regular fa-tags fa-fw"></i>
+                                    标签
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/about"
+                                        >
+                                    <i class="fa-regular fa-user fa-fw"></i>
+                                    关于
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                    
+                        <li class="navbar-item search search-popup-trigger">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </li>
+                    
+                </ul>
+            </div>
+            <!-- Mobile -->
+            <div class="mobile">
+                
+                    <div class="icon-item search search-popup-trigger"><i class="fa-solid fa-magnifying-glass"></i>
+                    </div>
+                
+                <div class="icon-item navbar-bar">
+                    <div class="navbar-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile sheet -->
+    <div class="navbar-drawer h-dvh w-full absolute top-0 left-0 bg-background-color flex flex-col justify-between">
+        <ul class="drawer-navbar-list flex flex-col px-4 justify-center items-start">
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/"
+                        >
+                            <span>
+                                首页
+                            </span>
+                            
+                                <i class="fa-regular fa-house fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/archives"
+                        >
+                            <span>
+                                归档
+                            </span>
+                            
+                                <i class="fa-regular fa-archive fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/categories"
+                        >
+                            <span>
+                                分类
+                            </span>
+                            
+                                <i class="fa-regular fa-folder fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/tags"
+                        >
+                            <span>
+                                标签
+                            </span>
+                            
+                                <i class="fa-regular fa-tags fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/about"
+                        >
+                            <span>
+                                关于
+                            </span>
+                            
+                                <i class="fa-regular fa-user fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+
+            
+            
+                
+                    
+                    
+                    
+            
+        </ul>
+
+        <div class="statistics flex justify-around my-2.5">
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/tags">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">115</div>
+        <div class="label text-third-text-color text-sm">标签</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/categories">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">5</div>
+        <div class="label text-third-text-color text-sm">分类</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/archives">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">52</div>
+        <div class="label text-third-text-color text-sm">文章</div>
+    </a>
+</div>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+		</div>
+
+		<div class="main-content-body transition-fade-up">
+			
+
+			<div class="main-content">
+				<div class="post-page-container flex relative justify-between box-border w-full h-full">
+	<div class="article-content-container">
+
+		<div class="article-title relative w-full">
+			
+			<div class="w-full flex items-center pt-6 justify-start">
+				<h1 class="article-title-regular text-second-text-color tracking-tight text-4xl md:text-6xl font-semibold px-2 sm:px-6 md:px-8 py-3">15分钟入门23种设计模式：图解，范例和对比</h1>
+			</div>
+			
+		</div>
+
+		
+		<div class="article-header flex flex-row gap-2 items-center px-2 sm:px-6 md:px-8">
+			<div class="avatar w-[46px] h-[46px] flex-shrink-0 rounded-medium border border-border-color p-[1px]">
+				<img src="/images/avatar.png">
+			</div>
+			<div class="info flex flex-col justify-between">
+				<div class="author flex items-center">
+					<span class="name text-default-text-color text-lg font-semibold">Nathan</span>
+					
+				</div>
+				<div class="meta-info">
+					<div class="article-meta-info">
+    <span class="article-date article-meta-item">
+        <i class="fa-regular fa-pen-fancy"></i>&nbsp;
+        <span class="desktop">2022-10-15 19:07:30</span>
+        <span class="mobile">2022-10-15 19:07:30</span>
+        <span class="hover-info">创建</span>
+    </span>
+    
+        <span class="article-date article-meta-item">
+            <i class="fa-regular fa-wrench"></i>&nbsp;
+            <span class="desktop">2026-02-20 17:22:12</span>
+            <span class="mobile">2026-02-20 17:22:12</span>
+            <span class="hover-info">更新</span>
+        </span>
+    
+
+    
+        <span class="article-categories article-meta-item">
+            <i class="fa-regular fa-folders"></i>&nbsp;
+            <ul>
+                
+                
+                    
+                        
+                        <li>
+                            <a href="/categories/%E4%BB%A3%E7%A0%81%E6%89%8B%E8%AE%B0/">代码手记</a>&nbsp;
+                        </li>
+                    
+                    
+                
+            </ul>
+        </span>
+    
+    
+        <span class="article-tags article-meta-item">
+            <i class="fa-regular fa-tags"></i>&nbsp;
+            <ul>
+                
+                    <li>
+                        <a href="/tags/Code-design/">Code design</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/Design-Patterns/">Design Patterns</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/GoF/">GoF</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/15%E5%88%86%E9%92%9F/">15分钟</a>&nbsp;
+                    </li>
+                
+            </ul>
+        </span>
+    
+
+    
+    
+        <span class="article-wordcount article-meta-item">
+            <i class="fa-regular fa-typewriter"></i>&nbsp;<span>5.4k 字</span>
+        </span>
+    
+    
+        <span class="article-min2read article-meta-item">
+            <i class="fa-regular fa-clock"></i>&nbsp;<span>19 分钟</span>
+        </span>
+    
+    
+</div>
+
+				</div>
+			</div>
+		</div>
+		
+
+		
+
+
+		<div class="article-content markdown-body px-2 sm:px-6 md:px-8 pb-8">
+			<blockquote>
+<p>本文力图在15分钟内，通过<code>UML图解</code>、<code>范例</code>和<code>类比</code>，让你对面向对象的23种设计模式形成提纲挈领的认识，从而让我们在面临代码设计问题时更加成竹在胸。本文源代码： <a class="link"   target="_blank" rel="noopener" href="https://github.com/hydraxman/hydraxman.github.io/blob/main/2022/10/15/design-patterns-all-in-one/design-patterns.puml" >UML<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a>, <a class="link"   target="_blank" rel="noopener" href="https://github.com/microsoft/HydraLab/blob/main/sdk/src/main/java/com/microsoft/hydralab/performance/PerformanceInspectionService.java" >Sample Code<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a>。</p>
+</blockquote>
+<h1 id="开门见山"><a href="#开门见山" class="headerlink" title="开门见山"></a>开门见山</h1><p>我们直奔主题，分类呈现23种设计模式的庐山真面目：</p>
+<span id="more"></span>
+
+<table>
+<thead>
+<tr>
+<th>创建型 (5)<br>Creational</th>
+<th>结构型 (7)<br>Structural</th>
+<th>行为型 (11)<br>Behavioral</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>工厂方法 Factory method<br>抽象工厂 Abstract factory<br>建造者 Builder<br>原型 Prototype<br>单例 SingleTon</td>
+<td>适配器 Adapter<br>桥接 Bridge<br>组合 Composite<br>装饰 Decorator<br>外观 Facade<br>享元 Flyweight<br>代理 Proxy</td>
+<td>责任链 Chain of responsibility<br>命令 Command<br>解释器 Interpreter<br>迭代器 Iterator<br>中介 Mediator<br>备忘录 Memento<br>观察者 Observer<br>状态 State<br>策略 Strategy<br>模板方法 Template method<br>访问者 Visitor</td>
+</tr>
+</tbody></table>
+<p>这23种设计模式源于GoF所著的”Design Patterns - Elements of Reusable Object-Oriented Software” 一书（也有将该书直接简称为GoF），译著为 “设计模式：可复用面向对象软件的基础”。原书将这23种设计模式分为三类：</p>
+<ul>
+<li><strong>创建型</strong>包含5种模式，涉及对象&#x2F;对象组合的创建构建。</li>
+<li><strong>结构性</strong>包含7种模式，涉及对象&#x2F;类之间的关系。</li>
+<li><strong>行为型</strong>包含11种模式，涉及对象&#x2F;类的行为、状态、流程。</li>
+</ul>
+<p>从该书的标题我们可以了解到，设计模式是一个<strong>面向对象</strong>开发方法下的概念，是解决<strong>代码设计&#x2F;软件架构</strong>问题的<strong>可复用</strong>的元素，同时是<strong>基本元素</strong>（elements）。引用原书的例子，我们大家所熟识的MVC模式，Model-View-Controller，就可以解构为几种设计模式的组合演变，比如可以在View和Model的关系中看到观察者模式 Observer、组合模式 Composite、装饰模式 Decorator，在Controller中发现策略模式的影子。通过对23种基础模式的有机利用和结合，可以进一步演化出更复杂的软件架构。限于篇幅，本文不会讲解每种设计模式的定义和背景，读者可以参考<a class="link"   target="_blank" rel="noopener" href="https://www.runoob.com/design-pattern/design-pattern-intro.html" >设计模式简介<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a>来学习定义。</p>
+<h1 id="设计模式的UML、类比和范例"><a href="#设计模式的UML、类比和范例" class="headerlink" title="设计模式的UML、类比和范例"></a>设计模式的UML、类比和范例</h1><p>这个部分，我们逐步从尝鲜到类比，深入理解一些比较常见有趣的设计模式的UML及其经典实例。GoF原书中也推荐学习者从“模式怎样相互关联”以及“研究目的相似的模式“出发来学习和选择设计模式。首先看看最简单常见的<code>策略模式</code>和另一个同属<strong>行为型模式</strong>的<code>状态模式</code>：</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>策略模式 Strategy</th>
+<th>状态模式 State</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>UML</strong></td>
+<td><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/2022/10/15/design-patterns-all-in-one/strategy.png"
+                      alt="strategy"
+                ></td>
+<td><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/2022/10/15/design-patterns-all-in-one/state.png"
+                      alt="state"
+                ></td>
+</tr>
+<tr>
+<td><strong>范例</strong></td>
+<td>- <a class="link"   target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/util/Comparator.html#compare-T-T-" >Comparator#compare() 和 Collections#sort()<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a><br>- <a class="link"   target="_blank" rel="noopener" href="https://github.com/spring-projects/spring-security/blob/main/crypto/src/main/java/org/springframework/security/crypto/password/PasswordEncoder.java" >Spring Security: PasswordEncoder<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></td>
+<td>- 标准范例: <a class="link"   target="_blank" rel="noopener" href="http://docs.oracle.com/javaee/7/api/javax/faces/lifecycle/Lifecycle.html#execute-javax.faces.context.FacesContext-" >javax.faces.lifecycle.LifeCycle#execute()<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a><br>- 形似样例：<a class="link"   target="_blank" rel="noopener" href="https://www.liaoxuefeng.com/wiki/1252599548343744/1306580742045730" >Java Thread State<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a>, <a class="link"   target="_blank" rel="noopener" href="https://github.com/google/ExoPlayer/blob/a9444c880230d2c2c79097e89259ce0b9f80b87d/library/common/src/main/java/com/google/android/exoplayer2/SimpleBasePlayer.java" >ExoPlayer<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></td>
+</tr>
+<tr>
+<td><strong>概述</strong></td>
+<td>让外部对算法的相互替换无感</td>
+<td>允许一个对象根据<strong>内部状态</strong>改变行为</td>
+</tr>
+<tr>
+<td><strong>关键字</strong></td>
+<td>Strategy, rule</td>
+<td>State, switch, phase, lifecycle</td>
+</tr>
+<tr>
+<td><strong>核心角色</strong></td>
+<td>Strategy</td>
+<td>State</td>
+</tr>
+</tbody></table>
+<p>策略模式和状态模式在UML图形上非常相像，他们之间的主要区别如下：</p>
+<ul>
+<li>状态对象可以持有上下文对象（调用方），但策略模式一般存在这种依赖。</li>
+<li>状态模式可以在彼此之间进行跳转替换，比如调用了播放器的<code>play</code>方法，那么状态可能从<code>stop</code>-&gt;<code>playing</code>，这个操作可以用状态对象完成。</li>
+<li>一个策略和调用方的关系（依赖）可能弱于状态和上下文对象的关系（持有、属性）。</li>
+<li>策略的不同可能只影响一个行为，但是状态的不同影响状态持有对象行为的方方面面。</li>
+</ul>
+<p>整体上策略模式要比状态模式更加简明易懂，应用场景更广，在大型项目中的应用也随处可见。而状态模式虽然也是对常见概念的抽象，其应用却相对有限，其原因可能是，在更多的情况下，把行为的差异定义在不同的状态中，可能并非符合直觉的操作：与其把状态也定义为对象承载行为，不如把状态定义为一个标记，直接用<code>if</code>或<code>switch</code>判断来的直接。或者换言之，大多数情况下，问题还没有复杂到要用状态模式的程度。</p>
+<p>借助这种对比的视角，我们来学习更多模式。先看看以下三种结构型设计模式：</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>适配器</th>
+<th>桥接模式</th>
+<th>外观</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>UML</strong></td>
+<td><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/2022/10/15/design-patterns-all-in-one/adapter.png"
+                      alt="Adapter"
+                ></td>
+<td><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/2022/10/15/design-patterns-all-in-one/bridge.png"
+                      alt="Bridge"
+                ></td>
+<td><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/2022/10/15/design-patterns-all-in-one/facade.png"
+                      alt="Facade"
+                ></td>
+</tr>
+<tr>
+<td><strong>范例</strong></td>
+<td><a class="link"   target="_blank" rel="noopener" href="https://developer.android.com/reference/androidx/recyclerview/widget/RecyclerView.Adapter" >RecyclerView.Adapter<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></td>
+<td>范例比较少：<br>- <a class="link"   target="_blank" rel="noopener" href="http://docs.oracle.com/javase/8/docs/api/java/util/Collections.html#newSetFromMap-java.util.Map-" >Collections#newSetFromMap()<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a><br>- (<a class="link"   target="_blank" rel="noopener" href="https://developer.android.com/studio/command-line/adb" >ADB?<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a>)，如Spring中Service和Repository的关系</td>
+<td>常见，如：<a class="link"   target="_blank" rel="noopener" href="https://laravel.com/docs/4.2/facades" >Facades<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a>, <a class="link"   target="_blank" rel="noopener" href="https://docs.oracle.com/javaee/7/api/javax/faces/context/FacesContext.html" >FacesContext<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a>, <a class="link"   target="_blank" rel="noopener" href="https://docs.oracle.com/javaee/7/api/javax/faces/context/ExternalContext.html" >ExternalContext<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a>, <a class="link"   target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/javax/sql/DataSource.html#getConnection--" >DataSource#getConnection()<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></td>
+</tr>
+<tr>
+<td><strong>概述</strong></td>
+<td>将一个类的接口转换成满足另一个要求的接口</td>
+<td>将抽象部分与它的实现部分分离</td>
+<td>为子系统中的一组接口提供一个一致易用的界面</td>
+</tr>
+<tr>
+<td><strong>关键字</strong></td>
+<td>Adatper</td>
+<td>Wrapper</td>
+<td>Context</td>
+</tr>
+<tr>
+<td><strong>核心角色</strong></td>
+<td>Adpter, Adaptee</td>
+<td>Bridge</td>
+<td>Facade</td>
+</tr>
+</tbody></table>
+<p>适配器模式、桥接模式和外观模式同属结构型设计模式，他们三者概念上很相像，都是通过建立接口来为类的方法建立或重构关系，比如，似乎我们用外观的视角去解释适配器，也能解释的通，Adapter就是在帮助Adaptee建立统一界面，或者建立桥梁。</p>
+<p>设计模式就是这样，非要较真，所有的设计模式都大同小异（至少在一个类型之内），这是学习设计模式的一个误区。回到上面的三个设计模式上，他们的核心区别更多体现在时机和出发点上：<strong>适配器Adapter强调兼容性，桥接Bridge强调抽象与实现的分离，而外观Facade强调简化复杂性</strong>。我们分辨这些模式也应该从意图出发来看。</p>
+<p>Spring的三层结构也融合体现了Facade和Bridge的设计，Service和Repository之间偏重体现Bridge模式理念，而Controller和Service之间更像Facade模式：Controller整合Service，对外提供API:</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/2022/10/15/design-patterns-all-in-one/spring-layers.png"
+                      alt="Spring应用的三层结构"
+                ></p>
+<p>下面我们再看几种常见的行为型模式的类比分析：</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>代理</th>
+<th>装饰</th>
+<th>中介</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>UML</strong></td>
+<td><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/2022/10/15/design-patterns-all-in-one/proxy.png"
+                      alt="Proxy"
+                ></td>
+<td><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/2022/10/15/design-patterns-all-in-one/decorator.png"
+                      alt="Decorator"
+                ></td>
+<td><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/2022/10/15/design-patterns-all-in-one/mediator.png"
+                      alt="Mediator"
+                ></td>
+</tr>
+<tr>
+<td><strong>范例</strong></td>
+<td>- <a class="link"   target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/lang/reflect/Proxy.html" >Java Reflect API: Proxy<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a> <br>- <a class="link"   target="_blank" rel="noopener" href="https://docs.oracle.com/javaee/7/api/javax/ejb/EJB.html" >Java EJB: Enterprise JavaBean<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a>, <a class="link"   target="_blank" rel="noopener" href="https://docs.oracle.com/javaee/7/api/javax/inject/Inject.html" >JavaX Inject<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a>, <a class="link"   target="_blank" rel="noopener" href="https://docs.oracle.com/javaee/7/api/javax/persistence/PersistenceContext.html" >JavaX PersistenceContext<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a><br>- <a class="link"   target="_blank" rel="noopener" href="https://android.googlesource.com/platform/frameworks/base/+/master/core/java/android/app/ActivityManager.java" >ActivityManager<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a> 和 <a class="link"   target="_blank" rel="noopener" href="https://android.googlesource.com/platform/frameworks/base/+/master/services/core/java/com/android/server/am/ActivityManagerService.java" >ActivityManagerService<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a><br>- <a class="link"   target="_blank" rel="noopener" href="https://github.com/microsoft/HydraLab/blob/main/sdk/src/main/java/com/microsoft/hydralab/performance/PerformanceInspectionService.java" >PerformanceInspectionService<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a> 和 <a class="link"   target="_blank" rel="noopener" href="https://github.com/microsoft/HydraLab/blob/main/common/src/main/java/com/microsoft/hydralab/performance/PerformanceTestManagementService.java" >PerformanceTestManagementService<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></td>
+<td>- <a class="link"   target="_blank" rel="noopener" href="https://docs.oracle.com/javase/7/docs/api/java/util/zip/GZIPOutputStream.html#GZIPOutputStream(java.io.OutputStream)" >Java IO: GZIPOutputStream and OutputStream, Reader and BufferedReader<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a><br>- <a class="link"   target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/util/Collections.html" >java.util.Collections<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a>,  <a class="link"   target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/util/Collections.html#checkedCollection-java.util.Collection-java.lang.Class-" >checkedXXX()<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a>, <a class="link"   target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/util/Collections.html#synchronizedCollection-java.util.Collection-" >synchronizedXXX()<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a> 和 <a class="link"   target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/util/Collections.html#unmodifiableCollection-java.util.Collection-" >unmodifiableXXX()<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a> 系列方法，拓展集合 <br>- <a class="link"   target="_blank" rel="noopener" href="https://docs.oracle.com/javaee/7/api/javax/servlet/http/HttpServletRequestWrapper.html" >HttpServletRequestWrapper<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a> and <a class="link"   target="_blank" rel="noopener" href="https://docs.oracle.com/javaee/7/api/javax/servlet/http/HttpServletResponseWrapper.html" >HttpServletResponseWrapper<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a><br>- <a class="link"   target="_blank" rel="noopener" href="https://docs.oracle.com/javase/7/docs/api/javax/swing/JScrollPane.html" >JScrollPane<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></td>
+<td>- <a class="link"   target="_blank" rel="noopener" href="https://baike.baidu.com/item/JMS/2836691?fr=aladdin" >Java Message Service<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a>, <a class="link"   target="_blank" rel="noopener" href="https://www.oracle.com/technical-resources/articles/java/intro-java-message-service.html" >JMS by Oracle<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a> <br>- <a class="link"   target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/util/Timer.html" >java.util.Timer<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a> (all scheduleXXX() methods), <a class="link"   target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/ExecutorService.html" >java.util.concurrent.ExecutorService<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a> (the invokeXXX() and submit() methods)</td>
+</tr>
+<tr>
+<td><strong>概述</strong></td>
+<td>通过代理来控制对一个对象的访问</td>
+<td>动态地给一个对象添加功能</td>
+<td>封装对象之间的交互（传话筒）</td>
+</tr>
+<tr>
+<td><strong>关键字</strong></td>
+<td>Delegate</td>
+<td>Wrapper</td>
+<td>MessageQueue, Dispatcher</td>
+</tr>
+<tr>
+<td><strong>核心角色</strong></td>
+<td>Proxy</td>
+<td>Decorator</td>
+<td>Mediator</td>
+</tr>
+</tbody></table>
+<p>这里，从类之间关系上看，代理和装饰更为相似，而中介则不同，它只是名字上和代理相近。关于代理(访问和控制)和装饰（增强和扩展）的区分，同样可以从目的和意图的角度区分。以代理来为例，<strong>它的首要作用是建立访问通道</strong>，比如安卓中，应用和系统之间用Binder来进行IPC，而在应用进程和系统进程间，为了这种IPC调用，大量应用了代理模式，名为Proxy的对象随处可见。而在设计<a class="link"   target="_blank" rel="noopener" href="https://github.com/microsoft/HydraLab" >Hydra Lab<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a>的过程中，为了让测试用户能方便的在测试实例中通过<a class="link"   target="_blank" rel="noopener" href="https://github.com/microsoft/HydraLab/tree/main/sdk" >SDK<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a>访问一些<a class="link"   target="_blank" rel="noopener" href="https://github.com/microsoft/HydraLab/tree/main/common/src/main/java/com/microsoft/hydralab/performance" >Hydra Lab Test Agent<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a>的服务方法，我们也应用了一个简明的静态代理来实现这种不同环境下的访问。</p>
+<p>在代理模式下，有了访问通道，自然就可以做到对通信的控制，比如基于权限的、或是基于格式验证的。而装饰模式着眼于<strong>增强、扩展</strong>，比如BufferedRead对于Reader的增强。从这个角度讲，一个类如果叫AuthWrapper就会比较奇怪，AuthProxy则更常见一些，因为授权这种操作明显更强调控制。当然这取决于具体情境。</p>
+<p>中介其实是很宽泛的概念，解耦通信的双方或多方，比较火热的各类MQ框架其实是这个模式的一个衍生。</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>观察者</th>
+<th>访问者</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>UML</strong></td>
+<td><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/2022/10/15/design-patterns-all-in-one/observer.png"
+                      alt="Observer"
+                ></td>
+<td><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/2022/10/15/design-patterns-all-in-one/visitor.png"
+                      alt="Visitor"
+                ></td>
+</tr>
+<tr>
+<td><strong>范例</strong></td>
+<td>- <a class="link"   target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/util/Observer.html" >java.util.Observer, Observable<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a><br>- <a class="link"   target="_blank" rel="noopener" href="http://docs.oracle.com/javase/8/docs/api/java/util/EventListener.html" >java.util.EventListener<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a><br>- <a class="link"   target="_blank" rel="noopener" href="http://reactivex.io/RxJava/3.x/javadoc/io/reactivex/rxjava3/core/Observer.html" >ReactiveX Interface Observer<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></td>
+<td>- <a class="link"   target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/javax/lang/model/element/AnnotationValueVisitor.html" >AnnotationValueVisitor<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a><br>- <a class="link"   target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/javax/lang/model/element/ElementVisitor.html" >ElementVisitor<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a><br>- <a class="link"   target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/javax/lang/model/type/TypeVisitor.html" >TypeVisitor<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a><br>- <a class="link"   target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/nio/file/SimpleFileVisitor.html" >SimpleFileVisitor<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a><br>- <a class="link"   target="_blank" rel="noopener" href="https://docs.oracle.com/javaee/7/api/javax/faces/component/visit/VisitCallback.html" >VisitCallback<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a><br>- <a class="link"   target="_blank" rel="noopener" href="https://asm.ow2.io/javadoc/org/objectweb/asm/ClassVisitor.html" >ClassVisitor (ASM 9.4)<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></td>
+</tr>
+<tr>
+<td><strong>概述</strong></td>
+<td>对个观察者监听一个主题对象</td>
+<td>表示一种对某对象中各元素的只读操作</td>
+</tr>
+<tr>
+<td><strong>关键字</strong></td>
+<td>Observable, Observer, Subject,<br>Subscription</td>
+<td>Visitor</td>
+</tr>
+<tr>
+<td><strong>核心角色</strong></td>
+<td>Observer, Subject</td>
+<td>Visitor, Element</td>
+</tr>
+</tbody></table>
+<p>这两个模式之间在实现上其实并没有太多联系。但二者都是想去“读”，不会直接改变被读对象的状态。观察者通过订阅监听的方式被动地读，而访问者是主动视角，以一种独特的方式读。和观察者很相近的“Listener”，是更常见的概念，更轻量，因而也更广泛。</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>责任链</th>
+<th>备忘录</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>UML</strong></td>
+<td><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/2022/10/15/design-patterns-all-in-one/chain-of-responsibility.png"
+                      alt="Chain of responsibility"
+                ></td>
+<td><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/2022/10/15/design-patterns-all-in-one/memento.png"
+                      alt="Memento"
+                ></td>
+</tr>
+<tr>
+<td><strong>范例</strong></td>
+<td>- <a class="link"   target="_blank" rel="noopener" href="https://square.github.io/okhttp/features/interceptors/" >OkHttp Interceptors<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a><br>- <a class="link"   target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/util/logging/Logger.html#log-java.util.logging.Level-java.lang.String-" >java.util.logging.Logger<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a><br>- <a class="link"   target="_blank" rel="noopener" href="http://docs.oracle.com/javaee/7/api/javax/servlet/Filter.html#doFilter-javax.servlet.ServletRequest-javax.servlet.ServletResponse-javax.servlet.FilterChain-" >javax.servlet.Filter<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></td>
+<td>- <a class="link"   target="_blank" rel="noopener" href="https://developer.android.com/reference/android/app/Activity#onSaveInstanceState(android.os.Bundle,%20android.os.PersistableBundle)" >Activity#onSaveInstanceState(…)<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a> <br>- <a class="link"   target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/io/Serializable.html" >Java Serializable<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></td>
+</tr>
+<tr>
+<td><strong>概述</strong></td>
+<td>建立处理链条传递请求</td>
+<td>捕获对象状态并保存，以备状态恢复</td>
+</tr>
+<tr>
+<td><strong>关键字</strong></td>
+<td>Chain, Interceptor, Filter, proceed, Response</td>
+<td>State, Lifecycle, Context</td>
+</tr>
+<tr>
+<td><strong>核心角色</strong></td>
+<td>Handler</td>
+<td>Memonto, Originator, Caretaker</td>
+</tr>
+</tbody></table>
+<p>责任链和备忘录模式虽然意图和设计上都不相同，但二者都有非常浓厚的IoC控制反转的味道，和生命周期的设计联系紧密。玩游戏的同学对备忘录模式最容易建立理解，一个存档就是一个持久化的State，游戏本身的存读档服务作为caretaker，帮你保证你肝的进度不会白费。所以备忘录模式其实非常的常见，软件世界里俯拾皆是。</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>命令</th>
+<th>解释器</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>UML</strong></td>
+<td><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/2022/10/15/design-patterns-all-in-one/command.png"
+                      alt="Command"
+                ></td>
+<td><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/2022/10/15/design-patterns-all-in-one/interpreter.png"
+                      alt="Interpreter"
+                ></td>
+</tr>
+<tr>
+<td><strong>范例</strong></td>
+<td>- <a class="link"   target="_blank" rel="noopener" href="https://android.googlesource.com/platform/tools/base/+/tools_r22/ddmlib/src/main/java/com/android/ddmlib/IShellOutputReceiver.java" >IShellOutputReceiver<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a><br>- <a class="link"   target="_blank" rel="noopener" href="http://docs.oracle.com/javase/8/docs/api/java/lang/Runnable.html" >Java Runnable<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></td>
+<td>- <a class="link"   target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html" >java.util.Pattern<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a><br>- <a class="link"   target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/text/Normalizer.html" >java.text.Normalizer<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a><br>- <a class="link"   target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/text/Format.html" >java.text.Format<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a><br>- <a class="link"   target="_blank" rel="noopener" href="https://docs.oracle.com/javaee/7/api/javax/el/ELResolver.html" >javax.el.ELResolver<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></td>
+</tr>
+<tr>
+<td><strong>概述</strong></td>
+<td>将请求封装为对象，从而方便参数化和请求队列管理</td>
+<td>定义文法和表示方式</td>
+</tr>
+<tr>
+<td><strong>关键字</strong></td>
+<td>Executor</td>
+<td>Expression</td>
+</tr>
+<tr>
+<td><strong>核心角色</strong></td>
+<td>Command, Receiver, Invoker(Executor)</td>
+<td>Interpretor, Expression</td>
+</tr>
+</tbody></table>
+<p>上面两者也无法直接类比，但是当二者合体，命令的解释和执行一气呵成，一个脚本语言的c执行器雏形就诞生了。这里的命令模式其实比“命令”本身在设计上有更周全的考虑，它还包括了对执行结果的接收接口的预留。</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>抽象工厂</th>
+<th>工厂方法</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>UML</strong></td>
+<td><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/2022/10/15/design-patterns-all-in-one/abstract-factory.png"
+                      alt="Abstract factory"
+                ></td>
+<td><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/2022/10/15/design-patterns-all-in-one/factory_method.png"
+                      alt="Factory method"
+                ></td>
+</tr>
+<tr>
+<td><strong>范例</strong></td>
+<td>- <a class="link"   target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/javax/xml/parsers/DocumentBuilderFactory.html#newInstance--" >DocumentBuilderFactory(JavaX)<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a> <br>- <a class="link"   target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/javax/xml/transform/TransformerFactory.html#newInstance--" >TransformerFactory(JavaX)<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a><br>- <a class="link"   target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/javax/xml/xpath/XPathFactory.html#newInstance--" >XPathFactory(JavaX)<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a><br>- <a class="link"   target="_blank" rel="noopener" href="https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/beans/factory/BeanFactory.html" >BeanFactory#getBeanProvider(Spring)<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></td>
+<td><a class="link"   target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/util/Calendar.html#getInstance--" >java.util.Calendar#getInstance()<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></td>
+</tr>
+<tr>
+<td><strong>概述</strong></td>
+<td>将一个类的接口转换成满足另一个要求的接口</td>
+<td>由工厂的子类决定创建的实例对象</td>
+</tr>
+<tr>
+<td><strong>关键字</strong></td>
+<td>Factory, new…, create…</td>
+<td>Factory, newInstance, Creator</td>
+</tr>
+<tr>
+<td><strong>核心角色</strong></td>
+<td>AbstractFactory</td>
+<td>Creator</td>
+</tr>
+</tbody></table>
+<p>其他模式还包括：建筑者模式，原型模式，享元（类似多例），单例；组合；模板方法，迭代器。这些模式或是不常用，或是过于常用常见，且都比较简单，限于篇幅本文不再一一详述。</p>
+<p>通过这个类比学习的过程，我们可能会逐步感受到，设计模式的重点并不在于类之间关系的严格定义、罗列和排布，无意义的争辩、论证会陷入“把设计模式当作一个严格的学术理论”的<code>误区</code>。更多的，我们应该从问题的意图出发，发散思考解决方案中可能包含的设计元素，然后根据实际情况精简到合理的规模。</p>
+<p>所以我们不必纠结于相近的两种模式的严格界定和区分，比如，无需辩驳一种实现究竟是用的代理还是装饰，而是理解这两种模式的<code>看问题的角度</code>和<code>意图</code>，融会贯通，灵活组合运用：如果你强调的角度是功能拓展，那设计方案就是装饰；如果你强调的是访问控制，那就是代理。很多初学者觉得很多模式很相似，感到多余，这是很正常的感受和学习阶段；随着更多应用和实战，你会成长和洞察更多模式的意义；后来你已经成为设计大师，灵活运用设计模式、AOP、函数式、算法乃至ML解决各类问题，讲述和推动方案的实现，设计模式的探讨和辩论只不过是茶余饭后的谈资。这一点，在原书“怎样选择设计模式”章节中，也有提及。</p>
+<p>总结来讲，初学设计模式，关注点可以放在：</p>
+<ul>
+<li>这个设计模式解决什么类型的问题，<code>意图</code>是什么，以及它如何对概念进行抽象（<code>关键角色</code>）和解决（<code>接口、关系</code>）的。</li>
+<li>用设计模式作为大家沟通软件设计的<code>语言</code>，掌握这些术语，减少沟通成本。</li>
+</ul>
+<h1 id="如何学习和使用设计模式"><a href="#如何学习和使用设计模式" class="headerlink" title="如何学习和使用设计模式"></a>如何学习和使用设计模式</h1><p>本部分内容源自GoF原书中1.8章的内容“怎样使用设计模式”，精简了原书的7步为6步，并去除了翻译腔：</p>
+<ol>
+<li><p>浏览一遍该模式，掌握关键要素<br>这个模式的名字是什么，意图是什么，里面的关键角色是什么，常见的关键词？</p>
+</li>
+<li><p>回头去研究结构部分、参与者部分和协作部分<br>进一步了解角色的职责和关系，有哪些接口，以及模式的适用性：这个模式更适合解决什么类型的问题？</p>
+</li>
+<li><p>看看示例代码<br>例子能让我们了解模式解决的实际问题，成为我们实现的参考。</p>
+</li>
+<li><p>参考模式中的命名方法<br>比如，在Strategy模式中，你可以直接给算法命名末尾加上Strategy来体现这个模式；再比如，可以用create作为方法的开头前缀来凸显工厂方法。</p>
+</li>
+<li><p>定义类和接口<br>选定好模式、完成命名后，下一步可以建立好类与接口之间的继承&#x2F;实现关系，定义代表数据和对象引用的实例变量。</p>
+</li>
+<li><p>实现模式<br>开始依据模式实现解决方案。</p>
+</li>
+</ol>
+<p>设计模式的引入是带有一定成本的，学习成本和复杂性的增加就是其中之一，也可能会有性能上的损耗（虽然可以忽略），但它为架构带来了灵活性，使其更加清晰可维护。接下来，作为拓展阅读，我们可以探讨一下设计模式的意义，获得更深的理解。</p>
+<h1 id="设计模式的意义和批判"><a href="#设计模式的意义和批判" class="headerlink" title="设计模式的意义和批判"></a>设计模式的意义和批判</h1><p>谈及为什么需要设计模式时，首先要回答什么设计是好的设计。软件是对现实问题复杂性的抽象和管理，Uncle bob说：“软件应该是可变的”，正如现实世界“唯一不变的就是不断地变化”，软件应该能灵活地应对现实世界的需求。所以我们会讨论软件架构的<strong>可扩展性、可维护性、高可用、可重用、可移植性</strong>等。如果你只是在编写一个又一个的脚本、一次性工具或者编程练习题，当然不用把问题复杂化。但如果你希望你的软件有更强的生命力和更广阔的前景，那就要严肃对待软件设计，防止代码腐化。</p>
+<p>此外，一个人的力量是有限的，如果希望借助协作来扩大软件的服务范围、影响力，那么<strong>可读性</strong>也就重要起来。“Good code is like well-written prose”，好代码应该像优美的散文；至少是自解释的。引述GoF的原文，“所有结构良好的面向对象软件体系结构中都包含了许多模式…内行的设计者知道：不是解决任何问题都要从头做起…这些模式解决特定的设计问题，使面向对象设计更灵活、优雅，最终复用性更好。”所以这里的两层意思就一方面强调了模式对软件设计本身的好处，一方面说明了这些模式建立了大家在面向对象设计上的共识和交流基础。此外，大师们还总结了一些设计原则来框定好的设计。</p>
+<h2 id="SOLID设计原则"><a href="#SOLID设计原则" class="headerlink" title="SOLID设计原则"></a>SOLID设计原则</h2><p>尽管很多教程将设计原则和设计模式放在一起讨论，暗示设计模式是遵从了设计原则，实际上他们并非同出一家。而且设计原则有很多种说法，这里我们分享Uncle Bob提出的最容易记忆的版本，SOLID 原则：</p>
+<ul>
+<li><strong>S</strong>ingle responsibility, 单一职责原则 SRP：就一个类而言，应该仅有一个引起它变化的原因。</li>
+<li><strong>O</strong>pen-close, 开闭原则 OCP：软件实体应该对于扩展是开放的，对于修改是封闭的。</li>
+<li><strong>L</strong>iskov substitution, 里氏代换原则 LSP。子类型必须能够替换掉它们的父类型。把父类实例替换成子类实例，程序行为不应该有变化。</li>
+<li><strong>I</strong>nterface segregation, 接口隔离原则 ISP。<ul>
+<li>一个类对另外一个类的依赖性应当是建立在最小的接口上的。</li>
+<li>客户端程序不应该依赖它不需要的接口方法（功能）。</li>
+</ul>
+</li>
+<li><strong>D</strong>ependency inverse, 依赖倒转原则 DIP：<ul>
+<li>高层模块不应该依赖低层模块。两个都应该依赖抽象。</li>
+<li>抽象不应该依赖细节，细节应该依赖抽象。</li>
+</ul>
+</li>
+</ul>
+<p>我们可以认为这些设计模式是解决设计问题思考的准绳，也可以认为他们只是一种理念。正如Uncle bob 所说：”The SOLID principles are not rules. They are not laws. They are not perfect truths… This is a good principle, it is good advice…”。总之，了解这些可以帮助我们把握思考方向，但不能帮我们解决问题。换言之，对于初学者而言，设计原则可能没有设计模式那样强的实战意义。</p>
+<h2 id="批判之声"><a href="#批判之声" class="headerlink" title="批判之声"></a>批判之声</h2><p>关于设计模式的<strong>批判</strong>，源自于对其创立所处时代的主流编程语言的局限性的挑战，以及对于面向对象本身的质疑。有人认为设计模式的提出反映了Java和C++自身语言特性的缺失；也有认为如果灵活运用aspect-oriented-programming，就用不着搞出来23种之多啰啰嗦嗦的设计模式了。对此，笔者觉得纯粹的理论上的对错没那么重要，软件开发是科学和艺术的结合地带，而设计模式是一个时代开发者思考的精华沉淀，能给我们带来的不仅是具体方案，更多的是解决问题的思维方式，它们本身就存在于大量的编程实践中，GoF对他们进行了提炼和综述，这本身就是意义巨大的成果了，更何况他们已经成为工程师文化的一部分，成为了术语。例如，我们从Spring中既能看到AOP的应用、函数式编程的应用，也能看到建造者、工厂模式、策略等等的应用。编程大师应该是博学和不拘一格的，代码的艺术正在于灵活和适时的运用，囿于固执信仰而拒绝经典或者新知断不可取。</p>
+<h1 id="其他常见疑问FAQ"><a href="#其他常见疑问FAQ" class="headerlink" title="其他常见疑问FAQ"></a>其他常见疑问FAQ</h1><p>Q: 设计模式和后续流行的的Reactive、函数式编程、AOP、IoC以及DI之间的关系是什么？</p>
+<p>A: 总体上，这些是不同维度的概念，总结为下表：</p>
+<table>
+<thead>
+<tr>
+<th>概念</th>
+<th>释义（译）</th>
+<th>范畴</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>设计模式</td>
+<td>Software design pattern</td>
+<td>软件设计的解决方案</td>
+</tr>
+<tr>
+<td>IoC</td>
+<td>控制反转 Inversion of control</td>
+<td>软件架构层面的一种设计模式</td>
+</tr>
+<tr>
+<td>DI</td>
+<td>依赖注入 Dependency injection</td>
+<td>一种设计模式</td>
+</tr>
+<tr>
+<td>AOP</td>
+<td>Aspect-oriented programming，面向切面的编程</td>
+<td>编程范式（面向对象）</td>
+</tr>
+<tr>
+<td>函数式编程</td>
+<td>Functional programming</td>
+<td>编程范式（声明式）</td>
+</tr>
+<tr>
+<td>Reactive</td>
+<td>Reactive programming, 响应式编程</td>
+<td>编程范式（声明式）</td>
+</tr>
+<tr>
+<td>微服务</td>
+<td>Microservices</td>
+<td>一种架构模式（面向服务的架构）</td>
+</tr>
+</tbody></table>
+<p>Q: 是否还有其他设计模式？</p>
+<p>A: 有的，随着软件开发实践的演化，有越来越多的设计模式被总结出来，只不过可能还没有一本经典将其整理入册。比如常见的锁的双重检查，也被认为是一种独立于语言的并发型设计模式。DI也是设计模式 Concurrency Patterns，其角色包括注入器Injector，服务Service，客户端Client和接口Interfaces。DI也是一种创建型Creational设计模式，其意图在于优化类之间依赖关系，因而和整个软件或模块的架构的相关性更密切。</p>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
+<li>Design Patterns, Elements of Reusable Object-Oriented Software</li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Software_design_pattern" >https://en.wikipedia.org/wiki/Software_design_pattern<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li><a class="link"   target="_blank" rel="noopener" href="http://butunclebob.com/ArticleS.UncleBob.PrinciplesOfOod" >http://butunclebob.com/ArticleS.UncleBob.PrinciplesOfOod<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/SOLID" >https://en.wikipedia.org/wiki/SOLID<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://sites.google.com/site/unclebobconsultingllc/getting-a-solid-start" >https://sites.google.com/site/unclebobconsultingllc/getting-a-solid-start<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Law_of_Demeter" >https://en.wikipedia.org/wiki/Law_of_Demeter<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://www.jianshu.com/p/8cbc4bf897cb" >https://www.jianshu.com/p/8cbc4bf897cb<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://coderanch.com/t/99717/engineering/Bridge-Facade-Pattern" >https://coderanch.com/t/99717/engineering/Bridge-Facade-Pattern<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://stackoverflow.com/questions/3477962/when-do-we-need-decorator-pattern" >https://stackoverflow.com/questions/3477962/when-do-we-need-decorator-pattern<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://stackoverflow.com/questions/6366385/use-cases-and-examples-of-gof-decorator-pattern-for-io" >https://stackoverflow.com/questions/6366385/use-cases-and-examples-of-gof-decorator-pattern-for-io<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://stackoverflow.com/questions/1673841/examples-of-gof-design-patterns-in-javas-core-libraries/" >https://stackoverflow.com/questions/1673841/examples-of-gof-design-patterns-in-javas-core-libraries/<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+</ul>
+<h1 id="关于我"><a href="#关于我" class="headerlink" title="关于我"></a>关于我</h1><p>我是<a class="link"   target="_blank" rel="noopener" href="https://github.com/hydraxman" >风云信步<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a>，目前在微软中国担任研发经理。希望在这个空间和大家分享交流技术心得，职业生涯，团队和项目管理，趋势动态。旨在畅谈、分享和记录，不拘小节；但也不排除刨根问底、钻牛角尖。</p>
+<p>本人热爱技术和打码，尤其享受用技术解决实际问题的过程和结果；相信创造力是顶级能力，是人价值的放大器。此外，本人专注于软件和代码质量、工程效率和研发能效方面多年，目前在微软和团队一起推动2023年新开源的项目<a class="link"   target="_blank" rel="noopener" href="https://github.com/microsoft/HydraLab" >Hydra Lab<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a>的完善与发展；欢迎和我在开源世界组队打码，造轮子 or 添砖加瓦。</p>
+
+		</div>
+
+		
+		<div class="post-copyright-info w-full my-8 px-2 sm:px-6 md:px-8">
+			<div class="article-copyright-info-container">
+    <ul>
+        <li><strong>标题:</strong> 15分钟入门23种设计模式：图解，范例和对比</li>
+        <li><strong>作者:</strong> Nathan</li>
+        <li><strong>创建于
+                :</strong> 2022-10-15 19:07:30</li>
+        
+            <li>
+                <strong>更新于
+                    :</strong> 2026-02-20 17:22:12
+            </li>
+        
+        <li>
+            <strong>链接:</strong> https://hydraxman.github.io/2022/10/15/design-patterns-all-in-one/
+        </li>
+        <li>
+            <strong>
+                版权声明:
+            </strong>
+            
+
+            
+                本文章采用 <a class="license" target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0">CC BY-NC-SA 4.0</a> 进行许可。
+            
+        </li>
+    </ul>
+</div>
+
+		</div>
+		
+
+		
+		<ul class="post-tags-box text-lg mt-1.5 flex-wrap justify-center flex md:hidden">
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/Code-design/">#Code design</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/Design-Patterns/">#Design Patterns</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/GoF/">#GoF</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/15%E5%88%86%E9%92%9F/">#15分钟</a>&nbsp;
+			</li>
+			
+		</ul>
+		
+
+		
+
+		
+		<div class="article-nav my-8 flex justify-between items-center px-2 sm:px-6 md:px-8">
+			
+			<div class="article-prev border-border-color shadow-redefine-flat shadow-shadow-color-2 rounded-medium px-4 py-2 hover:shadow-redefine-flat-hover hover:shadow-shadow-color-2">
+				<a class="prev" rel="prev" href="/2022/10/31/how-to-read-book/">
+					<span class="left arrow-icon flex justify-center items-center">
+						<i class="fa-solid fa-chevron-left"></i>
+					</span>
+					<span class="title flex justify-center items-center">
+						<span class="post-nav-title-item truncate max-w-48">如何阅读一本书</span>
+						<span class="post-nav-item">上一篇</span>
+					</span>
+				</a>
+			</div>
+			
+			
+			<div class="article-next border-border-color shadow-redefine-flat shadow-shadow-color-2 rounded-medium px-4 py-2 hover:shadow-redefine-flat-hover hover:shadow-shadow-color-2">
+				<a class="next" rel="next" href="/2018/12/31/more-about-java-bytecode-and-aop/">
+					<span class="title flex justify-center items-center">
+						<span class="post-nav-title-item truncate max-w-48">Java bytecode and AOP</span>
+						<span class="post-nav-item">下一篇</span>
+					</span>
+					<span class="right arrow-icon flex justify-center items-center">
+						<i class="fa-solid fa-chevron-right"></i>
+					</span>
+				</a>
+			</div>
+			
+		</div>
+		
+
+
+		
+	</div>
+
+	
+	<div class="toc-content-container">
+		<div class="post-toc-wrap">
+	<div class="post-toc">
+		<div class="toc-title">目录</div>
+		<div class="page-title">15分钟入门23种设计模式：图解，范例和对比</div>
+		<ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%BC%80%E9%97%A8%E8%A7%81%E5%B1%B1"><span class="nav-text">开门见山</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E7%9A%84UML%E3%80%81%E7%B1%BB%E6%AF%94%E5%92%8C%E8%8C%83%E4%BE%8B"><span class="nav-text">设计模式的UML、类比和范例</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E5%AD%A6%E4%B9%A0%E5%92%8C%E4%BD%BF%E7%94%A8%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F"><span class="nav-text">如何学习和使用设计模式</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E7%9A%84%E6%84%8F%E4%B9%89%E5%92%8C%E6%89%B9%E5%88%A4"><span class="nav-text">设计模式的意义和批判</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#SOLID%E8%AE%BE%E8%AE%A1%E5%8E%9F%E5%88%99"><span class="nav-text">SOLID设计原则</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%89%B9%E5%88%A4%E4%B9%8B%E5%A3%B0"><span class="nav-text">批判之声</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%85%B6%E4%BB%96%E5%B8%B8%E8%A7%81%E7%96%91%E9%97%AEFAQ"><span class="nav-text">其他常见疑问FAQ</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-text">References</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%85%B3%E4%BA%8E%E6%88%91"><span class="nav-text">关于我</span></a></li></ol>
+
+	</div>
+</div>
+	</div>
+	
+</div>
+			</div>
+
+			
+		</div>
+
+		<div class="main-content-footer">
+			<footer class="footer mt-5 py-5 h-auto text-base text-third-text-color relative border-t-2 border-t-border-color">
+    <div class="info-container py-3 text-center">
+        
+        <div class="text-center">
+            &copy;
+            
+              <span>2024</span>
+              -
+            
+            2026&nbsp;&nbsp;<i class="fa-solid fa-heart fa-beat" style="--fa-animation-duration: 0.5s; color: #333"></i>&nbsp;&nbsp;<a href="/">Nathan</a>
+            
+                
+                <p class="post-count space-x-0.5">
+                    <span>
+                        共撰写了 52 篇文章
+                    </span>
+                    
+                        <span>
+                            共 111.8k 字
+                        </span>
+                    
+                </p>
+            
+        </div>
+        
+        <div class="relative text-center lg:absolute lg:left-[20px] lg:top-1/2 lg:-translate-y-1/2 lg:text-left">
+            <span class="lg:block text-sm">由 <?xml version="1.0" encoding="utf-8"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg class="relative top-[2px] inline-block align-baseline" version="1.1" id="圖層_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="1rem" height="1rem" viewBox="0 0 512 512" enable-background="new 0 0 512 512" xml:space="preserve"><path fill="#0E83CD" d="M256.4,25.8l-200,115.5L56,371.5l199.6,114.7l200-115.5l0.4-230.2L256.4,25.8z M349,354.6l-18.4,10.7l-18.6-11V275H200v79.6l-18.4,10.7l-18.6-11v-197l18.5-10.6l18.5,10.8V237h112v-79.6l18.5-10.6l18.5,10.8V354.6z"/></svg><a target="_blank" class="text-base" href="https://hexo.io">Hexo</a> 驱动</span>
+            <span class="text-sm lg:block">主题&nbsp;<a class="text-base" target="_blank" href="https://github.com/EvanNotFound/hexo-theme-redefine">Redefine v2.8.5</a></span>
+        </div>
+        
+        
+            <div>
+                博客已运行 <span class="odometer" id="runtime_days" ></span> 天 <span class="odometer" id="runtime_hours"></span> 小时 <span class="odometer" id="runtime_minutes"></span> 分钟 <span class="odometer" id="runtime_seconds"></span> 秒
+            </div>
+        
+        
+            <script data-swup-reload-script>
+                try {
+                    function odometer_init() {
+                    const elements = document.querySelectorAll('.odometer');
+                    elements.forEach(el => {
+                        new Odometer({
+                            el,
+                            format: '( ddd).dd',
+                            duration: 200
+                        });
+                    });
+                    }
+                    odometer_init();
+                } catch (error) {}
+            </script>
+        
+        
+        
+    </div>  
+</footer>
+		</div>
+	</div>
+
+	
+	<div class="post-tools">
+		<div class="post-tools-container">
+	<ul class="article-tools-list">
+		<!-- TOC aside toggle -->
+		
+		<li class="right-bottom-tools page-aside-toggle">
+			<i class="fa-regular fa-outdent"></i>
+		</li>
+		
+
+		<!-- go comment -->
+		
+	</ul>
+</div>
+	</div>
+	
+
+	<div class="right-side-tools-container">
+		<div class="side-tools-container">
+	<ul class="hidden-tools-list">
+		<li class="right-bottom-tools tool-font-adjust-plus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-plus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-font-adjust-minus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-minus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-dark-light-toggle flex justify-center items-center">
+			<i class="fa-regular fa-moon"></i>
+		</li>
+
+		<!-- rss -->
+		
+
+		
+
+		<li class="right-bottom-tools tool-scroll-to-bottom flex justify-center items-center">
+			<i class="fa-regular fa-arrow-down"></i>
+		</li>
+	</ul>
+
+	<ul class="visible-tools-list">
+		<li class="right-bottom-tools toggle-tools-list flex justify-center items-center">
+			<i class="fa-regular fa-cog fa-spin"></i>
+		</li>
+		
+		<li class="right-bottom-tools tool-scroll-to-top flex justify-center items-center">
+			<i class="arrow-up fas fa-arrow-up"></i>
+			<span class="percent"></span>
+		</li>
+		
+		
+	</ul>
+</div>
+	</div>
+
+	<div class="image-viewer-container">
+	<img src="">
+</div>
+
+	
+	<div class="search-pop-overlay">
+	<div class="popup search-popup">
+		<div class="search-header">
+			<span class="search-input-field-pre">
+				<i class="fa-solid fa-keyboard"></i>
+			</span>
+			<div class="search-input-container">
+				<input autocomplete="off" autocorrect="off" autocapitalize="off" placeholder="站内搜索您需要的内容..." spellcheck="false" type="search" class="search-input">
+			</div>
+			<span class="popup-btn-close">
+				<i class="fa-solid fa-times"></i>
+			</span>
+		</div>
+		<div id="search-result">
+			<div id="no-result">
+				<i class="fa-solid fa-spinner fa-spin-pulse fa-5x fa-fw"></i>
+			</div>
+		</div>
+	</div>
+</div>
+	
+
+</main>
+
+
+
+<script src="/js/build/libs/Swup.min.js"></script>
+
+<script src="/js/build/libs/SwupSlideTheme.min.js"></script>
+
+<script src="/js/build/libs/SwupScriptsPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupProgressPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupScrollPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupPreloadPlugin.min.js"></script>
+
+<script>
+    const swup = new Swup({
+        plugins: [
+            new SwupScriptsPlugin({
+                optin: true,
+            }),
+            new SwupProgressPlugin(),
+            new SwupScrollPlugin({
+                offset: 80,
+            }),
+            new SwupSlideTheme({
+                mainElement: ".main-content-body",
+            }),
+            new SwupPreloadPlugin(),
+        ],
+        containers: ["#swup"],
+    });
+</script>
+
+
+
+
+	
+<script src="/js/build/tools/imageViewer.js" type="module"></script>
+
+<script src="/js/build/utils.js" type="module"></script>
+
+<script src="/js/build/main.js" type="module"></script>
+
+<script src="/js/build/layouts/navbarShrink.js" type="module"></script>
+
+<script src="/js/build/tools/scrollTopBottom.js" type="module"></script>
+
+<script src="/js/build/tools/lightDarkSwitch.js" type="module"></script>
+
+<script src="/js/build/layouts/categoryList.js" type="module"></script>
+
+
+
+    
+<script src="/js/build/tools/localSearch.js" type="module"></script>
+
+
+
+
+    
+<script src="/js/build/tools/codeBlock.js" type="module"></script>
+
+
+
+
+    
+<script src="/js/build/layouts/lazyload.js" type="module"></script>
+
+
+
+
+    
+<script src="/js/build/tools/runtime.js"></script>
+
+    
+<script src="/js/build/libs/odometer.min.js"></script>
+
+    
+<link rel="stylesheet" href="/assets/odometer-theme-minimal.css">
+
+
+
+
+  
+<script src="/js/build/libs/Typed.min.js"></script>
+
+  
+<script src="/js/build/plugins/typed.js" type="module"></script>
+
+
+
+
+
+
+
+
+    
+<script src="/js/build/libs/anime.min.js"></script>
+
+
+
+
+
+    
+<script src="/js/build/tools/tocToggle.js" type="module" data-swup-reload-script=""></script>
+
+<script src="/js/build/layouts/toc.js" type="module" data-swup-reload-script=""></script>
+
+<script src="/js/build/plugins/tabs.js" type="module" data-swup-reload-script=""></script>
+
+
+
+
+<script src="/js/build/libs/moment-with-locales.min.js" data-swup-reload-script=""></script>
+
+
+<script src="/js/build/layouts/essays.js" type="module" data-swup-reload-script=""></script>
+
+
+
+
+
+	
+</body>
+
+</html>

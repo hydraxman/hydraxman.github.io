@@ -1,0 +1,1459 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="keywords" content="计算机技术, 生活中的胡思乱想">
+    
+    <meta name="author" content="Nathan">
+    
+    <!-- Completely eliminate flash of wrong theme -->
+    <script>
+        (function() {
+            const THEME_KEY = "REDEFINE-THEME-STATUS";
+            const DARK = "dark", LIGHT = "light";
+            
+            // Get preferred theme
+            function getTheme() {
+                try {
+                    const saved = localStorage.getItem(THEME_KEY);
+                    if (saved) {
+                        const { isDark } = JSON.parse(saved);
+                        return isDark ? DARK : LIGHT;
+                    }
+                } catch (e) {}
+                
+                return matchMedia("(prefers-color-scheme: dark)").matches ? DARK : LIGHT;
+            }
+            
+            // Apply theme to document
+            function applyTheme(theme) {
+                const isDark = theme === DARK;
+                const root = document.documentElement;
+                
+                // Set data attribute for CSS variables
+                root.setAttribute("data-theme", theme);
+                
+                // Set classes for compatibility
+                root.classList.add(theme);
+                root.classList.remove(isDark ? LIGHT : DARK);
+                root.style.colorScheme = theme;
+            }
+            
+            // Initial application
+            const theme = getTheme();
+            applyTheme(theme);
+            
+            // Listen for system preference changes
+            matchMedia("(prefers-color-scheme: dark)").addEventListener("change", ({ matches }) => {
+                // Only update if using system preference (no localStorage entry)
+                if (!localStorage.getItem(THEME_KEY)) {
+                    applyTheme(matches ? DARK : LIGHT);
+                }
+            });
+            
+            // Set body classes once DOM is ready
+            if (document.readyState !== "loading") {
+                document.body.classList.add(theme + "-mode");
+            } else {
+                document.addEventListener("DOMContentLoaded", () => {
+                    document.body.classList.add(theme + "-mode");
+                    document.body.classList.remove((theme === DARK ? LIGHT : DARK) + "-mode");
+                });
+            }
+        })();
+    </script>
+    
+    <!-- Critical CSS to prevent flash -->
+    <style>
+        :root[data-theme="dark"] {
+            --background-color: #202124;
+            --background-color-transparent: rgba(32, 33, 36, 0.6);
+            --second-background-color: #2d2e32;
+            --third-background-color: #34353a;
+            --third-background-color-transparent: rgba(32, 33, 36, 0.6);
+            --primary-color: #0066CC;
+            --first-text-color: #ffffff;
+            --second-text-color: #eeeeee;
+            --third-text-color: #bebec6;
+            --fourth-text-color: #999999;
+            --default-text-color: #bebec6;
+            --invert-text-color: #373D3F;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --selection-color: #0066CC;
+            --shadow-color-1: rgba(255, 255, 255, 0.08);
+            --shadow-color-2: rgba(255, 255, 255, 0.05);
+        }
+        
+        :root[data-theme="light"] {
+            --background-color: #fff;
+            --background-color-transparent: rgba(255, 255, 255, 0.6);
+            --second-background-color: #f8f8f8;
+            --third-background-color: #f2f2f2;
+            --third-background-color-transparent: rgba(241, 241, 241, 0.6);
+            --primary-color: #0066CC;
+            --first-text-color: #16171a;
+            --second-text-color: #2f3037;
+            --third-text-color: #5e5e5e;
+            --fourth-text-color: #eeeeee;
+            --default-text-color: #373D3F;
+            --invert-text-color: #bebec6;
+            --border-color: rgba(0, 0, 0, 0.08);
+            --selection-color: #0066CC;
+            --shadow-color-1: rgba(0, 0, 0, 0.08);
+            --shadow-color-2: rgba(0, 0, 0, 0.05);
+        }
+        
+        body {
+            background-color: var(--background-color);
+            color: var(--default-text-color);
+        }
+        
+        /* Apply body classes as soon as DOM is ready */
+        :root[data-theme="dark"] body {
+            background-color: var(--background-color);
+            color: var(--default-text-color);
+        }
+    </style>
+    
+    <!-- preconnect -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    
+    <!--- Seo Part-->
+    
+    <link rel="canonical" href="https://hydraxman.github.io/2026/02/12/ai-ui-testing-automation-2026/"/>
+    <meta name="robots" content="index,follow">
+    <meta name="googlebot" content="index,follow">
+    <meta name="revisit-after" content="1 days">
+    
+    
+    
+        
+        <meta name="description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="2026年AI驱动UI测试自动化全景：当大模型学会「看屏幕操作电脑」">
+<meta property="og:url" content="https://hydraxman.github.io/2026/02/12/ai-ui-testing-automation-2026/index.html">
+<meta property="og:site_name" content="内森淼文">
+<meta property="og:description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://hydraxman.github.io/images/redefine-og.webp">
+<meta property="article:published_time" content="2026-02-11T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-02-20T09:22:12.121Z">
+<meta property="article:author" content="Nathan">
+<meta property="article:tag" content="AI">
+<meta property="article:tag" content="测试自动化">
+<meta property="article:tag" content="多模态大模型">
+<meta property="article:tag" content="GUI Agent">
+<meta property="article:tag" content="Windows">
+<meta property="article:tag" content="Android">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://hydraxman.github.io/images/redefine-og.webp">
+    
+    
+    <!--- Icon Part-->
+    <link rel="icon" type="image/png" href="/images/favicon.svg" sizes="192x192">
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.svg">
+    <meta name="theme-color" content="#ffffff">
+    <link rel="shortcut icon" href="/images/favicon.svg">
+    <!--- Page Info-->
+    
+    <title>
+        
+            2026年AI驱动UI测试自动化全景：当大模型学会「看屏幕操作电脑」 | 内森淼文
+        
+    </title>
+
+    
+<link rel="stylesheet" href="/fonts/Chillax/chillax.css">
+
+
+    <!--- Inject Part-->
+    
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    
+        
+<link rel="stylesheet" href="/css/build/tailwind.css">
+
+    
+
+    
+<link rel="stylesheet" href="/fonts/GeistMono/geist-mono.css">
+
+    
+<link rel="stylesheet" href="/fonts/Geist/geist.css">
+
+    <!--- Font Part-->
+    
+    
+    
+    
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&display=swap" rel="stylesheet">
+    
+    
+
+    <script id="hexo-configurations">
+    window.config = {"hostname":"hydraxman.github.io","root":"/","language":"zh-CN","path":"search.json"};
+    window.theme = {"articles":{"style":{"font_size":"16px","line_height":1.5,"image_border_radius":"14px","image_alignment":"center","image_caption":false,"link_icon":true,"delete_mask":false,"title_alignment":"left","headings_top_spacing":{"h1":"3.2rem","h2":"2.4rem","h3":"1.9rem","h4":"1.6rem","h5":"1.4rem","h6":"1.3rem"}},"word_count":{"enable":true,"count":true,"min2read":true},"author_label":{"enable":false,"auto":false,"list":[]},"code_block":{"copy":true,"style":"mac","highlight_theme":{"light":"github","dark":"vs2015"},"font":{"enable":false,"family":null,"url":null}},"toc":{"enable":true,"max_depth":3,"number":false,"expand":true,"init_open":true},"copyright":{"enable":true,"default":"cc_by_nc_sa"},"lazyload":true,"pangu_js":false,"recommendation":{"enable":false,"title":"推荐阅读","limit":3,"mobile_limit":2,"placeholder":"/images/wallhaven-wqery6-light.webp","skip_dirs":[]}},"colors":{"primary":"#ffffff","secondary":null,"default_mode":"light"},"global":{"fonts":{"chinese":{"enable":false,"family":null,"url":null},"english":{"enable":true,"family":"Inter","url":"https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"},"title":{"enable":true,"family":"Noto Serif","url":"https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&display=swap"}},"content_max_width":"1000px","sidebar_width":"210px","hover":{"shadow":true,"scale":false},"scroll_progress":{"bar":true,"percentage":true},"website_counter":{"url":"https://cn.vercount.one/js","enable":false,"site_pv":true,"site_uv":true,"post_pv":true},"single_page":true,"preloader":{"enable":false,"custom_message":null},"side_tools":{"gear_rotation":true,"auto_expand":false},"open_graph":{"enable":true,"image":"/images/redefine-og.webp","description":"Hexo Theme Redefine, Redefine Your Hexo Journey."},"google_analytics":{"enable":false,"id":null}},"home_banner":{"enable":true,"style":"fixed","image":{"light":"/images/banner-light.jpg","dark":"/images/banner-dark.jpg"},"title":"内森淼文","subtitle":{"text":["AI · 编程 · 科技见闻","Write Code, Read World"],"hitokoto":{"enable":false,"show_author":false,"api":"https://v1.hitokoto.cn"},"typing_speed":100,"backing_speed":80,"starting_delay":500,"backing_delay":1500,"loop":true,"smart_backspace":true},"text_color":{"light":"#fff","dark":"#d1d1b6"},"text_style":{"title_size":"2.8rem","subtitle_size":"1.5rem","line_height":1.2},"custom_font":{"enable":false,"family":null,"url":null},"social_links":{"enable":true,"style":"default","links":{"github":"https://github.com/hydraxman","instagram":null,"zhihu":null,"twitter":null,"email":null},"qrs":{"weixin":null}}},"plugins":{"feed":{"enable":false},"aplayer":{"enable":false,"type":"fixed","audios":[{"name":null,"artist":null,"url":null,"cover":null,"lrc":null}]},"mermaid":{"enable":false,"version":"11.4.1"}},"version":"2.8.5","navbar":{"auto_hide":false,"color":{"left":"#333333","right":"#555555","transparency":35},"width":{"home":"1200px","pages":"1000px"},"links":{"Home":{"path":"/","icon":"fa-regular fa-house"},"Archives":{"path":"/archives","icon":"fa-regular fa-archive"},"Categories":{"path":"/categories","icon":"fa-regular fa-folder"},"Tags":{"path":"/tags","icon":"fa-regular fa-tags"},"About":{"path":"/about","icon":"fa-regular fa-user"}},"search":{"enable":true,"preload":true}},"page_templates":{"friends_column":2,"tags_style":"blur"},"home":{"sidebar":{"enable":true,"position":"left","first_item":"menu","announcement":"AI · 编程 · 科技","show_on_mobile":true,"links":{"Archives":{"path":"/archives","icon":"fa-regular fa-archive"},"Tags":{"path":"/tags","icon":"fa-regular fa-tags"},"Categories":{"path":"/categories","icon":"fa-regular fa-folder"}}},"article_date_format":"auto","excerpt_length":200,"categories":{"enable":true,"limit":3},"tags":{"enable":true,"limit":3}},"footerStart":"2024/01/01 00:00:00"};
+    window.lang_ago = {"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"};
+    window.data = {"masonry":false};
+  </script>
+    
+    <!--- Fontawesome Part-->
+    
+<link rel="stylesheet" href="/fontawesome/fontawesome.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/brands.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/solid.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/regular.min.css">
+
+    
+    
+    
+    
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+
+<body>
+	<div class="progress-bar-container">
+	
+	<span class="scroll-progress-bar"></span>
+	
+
+	
+	<span class="pjax-progress-bar"></span>
+	<!--        <span class="swup-progress-icon">-->
+	<!--            <i class="fa-solid fa-circle-notch fa-spin"></i>-->
+	<!--        </span>-->
+	
+</div>
+
+<main class="page-container" id="swup">
+
+	
+
+	<div class="main-content-container flex flex-col justify-between min-h-dvh">
+		<div class="main-content-header">
+			<header class="navbar-container px-6 md:px-12">
+    <div class="navbar-content transition-navbar ">
+        <div class="left">
+            
+            <a class="logo-title" href="/">
+                
+                内森淼文
+                
+            </a>
+        </div>
+
+        <div class="right">
+            <!-- PC -->
+            <div class="desktop">
+                <ul class="navbar-list">
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/"
+                                        >
+                                    <i class="fa-regular fa-house fa-fw"></i>
+                                    首页
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/archives"
+                                        >
+                                    <i class="fa-regular fa-archive fa-fw"></i>
+                                    归档
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/categories"
+                                        >
+                                    <i class="fa-regular fa-folder fa-fw"></i>
+                                    分类
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/tags"
+                                        >
+                                    <i class="fa-regular fa-tags fa-fw"></i>
+                                    标签
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/about"
+                                        >
+                                    <i class="fa-regular fa-user fa-fw"></i>
+                                    关于
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                    
+                        <li class="navbar-item search search-popup-trigger">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </li>
+                    
+                </ul>
+            </div>
+            <!-- Mobile -->
+            <div class="mobile">
+                
+                    <div class="icon-item search search-popup-trigger"><i class="fa-solid fa-magnifying-glass"></i>
+                    </div>
+                
+                <div class="icon-item navbar-bar">
+                    <div class="navbar-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile sheet -->
+    <div class="navbar-drawer h-dvh w-full absolute top-0 left-0 bg-background-color flex flex-col justify-between">
+        <ul class="drawer-navbar-list flex flex-col px-4 justify-center items-start">
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/"
+                        >
+                            <span>
+                                首页
+                            </span>
+                            
+                                <i class="fa-regular fa-house fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/archives"
+                        >
+                            <span>
+                                归档
+                            </span>
+                            
+                                <i class="fa-regular fa-archive fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/categories"
+                        >
+                            <span>
+                                分类
+                            </span>
+                            
+                                <i class="fa-regular fa-folder fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/tags"
+                        >
+                            <span>
+                                标签
+                            </span>
+                            
+                                <i class="fa-regular fa-tags fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/about"
+                        >
+                            <span>
+                                关于
+                            </span>
+                            
+                                <i class="fa-regular fa-user fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+
+            
+            
+                
+                    
+                    
+                    
+            
+        </ul>
+
+        <div class="statistics flex justify-around my-2.5">
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/tags">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">115</div>
+        <div class="label text-third-text-color text-sm">标签</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/categories">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">5</div>
+        <div class="label text-third-text-color text-sm">分类</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/archives">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">52</div>
+        <div class="label text-third-text-color text-sm">文章</div>
+    </a>
+</div>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+		</div>
+
+		<div class="main-content-body transition-fade-up">
+			
+
+			<div class="main-content">
+				<div class="post-page-container flex relative justify-between box-border w-full h-full">
+	<div class="article-content-container">
+
+		<div class="article-title relative w-full">
+			
+			<div class="w-full flex items-center pt-6 justify-start">
+				<h1 class="article-title-regular text-second-text-color tracking-tight text-4xl md:text-6xl font-semibold px-2 sm:px-6 md:px-8 py-3">2026年AI驱动UI测试自动化全景：当大模型学会「看屏幕操作电脑」</h1>
+			</div>
+			
+		</div>
+
+		
+		<div class="article-header flex flex-row gap-2 items-center px-2 sm:px-6 md:px-8">
+			<div class="avatar w-[46px] h-[46px] flex-shrink-0 rounded-medium border border-border-color p-[1px]">
+				<img src="/images/avatar.png">
+			</div>
+			<div class="info flex flex-col justify-between">
+				<div class="author flex items-center">
+					<span class="name text-default-text-color text-lg font-semibold">Nathan</span>
+					
+				</div>
+				<div class="meta-info">
+					<div class="article-meta-info">
+    <span class="article-date article-meta-item">
+        <i class="fa-regular fa-pen-fancy"></i>&nbsp;
+        <span class="desktop">2026-02-12</span>
+        <span class="mobile">2026-02-12</span>
+        <span class="hover-info">创建</span>
+    </span>
+    
+        <span class="article-date article-meta-item">
+            <i class="fa-regular fa-wrench"></i>&nbsp;
+            <span class="desktop">2026-02-20 17:22:12</span>
+            <span class="mobile">2026-02-20 17:22:12</span>
+            <span class="hover-info">更新</span>
+        </span>
+    
+
+    
+        <span class="article-categories article-meta-item">
+            <i class="fa-regular fa-folders"></i>&nbsp;
+            <ul>
+                
+                
+                    
+                        
+                        <li>
+                            <a href="/categories/%E6%8A%80%E6%9C%AF%E5%AE%9E%E6%88%98/">技术实战</a>&nbsp;
+                        </li>
+                    
+                    
+                
+            </ul>
+        </span>
+    
+    
+        <span class="article-tags article-meta-item">
+            <i class="fa-regular fa-tags"></i>&nbsp;
+            <ul>
+                
+                    <li>
+                        <a href="/tags/AI/">AI</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/%E6%B5%8B%E8%AF%95%E8%87%AA%E5%8A%A8%E5%8C%96/">测试自动化</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/%E5%A4%9A%E6%A8%A1%E6%80%81%E5%A4%A7%E6%A8%A1%E5%9E%8B/">多模态大模型</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/GUI-Agent/">GUI Agent</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/Windows/">Windows</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/Android/">Android</a>&nbsp;
+                    </li>
+                
+            </ul>
+        </span>
+    
+
+    
+    
+        <span class="article-wordcount article-meta-item">
+            <i class="fa-regular fa-typewriter"></i>&nbsp;<span>2.9k 字</span>
+        </span>
+    
+    
+        <span class="article-min2read article-meta-item">
+            <i class="fa-regular fa-clock"></i>&nbsp;<span>11 分钟</span>
+        </span>
+    
+    
+</div>
+
+				</div>
+			</div>
+		</div>
+		
+
+		
+
+
+		<div class="article-content markdown-body px-2 sm:px-6 md:px-8 pb-8">
+			<blockquote>
+<p>GPT-5.3 在 OSWorld 上拿到 64.7%，Claude Opus 4.6 达到 72.7% 超越人类水平（72.36%），UI-TARS-2 在 12 个 Poki 游戏上通关率 100%——2026 年 2 月，AI 操控电脑的能力正在以不可思议的速度进化。本文全面梳理基于最新一线大模型的 Agentic UI 测试框架，聚焦 Windows + Android 双平台。</p>
+</blockquote>
+<h2 id="核心变化：从「定位元素」到「看屏幕操作」"><a href="#核心变化：从「定位元素」到「看屏幕操作」" class="headerlink" title="核心变化：从「定位元素」到「看屏幕操作」"></a>核心变化：从「定位元素」到「看屏幕操作」</h2><p>传统 UI 自动化测试依赖 XPath、CSS Selector、Accessibility ID 等定位器。UI 一改，测试就崩。</p>
+<p>2026 年的新范式彻底不同：</p>
+<div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">截图 → 多模态大模型理解界面 → 规划操作步骤 → 模拟鼠标键盘执行 → 截图验证结果</span><br></pre></td></tr></table></figure></div>
+
+<p><strong>不再需要任何定位器、不依赖 DOM 结构、不怕 UI 改版。</strong> 只要人类能看懂屏幕，AI 就能操作。</p>
+<p>这背后的核心驱动力是<strong>多模态大模型的能力飞跃</strong>。让我们先看看 2026 年 2 月的最新战况。</p>
+<hr>
+<h2 id="一、模型层：谁在驱动-Computer-Use？"><a href="#一、模型层：谁在驱动-Computer-Use？" class="headerlink" title="一、模型层：谁在驱动 Computer Use？"></a>一、模型层：谁在驱动 Computer Use？</h2><h3 id="OSWorld-Benchmark：AI-操控桌面的黄金标准"><a href="#OSWorld-Benchmark：AI-操控桌面的黄金标准" class="headerlink" title="OSWorld Benchmark：AI 操控桌面的黄金标准"></a>OSWorld Benchmark：AI 操控桌面的黄金标准</h3><p>OSWorld 是评估 AI 操控真实桌面环境（Windows&#x2F;Linux&#x2F;Mac）能力的权威 benchmark，包含文件管理、办公软件操作、浏览器任务等数百项真实任务。</p>
+<p><strong>2026 年 2 月最新排名：</strong></p>
+<table>
+<thead>
+<tr>
+<th>模型&#x2F;方案</th>
+<th>OSWorld 得分</th>
+<th>发布时间</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Anthropic BJudge (Claude Opus 4.6)</strong></td>
+<td><strong>72.7%</strong></td>
+<td>2026.02</td>
+<td>🏆 超越人类水平（72.36%）</td>
+</tr>
+<tr>
+<td>UiPath Screen Agent + Claude Opus 4.5</td>
+<td>OSWorld-Verified #1</td>
+<td>2026.01</td>
+<td>企业级方案</td>
+</tr>
+<tr>
+<td><strong>GPT-5.3 Codex</strong></td>
+<td><strong>64.7%</strong></td>
+<td>2026.02</td>
+<td>历史最高单模型得分</td>
+</tr>
+<tr>
+<td>UI-TARS-1.5</td>
+<td>42.5%</td>
+<td>2025.04</td>
+<td>开源最强</td>
+</tr>
+<tr>
+<td>OpenAI CUA (GPT-5 架构)</td>
+<td>36.4%</td>
+<td>2025</td>
+<td>Operator 产品底层</td>
+</tr>
+<tr>
+<td>Claude 3.7 Sonnet</td>
+<td>28%</td>
+<td>2024</td>
+<td>Computer Use 首发版</td>
+</tr>
+</tbody></table>
+<p><strong>关键信号</strong>：仅仅一年时间，从 28% 到 72.7%，<strong>AI 在桌面操控任务上已经超越了普通人类水平</strong>。</p>
+<h3 id="最新一线模型的-Computer-Use-能力对比"><a href="#最新一线模型的-Computer-Use-能力对比" class="headerlink" title="最新一线模型的 Computer Use 能力对比"></a>最新一线模型的 Computer Use 能力对比</h3><table>
+<thead>
+<tr>
+<th>能力维度</th>
+<th>Claude Opus 4.6</th>
+<th>GPT-5.3 Codex</th>
+<th>Gemini 3 Pro</th>
+<th>UI-TARS-2</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>OSWorld（桌面操控）</td>
+<td>72.7% 🏆</td>
+<td>64.7%</td>
+<td>-</td>
+<td>42.5%*</td>
+</tr>
+<tr>
+<td>上下文窗口</td>
+<td>1M tokens</td>
+<td>400K tokens</td>
+<td>1M+</td>
+<td>本地部署</td>
+</tr>
+<tr>
+<td>Agent Teams（多 Agent 协作）</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Computer Use API</td>
+<td>原生支持</td>
+<td>原生支持</td>
+<td>-</td>
+<td>pyautogui</td>
+</tr>
+<tr>
+<td>BrowseComp（浏览器搜索）</td>
+<td>84.0%</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>视频理解</td>
+<td>图片+文本</td>
+<td>原生视频+音频</td>
+<td>原生多模态</td>
+<td>图片</td>
+</tr>
+<tr>
+<td>成本（输入&#x2F;1M tokens）</td>
+<td>$5</td>
+<td>$1.25</td>
+<td>-</td>
+<td>免费（本地）</td>
+</tr>
+<tr>
+<td>Android 支持</td>
+<td>需搭配框架</td>
+<td>需搭配框架</td>
+<td>需搭配框架</td>
+<td>原生</td>
+</tr>
+<tr>
+<td>Windows 支持</td>
+<td>原生 Computer Use</td>
+<td>原生 Computer Use</td>
+<td>-</td>
+<td>原生</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>*UI-TARS-2 的 OSWorld 得分基于 2025.09 版本，最新版可能更高。其 benchmark 优势在 ScreenSpot（UI 定位精度）上更明显，达到 94.2%。</p>
+</blockquote>
+<hr>
+<h2 id="二、框架层：把大模型能力变成可用的测试工具"><a href="#二、框架层：把大模型能力变成可用的测试工具" class="headerlink" title="二、框架层：把大模型能力变成可用的测试工具"></a>二、框架层：把大模型能力变成可用的测试工具</h2><p>光有模型不够，还需要框架来编排 Agent 工作流。以下是 2026 年最值得关注的 Agentic 测试框架。</p>
+<h3 id="1-Cua-—-开源-Computer-Use-Agent-平台（⭐12-4K）"><a href="#1-Cua-—-开源-Computer-Use-Agent-平台（⭐12-4K）" class="headerlink" title="1. Cua — 开源 Computer Use Agent 平台（⭐12.4K）"></a>1. Cua — 开源 Computer Use Agent 平台（⭐12.4K）</h3><p><strong>GitHub</strong>：<a class="link"   target="_blank" rel="noopener" href="https://github.com/trycua/cua" >trycua&#x2F;cua<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a> | MIT 许可</p>
+<p><strong>这是 2026 年最值得关注的新项目。</strong> Cua 是一个专门为「AI 操控真实电脑」设计的开源平台，三层架构：</p>
+<p><strong>Layer 1 — 沙盒环境：</strong></p>
+<table>
+<thead>
+<tr>
+<th>环境类型</th>
+<th>平台</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Cloud Sandbox</td>
+<td>Linux&#x2F;Windows&#x2F;macOS</td>
+<td>托管云环境，开箱即用</td>
+</tr>
+<tr>
+<td>Docker 容器</td>
+<td>Linux</td>
+<td>轻量级桌面环境</td>
+</tr>
+<tr>
+<td>QEMU 虚拟机</td>
+<td>Linux&#x2F;Windows 11&#x2F;<strong>Android 11</strong></td>
+<td>Docker 内运行完整 OS</td>
+</tr>
+<tr>
+<td>Lume</td>
+<td>macOS&#x2F;Linux</td>
+<td>Apple Silicon 原生虚拟化</td>
+</tr>
+<tr>
+<td>Windows Sandbox</td>
+<td>Windows</td>
+<td>原生 Windows 沙盒</td>
+</tr>
+</tbody></table>
+<p><strong>Layer 2 — Computer SDK：</strong><br>统一的 Python&#x2F;TypeScript API，截图、鼠标点击、键盘输入、Shell 命令，一套代码跑所有沙盒。</p>
+<p><strong>Layer 3 — Agent 框架：</strong></p>
+<ul>
+<li>100+ 模型支持（Claude &#x2F; GPT &#x2F; Gemini &#x2F; 开源模型）</li>
+<li>预构建的 Agent Loop，专为 Computer Use 优化</li>
+<li><strong>内置 Android 支持</strong>（QEMU 虚拟化 + CuaBot）</li>
+</ul>
+<p><strong>为什么 Cua 对 UI 测试很重要？</strong></p>
+<div class="code-container" data-rel="Python"><figure class="iseeu highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> cua <span class="keyword">import</span> Agent, Sandbox</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建隔离的 Windows 沙盒</span></span><br><span class="line">sandbox = Sandbox.create(<span class="string">&quot;windows-11&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 用 Claude Opus 4.6 驱动 Agent</span></span><br><span class="line">agent = Agent(model=<span class="string">&quot;claude-opus-4.6&quot;</span>, sandbox=sandbox)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 自然语言描述测试任务</span></span><br><span class="line">agent.run(<span class="string">&quot;打开计算器，计算 123 × 456，验证结果是否为 56088&quot;</span>)</span><br></pre></td></tr></table></figure></div>
+
+<p>不需要写任何定位器，不需要了解应用内部结构。Agent 会自己截屏、理解界面、操作、验证结果。</p>
+<h3 id="2-UiPath-Screen-Agent-—-企业级-AI-自动化（OSWorld-Verified-1）"><a href="#2-UiPath-Screen-Agent-—-企业级-AI-自动化（OSWorld-Verified-1）" class="headerlink" title="2. UiPath Screen Agent — 企业级 AI 自动化（OSWorld-Verified #1）"></a>2. UiPath Screen Agent — 企业级 AI 自动化（OSWorld-Verified #1）</h3><p>UiPath 是全球最大的 RPA 公司。2025-2026 年，他们推出了 <strong>Screen Agent</strong>：</p>
+<ul>
+<li>2025.09：基于 <strong>GPT-5</strong> 拿到 OSWorld #1</li>
+<li>2026.01：切换到 <strong>Claude Opus 4.5</strong> 后拿到 OSWorld-Verified #1（369 项真实桌面任务）</li>
+</ul>
+<p>Screen Agent 代表了传统 RPA 与最新大模型的融合：用 UiPath 的企业级基础设施（机器人编排、权限管理、审计日志）+ 顶级大模型的视觉理解能力。</p>
+<p><strong>适合</strong>：已有 UiPath 基础设施的企业团队。</p>
+<h3 id="3-微软-UFO³-OmniParser-V2（⭐8K-⭐24-4K）"><a href="#3-微软-UFO³-OmniParser-V2（⭐8K-⭐24-4K）" class="headerlink" title="3. 微软 UFO³ + OmniParser V2（⭐8K + ⭐24.4K）"></a>3. 微软 UFO³ + OmniParser V2（⭐8K + ⭐24.4K）</h3><p><strong>GitHub</strong>：<a class="link"   target="_blank" rel="noopener" href="https://github.com/microsoft/UFO" >microsoft&#x2F;UFO<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a> | <a class="link"   target="_blank" rel="noopener" href="https://github.com/microsoft/OmniParser" >microsoft&#x2F;OmniParser<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></p>
+<p>微软自家出品，<strong>Windows 原生 Agent 操作系统</strong>。</p>
+<p><strong>OmniParser V2</strong> 是目前最强的屏幕解析引擎：把任意截图转成结构化 UI 元素列表。支持开箱接入 GPT-5.x &#x2F; Claude &#x2F; DeepSeek R1 &#x2F; Qwen 2.5VL 等模型。配套 <strong>OmniTool</strong> 提供 Docker 化 Windows 11 VM。</p>
+<p><strong>UFO³</strong> 的核心优势是 <strong>Windows 深度集成</strong>：</p>
+<ul>
+<li><strong>双通道感知</strong>：Windows UIA API（控件树）+ 视觉模型（OmniParser），精确性和灵活性兼得</li>
+<li><strong>智能执行选择</strong>：自动判断用 API 直接调用还是模拟 GUI 操作</li>
+<li><strong>多设备编排</strong>（Galaxy 模式）：DAG 任务分解 + 异步并行 + 跨设备协作</li>
+</ul>
+<p><strong>演进路线</strong>：</p>
+<div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">UFO (2024.02) → UFO² (2025.04) → UFO³ Galaxy (2025.11)</span><br><span class="line">单设备 Agent  → Desktop AgentOS → 多设备编排</span><br></pre></td></tr></table></figure></div>
+
+<p><strong>适合</strong>：Windows 桌面应用为核心的测试场景，尤其是需要操作 Office、Visual Studio 等微软生态软件。</p>
+<h3 id="4-字节跳动-UI-TARS-Midscene-js（⭐9-5K-⭐27-8K-⭐11-7K）"><a href="#4-字节跳动-UI-TARS-Midscene-js（⭐9-5K-⭐27-8K-⭐11-7K）" class="headerlink" title="4. 字节跳动 UI-TARS + Midscene.js（⭐9.5K + ⭐27.8K + ⭐11.7K）"></a>4. 字节跳动 UI-TARS + Midscene.js（⭐9.5K + ⭐27.8K + ⭐11.7K）</h3><p><strong>GitHub</strong>：<a class="link"   target="_blank" rel="noopener" href="https://github.com/bytedance/UI-TARS" >bytedance&#x2F;UI-TARS<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a> | <a class="link"   target="_blank" rel="noopener" href="https://github.com/bytedance/UI-TARS-desktop" >bytedance&#x2F;UI-TARS-desktop<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a> | <a class="link"   target="_blank" rel="noopener" href="https://github.com/web-infra-dev/midscene" >web-infra-dev&#x2F;midscene<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></p>
+<p><strong>UI-TARS</strong> 是字节开源的多模态 GUI Agent 模型，基于 Qwen2.5-VL。它和商业模型走的是不同路线——<strong>可本地部署、零 API 成本</strong>。</p>
+<p>UI-TARS 的独特优势：</p>
+<ul>
+<li><strong>UI 定位精度最高</strong>：ScreenSpot-V2 达 94.2%（超 GPT 87.9%、Claude 87.6%）</li>
+<li><strong>Windows + Android 双平台原生支持</strong>：提供 COMPUTER_USE 和 MOBILE_USE 两套 Prompt 模板</li>
+<li><strong>UI-TARS-2</strong>（2025.09）：All-In-One Agent 模型，加入 Game、Code、Tool Use</li>
+<li><strong>7B 模型可本地部署</strong>：一张消费级 GPU 即可运行</li>
+</ul>
+<p><strong>Midscene.js</strong> 是配套的测试框架（v1.0 已发布），用自然语言写测试：</p>
+<div class="code-container" data-rel="Javascript"><figure class="iseeu highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 自然语言描述操作</span></span><br><span class="line"><span class="keyword">await</span> agent.<span class="title function_">aiAction</span>(<span class="string">&#x27;点击搜索框，输入 &quot;AI testing&quot;，按回车&#x27;</span>);</span><br><span class="line"><span class="keyword">await</span> agent.<span class="title function_">aiAssert</span>(<span class="string">&#x27;搜索结果中包含相关内容&#x27;</span>);</span><br><span class="line"><span class="keyword">const</span> data = <span class="keyword">await</span> agent.<span class="title function_">aiExtract</span>(<span class="string">&#x27;提取前3个搜索结果的标题&#x27;</span>);</span><br></pre></td></tr></table></figure></div>
+
+<p>全平台支持：Web（Puppeteer&#x2F;Playwright）+ Android（adb）+ iOS（WebDriverAgent）</p>
+<p><strong>适合</strong>：追求零成本本地部署、同时覆盖桌面和移动端的团队。</p>
+<h3 id="5-AskUI-Vision-Agent-—-企业级跨平台（⭐501）"><a href="#5-AskUI-Vision-Agent-—-企业级跨平台（⭐501）" class="headerlink" title="5. AskUI Vision Agent — 企业级跨平台（⭐501）"></a>5. AskUI Vision Agent — 企业级跨平台（⭐501）</h3><p><strong>GitHub</strong>：<a class="link"   target="_blank" rel="noopener" href="https://github.com/askui/vision-agent" >askui&#x2F;vision-agent<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></p>
+<p>Python SDK，支持 Windows &#x2F; Mac &#x2F; Linux &#x2F; Android &#x2F; iOS &#x2F; Citrix。独特优势：</p>
+<ul>
+<li><strong>Windows 后台自动化</strong>：Agent 创建独立会话，不占用前台鼠标键盘</li>
+<li>支持热插拔模型 + 本地部署</li>
+<li>Agent OS 底层设备控制器</li>
+</ul>
+<p><strong>适合</strong>：企业环境，对安全性和稳定性有要求。</p>
+<h3 id="6-Arbigent-—-Android-x2F-iOS-场景分解测试（⭐505）"><a href="#6-Arbigent-—-Android-x2F-iOS-场景分解测试（⭐505）" class="headerlink" title="6. Arbigent — Android&#x2F;iOS 场景分解测试（⭐505）"></a>6. Arbigent — Android&#x2F;iOS 场景分解测试（⭐505）</h3><p><strong>GitHub</strong>：<a class="link"   target="_blank" rel="noopener" href="https://github.com/takahirom/arbigent" >takahirom&#x2F;arbigent<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></p>
+<p>核心创新：<strong>场景分解（Scenario Breakdown）</strong>。把复杂的端到端测试拆成多个有依赖关系的子场景，每个子场景独立运行和验证，大幅提高 AI 测试的可预测性。</p>
+<p>GUI 操作界面，非开发人员也能上手。支持 OpenAI &#x2F; Gemini &#x2F; Claude 等多种模型。</p>
+<p><strong>适合</strong>：移动端 QA 团队。</p>
+<hr>
+<h2 id="三、学术前沿：正在孵化的下一代技术"><a href="#三、学术前沿：正在孵化的下一代技术" class="headerlink" title="三、学术前沿：正在孵化的下一代技术"></a>三、学术前沿：正在孵化的下一代技术</h2><table>
+<thead>
+<tr>
+<th>项目</th>
+<th>出处</th>
+<th>核心贡献</th>
+<th>平台</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Scaling Agents for CU</strong></td>
+<td>Anthropic (2026.02)</td>
+<td>BJudge + 多轮执行，OSWorld 72.6% 超越人类</td>
+<td>桌面</td>
+</tr>
+<tr>
+<td><strong>AUITestAgent</strong></td>
+<td>北大</td>
+<td>从自然语言需求自动生成 GUI 功能测试</td>
+<td>Android</td>
+</tr>
+<tr>
+<td><strong>VisionDroid</strong></td>
+<td>学术界</td>
+<td>MLLM 功能感知探索 + 非崩溃 bug 检测</td>
+<td>Android</td>
+</tr>
+<tr>
+<td><strong>DroidAgent</strong></td>
+<td>KAIST</td>
+<td>意图驱动自主探索，自动生成 UIAutomator2 脚本</td>
+<td>Android</td>
+</tr>
+<tr>
+<td><strong>CogAgent</strong></td>
+<td>清华&#x2F;智谱</td>
+<td>双分辨率视觉编码器，专为 GUI Agent 设计</td>
+<td>双平台</td>
+</tr>
+<tr>
+<td><strong>AppAgent</strong></td>
+<td>腾讯</td>
+<td>多模态 Agent 像用户操作手机，含自主学习阶段</td>
+<td>Android</td>
+</tr>
+</tbody></table>
+<p>论文合集：<a class="link"   target="_blank" rel="noopener" href="https://github.com/showlab/Awesome-GUI-Agent" >Awesome-GUI-Agent<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a>（⭐1.1K），持续更新。</p>
+<hr>
+<h2 id="四、横向对比：该选哪个？"><a href="#四、横向对比：该选哪个？" class="headerlink" title="四、横向对比：该选哪个？"></a>四、横向对比：该选哪个？</h2><table>
+<thead>
+<tr>
+<th>方案</th>
+<th>Windows</th>
+<th>Android</th>
+<th>最新模型支持</th>
+<th>开源</th>
+<th>成熟度</th>
+<th>成本</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Cua</strong></td>
+<td>✅ 沙盒</td>
+<td>✅ QEMU</td>
+<td>Claude&#x2F;GPT&#x2F;Gemini&#x2F;开源</td>
+<td>✅ MIT</td>
+<td>活跃开发</td>
+<td>免费+API</td>
+</tr>
+<tr>
+<td><strong>UiPath Screen Agent</strong></td>
+<td>✅ 原生</td>
+<td>❌</td>
+<td>Claude Opus 4.5&#x2F;GPT-5</td>
+<td>❌ 商业</td>
+<td>生产级</td>
+<td>企业许可</td>
+</tr>
+<tr>
+<td><strong>UFO³ + OmniParser</strong></td>
+<td>✅✅ 最深</td>
+<td>❌</td>
+<td>GPT-5.x&#x2F;Claude&#x2F;DeepSeek&#x2F;Qwen</td>
+<td>✅</td>
+<td>生产级</td>
+<td>免费+API</td>
+</tr>
+<tr>
+<td><strong>UI-TARS + Midscene</strong></td>
+<td>✅</td>
+<td>✅ 原生</td>
+<td>UI-TARS-2（本地）</td>
+<td>✅</td>
+<td>v1.0</td>
+<td>完全免费</td>
+</tr>
+<tr>
+<td><strong>AskUI</strong></td>
+<td>✅</td>
+<td>✅</td>
+<td>多模型</td>
+<td>部分</td>
+<td>商业可用</td>
+<td>SaaS</td>
+</tr>
+<tr>
+<td><strong>Arbigent</strong></td>
+<td>❌</td>
+<td>✅✅</td>
+<td>多模型</td>
+<td>✅</td>
+<td>早期</td>
+<td>免费+API</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="五、实战推荐方案"><a href="#五、实战推荐方案" class="headerlink" title="五、实战推荐方案"></a>五、实战推荐方案</h2><h3 id="方案-A：最强桌面能力（Claude-Opus-4-6-Cua-x2F-UFO³）"><a href="#方案-A：最强桌面能力（Claude-Opus-4-6-Cua-x2F-UFO³）" class="headerlink" title="方案 A：最强桌面能力（Claude Opus 4.6 + Cua&#x2F;UFO³）"></a>方案 A：最强桌面能力（Claude Opus 4.6 + Cua&#x2F;UFO³）</h3><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Claude Opus 4.6 (72.7% OSWorld) + Cua 沙盒 或 UFO³ 框架</span><br></pre></td></tr></table></figure></div>
+
+<ul>
+<li>当前桌面操控 SOTA，超越人类水平</li>
+<li>Cua 提供隔离沙盒环境，安全可控</li>
+<li>UFO³ 提供 Windows 原生深度集成</li>
+<li><strong>成本</strong>：$5&#x2F;1M input tokens，适合高价值测试场景</li>
+</ul>
+<h3 id="方案-B：性价比之选（GPT-5-3-Codex-Cua）"><a href="#方案-B：性价比之选（GPT-5-3-Codex-Cua）" class="headerlink" title="方案 B：性价比之选（GPT-5.3 Codex + Cua）"></a>方案 B：性价比之选（GPT-5.3 Codex + Cua）</h3><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GPT-5.3 Codex (64.7% OSWorld) + Cua 沙盒</span><br></pre></td></tr></table></figure></div>
+
+<ul>
+<li>单模型历史最高 OSWorld 得分</li>
+<li>成本仅 Claude 的 1&#x2F;4（$1.25&#x2F;1M input tokens）</li>
+<li>原生视频+音频理解能力</li>
+<li><strong>适合</strong>：大规模回归测试，对成本敏感</li>
+</ul>
+<h3 id="方案-C：零成本本地部署（UI-TARS-Midscene-js）"><a href="#方案-C：零成本本地部署（UI-TARS-Midscene-js）" class="headerlink" title="方案 C：零成本本地部署（UI-TARS + Midscene.js）"></a>方案 C：零成本本地部署（UI-TARS + Midscene.js）</h3><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">UI-TARS-1.5-7B（本地 GPU）+ Midscene.js 框架</span><br></pre></td></tr></table></figure></div>
+
+<ul>
+<li>Windows + Android 双平台原生覆盖</li>
+<li>零 API 费用，一张 GPU 搞定</li>
+<li>Midscene.js 自然语言写测试，开发者友好</li>
+<li><strong>适合</strong>：有 GPU 资源、追求长期低成本运营</li>
+</ul>
+<h3 id="方案-D：企业级落地（UiPath-Claude-Opus-4-5）"><a href="#方案-D：企业级落地（UiPath-Claude-Opus-4-5）" class="headerlink" title="方案 D：企业级落地（UiPath + Claude Opus 4.5）"></a>方案 D：企业级落地（UiPath + Claude Opus 4.5）</h3><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">UiPath Screen Agent + Claude Opus 4.5</span><br></pre></td></tr></table></figure></div>
+
+<ul>
+<li>OSWorld-Verified 认证第一</li>
+<li>企业级基础设施（编排、权限、审计）</li>
+<li><strong>适合</strong>：已有 RPA 基础设施的大型企业</li>
+</ul>
+<hr>
+<h2 id="六、趋势判断"><a href="#六、趋势判断" class="headerlink" title="六、趋势判断"></a>六、趋势判断</h2><p><strong>1. Computer Use 已超越人类水平</strong><br>Claude Opus 4.6 在 OSWorld 上达到 72.7%，超越人类的 72.36%。这是一个里程碑——意味着在标准化桌面任务上，AI Agent 已经比普通人更准确。</p>
+<p><strong>2. 商业模型和开源模型走向不同赛道</strong></p>
+<ul>
+<li>商业模型（Claude&#x2F;GPT）追求极致准确率，适合高价值场景</li>
+<li>开源模型（UI-TARS）追求零成本部署和定位精度，适合大规模应用</li>
+</ul>
+<p><strong>3. 沙盒化是 CI&#x2F;CD 集成的关键</strong><br>Cua、OmniTool 等都提供 Docker 化的隔离环境。这意味着 AI GUI 测试可以像单元测试一样跑在 CI pipeline 里。</p>
+<p><strong>4. 速度和成本仍是主要瓶颈</strong><br>每步截图 + LLM 推理需要 2-5 秒，传统自动化是毫秒级。高频回归测试仍需混合策略：核心路径用传统方法，复杂场景用 AI Agent。</p>
+<p><strong>5. 2026 是落地元年</strong><br>从 benchmark 到生产：UiPath Screen Agent 已在企业中部署，Midscene.js 已发布 v1.0，Cua 已有 12.4K star。这不再是论文里的概念。</p>
+<hr>
+<h2 id="资源汇总"><a href="#资源汇总" class="headerlink" title="资源汇总"></a>资源汇总</h2><table>
+<thead>
+<tr>
+<th>资源</th>
+<th>链接</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Awesome-GUI-Agent</td>
+<td><a class="link"   target="_blank" rel="noopener" href="https://github.com/showlab/Awesome-GUI-Agent" >GitHub<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></td>
+<td>最全论文列表（⭐1.1K）</td>
+</tr>
+<tr>
+<td>OSWorld Benchmark</td>
+<td><a class="link"   target="_blank" rel="noopener" href="https://os-world.github.io/" >官网<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></td>
+<td>桌面操控标准评测</td>
+</tr>
+<tr>
+<td>Cua</td>
+<td><a class="link"   target="_blank" rel="noopener" href="https://github.com/trycua/cua" >GitHub<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></td>
+<td>开源 Computer Use Agent 平台</td>
+</tr>
+<tr>
+<td>UI-TARS</td>
+<td><a class="link"   target="_blank" rel="noopener" href="https://github.com/bytedance/UI-TARS" >GitHub<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></td>
+<td>字节开源 GUI Agent 模型</td>
+</tr>
+<tr>
+<td>Midscene.js</td>
+<td><a class="link"   target="_blank" rel="noopener" href="https://midscenejs.com/" >官网<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></td>
+<td>自然语言 UI 测试框架</td>
+</tr>
+<tr>
+<td>UFO³</td>
+<td><a class="link"   target="_blank" rel="noopener" href="https://github.com/microsoft/UFO" >GitHub<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></td>
+<td>微软 Windows Agent OS</td>
+</tr>
+<tr>
+<td>OmniParser V2</td>
+<td><a class="link"   target="_blank" rel="noopener" href="https://github.com/microsoft/OmniParser" >GitHub<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></td>
+<td>微软屏幕解析引擎</td>
+</tr>
+<tr>
+<td>LLM-Powered GUI Agents Survey</td>
+<td><a class="link"   target="_blank" rel="noopener" href="https://github.com/PhoneLLM/Awesome-LLM-Powered-Phone-GUI-Agents" >GitHub<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></td>
+<td>手机 GUI Agent 综述</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>本文基于 2026 年 2 月 12 日的调研。这个领域每周都在刷新纪录——一个月前 Claude Opus 4.5 还是 SOTA，现在 Opus 4.6 已经超越人类。建议持续关注 <a class="link"   target="_blank" rel="noopener" href="https://os-world.github.io/" >OSWorld Leaderboard<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a> 获取最新排名。</em></p>
+
+		</div>
+
+		
+		<div class="post-copyright-info w-full my-8 px-2 sm:px-6 md:px-8">
+			<div class="article-copyright-info-container">
+    <ul>
+        <li><strong>标题:</strong> 2026年AI驱动UI测试自动化全景：当大模型学会「看屏幕操作电脑」</li>
+        <li><strong>作者:</strong> Nathan</li>
+        <li><strong>创建于
+                :</strong> 2026-02-12 00:00:00</li>
+        
+            <li>
+                <strong>更新于
+                    :</strong> 2026-02-20 17:22:12
+            </li>
+        
+        <li>
+            <strong>链接:</strong> https://hydraxman.github.io/2026/02/12/ai-ui-testing-automation-2026/
+        </li>
+        <li>
+            <strong>
+                版权声明:
+            </strong>
+            
+
+            
+                本文章采用 <a class="license" target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0">CC BY-NC-SA 4.0</a> 进行许可。
+            
+        </li>
+    </ul>
+</div>
+
+		</div>
+		
+
+		
+		<ul class="post-tags-box text-lg mt-1.5 flex-wrap justify-center flex md:hidden">
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/AI/">#AI</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/%E6%B5%8B%E8%AF%95%E8%87%AA%E5%8A%A8%E5%8C%96/">#测试自动化</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/%E5%A4%9A%E6%A8%A1%E6%80%81%E5%A4%A7%E6%A8%A1%E5%9E%8B/">#多模态大模型</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/GUI-Agent/">#GUI Agent</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/Windows/">#Windows</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/Android/">#Android</a>&nbsp;
+			</li>
+			
+		</ul>
+		
+
+		
+
+		
+		<div class="article-nav my-8 flex justify-between items-center px-2 sm:px-6 md:px-8">
+			
+			<div class="article-prev border-border-color shadow-redefine-flat shadow-shadow-color-2 rounded-medium px-4 py-2 hover:shadow-redefine-flat-hover hover:shadow-shadow-color-2">
+				<a class="prev" rel="prev" href="/2026/02/12/2026-02-12-morning-news/">
+					<span class="left arrow-icon flex justify-center items-center">
+						<i class="fa-solid fa-chevron-left"></i>
+					</span>
+					<span class="title flex justify-center items-center">
+						<span class="post-nav-title-item truncate max-w-48">2026年02月12日早间要闻</span>
+						<span class="post-nav-item">上一篇</span>
+					</span>
+				</a>
+			</div>
+			
+			
+			<div class="article-next border-border-color shadow-redefine-flat shadow-shadow-color-2 rounded-medium px-4 py-2 hover:shadow-redefine-flat-hover hover:shadow-shadow-color-2">
+				<a class="next" rel="next" href="/2026/02/12/tech-hot-news-2026-02-12/">
+					<span class="title flex justify-center items-center">
+						<span class="post-nav-title-item truncate max-w-48">科技热榜速递 | 2026-02-13：Seedance 2.0 正式发布、Claude Code 变蠢争议、xAI 星际野心</span>
+						<span class="post-nav-item">下一篇</span>
+					</span>
+					<span class="right arrow-icon flex justify-center items-center">
+						<i class="fa-solid fa-chevron-right"></i>
+					</span>
+				</a>
+			</div>
+			
+		</div>
+		
+
+
+		
+	</div>
+
+	
+	<div class="toc-content-container">
+		<div class="post-toc-wrap">
+	<div class="post-toc">
+		<div class="toc-title">目录</div>
+		<div class="page-title">2026年AI驱动UI测试自动化全景：当大模型学会「看屏幕操作电脑」</div>
+		<ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E5%8F%98%E5%8C%96%EF%BC%9A%E4%BB%8E%E3%80%8C%E5%AE%9A%E4%BD%8D%E5%85%83%E7%B4%A0%E3%80%8D%E5%88%B0%E3%80%8C%E7%9C%8B%E5%B1%8F%E5%B9%95%E6%93%8D%E4%BD%9C%E3%80%8D"><span class="nav-text">核心变化：从「定位元素」到「看屏幕操作」</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E6%A8%A1%E5%9E%8B%E5%B1%82%EF%BC%9A%E8%B0%81%E5%9C%A8%E9%A9%B1%E5%8A%A8-Computer-Use%EF%BC%9F"><span class="nav-text">一、模型层：谁在驱动 Computer Use？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#OSWorld-Benchmark%EF%BC%9AAI-%E6%93%8D%E6%8E%A7%E6%A1%8C%E9%9D%A2%E7%9A%84%E9%BB%84%E9%87%91%E6%A0%87%E5%87%86"><span class="nav-text">OSWorld Benchmark：AI 操控桌面的黄金标准</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%80%E6%96%B0%E4%B8%80%E7%BA%BF%E6%A8%A1%E5%9E%8B%E7%9A%84-Computer-Use-%E8%83%BD%E5%8A%9B%E5%AF%B9%E6%AF%94"><span class="nav-text">最新一线模型的 Computer Use 能力对比</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E6%A1%86%E6%9E%B6%E5%B1%82%EF%BC%9A%E6%8A%8A%E5%A4%A7%E6%A8%A1%E5%9E%8B%E8%83%BD%E5%8A%9B%E5%8F%98%E6%88%90%E5%8F%AF%E7%94%A8%E7%9A%84%E6%B5%8B%E8%AF%95%E5%B7%A5%E5%85%B7"><span class="nav-text">二、框架层：把大模型能力变成可用的测试工具</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Cua-%E2%80%94-%E5%BC%80%E6%BA%90-Computer-Use-Agent-%E5%B9%B3%E5%8F%B0%EF%BC%88%E2%AD%9012-4K%EF%BC%89"><span class="nav-text">1. Cua — 开源 Computer Use Agent 平台（⭐12.4K）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-UiPath-Screen-Agent-%E2%80%94-%E4%BC%81%E4%B8%9A%E7%BA%A7-AI-%E8%87%AA%E5%8A%A8%E5%8C%96%EF%BC%88OSWorld-Verified-1%EF%BC%89"><span class="nav-text">2. UiPath Screen Agent — 企业级 AI 自动化（OSWorld-Verified #1）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E5%BE%AE%E8%BD%AF-UFO%C2%B3-OmniParser-V2%EF%BC%88%E2%AD%908K-%E2%AD%9024-4K%EF%BC%89"><span class="nav-text">3. 微软 UFO³ + OmniParser V2（⭐8K + ⭐24.4K）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8-UI-TARS-Midscene-js%EF%BC%88%E2%AD%909-5K-%E2%AD%9027-8K-%E2%AD%9011-7K%EF%BC%89"><span class="nav-text">4. 字节跳动 UI-TARS + Midscene.js（⭐9.5K + ⭐27.8K + ⭐11.7K）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-AskUI-Vision-Agent-%E2%80%94-%E4%BC%81%E4%B8%9A%E7%BA%A7%E8%B7%A8%E5%B9%B3%E5%8F%B0%EF%BC%88%E2%AD%90501%EF%BC%89"><span class="nav-text">5. AskUI Vision Agent — 企业级跨平台（⭐501）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-Arbigent-%E2%80%94-Android-x2F-iOS-%E5%9C%BA%E6%99%AF%E5%88%86%E8%A7%A3%E6%B5%8B%E8%AF%95%EF%BC%88%E2%AD%90505%EF%BC%89"><span class="nav-text">6. Arbigent — Android&#x2F;iOS 场景分解测试（⭐505）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E5%AD%A6%E6%9C%AF%E5%89%8D%E6%B2%BF%EF%BC%9A%E6%AD%A3%E5%9C%A8%E5%AD%B5%E5%8C%96%E7%9A%84%E4%B8%8B%E4%B8%80%E4%BB%A3%E6%8A%80%E6%9C%AF"><span class="nav-text">三、学术前沿：正在孵化的下一代技术</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E6%A8%AA%E5%90%91%E5%AF%B9%E6%AF%94%EF%BC%9A%E8%AF%A5%E9%80%89%E5%93%AA%E4%B8%AA%EF%BC%9F"><span class="nav-text">四、横向对比：该选哪个？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%94%E3%80%81%E5%AE%9E%E6%88%98%E6%8E%A8%E8%8D%90%E6%96%B9%E6%A1%88"><span class="nav-text">五、实战推荐方案</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%B9%E6%A1%88-A%EF%BC%9A%E6%9C%80%E5%BC%BA%E6%A1%8C%E9%9D%A2%E8%83%BD%E5%8A%9B%EF%BC%88Claude-Opus-4-6-Cua-x2F-UFO%C2%B3%EF%BC%89"><span class="nav-text">方案 A：最强桌面能力（Claude Opus 4.6 + Cua&#x2F;UFO³）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%B9%E6%A1%88-B%EF%BC%9A%E6%80%A7%E4%BB%B7%E6%AF%94%E4%B9%8B%E9%80%89%EF%BC%88GPT-5-3-Codex-Cua%EF%BC%89"><span class="nav-text">方案 B：性价比之选（GPT-5.3 Codex + Cua）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%B9%E6%A1%88-C%EF%BC%9A%E9%9B%B6%E6%88%90%E6%9C%AC%E6%9C%AC%E5%9C%B0%E9%83%A8%E7%BD%B2%EF%BC%88UI-TARS-Midscene-js%EF%BC%89"><span class="nav-text">方案 C：零成本本地部署（UI-TARS + Midscene.js）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%B9%E6%A1%88-D%EF%BC%9A%E4%BC%81%E4%B8%9A%E7%BA%A7%E8%90%BD%E5%9C%B0%EF%BC%88UiPath-Claude-Opus-4-5%EF%BC%89"><span class="nav-text">方案 D：企业级落地（UiPath + Claude Opus 4.5）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AD%E3%80%81%E8%B6%8B%E5%8A%BF%E5%88%A4%E6%96%AD"><span class="nav-text">六、趋势判断</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B5%84%E6%BA%90%E6%B1%87%E6%80%BB"><span class="nav-text">资源汇总</span></a></li></ol>
+
+	</div>
+</div>
+	</div>
+	
+</div>
+			</div>
+
+			
+		</div>
+
+		<div class="main-content-footer">
+			<footer class="footer mt-5 py-5 h-auto text-base text-third-text-color relative border-t-2 border-t-border-color">
+    <div class="info-container py-3 text-center">
+        
+        <div class="text-center">
+            &copy;
+            
+              <span>2024</span>
+              -
+            
+            2026&nbsp;&nbsp;<i class="fa-solid fa-heart fa-beat" style="--fa-animation-duration: 0.5s; color: #333"></i>&nbsp;&nbsp;<a href="/">Nathan</a>
+            
+                
+                <p class="post-count space-x-0.5">
+                    <span>
+                        共撰写了 52 篇文章
+                    </span>
+                    
+                        <span>
+                            共 111.8k 字
+                        </span>
+                    
+                </p>
+            
+        </div>
+        
+        <div class="relative text-center lg:absolute lg:left-[20px] lg:top-1/2 lg:-translate-y-1/2 lg:text-left">
+            <span class="lg:block text-sm">由 <?xml version="1.0" encoding="utf-8"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg class="relative top-[2px] inline-block align-baseline" version="1.1" id="圖層_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="1rem" height="1rem" viewBox="0 0 512 512" enable-background="new 0 0 512 512" xml:space="preserve"><path fill="#0E83CD" d="M256.4,25.8l-200,115.5L56,371.5l199.6,114.7l200-115.5l0.4-230.2L256.4,25.8z M349,354.6l-18.4,10.7l-18.6-11V275H200v79.6l-18.4,10.7l-18.6-11v-197l18.5-10.6l18.5,10.8V237h112v-79.6l18.5-10.6l18.5,10.8V354.6z"/></svg><a target="_blank" class="text-base" href="https://hexo.io">Hexo</a> 驱动</span>
+            <span class="text-sm lg:block">主题&nbsp;<a class="text-base" target="_blank" href="https://github.com/EvanNotFound/hexo-theme-redefine">Redefine v2.8.5</a></span>
+        </div>
+        
+        
+            <div>
+                博客已运行 <span class="odometer" id="runtime_days" ></span> 天 <span class="odometer" id="runtime_hours"></span> 小时 <span class="odometer" id="runtime_minutes"></span> 分钟 <span class="odometer" id="runtime_seconds"></span> 秒
+            </div>
+        
+        
+            <script data-swup-reload-script>
+                try {
+                    function odometer_init() {
+                    const elements = document.querySelectorAll('.odometer');
+                    elements.forEach(el => {
+                        new Odometer({
+                            el,
+                            format: '( ddd).dd',
+                            duration: 200
+                        });
+                    });
+                    }
+                    odometer_init();
+                } catch (error) {}
+            </script>
+        
+        
+        
+    </div>  
+</footer>
+		</div>
+	</div>
+
+	
+	<div class="post-tools">
+		<div class="post-tools-container">
+	<ul class="article-tools-list">
+		<!-- TOC aside toggle -->
+		
+		<li class="right-bottom-tools page-aside-toggle">
+			<i class="fa-regular fa-outdent"></i>
+		</li>
+		
+
+		<!-- go comment -->
+		
+	</ul>
+</div>
+	</div>
+	
+
+	<div class="right-side-tools-container">
+		<div class="side-tools-container">
+	<ul class="hidden-tools-list">
+		<li class="right-bottom-tools tool-font-adjust-plus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-plus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-font-adjust-minus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-minus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-dark-light-toggle flex justify-center items-center">
+			<i class="fa-regular fa-moon"></i>
+		</li>
+
+		<!-- rss -->
+		
+
+		
+
+		<li class="right-bottom-tools tool-scroll-to-bottom flex justify-center items-center">
+			<i class="fa-regular fa-arrow-down"></i>
+		</li>
+	</ul>
+
+	<ul class="visible-tools-list">
+		<li class="right-bottom-tools toggle-tools-list flex justify-center items-center">
+			<i class="fa-regular fa-cog fa-spin"></i>
+		</li>
+		
+		<li class="right-bottom-tools tool-scroll-to-top flex justify-center items-center">
+			<i class="arrow-up fas fa-arrow-up"></i>
+			<span class="percent"></span>
+		</li>
+		
+		
+	</ul>
+</div>
+	</div>
+
+	<div class="image-viewer-container">
+	<img src="">
+</div>
+
+	
+	<div class="search-pop-overlay">
+	<div class="popup search-popup">
+		<div class="search-header">
+			<span class="search-input-field-pre">
+				<i class="fa-solid fa-keyboard"></i>
+			</span>
+			<div class="search-input-container">
+				<input autocomplete="off" autocorrect="off" autocapitalize="off" placeholder="站内搜索您需要的内容..." spellcheck="false" type="search" class="search-input">
+			</div>
+			<span class="popup-btn-close">
+				<i class="fa-solid fa-times"></i>
+			</span>
+		</div>
+		<div id="search-result">
+			<div id="no-result">
+				<i class="fa-solid fa-spinner fa-spin-pulse fa-5x fa-fw"></i>
+			</div>
+		</div>
+	</div>
+</div>
+	
+
+</main>
+
+
+
+<script src="/js/build/libs/Swup.min.js"></script>
+
+<script src="/js/build/libs/SwupSlideTheme.min.js"></script>
+
+<script src="/js/build/libs/SwupScriptsPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupProgressPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupScrollPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupPreloadPlugin.min.js"></script>
+
+<script>
+    const swup = new Swup({
+        plugins: [
+            new SwupScriptsPlugin({
+                optin: true,
+            }),
+            new SwupProgressPlugin(),
+            new SwupScrollPlugin({
+                offset: 80,
+            }),
+            new SwupSlideTheme({
+                mainElement: ".main-content-body",
+            }),
+            new SwupPreloadPlugin(),
+        ],
+        containers: ["#swup"],
+    });
+</script>
+
+
+
+
+	
+<script src="/js/build/tools/imageViewer.js" type="module"></script>
+
+<script src="/js/build/utils.js" type="module"></script>
+
+<script src="/js/build/main.js" type="module"></script>
+
+<script src="/js/build/layouts/navbarShrink.js" type="module"></script>
+
+<script src="/js/build/tools/scrollTopBottom.js" type="module"></script>
+
+<script src="/js/build/tools/lightDarkSwitch.js" type="module"></script>
+
+<script src="/js/build/layouts/categoryList.js" type="module"></script>
+
+
+
+    
+<script src="/js/build/tools/localSearch.js" type="module"></script>
+
+
+
+
+    
+<script src="/js/build/tools/codeBlock.js" type="module"></script>
+
+
+
+
+    
+<script src="/js/build/layouts/lazyload.js" type="module"></script>
+
+
+
+
+    
+<script src="/js/build/tools/runtime.js"></script>
+
+    
+<script src="/js/build/libs/odometer.min.js"></script>
+
+    
+<link rel="stylesheet" href="/assets/odometer-theme-minimal.css">
+
+
+
+
+  
+<script src="/js/build/libs/Typed.min.js"></script>
+
+  
+<script src="/js/build/plugins/typed.js" type="module"></script>
+
+
+
+
+
+
+
+
+    
+<script src="/js/build/libs/anime.min.js"></script>
+
+
+
+
+
+    
+<script src="/js/build/tools/tocToggle.js" type="module" data-swup-reload-script=""></script>
+
+<script src="/js/build/layouts/toc.js" type="module" data-swup-reload-script=""></script>
+
+<script src="/js/build/plugins/tabs.js" type="module" data-swup-reload-script=""></script>
+
+
+
+
+<script src="/js/build/libs/moment-with-locales.min.js" data-swup-reload-script=""></script>
+
+
+<script src="/js/build/layouts/essays.js" type="module" data-swup-reload-script=""></script>
+
+
+
+
+
+	
+</body>
+
+</html>

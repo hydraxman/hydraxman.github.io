@@ -1,0 +1,1529 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="keywords" content="计算机技术, 生活中的胡思乱想">
+    
+    <meta name="author" content="Nathan">
+    
+    <!-- Completely eliminate flash of wrong theme -->
+    <script>
+        (function() {
+            const THEME_KEY = "REDEFINE-THEME-STATUS";
+            const DARK = "dark", LIGHT = "light";
+            
+            // Get preferred theme
+            function getTheme() {
+                try {
+                    const saved = localStorage.getItem(THEME_KEY);
+                    if (saved) {
+                        const { isDark } = JSON.parse(saved);
+                        return isDark ? DARK : LIGHT;
+                    }
+                } catch (e) {}
+                
+                return matchMedia("(prefers-color-scheme: dark)").matches ? DARK : LIGHT;
+            }
+            
+            // Apply theme to document
+            function applyTheme(theme) {
+                const isDark = theme === DARK;
+                const root = document.documentElement;
+                
+                // Set data attribute for CSS variables
+                root.setAttribute("data-theme", theme);
+                
+                // Set classes for compatibility
+                root.classList.add(theme);
+                root.classList.remove(isDark ? LIGHT : DARK);
+                root.style.colorScheme = theme;
+            }
+            
+            // Initial application
+            const theme = getTheme();
+            applyTheme(theme);
+            
+            // Listen for system preference changes
+            matchMedia("(prefers-color-scheme: dark)").addEventListener("change", ({ matches }) => {
+                // Only update if using system preference (no localStorage entry)
+                if (!localStorage.getItem(THEME_KEY)) {
+                    applyTheme(matches ? DARK : LIGHT);
+                }
+            });
+            
+            // Set body classes once DOM is ready
+            if (document.readyState !== "loading") {
+                document.body.classList.add(theme + "-mode");
+            } else {
+                document.addEventListener("DOMContentLoaded", () => {
+                    document.body.classList.add(theme + "-mode");
+                    document.body.classList.remove((theme === DARK ? LIGHT : DARK) + "-mode");
+                });
+            }
+        })();
+    </script>
+    
+    <!-- Critical CSS to prevent flash -->
+    <style>
+        :root[data-theme="dark"] {
+            --background-color: #202124;
+            --background-color-transparent: rgba(32, 33, 36, 0.6);
+            --second-background-color: #2d2e32;
+            --third-background-color: #34353a;
+            --third-background-color-transparent: rgba(32, 33, 36, 0.6);
+            --primary-color: #0066CC;
+            --first-text-color: #ffffff;
+            --second-text-color: #eeeeee;
+            --third-text-color: #bebec6;
+            --fourth-text-color: #999999;
+            --default-text-color: #bebec6;
+            --invert-text-color: #373D3F;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --selection-color: #0066CC;
+            --shadow-color-1: rgba(255, 255, 255, 0.08);
+            --shadow-color-2: rgba(255, 255, 255, 0.05);
+        }
+        
+        :root[data-theme="light"] {
+            --background-color: #fff;
+            --background-color-transparent: rgba(255, 255, 255, 0.6);
+            --second-background-color: #f8f8f8;
+            --third-background-color: #f2f2f2;
+            --third-background-color-transparent: rgba(241, 241, 241, 0.6);
+            --primary-color: #0066CC;
+            --first-text-color: #16171a;
+            --second-text-color: #2f3037;
+            --third-text-color: #5e5e5e;
+            --fourth-text-color: #eeeeee;
+            --default-text-color: #373D3F;
+            --invert-text-color: #bebec6;
+            --border-color: rgba(0, 0, 0, 0.08);
+            --selection-color: #0066CC;
+            --shadow-color-1: rgba(0, 0, 0, 0.08);
+            --shadow-color-2: rgba(0, 0, 0, 0.05);
+        }
+        
+        body {
+            background-color: var(--background-color);
+            color: var(--default-text-color);
+        }
+        
+        /* Apply body classes as soon as DOM is ready */
+        :root[data-theme="dark"] body {
+            background-color: var(--background-color);
+            color: var(--default-text-color);
+        }
+    </style>
+    
+    <!-- preconnect -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    
+    <!--- Seo Part-->
+    
+    <link rel="canonical" href="https://hydraxman.github.io/2026/02/04/openclaw-local-deployment-guide/"/>
+    <meta name="robots" content="index,follow">
+    <meta name="googlebot" content="index,follow">
+    <meta name="revisit-after" content="1 days">
+    
+    
+    
+        
+        <meta name="description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="OpenClaw 本地部署完全指南：Windows 与 macOS 全平台教程">
+<meta property="og:url" content="https://hydraxman.github.io/2026/02/04/openclaw-local-deployment-guide/index.html">
+<meta property="og:site_name" content="内森淼文">
+<meta property="og:description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://hydraxman.github.io/images/redefine-og.webp">
+<meta property="article:published_time" content="2026-02-04T08:30:00.000Z">
+<meta property="article:modified_time" content="2026-02-20T09:22:12.117Z">
+<meta property="article:author" content="Nathan">
+<meta property="article:tag" content="AI">
+<meta property="article:tag" content="Windows">
+<meta property="article:tag" content="macOS">
+<meta property="article:tag" content="OpenClaw">
+<meta property="article:tag" content="教程">
+<meta property="article:tag" content="本地部署">
+<meta property="article:tag" content="飞书">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://hydraxman.github.io/images/redefine-og.webp">
+    
+    
+    <!--- Icon Part-->
+    <link rel="icon" type="image/png" href="/images/favicon.svg" sizes="192x192">
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.svg">
+    <meta name="theme-color" content="#ffffff">
+    <link rel="shortcut icon" href="/images/favicon.svg">
+    <!--- Page Info-->
+    
+    <title>
+        
+            OpenClaw 本地部署完全指南：Windows 与 macOS 全平台教程 | 内森淼文
+        
+    </title>
+
+    
+<link rel="stylesheet" href="/fonts/Chillax/chillax.css">
+
+
+    <!--- Inject Part-->
+    
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    
+        
+<link rel="stylesheet" href="/css/build/tailwind.css">
+
+    
+
+    
+<link rel="stylesheet" href="/fonts/GeistMono/geist-mono.css">
+
+    
+<link rel="stylesheet" href="/fonts/Geist/geist.css">
+
+    <!--- Font Part-->
+    
+    
+    
+    
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&display=swap" rel="stylesheet">
+    
+    
+
+    <script id="hexo-configurations">
+    window.config = {"hostname":"hydraxman.github.io","root":"/","language":"zh-CN","path":"search.json"};
+    window.theme = {"articles":{"style":{"font_size":"16px","line_height":1.5,"image_border_radius":"14px","image_alignment":"center","image_caption":false,"link_icon":true,"delete_mask":false,"title_alignment":"left","headings_top_spacing":{"h1":"3.2rem","h2":"2.4rem","h3":"1.9rem","h4":"1.6rem","h5":"1.4rem","h6":"1.3rem"}},"word_count":{"enable":true,"count":true,"min2read":true},"author_label":{"enable":false,"auto":false,"list":[]},"code_block":{"copy":true,"style":"mac","highlight_theme":{"light":"github","dark":"vs2015"},"font":{"enable":false,"family":null,"url":null}},"toc":{"enable":true,"max_depth":3,"number":false,"expand":true,"init_open":true},"copyright":{"enable":true,"default":"cc_by_nc_sa"},"lazyload":true,"pangu_js":false,"recommendation":{"enable":false,"title":"推荐阅读","limit":3,"mobile_limit":2,"placeholder":"/images/wallhaven-wqery6-light.webp","skip_dirs":[]}},"colors":{"primary":"#ffffff","secondary":null,"default_mode":"light"},"global":{"fonts":{"chinese":{"enable":false,"family":null,"url":null},"english":{"enable":true,"family":"Inter","url":"https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"},"title":{"enable":true,"family":"Noto Serif","url":"https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&display=swap"}},"content_max_width":"1000px","sidebar_width":"210px","hover":{"shadow":true,"scale":false},"scroll_progress":{"bar":true,"percentage":true},"website_counter":{"url":"https://cn.vercount.one/js","enable":false,"site_pv":true,"site_uv":true,"post_pv":true},"single_page":true,"preloader":{"enable":false,"custom_message":null},"side_tools":{"gear_rotation":true,"auto_expand":false},"open_graph":{"enable":true,"image":"/images/redefine-og.webp","description":"Hexo Theme Redefine, Redefine Your Hexo Journey."},"google_analytics":{"enable":false,"id":null}},"home_banner":{"enable":true,"style":"fixed","image":{"light":"/images/banner-light.jpg","dark":"/images/banner-dark.jpg"},"title":"内森淼文","subtitle":{"text":["AI · 编程 · 科技见闻","Write Code, Read World"],"hitokoto":{"enable":false,"show_author":false,"api":"https://v1.hitokoto.cn"},"typing_speed":100,"backing_speed":80,"starting_delay":500,"backing_delay":1500,"loop":true,"smart_backspace":true},"text_color":{"light":"#fff","dark":"#d1d1b6"},"text_style":{"title_size":"2.8rem","subtitle_size":"1.5rem","line_height":1.2},"custom_font":{"enable":false,"family":null,"url":null},"social_links":{"enable":true,"style":"default","links":{"github":"https://github.com/hydraxman","instagram":null,"zhihu":null,"twitter":null,"email":null},"qrs":{"weixin":null}}},"plugins":{"feed":{"enable":false},"aplayer":{"enable":false,"type":"fixed","audios":[{"name":null,"artist":null,"url":null,"cover":null,"lrc":null}]},"mermaid":{"enable":false,"version":"11.4.1"}},"version":"2.8.5","navbar":{"auto_hide":false,"color":{"left":"#333333","right":"#555555","transparency":35},"width":{"home":"1200px","pages":"1000px"},"links":{"Home":{"path":"/","icon":"fa-regular fa-house"},"Archives":{"path":"/archives","icon":"fa-regular fa-archive"},"Categories":{"path":"/categories","icon":"fa-regular fa-folder"},"Tags":{"path":"/tags","icon":"fa-regular fa-tags"},"About":{"path":"/about","icon":"fa-regular fa-user"}},"search":{"enable":true,"preload":true}},"page_templates":{"friends_column":2,"tags_style":"blur"},"home":{"sidebar":{"enable":true,"position":"left","first_item":"menu","announcement":"AI · 编程 · 科技","show_on_mobile":true,"links":{"Archives":{"path":"/archives","icon":"fa-regular fa-archive"},"Tags":{"path":"/tags","icon":"fa-regular fa-tags"},"Categories":{"path":"/categories","icon":"fa-regular fa-folder"}}},"article_date_format":"auto","excerpt_length":200,"categories":{"enable":true,"limit":3},"tags":{"enable":true,"limit":3}},"footerStart":"2024/01/01 00:00:00"};
+    window.lang_ago = {"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"};
+    window.data = {"masonry":false};
+  </script>
+    
+    <!--- Fontawesome Part-->
+    
+<link rel="stylesheet" href="/fontawesome/fontawesome.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/brands.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/solid.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/regular.min.css">
+
+    
+    
+    
+    
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+
+<body>
+	<div class="progress-bar-container">
+	
+	<span class="scroll-progress-bar"></span>
+	
+
+	
+	<span class="pjax-progress-bar"></span>
+	<!--        <span class="swup-progress-icon">-->
+	<!--            <i class="fa-solid fa-circle-notch fa-spin"></i>-->
+	<!--        </span>-->
+	
+</div>
+
+<main class="page-container" id="swup">
+
+	
+
+	<div class="main-content-container flex flex-col justify-between min-h-dvh">
+		<div class="main-content-header">
+			<header class="navbar-container px-6 md:px-12">
+    <div class="navbar-content transition-navbar ">
+        <div class="left">
+            
+            <a class="logo-title" href="/">
+                
+                内森淼文
+                
+            </a>
+        </div>
+
+        <div class="right">
+            <!-- PC -->
+            <div class="desktop">
+                <ul class="navbar-list">
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/"
+                                        >
+                                    <i class="fa-regular fa-house fa-fw"></i>
+                                    首页
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/archives"
+                                        >
+                                    <i class="fa-regular fa-archive fa-fw"></i>
+                                    归档
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/categories"
+                                        >
+                                    <i class="fa-regular fa-folder fa-fw"></i>
+                                    分类
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/tags"
+                                        >
+                                    <i class="fa-regular fa-tags fa-fw"></i>
+                                    标签
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/about"
+                                        >
+                                    <i class="fa-regular fa-user fa-fw"></i>
+                                    关于
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                    
+                        <li class="navbar-item search search-popup-trigger">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </li>
+                    
+                </ul>
+            </div>
+            <!-- Mobile -->
+            <div class="mobile">
+                
+                    <div class="icon-item search search-popup-trigger"><i class="fa-solid fa-magnifying-glass"></i>
+                    </div>
+                
+                <div class="icon-item navbar-bar">
+                    <div class="navbar-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile sheet -->
+    <div class="navbar-drawer h-dvh w-full absolute top-0 left-0 bg-background-color flex flex-col justify-between">
+        <ul class="drawer-navbar-list flex flex-col px-4 justify-center items-start">
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/"
+                        >
+                            <span>
+                                首页
+                            </span>
+                            
+                                <i class="fa-regular fa-house fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/archives"
+                        >
+                            <span>
+                                归档
+                            </span>
+                            
+                                <i class="fa-regular fa-archive fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/categories"
+                        >
+                            <span>
+                                分类
+                            </span>
+                            
+                                <i class="fa-regular fa-folder fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/tags"
+                        >
+                            <span>
+                                标签
+                            </span>
+                            
+                                <i class="fa-regular fa-tags fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/about"
+                        >
+                            <span>
+                                关于
+                            </span>
+                            
+                                <i class="fa-regular fa-user fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+
+            
+            
+                
+                    
+                    
+                    
+            
+        </ul>
+
+        <div class="statistics flex justify-around my-2.5">
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/tags">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">115</div>
+        <div class="label text-third-text-color text-sm">标签</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/categories">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">5</div>
+        <div class="label text-third-text-color text-sm">分类</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/archives">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">52</div>
+        <div class="label text-third-text-color text-sm">文章</div>
+    </a>
+</div>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+		</div>
+
+		<div class="main-content-body transition-fade-up">
+			
+
+			<div class="main-content">
+				<div class="post-page-container flex relative justify-between box-border w-full h-full">
+	<div class="article-content-container">
+
+		<div class="article-title relative w-full">
+			
+			
+			
+			<img src="/images/openclaw-guide/cover.png" alt="OpenClaw 本地部署完全指南：Windows 与 macOS 全平台教程" class="w-full h-60 sm:h-72 md:h-80 object-cover sm:rounded-t-large dark:brightness-75" />
+			
+			<div class="w-full flex items-center absolute bottom-0 justify-start">
+				<h1 class="article-title-cover text-center mx-6 my-6 text-second-text-color bg-background-color-transparent px-4 py-3 text-3xl sm:text-4xl md:text-5xl font-semibold backdrop-blur-lg rounded-xl border border-border-color ">OpenClaw 本地部署完全指南：Windows 与 macOS 全平台教程</h1>
+			</div>
+			
+		</div>
+
+		
+		<div class="article-header flex flex-row gap-2 items-center px-2 sm:px-6 md:px-8">
+			<div class="avatar w-[46px] h-[46px] flex-shrink-0 rounded-medium border border-border-color p-[1px]">
+				<img src="/images/avatar.png">
+			</div>
+			<div class="info flex flex-col justify-between">
+				<div class="author flex items-center">
+					<span class="name text-default-text-color text-lg font-semibold">Nathan</span>
+					
+				</div>
+				<div class="meta-info">
+					<div class="article-meta-info">
+    <span class="article-date article-meta-item">
+        <i class="fa-regular fa-pen-fancy"></i>&nbsp;
+        <span class="desktop">2026-02-04 16:30</span>
+        <span class="mobile">2026-02-04 16:30</span>
+        <span class="hover-info">创建</span>
+    </span>
+    
+        <span class="article-date article-meta-item">
+            <i class="fa-regular fa-wrench"></i>&nbsp;
+            <span class="desktop">2026-02-20 17:22:12</span>
+            <span class="mobile">2026-02-20 17:22:12</span>
+            <span class="hover-info">更新</span>
+        </span>
+    
+
+    
+        <span class="article-categories article-meta-item">
+            <i class="fa-regular fa-folders"></i>&nbsp;
+            <ul>
+                
+                
+                    
+                        
+                        <li>
+                            <a href="/categories/%E6%8A%80%E6%9C%AF%E5%AE%9E%E6%88%98/">技术实战</a>&nbsp;
+                        </li>
+                    
+                    
+                
+            </ul>
+        </span>
+    
+    
+        <span class="article-tags article-meta-item">
+            <i class="fa-regular fa-tags"></i>&nbsp;
+            <ul>
+                
+                    <li>
+                        <a href="/tags/AI/">AI</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/Windows/">Windows</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/macOS/">macOS</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/OpenClaw/">OpenClaw</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/%E6%95%99%E7%A8%8B/">教程</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/%E6%9C%AC%E5%9C%B0%E9%83%A8%E7%BD%B2/">本地部署</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/%E9%A3%9E%E4%B9%A6/">飞书</a>&nbsp;
+                    </li>
+                
+            </ul>
+        </span>
+    
+
+    
+    
+        <span class="article-wordcount article-meta-item">
+            <i class="fa-regular fa-typewriter"></i>&nbsp;<span>3.1k 字</span>
+        </span>
+    
+    
+        <span class="article-min2read article-meta-item">
+            <i class="fa-regular fa-clock"></i>&nbsp;<span>13 分钟</span>
+        </span>
+    
+    
+</div>
+
+				</div>
+			</div>
+		</div>
+		
+
+		
+
+
+		<div class="article-content markdown-body px-2 sm:px-6 md:px-8 pb-8">
+			<h1 id="🦞-OpenClaw-本地部署完全指南"><a href="#🦞-OpenClaw-本地部署完全指南" class="headerlink" title="🦞 OpenClaw 本地部署完全指南"></a>🦞 OpenClaw 本地部署完全指南</h1><blockquote>
+<p>OpenClaw 是一款开源的本地优先 AI 助手平台，支持<strong>飞书</strong>、Telegram、Discord、WhatsApp 等多种即时通讯渠道。本文将详细介绍如何在 <strong>Windows</strong> 和 <strong>macOS</strong> 上完成本地部署，并重点讲解<strong>飞书集成</strong>配置。</p>
+</blockquote>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/openclaw-guide/openclaw-logo-text.png"
+                      alt="OpenClaw Logo"
+                ></p>
+<h2 id="📋-目录"><a href="#📋-目录" class="headerlink" title="📋 目录"></a>📋 目录</h2><ol>
+<li><a href="#%E4%BB%80%E4%B9%88%E6%98%AF-openclaw">什么是 OpenClaw？</a></li>
+<li><a href="#%E7%B3%BB%E7%BB%9F%E8%A6%81%E6%B1%82">系统要求</a></li>
+<li><a href="#macos-%E5%AE%89%E8%A3%85%E6%95%99%E7%A8%8B">macOS 安装教程</a></li>
+<li><a href="#windows-%E5%AE%89%E8%A3%85%E6%95%99%E7%A8%8Bwsl2">Windows 安装教程（WSL2）</a></li>
+<li><a href="#%E9%A6%96%E6%AC%A1%E9%85%8D%E7%BD%AE%E5%90%91%E5%AF%BC">首次配置向导</a></li>
+<li><a href="#%E5%90%AF%E5%8A%A8-gateway">启动 Gateway</a></li>
+<li><a href="#%E8%BF%9E%E6%8E%A5%E5%8D%B3%E6%97%B6%E9%80%9A%E8%AE%AF%E5%B9%B3%E5%8F%B0">连接即时通讯平台</a></li>
+<li><a href="#%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4%E9%80%9F%E6%9F%A5">常用命令速查</a></li>
+<li><a href="#%E6%95%85%E9%9A%9C%E6%8E%92%E9%99%A4">故障排除</a></li>
+<li><a href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99">参考资料</a></li>
+</ol>
+<hr>
+<h2 id="什么是-OpenClaw？"><a href="#什么是-OpenClaw？" class="headerlink" title="什么是 OpenClaw？"></a>什么是 OpenClaw？</h2><p>OpenClaw（曾用名 Clawdbot &#x2F; Moltbot）是由 Peter Steinberger 和 Mario Zechner 开发的<strong>开源个人 AI 助手</strong>项目。</p>
+<h3 id="🎯-核心特性"><a href="#🎯-核心特性" class="headerlink" title="🎯 核心特性"></a>🎯 核心特性</h3><ul>
+<li>🤖 <strong>多模型支持</strong>：Anthropic Claude、OpenAI GPT、MiniMax、智谱 GLM、本地 Ollama 等</li>
+<li>💬 <strong>多渠道整合</strong>：<strong>飞书</strong>、Telegram、Discord、WhatsApp、Slack、iMessage 等</li>
+<li>🏠 <strong>本地优先</strong>：数据完全在本地，隐私有保障</li>
+<li>🔧 <strong>工具扩展</strong>：浏览器控制、文件操作、定时任务等丰富工具</li>
+<li>📱 <strong>跨平台</strong>：macOS、Linux、Windows (WSL2)</li>
+<li>🇨🇳 <strong>国内友好</strong>：支持飞书、MiniMax、智谱等国产平台</li>
+</ul>
+<h3 id="🏗️-架构概览"><a href="#🏗️-架构概览" class="headerlink" title="🏗️ 架构概览"></a>🏗️ 架构概览</h3><p>下图展示了 OpenClaw 的整体架构：</p>
+<div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">┌─────────────┐  ┌─────────────┐  ┌─────────────┐</span><br><span class="line">│    飞书     │  │  Telegram   │  │   Discord   │</span><br><span class="line">└──────┬──────┘  └──────┬──────┘  └──────┬──────┘</span><br><span class="line">       │                │                │</span><br><span class="line">       └────────────────┼────────────────┘</span><br><span class="line">                        ▼</span><br><span class="line">            ┌───────────────────────┐</span><br><span class="line">            │       Gateway         │</span><br><span class="line">            │  ws://127.0.0.1:18789 │</span><br><span class="line">            │     (控制中心)         │</span><br><span class="line">            └───────────┬───────────┘</span><br><span class="line">                        │</span><br><span class="line">        ┌───────────────┼───────────────┐</span><br><span class="line">        ▼               ▼               ▼</span><br><span class="line">  ┌──────────┐   ┌──────────┐   ┌──────────┐</span><br><span class="line">  │ AI Agent │   │  工具系统  │   │  Canvas  │</span><br><span class="line">  │(Claude)  │   │(浏览器等) │   │ (可视化) │</span><br><span class="line">  └──────────┘   └──────────┘   └──────────┘</span><br></pre></td></tr></table></figure></div>
+
+<h3 id="📱-移动端支持"><a href="#📱-移动端支持" class="headerlink" title="📱 移动端支持"></a>📱 移动端支持</h3><p>OpenClaw 支持 iOS&#x2F;Android 节点，可以实现：</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/openclaw-guide/mobile-ui-screenshot.png"
+                      alt="移动端 UI"
+                ></p>
+<ul>
+<li>手机端 Canvas 可视化</li>
+<li>语音唤醒与对话</li>
+<li>摄像头&#x2F;屏幕录制集成</li>
+</ul>
+<hr>
+<h2 id="系统要求"><a href="#系统要求" class="headerlink" title="系统要求"></a>系统要求</h2><h3 id="基础要求"><a href="#基础要求" class="headerlink" title="基础要求"></a>基础要求</h3><table>
+<thead>
+<tr>
+<th>项目</th>
+<th>最低要求</th>
+<th>推荐配置</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Node.js</td>
+<td>≥ 22.x</td>
+<td>最新 LTS</td>
+</tr>
+<tr>
+<td>内存</td>
+<td>2GB</td>
+<td>4GB+</td>
+</tr>
+<tr>
+<td>磁盘</td>
+<td>1GB</td>
+<td>5GB+</td>
+</tr>
+<tr>
+<td>网络</td>
+<td>可访问 API 服务</td>
+<td>稳定网络</td>
+</tr>
+</tbody></table>
+<h3 id="平台特定要求"><a href="#平台特定要求" class="headerlink" title="平台特定要求"></a>平台特定要求</h3><table>
+<thead>
+<tr>
+<th>平台</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>macOS</strong></td>
+<td>仅 CLI + Gateway 只需 Node.js；构建 App 需要 Xcode</td>
+</tr>
+<tr>
+<td><strong>Windows</strong></td>
+<td><strong>强烈推荐 WSL2</strong>（Ubuntu），原生 Windows 未经充分测试</td>
+</tr>
+<tr>
+<td><strong>Linux</strong></td>
+<td>无额外要求</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>💡 <strong>提示</strong>：国内用户可优先选择 MiniMax、智谱 GLM 等国产模型，无需额外网络配置</p>
+</blockquote>
+<hr>
+<h2 id="macOS-安装教程"><a href="#macOS-安装教程" class="headerlink" title="macOS 安装教程"></a>macOS 安装教程</h2><h3 id="步骤-1：安装-Node-js"><a href="#步骤-1：安装-Node-js" class="headerlink" title="步骤 1：安装 Node.js"></a>步骤 1：安装 Node.js</h3><h4 id="方式一：使用-Homebrew（推荐）"><a href="#方式一：使用-Homebrew（推荐）" class="headerlink" title="方式一：使用 Homebrew（推荐）"></a>方式一：使用 Homebrew（推荐）</h4><p>打开终端 (Terminal.app)，执行以下命令：</p>
+<div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 安装 Homebrew（如果没有）</span></span><br><span class="line">/bin/bash -c <span class="string">&quot;<span class="subst">$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)</span>&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 安装 Node.js 22</span></span><br><span class="line">brew install node@22</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加到 PATH（Apple Silicon Mac）</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&#x27;export PATH=&quot;/opt/homebrew/opt/node@22/bin:$PATH&quot;&#x27;</span> &gt;&gt; ~/.zshrc</span><br><span class="line"><span class="built_in">source</span> ~/.zshrc</span><br><span class="line"></span><br><span class="line"><span class="comment"># 验证安装</span></span><br><span class="line">node --version  <span class="comment"># 应显示 v22.x.x</span></span><br></pre></td></tr></table></figure></div>
+
+<blockquote>
+<p>💡 <strong>提示</strong>：Intel Mac 的路径是 <code>/usr/local/opt/node@22/bin</code></p>
+</blockquote>
+<h4 id="方式二：使用-nvm（版本管理器）"><a href="#方式二：使用-nvm（版本管理器）" class="headerlink" title="方式二：使用 nvm（版本管理器）"></a>方式二：使用 nvm（版本管理器）</h4><div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 安装 nvm</span></span><br><span class="line">curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash</span><br><span class="line"><span class="built_in">source</span> ~/.zshrc</span><br><span class="line"></span><br><span class="line"><span class="comment"># 安装 Node.js 22</span></span><br><span class="line">nvm install 22</span><br><span class="line">nvm use 22</span><br></pre></td></tr></table></figure></div>
+
+<h3 id="步骤-2：安装-OpenClaw"><a href="#步骤-2：安装-OpenClaw" class="headerlink" title="步骤 2：安装 OpenClaw"></a>步骤 2：安装 OpenClaw</h3><div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 一键安装（推荐）</span></span><br><span class="line">curl -fsSL https://openclaw.ai/install.sh | bash</span><br></pre></td></tr></table></figure></div>
+
+<p>或者使用 npm：</p>
+<div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install -g openclaw@latest</span><br></pre></td></tr></table></figure></div>
+
+<blockquote>
+<p>如果遇到 <code>sharp</code> 相关错误，尝试：</p>
+<div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SHARP_IGNORE_GLOBAL_LIBVIPS=1 npm install -g openclaw@latest</span><br></pre></td></tr></table></figure></div>
+</blockquote>
+<h3 id="步骤-3：运行配置向导"><a href="#步骤-3：运行配置向导" class="headerlink" title="步骤 3：运行配置向导"></a>步骤 3：运行配置向导</h3><div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openclaw onboard --install-daemon</span><br></pre></td></tr></table></figure></div>
+
+<p>向导会引导你完成：</p>
+<ul>
+<li>✅ Gateway 模式选择（本地&#x2F;远程）</li>
+<li>✅ AI 模型认证（API Key &#x2F; OAuth）</li>
+<li>✅ 通讯渠道配置</li>
+<li>✅ 后台服务安装</li>
+</ul>
+<h3 id="步骤-4：验证安装"><a href="#步骤-4：验证安装" class="headerlink" title="步骤 4：验证安装"></a>步骤 4：验证安装</h3><div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看状态</span></span><br><span class="line">openclaw status</span><br><span class="line"></span><br><span class="line"><span class="comment"># 健康检查</span></span><br><span class="line">openclaw health</span><br><span class="line"></span><br><span class="line"><span class="comment"># 安全审计</span></span><br><span class="line">openclaw security audit --deep</span><br></pre></td></tr></table></figure></div>
+
+<h3 id="macOS-App（可选）"><a href="#macOS-App（可选）" class="headerlink" title="macOS App（可选）"></a>macOS App（可选）</h3><p>OpenClaw 提供 macOS 菜单栏应用，功能包括：</p>
+<ul>
+<li>🔔 原生通知</li>
+<li>🎤 语音唤醒 + 对话模式</li>
+<li>📺 Canvas 可视化工作区</li>
+<li>📷 摄像头 &#x2F; 屏幕录制集成</li>
+</ul>
+<hr>
+<h2 id="Windows-安装教程（WSL2）"><a href="#Windows-安装教程（WSL2）" class="headerlink" title="Windows 安装教程（WSL2）"></a>Windows 安装教程（WSL2）</h2><blockquote>
+<p>💡 <strong>为什么用 WSL2？</strong> OpenClaw 的 CLI 和 Gateway 在 Linux 环境下运行最稳定，工具兼容性更好。WSL2 让你在 Windows 上获得完整的 Linux 体验。</p>
+</blockquote>
+<h3 id="步骤-1：安装-WSL2"><a href="#步骤-1：安装-WSL2" class="headerlink" title="步骤 1：安装 WSL2"></a>步骤 1：安装 WSL2</h3><p>以<strong>管理员身份</strong>打开 PowerShell（右键点击开始菜单 → Windows 终端(管理员)）：</p>
+<div class="code-container" data-rel="Powershell"><figure class="iseeu highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 一键安装 WSL（默认 Ubuntu）</span></span><br><span class="line">wsl <span class="literal">--install</span></span><br></pre></td></tr></table></figure></div>
+
+<p>或者指定发行版：</p>
+<div class="code-container" data-rel="Powershell"><figure class="iseeu highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看可用发行版</span></span><br><span class="line">wsl <span class="literal">--list</span> <span class="literal">--online</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 安装 Ubuntu 24.04</span></span><br><span class="line">wsl <span class="literal">--install</span> <span class="literal">-d</span> Ubuntu<span class="literal">-24</span>.<span class="number">04</span></span><br></pre></td></tr></table></figure></div>
+
+<p>安装完成后<strong>重启电脑</strong>。</p>
+<blockquote>
+<p>📝 <strong>首次启动</strong>：重启后会自动打开 Ubuntu，按提示创建用户名和密码。</p>
+</blockquote>
+<h3 id="步骤-2：启用-systemd"><a href="#步骤-2：启用-systemd" class="headerlink" title="步骤 2：启用 systemd"></a>步骤 2：启用 systemd</h3><p>在 WSL Ubuntu 终端中：</p>
+<div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 配置 systemd（OpenClaw 后台服务需要）</span></span><br><span class="line">sudo <span class="built_in">tee</span> /etc/wsl.conf &gt;/dev/null &lt;&lt;<span class="string">&#x27;EOF&#x27;</span></span><br><span class="line">[boot]</span><br><span class="line">systemd=<span class="literal">true</span></span><br><span class="line">EOF</span><br></pre></td></tr></table></figure></div>
+
+<p>然后在 PowerShell 中重启 WSL：</p>
+<div class="code-container" data-rel="Powershell"><figure class="iseeu highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wsl <span class="literal">--shutdown</span></span><br></pre></td></tr></table></figure></div>
+
+<p>重新打开 Ubuntu，验证 systemd：</p>
+<div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl --user status</span><br></pre></td></tr></table></figure></div>
+
+<h3 id="步骤-3：安装-Node-js"><a href="#步骤-3：安装-Node-js" class="headerlink" title="步骤 3：安装 Node.js"></a>步骤 3：安装 Node.js</h3><p>在 WSL Ubuntu 终端中：</p>
+<div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 安装 Node.js 22</span></span><br><span class="line">curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -</span><br><span class="line">sudo apt-get install -y nodejs</span><br><span class="line"></span><br><span class="line"><span class="comment"># 验证</span></span><br><span class="line">node --version</span><br><span class="line">npm --version</span><br></pre></td></tr></table></figure></div>
+
+<h3 id="步骤-4：安装-OpenClaw"><a href="#步骤-4：安装-OpenClaw" class="headerlink" title="步骤 4：安装 OpenClaw"></a>步骤 4：安装 OpenClaw</h3><div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 一键安装</span></span><br><span class="line">curl -fsSL https://openclaw.ai/install.sh | bash</span><br></pre></td></tr></table></figure></div>
+
+<h3 id="步骤-5：运行配置向导"><a href="#步骤-5：运行配置向导" class="headerlink" title="步骤 5：运行配置向导"></a>步骤 5：运行配置向导</h3><div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openclaw onboard --install-daemon</span><br></pre></td></tr></table></figure></div>
+
+<h3 id="步骤-6：从-Windows-访问-Gateway（可选）"><a href="#步骤-6：从-Windows-访问-Gateway（可选）" class="headerlink" title="步骤 6：从 Windows 访问 Gateway（可选）"></a>步骤 6：从 Windows 访问 Gateway（可选）</h3><p>如果需要从 Windows 或局域网访问 WSL 中的 Gateway，需要配置端口转发。</p>
+<p>以<strong>管理员身份</strong>打开 PowerShell：</p>
+<div class="code-container" data-rel="Powershell"><figure class="iseeu highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$Distro</span> = <span class="string">&quot;Ubuntu-24.04&quot;</span></span><br><span class="line"><span class="variable">$ListenPort</span> = <span class="number">18789</span></span><br><span class="line"><span class="variable">$TargetPort</span> = <span class="number">18789</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 获取 WSL IP</span></span><br><span class="line"><span class="variable">$WslIp</span> = (wsl <span class="literal">-d</span> <span class="variable">$Distro</span> <span class="literal">--</span> hostname <span class="literal">-I</span>).Trim().Split(<span class="string">&quot; &quot;</span>)[<span class="number">0</span>]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加端口转发</span></span><br><span class="line">netsh interface portproxy add v4tov4 `</span><br><span class="line">    listenaddress=<span class="number">0.0</span>.<span class="number">0.0</span> listenport=<span class="variable">$ListenPort</span> `</span><br><span class="line">    connectaddress=<span class="variable">$WslIp</span> connectport=<span class="variable">$TargetPort</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加防火墙规则（一次性）</span></span><br><span class="line"><span class="built_in">New-NetFirewallRule</span> <span class="literal">-DisplayName</span> <span class="string">&quot;OpenClaw Gateway&quot;</span> `</span><br><span class="line">    <span class="literal">-Direction</span> Inbound <span class="literal">-Protocol</span> TCP `</span><br><span class="line">    <span class="literal">-LocalPort</span> <span class="variable">$ListenPort</span> <span class="literal">-Action</span> Allow</span><br></pre></td></tr></table></figure></div>
+
+<blockquote>
+<p>⚠️ WSL IP 在重启后会变化，需要重新运行端口转发命令。</p>
+</blockquote>
+<hr>
+<h2 id="首次配置向导"><a href="#首次配置向导" class="headerlink" title="首次配置向导"></a>首次配置向导</h2><p>运行 <code>openclaw onboard --install-daemon</code> 后，会进入交互式配置：</p>
+<h3 id="1-Gateway-模式"><a href="#1-Gateway-模式" class="headerlink" title="1. Gateway 模式"></a>1. Gateway 模式</h3><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">? Gateway mode:</span><br><span class="line">❯ Local    # 本地运行（推荐）</span><br><span class="line">  Remote   # 连接远程 Gateway</span><br></pre></td></tr></table></figure></div>
+
+<h3 id="2-认证方式"><a href="#2-认证方式" class="headerlink" title="2. 认证方式"></a>2. 认证方式</h3><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">? Auth provider:</span><br><span class="line">❯ Anthropic (API key)   # 推荐</span><br><span class="line">  OpenAI (API key)</span><br><span class="line">  Anthropic (OAuth)     # 复用 Claude Code 凭证</span><br><span class="line">  ...</span><br></pre></td></tr></table></figure></div>
+
+<p><strong>获取 API Key：</strong></p>
+<ul>
+<li>Anthropic：<a class="link"   target="_blank" rel="noopener" href="https://console.anthropic.com/" >https://console.anthropic.com/<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li>OpenAI：<a class="link"   target="_blank" rel="noopener" href="https://platform.openai.com/" >https://platform.openai.com/<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+</ul>
+<h3 id="3-选择默认模型"><a href="#3-选择默认模型" class="headerlink" title="3. 选择默认模型"></a>3. 选择默认模型</h3><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">? Default model:</span><br><span class="line">❯ claude-sonnet-4-0    # 推荐，速度与智能平衡</span><br><span class="line">  claude-opus-4-5      # 更强智能，更慢</span><br><span class="line">  claude-haiku-3-5     # 快速响应</span><br></pre></td></tr></table></figure></div>
+
+<h3 id="4-渠道配置"><a href="#4-渠道配置" class="headerlink" title="4. 渠道配置"></a>4. 渠道配置</h3><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">? Channels to configure:</span><br><span class="line">⬡ WhatsApp    # 需要扫码登录</span><br><span class="line">◉ Telegram    # 需要 Bot Token</span><br><span class="line">◯ Discord     # 需要 Bot Token</span><br><span class="line">◯ iMessage    # 仅 macOS</span><br></pre></td></tr></table></figure></div>
+
+<h3 id="5-安装后台服务"><a href="#5-安装后台服务" class="headerlink" title="5. 安装后台服务"></a>5. 安装后台服务</h3><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">? Install daemon: (y/N) y</span><br></pre></td></tr></table></figure></div>
+
+<h3 id="认证文件位置"><a href="#认证文件位置" class="headerlink" title="认证文件位置"></a>认证文件位置</h3><table>
+<thead>
+<tr>
+<th>类型</th>
+<th>路径</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>OAuth 凭证</td>
+<td><code>~/.openclaw/credentials/oauth.json</code></td>
+</tr>
+<tr>
+<td>Auth 配置</td>
+<td><code>~/.openclaw/agents/&lt;agentId&gt;/agent/auth-profiles.json</code></td>
+</tr>
+<tr>
+<td>主配置文件</td>
+<td><code>~/.openclaw/openclaw.json</code></td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="启动-Gateway"><a href="#启动-Gateway" class="headerlink" title="启动 Gateway"></a>启动 Gateway</h2><h3 id="检查状态"><a href="#检查状态" class="headerlink" title="检查状态"></a>检查状态</h3><div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openclaw gateway status</span><br></pre></td></tr></table></figure></div>
+
+<h3 id="手动启动（前台，调试用）"><a href="#手动启动（前台，调试用）" class="headerlink" title="手动启动（前台，调试用）"></a>手动启动（前台，调试用）</h3><div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openclaw gateway --port 18789 --verbose</span><br></pre></td></tr></table></figure></div>
+
+<h3 id="访问控制台"><a href="#访问控制台" class="headerlink" title="访问控制台"></a>访问控制台</h3><p>启动 Gateway 后，可以通过浏览器访问控制台：</p>
+<ul>
+<li><strong>Dashboard</strong>: <a class="link"   target="_blank" rel="noopener" href="http://127.0.0.1:18789/" >http://127.0.0.1:18789/<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li><strong>Control UI</strong>: <a class="link"   target="_blank" rel="noopener" href="http://127.0.0.1:18789/openclaw/" >http://127.0.0.1:18789/openclaw/<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+</ul>
+<p>如果配置了 token，需要在 Control UI 设置中输入。</p>
+<blockquote>
+<p>💡 <strong>提示</strong>：可以运行 <code>openclaw dashboard</code> 直接打开浏览器</p>
+</blockquote>
+<h3 id="服务管理"><a href="#服务管理" class="headerlink" title="服务管理"></a>服务管理</h3><div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 启动</span></span><br><span class="line">openclaw gateway start</span><br><span class="line"></span><br><span class="line"><span class="comment"># 停止</span></span><br><span class="line">openclaw gateway stop</span><br><span class="line"></span><br><span class="line"><span class="comment"># 重启</span></span><br><span class="line">openclaw gateway restart</span><br></pre></td></tr></table></figure></div>
+
+<hr>
+<h2 id="连接即时通讯平台"><a href="#连接即时通讯平台" class="headerlink" title="连接即时通讯平台"></a>连接即时通讯平台</h2><h3 id="🔥-飞书集成（推荐国内用户）"><a href="#🔥-飞书集成（推荐国内用户）" class="headerlink" title="🔥 飞书集成（推荐国内用户）"></a>🔥 飞书集成（推荐国内用户）</h3><p>飞书是国内企业常用的协作平台，OpenClaw 通过 WebSocket 长连接与飞书机器人集成，<strong>无需公网 URL</strong>，配置简单。</p>
+<h4 id="步骤-1：安装飞书插件"><a href="#步骤-1：安装飞书插件" class="headerlink" title="步骤 1：安装飞书插件"></a>步骤 1：安装飞书插件</h4><div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openclaw plugins install @openclaw/feishu</span><br></pre></td></tr></table></figure></div>
+
+<h4 id="步骤-2：创建飞书应用"><a href="#步骤-2：创建飞书应用" class="headerlink" title="步骤 2：创建飞书应用"></a>步骤 2：创建飞书应用</h4><ol>
+<li>访问 <a class="link"   target="_blank" rel="noopener" href="https://open.feishu.cn/app" >飞书开放平台<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a> 并登录</li>
+<li>点击 <strong>创建企业自建应用</strong></li>
+<li>填写应用名称和描述，选择图标</li>
+<li>在 <strong>凭证与基础信息</strong> 页面，复制：<ul>
+<li><strong>App ID</strong>（格式：<code>cli_xxx</code>）</li>
+<li><strong>App Secret</strong></li>
+</ul>
+</li>
+</ol>
+<blockquote>
+<p>❗ <strong>重要</strong>：App Secret 请妥善保管，不要泄露！</p>
+</blockquote>
+<h4 id="步骤-3：配置应用权限"><a href="#步骤-3：配置应用权限" class="headerlink" title="步骤 3：配置应用权限"></a>步骤 3：配置应用权限</h4><p>在 <strong>权限管理</strong> 页面，点击 <strong>批量开通</strong>，粘贴以下 JSON：</p>
+<div class="code-container" data-rel="Json"><figure class="iseeu highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;scopes&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;tenant&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">      <span class="string">&quot;im:message&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="string">&quot;im:message.group_at_msg:readonly&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="string">&quot;im:message.p2p_msg:readonly&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="string">&quot;im:message:readonly&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="string">&quot;im:message:send_as_bot&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="string">&quot;im:resource&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="string">&quot;im:chat.access_event.bot_p2p_chat:read&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="string">&quot;im:chat.members:bot_access&quot;</span></span><br><span class="line">    <span class="punctuation">]</span></span><br><span class="line">  <span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure></div>
+
+<h4 id="步骤-4：启用机器人能力"><a href="#步骤-4：启用机器人能力" class="headerlink" title="步骤 4：启用机器人能力"></a>步骤 4：启用机器人能力</h4><p>在 <strong>应用能力 → 机器人</strong>：</p>
+<ul>
+<li>开启机器人能力</li>
+<li>设置机器人名称</li>
+</ul>
+<h4 id="步骤-5：配置事件订阅"><a href="#步骤-5：配置事件订阅" class="headerlink" title="步骤 5：配置事件订阅"></a>步骤 5：配置事件订阅</h4><blockquote>
+<p>⚠️ <strong>重要</strong>：配置事件订阅前，确保 Gateway 已启动！</p>
+</blockquote>
+<p>在 <strong>事件订阅</strong> 页面：</p>
+<ol>
+<li>选择 <strong>使用长连接接收事件</strong>（WebSocket 方式）</li>
+<li>添加事件：<code>im.message.receive_v1</code></li>
+</ol>
+<h4 id="步骤-6：发布应用"><a href="#步骤-6：发布应用" class="headerlink" title="步骤 6：发布应用"></a>步骤 6：发布应用</h4><ol>
+<li>在 <strong>版本管理与发布</strong> 创建版本</li>
+<li>提交审核并发布</li>
+<li>等待管理员审批（企业内部应用通常自动通过）</li>
+</ol>
+<h4 id="步骤-7：配置-OpenClaw"><a href="#步骤-7：配置-OpenClaw" class="headerlink" title="步骤 7：配置 OpenClaw"></a>步骤 7：配置 OpenClaw</h4><div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openclaw channels add</span><br></pre></td></tr></table></figure></div>
+
+<p>选择 <strong>Feishu</strong>，输入 App ID 和 App Secret。</p>
+<p>或者直接编辑配置文件 <code>~/.openclaw/openclaw.json</code>：</p>
+<div class="code-container" data-rel="Json"><figure class="iseeu highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;channels&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;feishu&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">      <span class="attr">&quot;enabled&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;dmPolicy&quot;</span><span class="punctuation">:</span> <span class="string">&quot;pairing&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;accounts&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;main&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">          <span class="attr">&quot;appId&quot;</span><span class="punctuation">:</span> <span class="string">&quot;cli_xxx&quot;</span><span class="punctuation">,</span></span><br><span class="line">          <span class="attr">&quot;appSecret&quot;</span><span class="punctuation">:</span> <span class="string">&quot;你的AppSecret&quot;</span><span class="punctuation">,</span></span><br><span class="line">          <span class="attr">&quot;botName&quot;</span><span class="punctuation">:</span> <span class="string">&quot;我的AI助手&quot;</span></span><br><span class="line">        <span class="punctuation">&#125;</span></span><br><span class="line">      <span class="punctuation">&#125;</span></span><br><span class="line">    <span class="punctuation">&#125;</span></span><br><span class="line">  <span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure></div>
+
+<h4 id="步骤-8：测试连接"><a href="#步骤-8：测试连接" class="headerlink" title="步骤 8：测试连接"></a>步骤 8：测试连接</h4><div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 启动 Gateway</span></span><br><span class="line">openclaw gateway</span><br><span class="line"></span><br><span class="line"><span class="comment"># 在飞书中找到你的机器人，发送一条消息</span></span><br><span class="line"><span class="comment"># 首次会收到配对码，批准配对：</span></span><br><span class="line">openclaw pairing approve feishu &lt;CODE&gt;</span><br></pre></td></tr></table></figure></div>
+
+<h4 id="飞书群聊配置"><a href="#飞书群聊配置" class="headerlink" title="飞书群聊配置"></a>飞书群聊配置</h4><p>默认情况下，群聊需要 @机器人 才能触发回复。可以修改配置：</p>
+<div class="code-container" data-rel="Json"><figure class="iseeu highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;channels&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;feishu&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">      <span class="attr">&quot;groups&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;oc_xxx&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span> <span class="attr">&quot;requireMention&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">false</span></span> <span class="punctuation">&#125;</span></span><br><span class="line">      <span class="punctuation">&#125;</span></span><br><span class="line">    <span class="punctuation">&#125;</span></span><br><span class="line">  <span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure></div>
+
+<blockquote>
+<p>💡 <strong>获取群聊 ID</strong>：在群里 @机器人，然后查看日志 <code>openclaw logs --follow</code>，找到 <code>chat_id</code>。</p>
+</blockquote>
+<hr>
+<h3 id="WhatsApp（扫码登录）"><a href="#WhatsApp（扫码登录）" class="headerlink" title="WhatsApp（扫码登录）"></a>WhatsApp（扫码登录）</h3><p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/openclaw-guide/whatsapp-openclaw.jpg"
+                      alt="WhatsApp 连接"
+                ></p>
+<div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openclaw channels login</span><br></pre></td></tr></table></figure></div>
+
+<p>扫码方式：</p>
+<ol>
+<li>打开手机 WhatsApp</li>
+<li>进入 <strong>设置 → 已关联设备</strong></li>
+<li>扫描终端显示的二维码</li>
+</ol>
+<h3 id="Telegram（Bot-Token）"><a href="#Telegram（Bot-Token）" class="headerlink" title="Telegram（Bot Token）"></a>Telegram（Bot Token）</h3><ol>
+<li>访问 <a class="link"   target="_blank" rel="noopener" href="https://t.me/BotFather" >@BotFather<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li>发送 <code>/newbot</code> 创建机器人</li>
+<li>获取 Bot Token</li>
+<li>配置：</li>
+</ol>
+<div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openclaw configure --section channels.telegram</span><br></pre></td></tr></table></figure></div>
+
+<h3 id="Discord（Bot-Token）"><a href="#Discord（Bot-Token）" class="headerlink" title="Discord（Bot Token）"></a>Discord（Bot Token）</h3><ol>
+<li>访问 <a class="link"   target="_blank" rel="noopener" href="https://discord.com/developers/applications" >Discord Developer Portal<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li>创建应用，添加 Bot</li>
+<li>获取 Bot Token</li>
+<li>邀请 Bot 到服务器</li>
+<li>配置：</li>
+</ol>
+<div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openclaw configure --section channels.discord</span><br></pre></td></tr></table></figure></div>
+
+<h3 id="DM-配对"><a href="#DM-配对" class="headerlink" title="DM 配对"></a>DM 配对</h3><p>默认情况下，未知用户的私聊需要先<strong>批准配对</strong>才能处理：</p>
+<div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看待处理配对（飞书）</span></span><br><span class="line">openclaw pairing list feishu</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看待处理配对（Telegram）</span></span><br><span class="line">openclaw pairing list telegram</span><br><span class="line"></span><br><span class="line"><span class="comment"># 批准</span></span><br><span class="line">openclaw pairing approve feishu &lt;CODE&gt;</span><br><span class="line">openclaw pairing approve telegram &lt;CODE&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 拒绝</span></span><br><span class="line">openclaw pairing deny feishu &lt;CODE&gt;</span><br></pre></td></tr></table></figure></div>
+
+<hr>
+<h2 id="常用命令速查"><a href="#常用命令速查" class="headerlink" title="常用命令速查"></a>常用命令速查</h2><h3 id="基础命令"><a href="#基础命令" class="headerlink" title="基础命令"></a>基础命令</h3><table>
+<thead>
+<tr>
+<th>命令</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>openclaw status</code></td>
+<td>查看状态概览</td>
+</tr>
+<tr>
+<td><code>openclaw status --all</code></td>
+<td>完整诊断报告（最佳调试输出）</td>
+</tr>
+<tr>
+<td><code>openclaw health</code></td>
+<td>健康检查</td>
+</tr>
+<tr>
+<td><code>openclaw doctor</code></td>
+<td>问题诊断</td>
+</tr>
+</tbody></table>
+<h3 id="Gateway-管理"><a href="#Gateway-管理" class="headerlink" title="Gateway 管理"></a>Gateway 管理</h3><table>
+<thead>
+<tr>
+<th>命令</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>openclaw gateway start</code></td>
+<td>启动</td>
+</tr>
+<tr>
+<td><code>openclaw gateway stop</code></td>
+<td>停止</td>
+</tr>
+<tr>
+<td><code>openclaw gateway restart</code></td>
+<td>重启</td>
+</tr>
+<tr>
+<td><code>openclaw gateway status</code></td>
+<td>状态</td>
+</tr>
+<tr>
+<td><code>openclaw gateway install</code></td>
+<td>安装后台服务</td>
+</tr>
+</tbody></table>
+<h3 id="配置管理"><a href="#配置管理" class="headerlink" title="配置管理"></a>配置管理</h3><table>
+<thead>
+<tr>
+<th>命令</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>openclaw configure</code></td>
+<td>交互式配置</td>
+</tr>
+<tr>
+<td><code>openclaw config get</code></td>
+<td>查看配置</td>
+</tr>
+<tr>
+<td><code>openclaw config set &lt;key&gt; &lt;value&gt;</code></td>
+<td>设置配置</td>
+</tr>
+</tbody></table>
+<h3 id="渠道管理"><a href="#渠道管理" class="headerlink" title="渠道管理"></a>渠道管理</h3><table>
+<thead>
+<tr>
+<th>命令</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>openclaw plugins install @openclaw/feishu</code></td>
+<td>安装飞书插件</td>
+</tr>
+<tr>
+<td><code>openclaw channels add</code></td>
+<td>添加新渠道</td>
+</tr>
+<tr>
+<td><code>openclaw channels login</code></td>
+<td>WhatsApp 扫码登录</td>
+</tr>
+<tr>
+<td><code>openclaw channels status</code></td>
+<td>查看渠道状态</td>
+</tr>
+<tr>
+<td><code>openclaw channels status --probe</code></td>
+<td>探测渠道连通性</td>
+</tr>
+<tr>
+<td><code>openclaw pairing list &lt;channel&gt;</code></td>
+<td>查看待配对</td>
+</tr>
+</tbody></table>
+<h3 id="更新与维护"><a href="#更新与维护" class="headerlink" title="更新与维护"></a>更新与维护</h3><table>
+<thead>
+<tr>
+<th>命令</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>openclaw update</code></td>
+<td>更新到最新版</td>
+</tr>
+<tr>
+<td><code>openclaw update --channel beta</code></td>
+<td>切换到 beta 版</td>
+</tr>
+<tr>
+<td><code>openclaw update --channel stable</code></td>
+<td>切换到稳定版</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="故障排除"><a href="#故障排除" class="headerlink" title="故障排除"></a>故障排除</h2><h3 id="1-openclaw-命令找不到"><a href="#1-openclaw-命令找不到" class="headerlink" title="1. openclaw 命令找不到"></a>1. <code>openclaw</code> 命令找不到</h3><p>检查 PATH：</p>
+<div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">node -v</span><br><span class="line">npm prefix -g</span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;<span class="variable">$PATH</span>&quot;</span></span><br></pre></td></tr></table></figure></div>
+
+<p>如果 <code>$(npm prefix -g)/bin</code> 不在 PATH 中，添加到 shell 配置：</p>
+<div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># macOS / Linux (zsh)</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&#x27;export PATH=&quot;$(npm prefix -g)/bin:$PATH&quot;&#x27;</span> &gt;&gt; ~/.zshrc</span><br><span class="line"><span class="built_in">source</span> ~/.zshrc</span><br><span class="line"></span><br><span class="line"><span class="comment"># Linux (bash)</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&#x27;export PATH=&quot;$(npm prefix -g)/bin:$PATH&quot;&#x27;</span> &gt;&gt; ~/.bashrc</span><br><span class="line"><span class="built_in">source</span> ~/.bashrc</span><br></pre></td></tr></table></figure></div>
+
+<h3 id="2-Gateway-无法启动"><a href="#2-Gateway-无法启动" class="headerlink" title="2. Gateway 无法启动"></a>2. Gateway 无法启动</h3><div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 检查端口占用</span></span><br><span class="line">lsof -i :18789</span><br><span class="line"></span><br><span class="line"><span class="comment"># 杀掉占用进程</span></span><br><span class="line"><span class="built_in">kill</span> -9 &lt;PID&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看详细日志</span></span><br><span class="line">openclaw gateway --verbose</span><br></pre></td></tr></table></figure></div>
+
+<h3 id="3-WhatsApp-扫码失败"><a href="#3-WhatsApp-扫码失败" class="headerlink" title="3. WhatsApp 扫码失败"></a>3. WhatsApp 扫码失败</h3><div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 重新登录</span></span><br><span class="line">openclaw channels <span class="built_in">logout</span> whatsapp</span><br><span class="line">openclaw channels login</span><br></pre></td></tr></table></figure></div>
+
+<h3 id="4-API-连接问题（国内用户）"><a href="#4-API-连接问题（国内用户）" class="headerlink" title="4. API 连接问题（国内用户）"></a>4. API 连接问题（国内用户）</h3><p>国内用户推荐使用国产模型服务：</p>
+<div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 配置 MiniMax</span></span><br><span class="line">openclaw configure --section auth</span><br><span class="line"></span><br><span class="line"><span class="comment"># 选择 MiniMax 或智谱 GLM</span></span><br></pre></td></tr></table></figure></div>
+
+<p>支持的国产模型：</p>
+<ul>
+<li><strong>MiniMax</strong>：<a class="link"   target="_blank" rel="noopener" href="https://www.minimaxi.com/" >https://www.minimaxi.com/<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li><strong>智谱 GLM</strong>：<a class="link"   target="_blank" rel="noopener" href="https://open.bigmodel.cn/" >https://open.bigmodel.cn/<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li><strong>本地 Ollama</strong>：完全离线运行</li>
+</ul>
+<h3 id="5-WSL2-端口转发失效"><a href="#5-WSL2-端口转发失效" class="headerlink" title="5. WSL2 端口转发失效"></a>5. WSL2 端口转发失效</h3><p>WSL IP 在重启后会变化，需要重新运行端口转发脚本。可以创建一个脚本自动刷新：</p>
+<div class="code-container" data-rel="Powershell"><figure class="iseeu highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># refresh-wsl-port.ps1</span></span><br><span class="line"><span class="variable">$Distro</span> = <span class="string">&quot;Ubuntu-24.04&quot;</span></span><br><span class="line"><span class="variable">$Port</span> = <span class="number">18789</span></span><br><span class="line"></span><br><span class="line"><span class="variable">$WslIp</span> = (wsl <span class="literal">-d</span> <span class="variable">$Distro</span> <span class="literal">--</span> hostname <span class="literal">-I</span>).Trim().Split(<span class="string">&quot; &quot;</span>)[<span class="number">0</span>]</span><br><span class="line">netsh interface portproxy delete v4tov4 listenport=<span class="variable">$Port</span> listenaddress=<span class="number">0.0</span>.<span class="number">0.0</span></span><br><span class="line">netsh interface portproxy add v4tov4 listenport=<span class="variable">$Port</span> listenaddress=<span class="number">0.0</span>.<span class="number">0.0</span> connectaddress=<span class="variable">$WslIp</span> connectport=<span class="variable">$Port</span></span><br><span class="line"><span class="built_in">Write-Host</span> <span class="string">&quot;Port forwarding updated: <span class="variable">$WslIp:</span><span class="variable">$Port</span>&quot;</span></span><br></pre></td></tr></table></figure></div>
+
+<h3 id="6-“no-auth-configured”-错误"><a href="#6-“no-auth-configured”-错误" class="headerlink" title="6. “no auth configured” 错误"></a>6. “no auth configured” 错误</h3><p>重新运行配置向导设置 API Key：</p>
+<div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openclaw configure</span><br></pre></td></tr></table></figure></div>
+
+<h3 id="7-飞书机器人不响应"><a href="#7-飞书机器人不响应" class="headerlink" title="7. 飞书机器人不响应"></a>7. 飞书机器人不响应</h3><ul>
+<li>确保应用已发布并审批通过</li>
+<li>确保事件订阅包含 <code>im.message.receive_v1</code></li>
+<li>确保已启用”长连接接收事件”</li>
+<li>确保 Gateway 正在运行：<code>openclaw gateway status</code></li>
+<li>查看日志：<code>openclaw logs --follow</code></li>
+</ul>
+<h3 id="8-飞书群聊不响应"><a href="#8-飞书群聊不响应" class="headerlink" title="8. 飞书群聊不响应"></a>8. 飞书群聊不响应</h3><ul>
+<li>确保机器人已添加到群聊</li>
+<li>默认需要 @机器人（检查 <code>requireMention</code> 配置）</li>
+<li>确保 <code>groupPolicy</code> 不是 <code>disabled</code></li>
+</ul>
+<hr>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><h3 id="官方资源"><a href="#官方资源" class="headerlink" title="官方资源"></a>官方资源</h3><ul>
+<li>📚 <strong>官方文档</strong>: <a class="link"   target="_blank" rel="noopener" href="https://docs.openclaw.ai/" >https://docs.openclaw.ai<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li>🐙 <strong>GitHub 仓库</strong>: <a class="link"   target="_blank" rel="noopener" href="https://github.com/openclaw/openclaw" >https://github.com/openclaw/openclaw<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li>💬 <strong>Discord 社区</strong>: <a class="link"   target="_blank" rel="noopener" href="https://discord.gg/clawd" >https://discord.gg/clawd<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li>🎓 <strong>DeepWiki 知识库</strong>: <a class="link"   target="_blank" rel="noopener" href="https://deepwiki.com/openclaw/openclaw" >https://deepwiki.com/openclaw/openclaw<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+</ul>
+<h3 id="相关教程"><a href="#相关教程" class="headerlink" title="相关教程"></a>相关教程</h3><ul>
+<li><a class="link"   target="_blank" rel="noopener" href="https://docs.openclaw.ai/start/getting-started" >Getting Started<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a> - 官方入门指南</li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://docs.openclaw.ai/channels/feishu" >飞书集成文档<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a> - 飞书配置详解</li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://docs.openclaw.ai/platforms/windows" >Windows (WSL2)<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a> - Windows 部署文档</li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://docs.openclaw.ai/platforms/macos" >macOS App<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a> - macOS 应用文档</li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://docs.openclaw.ai/install/docker" >Docker 部署<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a> - 容器化部署</li>
+</ul>
+<h3 id="中文资源"><a href="#中文资源" class="headerlink" title="中文资源"></a>中文资源</h3><ul>
+<li><a class="link"   target="_blank" rel="noopener" href="https://blog.csdn.net/liwang0113/article/details/157579187" >CSDN 保姆级教程<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://www.cnblogs.com/whuanle/p/19558535" >博客园部署指南<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://help.aliyun.com/zh/simple-application-server/use-cases/quickly-deploy-and-use-openclaw" >阿里云应用模板<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+</ul>
+<hr>
+<blockquote>
+<p>📝 <strong>文章作者</strong>: 隆戈 🐉<br>📅 <strong>更新日期</strong>: 2026-02-04<br>🔗 <strong>本文链接</strong>: <a href="https://hydraxman.github.io/2026/02/04/openclaw-local-deployment-guide/">https://hydraxman.github.io/2026/02/04/openclaw-local-deployment-guide/</a></p>
+</blockquote>
+<p>如果这篇教程对你有帮助，欢迎分享给需要的朋友！有问题可以在评论区留言讨论。</p>
+
+		</div>
+
+		
+		<div class="post-copyright-info w-full my-8 px-2 sm:px-6 md:px-8">
+			<div class="article-copyright-info-container">
+    <ul>
+        <li><strong>标题:</strong> OpenClaw 本地部署完全指南：Windows 与 macOS 全平台教程</li>
+        <li><strong>作者:</strong> Nathan</li>
+        <li><strong>创建于
+                :</strong> 2026-02-04 16:30:00</li>
+        
+            <li>
+                <strong>更新于
+                    :</strong> 2026-02-20 17:22:12
+            </li>
+        
+        <li>
+            <strong>链接:</strong> https://hydraxman.github.io/2026/02/04/openclaw-local-deployment-guide/
+        </li>
+        <li>
+            <strong>
+                版权声明:
+            </strong>
+            
+
+            
+                本文章采用 <a class="license" target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0">CC BY-NC-SA 4.0</a> 进行许可。
+            
+        </li>
+    </ul>
+</div>
+
+		</div>
+		
+
+		
+		<ul class="post-tags-box text-lg mt-1.5 flex-wrap justify-center flex md:hidden">
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/AI/">#AI</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/Windows/">#Windows</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/macOS/">#macOS</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/OpenClaw/">#OpenClaw</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/%E6%95%99%E7%A8%8B/">#教程</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/%E6%9C%AC%E5%9C%B0%E9%83%A8%E7%BD%B2/">#本地部署</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/%E9%A3%9E%E4%B9%A6/">#飞书</a>&nbsp;
+			</li>
+			
+		</ul>
+		
+
+		
+
+		
+		<div class="article-nav my-8 flex justify-between items-center px-2 sm:px-6 md:px-8">
+			
+			<div class="article-prev border-border-color shadow-redefine-flat shadow-shadow-color-2 rounded-medium px-4 py-2 hover:shadow-redefine-flat-hover hover:shadow-shadow-color-2">
+				<a class="prev" rel="prev" href="/2026/02/05/github-agent-hq-claude-codex/">
+					<span class="left arrow-icon flex justify-center items-center">
+						<i class="fa-solid fa-chevron-left"></i>
+					</span>
+					<span class="title flex justify-center items-center">
+						<span class="post-nav-title-item truncate max-w-48">GitHub 重磅更新：一个指令，Claude、Codex、Copilot 任你调遣</span>
+						<span class="post-nav-item">上一篇</span>
+					</span>
+				</a>
+			</div>
+			
+			
+			<div class="article-next border-border-color shadow-redefine-flat shadow-shadow-color-2 rounded-medium px-4 py-2 hover:shadow-redefine-flat-hover hover:shadow-shadow-color-2">
+				<a class="next" rel="next" href="/2026/02/02/ai-industry-thoughts-2026/index/">
+					<span class="title flex justify-center items-center">
+						<span class="post-nav-title-item truncate max-w-48">从 Cursor 到 Lovart：AI 时代的窗口期与维度战争</span>
+						<span class="post-nav-item">下一篇</span>
+					</span>
+					<span class="right arrow-icon flex justify-center items-center">
+						<i class="fa-solid fa-chevron-right"></i>
+					</span>
+				</a>
+			</div>
+			
+		</div>
+		
+
+
+		
+	</div>
+
+	
+	<div class="toc-content-container">
+		<div class="post-toc-wrap">
+	<div class="post-toc">
+		<div class="toc-title">目录</div>
+		<div class="page-title">OpenClaw 本地部署完全指南：Windows 与 macOS 全平台教程</div>
+		<ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%F0%9F%A6%9E-OpenClaw-%E6%9C%AC%E5%9C%B0%E9%83%A8%E7%BD%B2%E5%AE%8C%E5%85%A8%E6%8C%87%E5%8D%97"><span class="nav-text">🦞 OpenClaw 本地部署完全指南</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%F0%9F%93%8B-%E7%9B%AE%E5%BD%95"><span class="nav-text">📋 目录</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF-OpenClaw%EF%BC%9F"><span class="nav-text">什么是 OpenClaw？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%F0%9F%8E%AF-%E6%A0%B8%E5%BF%83%E7%89%B9%E6%80%A7"><span class="nav-text">🎯 核心特性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%F0%9F%8F%97%EF%B8%8F-%E6%9E%B6%E6%9E%84%E6%A6%82%E8%A7%88"><span class="nav-text">🏗️ 架构概览</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%F0%9F%93%B1-%E7%A7%BB%E5%8A%A8%E7%AB%AF%E6%94%AF%E6%8C%81"><span class="nav-text">📱 移动端支持</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9F%E8%A6%81%E6%B1%82"><span class="nav-text">系统要求</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E7%A1%80%E8%A6%81%E6%B1%82"><span class="nav-text">基础要求</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B9%B3%E5%8F%B0%E7%89%B9%E5%AE%9A%E8%A6%81%E6%B1%82"><span class="nav-text">平台特定要求</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#macOS-%E5%AE%89%E8%A3%85%E6%95%99%E7%A8%8B"><span class="nav-text">macOS 安装教程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AD%A5%E9%AA%A4-1%EF%BC%9A%E5%AE%89%E8%A3%85-Node-js"><span class="nav-text">步骤 1：安装 Node.js</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AD%A5%E9%AA%A4-2%EF%BC%9A%E5%AE%89%E8%A3%85-OpenClaw"><span class="nav-text">步骤 2：安装 OpenClaw</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AD%A5%E9%AA%A4-3%EF%BC%9A%E8%BF%90%E8%A1%8C%E9%85%8D%E7%BD%AE%E5%90%91%E5%AF%BC"><span class="nav-text">步骤 3：运行配置向导</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AD%A5%E9%AA%A4-4%EF%BC%9A%E9%AA%8C%E8%AF%81%E5%AE%89%E8%A3%85"><span class="nav-text">步骤 4：验证安装</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#macOS-App%EF%BC%88%E5%8F%AF%E9%80%89%EF%BC%89"><span class="nav-text">macOS App（可选）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Windows-%E5%AE%89%E8%A3%85%E6%95%99%E7%A8%8B%EF%BC%88WSL2%EF%BC%89"><span class="nav-text">Windows 安装教程（WSL2）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AD%A5%E9%AA%A4-1%EF%BC%9A%E5%AE%89%E8%A3%85-WSL2"><span class="nav-text">步骤 1：安装 WSL2</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AD%A5%E9%AA%A4-2%EF%BC%9A%E5%90%AF%E7%94%A8-systemd"><span class="nav-text">步骤 2：启用 systemd</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AD%A5%E9%AA%A4-3%EF%BC%9A%E5%AE%89%E8%A3%85-Node-js"><span class="nav-text">步骤 3：安装 Node.js</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AD%A5%E9%AA%A4-4%EF%BC%9A%E5%AE%89%E8%A3%85-OpenClaw"><span class="nav-text">步骤 4：安装 OpenClaw</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AD%A5%E9%AA%A4-5%EF%BC%9A%E8%BF%90%E8%A1%8C%E9%85%8D%E7%BD%AE%E5%90%91%E5%AF%BC"><span class="nav-text">步骤 5：运行配置向导</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AD%A5%E9%AA%A4-6%EF%BC%9A%E4%BB%8E-Windows-%E8%AE%BF%E9%97%AE-Gateway%EF%BC%88%E5%8F%AF%E9%80%89%EF%BC%89"><span class="nav-text">步骤 6：从 Windows 访问 Gateway（可选）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%A6%96%E6%AC%A1%E9%85%8D%E7%BD%AE%E5%90%91%E5%AF%BC"><span class="nav-text">首次配置向导</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Gateway-%E6%A8%A1%E5%BC%8F"><span class="nav-text">1. Gateway 模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E8%AE%A4%E8%AF%81%E6%96%B9%E5%BC%8F"><span class="nav-text">2. 认证方式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E9%80%89%E6%8B%A9%E9%BB%98%E8%AE%A4%E6%A8%A1%E5%9E%8B"><span class="nav-text">3. 选择默认模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E6%B8%A0%E9%81%93%E9%85%8D%E7%BD%AE"><span class="nav-text">4. 渠道配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-%E5%AE%89%E8%A3%85%E5%90%8E%E5%8F%B0%E6%9C%8D%E5%8A%A1"><span class="nav-text">5. 安装后台服务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%A4%E8%AF%81%E6%96%87%E4%BB%B6%E4%BD%8D%E7%BD%AE"><span class="nav-text">认证文件位置</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%90%AF%E5%8A%A8-Gateway"><span class="nav-text">启动 Gateway</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A3%80%E6%9F%A5%E7%8A%B6%E6%80%81"><span class="nav-text">检查状态</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%89%8B%E5%8A%A8%E5%90%AF%E5%8A%A8%EF%BC%88%E5%89%8D%E5%8F%B0%EF%BC%8C%E8%B0%83%E8%AF%95%E7%94%A8%EF%BC%89"><span class="nav-text">手动启动（前台，调试用）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%BF%E9%97%AE%E6%8E%A7%E5%88%B6%E5%8F%B0"><span class="nav-text">访问控制台</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%8D%E5%8A%A1%E7%AE%A1%E7%90%86"><span class="nav-text">服务管理</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BF%9E%E6%8E%A5%E5%8D%B3%E6%97%B6%E9%80%9A%E8%AE%AF%E5%B9%B3%E5%8F%B0"><span class="nav-text">连接即时通讯平台</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%F0%9F%94%A5-%E9%A3%9E%E4%B9%A6%E9%9B%86%E6%88%90%EF%BC%88%E6%8E%A8%E8%8D%90%E5%9B%BD%E5%86%85%E7%94%A8%E6%88%B7%EF%BC%89"><span class="nav-text">🔥 飞书集成（推荐国内用户）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#WhatsApp%EF%BC%88%E6%89%AB%E7%A0%81%E7%99%BB%E5%BD%95%EF%BC%89"><span class="nav-text">WhatsApp（扫码登录）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Telegram%EF%BC%88Bot-Token%EF%BC%89"><span class="nav-text">Telegram（Bot Token）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Discord%EF%BC%88Bot-Token%EF%BC%89"><span class="nav-text">Discord（Bot Token）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DM-%E9%85%8D%E5%AF%B9"><span class="nav-text">DM 配对</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4%E9%80%9F%E6%9F%A5"><span class="nav-text">常用命令速查</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4"><span class="nav-text">基础命令</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Gateway-%E7%AE%A1%E7%90%86"><span class="nav-text">Gateway 管理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E7%AE%A1%E7%90%86"><span class="nav-text">配置管理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B8%A0%E9%81%93%E7%AE%A1%E7%90%86"><span class="nav-text">渠道管理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9B%B4%E6%96%B0%E4%B8%8E%E7%BB%B4%E6%8A%A4"><span class="nav-text">更新与维护</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%95%85%E9%9A%9C%E6%8E%92%E9%99%A4"><span class="nav-text">故障排除</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-openclaw-%E5%91%BD%E4%BB%A4%E6%89%BE%E4%B8%8D%E5%88%B0"><span class="nav-text">1. openclaw 命令找不到</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Gateway-%E6%97%A0%E6%B3%95%E5%90%AF%E5%8A%A8"><span class="nav-text">2. Gateway 无法启动</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-WhatsApp-%E6%89%AB%E7%A0%81%E5%A4%B1%E8%B4%A5"><span class="nav-text">3. WhatsApp 扫码失败</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-API-%E8%BF%9E%E6%8E%A5%E9%97%AE%E9%A2%98%EF%BC%88%E5%9B%BD%E5%86%85%E7%94%A8%E6%88%B7%EF%BC%89"><span class="nav-text">4. API 连接问题（国内用户）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-WSL2-%E7%AB%AF%E5%8F%A3%E8%BD%AC%E5%8F%91%E5%A4%B1%E6%95%88"><span class="nav-text">5. WSL2 端口转发失效</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-%E2%80%9Cno-auth-configured%E2%80%9D-%E9%94%99%E8%AF%AF"><span class="nav-text">6. “no auth configured” 错误</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-%E9%A3%9E%E4%B9%A6%E6%9C%BA%E5%99%A8%E4%BA%BA%E4%B8%8D%E5%93%8D%E5%BA%94"><span class="nav-text">7. 飞书机器人不响应</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#8-%E9%A3%9E%E4%B9%A6%E7%BE%A4%E8%81%8A%E4%B8%8D%E5%93%8D%E5%BA%94"><span class="nav-text">8. 飞书群聊不响应</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="nav-text">参考资料</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%98%E6%96%B9%E8%B5%84%E6%BA%90"><span class="nav-text">官方资源</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%9B%B8%E5%85%B3%E6%95%99%E7%A8%8B"><span class="nav-text">相关教程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%AD%E6%96%87%E8%B5%84%E6%BA%90"><span class="nav-text">中文资源</span></a></li></ol></li></ol></li></ol>
+
+	</div>
+</div>
+	</div>
+	
+</div>
+			</div>
+
+			
+		</div>
+
+		<div class="main-content-footer">
+			<footer class="footer mt-5 py-5 h-auto text-base text-third-text-color relative border-t-2 border-t-border-color">
+    <div class="info-container py-3 text-center">
+        
+        <div class="text-center">
+            &copy;
+            
+              <span>2024</span>
+              -
+            
+            2026&nbsp;&nbsp;<i class="fa-solid fa-heart fa-beat" style="--fa-animation-duration: 0.5s; color: #333"></i>&nbsp;&nbsp;<a href="/">Nathan</a>
+            
+                
+                <p class="post-count space-x-0.5">
+                    <span>
+                        共撰写了 52 篇文章
+                    </span>
+                    
+                        <span>
+                            共 111.8k 字
+                        </span>
+                    
+                </p>
+            
+        </div>
+        
+        <div class="relative text-center lg:absolute lg:left-[20px] lg:top-1/2 lg:-translate-y-1/2 lg:text-left">
+            <span class="lg:block text-sm">由 <?xml version="1.0" encoding="utf-8"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg class="relative top-[2px] inline-block align-baseline" version="1.1" id="圖層_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="1rem" height="1rem" viewBox="0 0 512 512" enable-background="new 0 0 512 512" xml:space="preserve"><path fill="#0E83CD" d="M256.4,25.8l-200,115.5L56,371.5l199.6,114.7l200-115.5l0.4-230.2L256.4,25.8z M349,354.6l-18.4,10.7l-18.6-11V275H200v79.6l-18.4,10.7l-18.6-11v-197l18.5-10.6l18.5,10.8V237h112v-79.6l18.5-10.6l18.5,10.8V354.6z"/></svg><a target="_blank" class="text-base" href="https://hexo.io">Hexo</a> 驱动</span>
+            <span class="text-sm lg:block">主题&nbsp;<a class="text-base" target="_blank" href="https://github.com/EvanNotFound/hexo-theme-redefine">Redefine v2.8.5</a></span>
+        </div>
+        
+        
+            <div>
+                博客已运行 <span class="odometer" id="runtime_days" ></span> 天 <span class="odometer" id="runtime_hours"></span> 小时 <span class="odometer" id="runtime_minutes"></span> 分钟 <span class="odometer" id="runtime_seconds"></span> 秒
+            </div>
+        
+        
+            <script data-swup-reload-script>
+                try {
+                    function odometer_init() {
+                    const elements = document.querySelectorAll('.odometer');
+                    elements.forEach(el => {
+                        new Odometer({
+                            el,
+                            format: '( ddd).dd',
+                            duration: 200
+                        });
+                    });
+                    }
+                    odometer_init();
+                } catch (error) {}
+            </script>
+        
+        
+        
+    </div>  
+</footer>
+		</div>
+	</div>
+
+	
+	<div class="post-tools">
+		<div class="post-tools-container">
+	<ul class="article-tools-list">
+		<!-- TOC aside toggle -->
+		
+		<li class="right-bottom-tools page-aside-toggle">
+			<i class="fa-regular fa-outdent"></i>
+		</li>
+		
+
+		<!-- go comment -->
+		
+	</ul>
+</div>
+	</div>
+	
+
+	<div class="right-side-tools-container">
+		<div class="side-tools-container">
+	<ul class="hidden-tools-list">
+		<li class="right-bottom-tools tool-font-adjust-plus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-plus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-font-adjust-minus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-minus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-dark-light-toggle flex justify-center items-center">
+			<i class="fa-regular fa-moon"></i>
+		</li>
+
+		<!-- rss -->
+		
+
+		
+
+		<li class="right-bottom-tools tool-scroll-to-bottom flex justify-center items-center">
+			<i class="fa-regular fa-arrow-down"></i>
+		</li>
+	</ul>
+
+	<ul class="visible-tools-list">
+		<li class="right-bottom-tools toggle-tools-list flex justify-center items-center">
+			<i class="fa-regular fa-cog fa-spin"></i>
+		</li>
+		
+		<li class="right-bottom-tools tool-scroll-to-top flex justify-center items-center">
+			<i class="arrow-up fas fa-arrow-up"></i>
+			<span class="percent"></span>
+		</li>
+		
+		
+	</ul>
+</div>
+	</div>
+
+	<div class="image-viewer-container">
+	<img src="">
+</div>
+
+	
+	<div class="search-pop-overlay">
+	<div class="popup search-popup">
+		<div class="search-header">
+			<span class="search-input-field-pre">
+				<i class="fa-solid fa-keyboard"></i>
+			</span>
+			<div class="search-input-container">
+				<input autocomplete="off" autocorrect="off" autocapitalize="off" placeholder="站内搜索您需要的内容..." spellcheck="false" type="search" class="search-input">
+			</div>
+			<span class="popup-btn-close">
+				<i class="fa-solid fa-times"></i>
+			</span>
+		</div>
+		<div id="search-result">
+			<div id="no-result">
+				<i class="fa-solid fa-spinner fa-spin-pulse fa-5x fa-fw"></i>
+			</div>
+		</div>
+	</div>
+</div>
+	
+
+</main>
+
+
+
+<script src="/js/build/libs/Swup.min.js"></script>
+
+<script src="/js/build/libs/SwupSlideTheme.min.js"></script>
+
+<script src="/js/build/libs/SwupScriptsPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupProgressPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupScrollPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupPreloadPlugin.min.js"></script>
+
+<script>
+    const swup = new Swup({
+        plugins: [
+            new SwupScriptsPlugin({
+                optin: true,
+            }),
+            new SwupProgressPlugin(),
+            new SwupScrollPlugin({
+                offset: 80,
+            }),
+            new SwupSlideTheme({
+                mainElement: ".main-content-body",
+            }),
+            new SwupPreloadPlugin(),
+        ],
+        containers: ["#swup"],
+    });
+</script>
+
+
+
+
+	
+<script src="/js/build/tools/imageViewer.js" type="module"></script>
+
+<script src="/js/build/utils.js" type="module"></script>
+
+<script src="/js/build/main.js" type="module"></script>
+
+<script src="/js/build/layouts/navbarShrink.js" type="module"></script>
+
+<script src="/js/build/tools/scrollTopBottom.js" type="module"></script>
+
+<script src="/js/build/tools/lightDarkSwitch.js" type="module"></script>
+
+<script src="/js/build/layouts/categoryList.js" type="module"></script>
+
+
+
+    
+<script src="/js/build/tools/localSearch.js" type="module"></script>
+
+
+
+
+    
+<script src="/js/build/tools/codeBlock.js" type="module"></script>
+
+
+
+
+    
+<script src="/js/build/layouts/lazyload.js" type="module"></script>
+
+
+
+
+    
+<script src="/js/build/tools/runtime.js"></script>
+
+    
+<script src="/js/build/libs/odometer.min.js"></script>
+
+    
+<link rel="stylesheet" href="/assets/odometer-theme-minimal.css">
+
+
+
+
+  
+<script src="/js/build/libs/Typed.min.js"></script>
+
+  
+<script src="/js/build/plugins/typed.js" type="module"></script>
+
+
+
+
+
+
+
+
+    
+<script src="/js/build/libs/anime.min.js"></script>
+
+
+
+
+
+    
+<script src="/js/build/tools/tocToggle.js" type="module" data-swup-reload-script=""></script>
+
+<script src="/js/build/layouts/toc.js" type="module" data-swup-reload-script=""></script>
+
+<script src="/js/build/plugins/tabs.js" type="module" data-swup-reload-script=""></script>
+
+
+
+
+<script src="/js/build/libs/moment-with-locales.min.js" data-swup-reload-script=""></script>
+
+
+<script src="/js/build/layouts/essays.js" type="module" data-swup-reload-script=""></script>
+
+
+
+
+
+	
+</body>
+
+</html>
