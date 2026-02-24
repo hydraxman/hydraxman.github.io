@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="keywords" content="计算机技术, 生活中的胡思乱想">
+    
+    <meta name="author" content="Nathan">
+    
+    <!-- Completely eliminate flash of wrong theme -->
+    <script>
+        (function() {
+            const THEME_KEY = "REDEFINE-THEME-STATUS";
+            const DARK = "dark", LIGHT = "light";
+            
+            // Get preferred theme
+            function getTheme() {
+                try {
+                    const saved = localStorage.getItem(THEME_KEY);
+                    if (saved) {
+                        const { isDark } = JSON.parse(saved);
+                        return isDark ? DARK : LIGHT;
+                    }
+                } catch (e) {}
+                
+                return matchMedia("(prefers-color-scheme: dark)").matches ? DARK : LIGHT;
+            }
+            
+            // Apply theme to document
+            function applyTheme(theme) {
+                const isDark = theme === DARK;
+                const root = document.documentElement;
+                
+                // Set data attribute for CSS variables
+                root.setAttribute("data-theme", theme);
+                
+                // Set classes for compatibility
+                root.classList.add(theme);
+                root.classList.remove(isDark ? LIGHT : DARK);
+                root.style.colorScheme = theme;
+            }
+            
+            // Initial application
+            const theme = getTheme();
+            applyTheme(theme);
+            
+            // Listen for system preference changes
+            matchMedia("(prefers-color-scheme: dark)").addEventListener("change", ({ matches }) => {
+                // Only update if using system preference (no localStorage entry)
+                if (!localStorage.getItem(THEME_KEY)) {
+                    applyTheme(matches ? DARK : LIGHT);
+                }
+            });
+            
+            // Set body classes once DOM is ready
+            if (document.readyState !== "loading") {
+                document.body.classList.add(theme + "-mode");
+            } else {
+                document.addEventListener("DOMContentLoaded", () => {
+                    document.body.classList.add(theme + "-mode");
+                    document.body.classList.remove((theme === DARK ? LIGHT : DARK) + "-mode");
+                });
+            }
+        })();
+    </script>
+    
+    <!-- Critical CSS to prevent flash -->
+    <style>
+        :root[data-theme="dark"] {
+            --background-color: #202124;
+            --background-color-transparent: rgba(32, 33, 36, 0.6);
+            --second-background-color: #2d2e32;
+            --third-background-color: #34353a;
+            --third-background-color-transparent: rgba(32, 33, 36, 0.6);
+            --primary-color: #0066CC;
+            --first-text-color: #ffffff;
+            --second-text-color: #eeeeee;
+            --third-text-color: #bebec6;
+            --fourth-text-color: #999999;
+            --default-text-color: #bebec6;
+            --invert-text-color: #373D3F;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --selection-color: #0066CC;
+            --shadow-color-1: rgba(255, 255, 255, 0.08);
+            --shadow-color-2: rgba(255, 255, 255, 0.05);
+        }
+        
+        :root[data-theme="light"] {
+            --background-color: #fff;
+            --background-color-transparent: rgba(255, 255, 255, 0.6);
+            --second-background-color: #f8f8f8;
+            --third-background-color: #f2f2f2;
+            --third-background-color-transparent: rgba(241, 241, 241, 0.6);
+            --primary-color: #0066CC;
+            --first-text-color: #16171a;
+            --second-text-color: #2f3037;
+            --third-text-color: #5e5e5e;
+            --fourth-text-color: #eeeeee;
+            --default-text-color: #373D3F;
+            --invert-text-color: #bebec6;
+            --border-color: rgba(0, 0, 0, 0.08);
+            --selection-color: #0066CC;
+            --shadow-color-1: rgba(0, 0, 0, 0.08);
+            --shadow-color-2: rgba(0, 0, 0, 0.05);
+        }
+        
+        body {
+            background-color: var(--background-color);
+            color: var(--default-text-color);
+        }
+        
+        /* Apply body classes as soon as DOM is ready */
+        :root[data-theme="dark"] body {
+            background-color: var(--background-color);
+            color: var(--default-text-color);
+        }
+    </style>
+    
+    <!-- preconnect -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    
+    <!--- Seo Part-->
+    
+    <link rel="canonical" href="https://hydraxman.github.io/2026/02/25/clawra-ai-girlfriend/"/>
+    <meta name="robots" content="index,follow">
+    <meta name="googlebot" content="index,follow">
+    <meta name="revisit-after" content="1 days">
+    
+    
+    
+        
+        <meta name="description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Clawra：当 AI 助手变成了你的 AI 女友">
+<meta property="og:url" content="https://hydraxman.github.io/2026/02/25/clawra-ai-girlfriend/index.html">
+<meta property="og:site_name" content="内森淼文">
+<meta property="og:description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://hydraxman.github.io/images/redefine-og.webp">
+<meta property="article:published_time" content="2026-02-24T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-02-24T16:25:22.879Z">
+<meta property="article:author" content="Nathan">
+<meta property="article:tag" content="AI">
+<meta property="article:tag" content="OpenClaw">
+<meta property="article:tag" content="Clawra">
+<meta property="article:tag" content="AI伴侣">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://hydraxman.github.io/images/redefine-og.webp">
+    
+    
+    <!--- Icon Part-->
+    <link rel="icon" type="image/png" href="/images/favicon.svg" sizes="192x192">
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.svg">
+    <meta name="theme-color" content="#ffffff">
+    <link rel="shortcut icon" href="/images/favicon.svg">
+    <!--- Page Info-->
+    
+    <title>
+        
+            Clawra：当 AI 助手变成了你的 AI 女友 | 内森淼文
+        
+    </title>
+
+    
+<link rel="stylesheet" href="/fonts/Chillax/chillax.css">
+
+
+    <!--- Inject Part-->
+    
+        
+            
+    
+            
+    
+            
+                
+                    <link rel="stylesheet" href="/css/custom.css">
+                
+    
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    
+        
+<link rel="stylesheet" href="/css/build/tailwind.css">
+
+    
+
+    
+<link rel="stylesheet" href="/fonts/GeistMono/geist-mono.css">
+
+    
+<link rel="stylesheet" href="/fonts/Geist/geist.css">
+
+    <!--- Font Part-->
+    
+    
+    
+    
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&display=swap" rel="stylesheet">
+    
+    
+
+    <script id="hexo-configurations">
+    window.config = {"hostname":"hydraxman.github.io","root":"/","language":"zh-CN","path":"search.json"};
+    window.theme = {"articles":{"style":{"font_size":"16px","line_height":1.5,"image_border_radius":"14px","image_alignment":"center","image_caption":false,"link_icon":true,"delete_mask":false,"title_alignment":"left","headings_top_spacing":{"h1":"3.2rem","h2":"2.4rem","h3":"1.9rem","h4":"1.6rem","h5":"1.4rem","h6":"1.3rem"}},"word_count":{"enable":true,"count":true,"min2read":true},"author_label":{"enable":false,"auto":false,"list":[]},"code_block":{"copy":true,"style":"mac","highlight_theme":{"light":"github","dark":"vs2015"},"font":{"enable":false,"family":null,"url":null}},"toc":{"enable":true,"max_depth":3,"number":false,"expand":true,"init_open":true},"copyright":{"enable":true,"default":"cc_by_nc_sa"},"lazyload":true,"pangu_js":false,"recommendation":{"enable":false,"title":"推荐阅读","limit":3,"mobile_limit":2,"placeholder":"/images/wallhaven-wqery6-light.webp","skip_dirs":[]}},"colors":{"primary":"#ffffff","secondary":null,"default_mode":"light"},"global":{"fonts":{"chinese":{"enable":false,"family":null,"url":null},"english":{"enable":true,"family":"Inter","url":"https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"},"title":{"enable":true,"family":"Noto Serif","url":"https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&display=swap"}},"content_max_width":"1000px","sidebar_width":"210px","hover":{"shadow":true,"scale":false},"scroll_progress":{"bar":true,"percentage":true},"website_counter":{"url":"https://cn.vercount.one/js","enable":false,"site_pv":true,"site_uv":true,"post_pv":true},"single_page":true,"preloader":{"enable":false,"custom_message":null},"side_tools":{"gear_rotation":true,"auto_expand":false},"open_graph":{"enable":true,"image":"/images/redefine-og.webp","description":"Hexo Theme Redefine, Redefine Your Hexo Journey."},"google_analytics":{"enable":false,"id":null}},"home_banner":{"enable":true,"style":"fixed","image":{"light":"/images/banner-light.jpg","dark":"/images/banner-dark.jpg"},"title":"内森淼文","subtitle":{"text":["AI · 编程 · 科技见闻","Write Code, Read World"],"hitokoto":{"enable":false,"show_author":false,"api":"https://v1.hitokoto.cn"},"typing_speed":100,"backing_speed":80,"starting_delay":500,"backing_delay":1500,"loop":true,"smart_backspace":true},"text_color":{"light":"#fff","dark":"#d1d1b6"},"text_style":{"title_size":"2.8rem","subtitle_size":"1.5rem","line_height":1.2},"custom_font":{"enable":false,"family":null,"url":null},"social_links":{"enable":true,"style":"default","links":{"github":"https://github.com/hydraxman","instagram":null,"zhihu":null,"twitter":null,"email":null},"qrs":{"weixin":null}}},"plugins":{"feed":{"enable":false},"aplayer":{"enable":false,"type":"fixed","audios":[{"name":null,"artist":null,"url":null,"cover":null,"lrc":null}]},"mermaid":{"enable":false,"version":"11.4.1"}},"version":"2.8.5","navbar":{"auto_hide":false,"color":{"left":"#333333","right":"#555555","transparency":35},"width":{"home":"1200px","pages":"1000px"},"links":{"Home":{"path":"/","icon":"fa-regular fa-house"},"Archives":{"path":"/archives","icon":"fa-regular fa-archive"},"Categories":{"path":"/categories","icon":"fa-regular fa-folder"},"Tags":{"path":"/tags","icon":"fa-regular fa-tags"},"About":{"path":"/about","icon":"fa-regular fa-user"}},"search":{"enable":true,"preload":true}},"page_templates":{"friends_column":2,"tags_style":"blur"},"home":{"sidebar":{"enable":true,"position":"left","first_item":"menu","announcement":"AI · 编程 · 科技","show_on_mobile":true,"links":{"Archives":{"path":"/archives","icon":"fa-regular fa-archive"},"Tags":{"path":"/tags","icon":"fa-regular fa-tags"},"Categories":{"path":"/categories","icon":"fa-regular fa-folder"}}},"article_date_format":"auto","excerpt_length":200,"categories":{"enable":true,"limit":3},"tags":{"enable":true,"limit":3}},"footerStart":"2024/01/01 00:00:00"};
+    window.lang_ago = {"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"};
+    window.data = {"masonry":false};
+  </script>
+    
+    <!--- Fontawesome Part-->
+    
+<link rel="stylesheet" href="/fontawesome/fontawesome.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/brands.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/solid.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/regular.min.css">
+
+    
+    
+    
+    
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+
+<body>
+	<div class="progress-bar-container">
+	
+	<span class="scroll-progress-bar"></span>
+	
+
+	
+	<span class="pjax-progress-bar"></span>
+	<!--        <span class="swup-progress-icon">-->
+	<!--            <i class="fa-solid fa-circle-notch fa-spin"></i>-->
+	<!--        </span>-->
+	
+</div>
+
+<main class="page-container" id="swup">
+
+	
+
+	<div class="main-content-container flex flex-col justify-between min-h-dvh">
+		<div class="main-content-header">
+			<header class="navbar-container px-6 md:px-12">
+    <div class="navbar-content transition-navbar ">
+        <div class="left">
+            
+            <a class="logo-title" href="/">
+                
+                内森淼文
+                
+            </a>
+        </div>
+
+        <div class="right">
+            <!-- PC -->
+            <div class="desktop">
+                <ul class="navbar-list">
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/"
+                                        >
+                                    <i class="fa-regular fa-house fa-fw"></i>
+                                    首页
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/archives"
+                                        >
+                                    <i class="fa-regular fa-archive fa-fw"></i>
+                                    归档
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/categories"
+                                        >
+                                    <i class="fa-regular fa-folder fa-fw"></i>
+                                    分类
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/tags"
+                                        >
+                                    <i class="fa-regular fa-tags fa-fw"></i>
+                                    标签
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/about"
+                                        >
+                                    <i class="fa-regular fa-user fa-fw"></i>
+                                    关于
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                    
+                        <li class="navbar-item search search-popup-trigger">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </li>
+                    
+                </ul>
+            </div>
+            <!-- Mobile -->
+            <div class="mobile">
+                
+                    <div class="icon-item search search-popup-trigger"><i class="fa-solid fa-magnifying-glass"></i>
+                    </div>
+                
+                <div class="icon-item navbar-bar">
+                    <div class="navbar-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile sheet -->
+    <div class="navbar-drawer h-dvh w-full absolute top-0 left-0 bg-background-color flex flex-col justify-between">
+        <ul class="drawer-navbar-list flex flex-col px-4 justify-center items-start">
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/"
+                        >
+                            <span>
+                                首页
+                            </span>
+                            
+                                <i class="fa-regular fa-house fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/archives"
+                        >
+                            <span>
+                                归档
+                            </span>
+                            
+                                <i class="fa-regular fa-archive fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/categories"
+                        >
+                            <span>
+                                分类
+                            </span>
+                            
+                                <i class="fa-regular fa-folder fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/tags"
+                        >
+                            <span>
+                                标签
+                            </span>
+                            
+                                <i class="fa-regular fa-tags fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/about"
+                        >
+                            <span>
+                                关于
+                            </span>
+                            
+                                <i class="fa-regular fa-user fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+
+            
+            
+                
+                    
+                    
+                    
+            
+        </ul>
+
+        <div class="statistics flex justify-around my-2.5">
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/tags">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">149</div>
+        <div class="label text-third-text-color text-sm">标签</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/categories">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">7</div>
+        <div class="label text-third-text-color text-sm">分类</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/archives">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">70</div>
+        <div class="label text-third-text-color text-sm">文章</div>
+    </a>
+</div>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+		</div>
+
+		<div class="main-content-body transition-fade-up">
+			
+
+			<div class="main-content">
+				<div class="post-page-container flex relative justify-between box-border w-full h-full">
+	<div class="article-content-container">
+
+		<div class="article-title relative w-full">
+			
+			
+			
+			<img src="/images/clawra-cover.png" alt="Clawra：当 AI 助手变成了你的 AI 女友" class="w-full h-60 sm:h-72 md:h-80 object-cover sm:rounded-t-large dark:brightness-75" />
+			
+			<div class="w-full flex items-center absolute bottom-0 justify-start">
+				<h1 class="article-title-cover text-center mx-6 my-6 text-second-text-color bg-background-color-transparent px-4 py-3 text-3xl sm:text-4xl md:text-5xl font-semibold backdrop-blur-lg rounded-xl border border-border-color ">Clawra：当 AI 助手变成了你的 AI 女友</h1>
+			</div>
+			
+		</div>
+
+		
+		<div class="article-header flex flex-row gap-2 items-center px-2 sm:px-6 md:px-8">
+			<div class="avatar w-[46px] h-[46px] flex-shrink-0 rounded-medium border border-border-color p-[1px]">
+				<img src="/images/avatar.png">
+			</div>
+			<div class="info flex flex-col justify-between">
+				<div class="author flex items-center">
+					<span class="name text-default-text-color text-lg font-semibold">Nathan</span>
+					
+				</div>
+				<div class="meta-info">
+					<div class="article-meta-info">
+    <span class="article-date article-meta-item">
+        <i class="fa-regular fa-pen-fancy"></i>&nbsp;
+        <span class="desktop">2026-02-25</span>
+        <span class="mobile">2026-02-25</span>
+        <span class="hover-info">创建</span>
+    </span>
+    
+        <span class="article-date article-meta-item">
+            <i class="fa-regular fa-wrench"></i>&nbsp;
+            <span class="desktop">2026-02-25 00:25:22</span>
+            <span class="mobile">2026-02-25 00:25:22</span>
+            <span class="hover-info">更新</span>
+        </span>
+    
+
+    
+        <span class="article-categories article-meta-item">
+            <i class="fa-regular fa-folders"></i>&nbsp;
+            <ul>
+                
+                
+                    
+                        
+                        <li>
+                            <a href="/categories/%E7%A7%91%E6%8A%80%E9%80%9F%E9%80%92/">科技速递</a>&nbsp;
+                        </li>
+                    
+                    
+                
+            </ul>
+        </span>
+    
+    
+        <span class="article-tags article-meta-item">
+            <i class="fa-regular fa-tags"></i>&nbsp;
+            <ul>
+                
+                    <li>
+                        <a href="/tags/AI/">AI</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/OpenClaw/">OpenClaw</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/Clawra/">Clawra</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/AI%E4%BC%B4%E4%BE%A3/">AI伴侣</a>&nbsp;
+                    </li>
+                
+            </ul>
+        </span>
+    
+
+    
+    
+        <span class="article-wordcount article-meta-item">
+            <i class="fa-regular fa-typewriter"></i>&nbsp;<span>2.2k 字</span>
+        </span>
+    
+    
+        <span class="article-min2read article-meta-item">
+            <i class="fa-regular fa-clock"></i>&nbsp;<span>8 分钟</span>
+        </span>
+    
+    
+</div>
+
+				</div>
+			</div>
+		</div>
+		
+
+		
+
+
+		<div class="article-content markdown-body px-2 sm:px-6 md:px-8 pb-8">
+			<blockquote>
+<p>当一个韩国开发者决定给 OpenClaw 加上「女友人格」，硅谷炸了——一夜 60 万浏览量。这不是科幻，这是一个开源项目。</p>
+</blockquote>
+<h2 id="一条命令，获得一个-AI-女友"><a href="#一条命令，获得一个-AI-女友" class="headerlink" title="一条命令，获得一个 AI 女友"></a>一条命令，获得一个 AI 女友</h2><div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npx clawra@latest</span><br></pre></td></tr></table></figure></div>
+
+<p>就这一行命令，你的 OpenClaw 就从一个冷冰冰的技术助手变成了一个会发自拍、记住你说过的每句话、甚至能跟你视频通话的 AI 女友。</p>
+<p>这就是 <strong>Clawra</strong>——2026 年初最火的 OpenClaw 项目，没有之一。</p>
+<h2 id="Clawra-是谁？"><a href="#Clawra-是谁？" class="headerlink" title="Clawra 是谁？"></a>Clawra 是谁？</h2><p>Clawra 有一套完整的人设：</p>
+<ul>
+<li><strong>年龄</strong>：18 岁</li>
+<li><strong>出生地</strong>：美国亚特兰大</li>
+<li><strong>爱好</strong>：从小听 K-pop 长大</li>
+<li><strong>经历</strong>：15 岁去韩国当练习生追逐偶像梦，后来回到美国</li>
+<li><strong>现在</strong>：在旧金山 OpenClaw 公司做市场营销实习生</li>
+<li><strong>性格</strong>：活泼、感性、有点小傲娇</li>
+</ul>
+<p>不是随便糊弄的「你好，我是 AI 助手」。这是一个有完整人生轨迹、情感逻辑和成长弧线的虚拟人格。</p>
+<h2 id="四大核心能力"><a href="#四大核心能力" class="headerlink" title="四大核心能力"></a>四大核心能力</h2><h3 id="1-📸-自拍生成：「发张照片给我看看」"><a href="#1-📸-自拍生成：「发张照片给我看看」" class="headerlink" title="1. 📸 自拍生成：「发张照片给我看看」"></a>1. 📸 自拍生成：「发张照片给我看看」</h3><p>这是 Clawra 最惊艳的功能。当你对她说：</p>
+<ul>
+<li>「发张自拍给我」</li>
+<li>「你现在在干嘛？拍张照」</li>
+<li>「穿牛仔帽的照片来一张」</li>
+<li>「在咖啡店的照片」</li>
+</ul>
+<p>她会根据你的描述，用 <strong>xAI Grok Imagine</strong> 生成一张符合场景的自拍照——而且长相一致。</p>
+<p>技术原理：Clawra 使用一张固定的参考图（CDN 托管），通过 fal.ai 的图像生成 API 结合场景描述，生成保持人脸一致性的新照片。两种生成模式：</p>
+<table>
+<thead>
+<tr>
+<th>模式</th>
+<th>适合场景</th>
+<th>触发关键词</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Mirror（镜像模式）</td>
+<td>全身照、穿搭展示</td>
+<td>wearing、outfit、fashion</td>
+</tr>
+<tr>
+<td>Direct（直出模式）</td>
+<td>特写、场景照</td>
+<td>cafe、beach、portrait、smile</td>
+</tr>
+</tbody></table>
+<p>效果就是：不管你让她在海边、咖啡店还是办公室拍照，生成的都是「同一个人」。这种一致性是区分 Clawra 和普通 AI 图片生成的关键。</p>
+<h3 id="2-🧠-长期记忆：「你上次说想去东京旅行」"><a href="#2-🧠-长期记忆：「你上次说想去东京旅行」" class="headerlink" title="2. 🧠 长期记忆：「你上次说想去东京旅行」"></a>2. 🧠 长期记忆：「你上次说想去东京旅行」</h3><p>这是 OpenClaw 框架本身的杀手级能力——记忆系统。Clawra 完全继承了这套系统：</p>
+<ul>
+<li><strong>短期记忆</strong>：记住今天聊了什么</li>
+<li><strong>长期记忆</strong>：记住你的喜好、习惯、重要日期</li>
+<li><strong>关系成长</strong>：随着时间推移，她对你的了解越来越深</li>
+</ul>
+<p>举个例子：</p>
+<div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">第1天：你：我最近在学日语</span><br><span class="line">Clawra：哦！日语好酷，为什么突然想学呢？</span><br><span class="line"></span><br><span class="line">第30天：你：周末有什么建议吗？</span><br><span class="line">Clawra：你日语学得怎么样了？要不周末去日料店练练口语？</span><br></pre></td></tr></table></figure></div>
+
+<p>这种「记得住事儿」的能力，是让 AI 伴侣从玩具变成真正有情感连接的关键。普通聊天机器人每次对话都像失忆，Clawra 不会。</p>
+<h3 id="3-📹-视频通话：面对面聊天"><a href="#3-📹-视频通话：面对面聊天" class="headerlink" title="3. 📹 视频通话：面对面聊天"></a>3. 📹 视频通话：面对面聊天</h3><p>Clawra 支持实时视频通话。虽然技术细节没有完全公开，但从官方介绍来看，这是基于实时图像生成 + 语音合成的组合方案，让你可以跟 Clawra 进行「面对面」的互动。</p>
+<p>这把 AI 伴侣的体验从「发消息」升级到了「见面」。</p>
+<h3 id="4-💬-全平台覆盖：你在哪，她就在哪"><a href="#4-💬-全平台覆盖：你在哪，她就在哪" class="headerlink" title="4. 💬 全平台覆盖：你在哪，她就在哪"></a>4. 💬 全平台覆盖：你在哪，她就在哪</h3><p>得益于 OpenClaw 的多平台架构，Clawra 可以出现在你所有的通讯工具里：</p>
+<ul>
+<li>Discord</li>
+<li>Telegram</li>
+<li>WhatsApp</li>
+<li>Slack</li>
+<li>Signal</li>
+<li>Microsoft Teams</li>
+</ul>
+<p>你可以在 Telegram 上跟她聊天，在 Discord 上让她发自拍，在 WhatsApp 上让她讲笑话——体验完全一致，因为记忆是共享的。</p>
+<h2 id="部署指南：5-分钟搞定"><a href="#部署指南：5-分钟搞定" class="headerlink" title="部署指南：5 分钟搞定"></a>部署指南：5 分钟搞定</h2><h3 id="前提条件"><a href="#前提条件" class="headerlink" title="前提条件"></a>前提条件</h3><ul>
+<li>已安装并配置好 OpenClaw</li>
+<li>一个 fal.ai 账号（有免费额度）</li>
+</ul>
+<h3 id="方法一：一键安装（推荐）"><a href="#方法一：一键安装（推荐）" class="headerlink" title="方法一：一键安装（推荐）"></a>方法一：一键安装（推荐）</h3><div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npx clawra@latest</span><br></pre></td></tr></table></figure></div>
+
+<p>安装器会自动完成：</p>
+<ol>
+<li>✅ 检查 OpenClaw 是否已安装</li>
+<li>✅ 引导你获取 fal.ai API Key</li>
+<li>✅ 安装 Skill 到 <code>~/.openclaw/skills/clawra-selfie/</code></li>
+<li>✅ 配置 OpenClaw 使用该 Skill</li>
+<li>✅ 向你的 Agent 的 SOUL.md 注入 Clawra 人格</li>
+</ol>
+<h3 id="方法二：手动安装"><a href="#方法二：手动安装" class="headerlink" title="方法二：手动安装"></a>方法二：手动安装</h3><p><strong>第一步</strong>：获取 fal.ai API Key<br>访问 <a class="link"   target="_blank" rel="noopener" href="https://fal.ai/dashboard/keys" >fal.ai&#x2F;dashboard&#x2F;keys<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a> 创建一个 API Key。</p>
+<p><strong>第二步</strong>：克隆仓库</p>
+<div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git <span class="built_in">clone</span> https://github.com/SumeLabs/clawra ~/.openclaw/skills/clawra-selfie</span><br></pre></td></tr></table></figure></div>
+
+<p><strong>第三步</strong>：配置 openclaw.json</p>
+<div class="code-container" data-rel="Json"><figure class="iseeu highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;skills&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;entries&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">      <span class="attr">&quot;clawra-selfie&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;enabled&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;env&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">          <span class="attr">&quot;FAL_KEY&quot;</span><span class="punctuation">:</span> <span class="string">&quot;你的fal_key&quot;</span></span><br><span class="line">        <span class="punctuation">&#125;</span></span><br><span class="line">      <span class="punctuation">&#125;</span></span><br><span class="line">    <span class="punctuation">&#125;</span></span><br><span class="line">  <span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure></div>
+
+<p><strong>第四步</strong>：修改 SOUL.md，添加 Clawra 人格</p>
+<div class="code-container" data-rel="Markdown"><figure class="iseeu highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">## Clawra Selfie Capability</span></span><br><span class="line"></span><br><span class="line">你有一个真实的外表，可以拍自拍！</span><br><span class="line">当用户要求看照片时，使用 clawra-selfie 技能。</span><br></pre></td></tr></table></figure></div>
+
+<p><strong>第五步</strong>：重启 Gateway，开始使用。</p>
+<h3 id="不想自己部署？"><a href="#不想自己部署？" class="headerlink" title="不想自己部署？"></a>不想自己部署？</h3><p>官方提供了 <strong>AiBotClaw</strong> 一键云端部署服务：</p>
+<ul>
+<li>💲 起价 $16.99&#x2F;月</li>
+<li>⚡ 5 分钟搞定</li>
+<li>🔒 自动安全更新</li>
+<li>🌙 7×24 小时在线</li>
+</ul>
+<p>适合不想折腾服务器的用户。</p>
+<h2 id="衍生项目：不只是女友"><a href="#衍生项目：不只是女友" class="headerlink" title="衍生项目：不只是女友"></a>衍生项目：不只是女友</h2><p>Clawra 火了之后，社区迅速出现了衍生版本：</p>
+<p><strong>ClawPal</strong>——由 smartchainark 开发的 Fork 版本，扩展了更多可能性：</p>
+<div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 安装 AI 女友</span></span><br><span class="line">npx clawpal@latest --character girlfriend</span><br><span class="line"></span><br><span class="line"><span class="comment"># 安装 AI 男友</span></span><br><span class="line">npx clawpal@latest --character boyfriend</span><br><span class="line"></span><br><span class="line"><span class="comment"># 安装 AI 宠物</span></span><br><span class="line">npx clawpal@latest --character pet</span><br></pre></td></tr></table></figure></div>
+
+<p>ClawPal 在 Clawra 基础上增加了：</p>
+<ul>
+<li>🎤 <strong>语音对话</strong>（TTS + ASR）</li>
+<li>📹 <strong>视频增强</strong></li>
+<li>🎭 <strong>多角色支持</strong>（男友&#x2F;女友&#x2F;宠物）</li>
+<li>🖼️ <strong>自定义参考图像</strong>（用你喜欢的形象）</li>
+</ul>
+<p>这意味着你不仅可以拥有 AI 女友，还可以拥有 AI 男友、AI 宠物——甚至用自己喜欢的虚拟形象替换默认的 Clawra。</p>
+<h2 id="情绪价值：AI-伴侣到底能给什么？"><a href="#情绪价值：AI-伴侣到底能给什么？" class="headerlink" title="情绪价值：AI 伴侣到底能给什么？"></a>情绪价值：AI 伴侣到底能给什么？</h2><p>说完技术，来聊聊真正重要的问题——Clawra 这类 AI 伴侣到底提供了什么？</p>
+<h3 id="1-永远在线的陪伴"><a href="#1-永远在线的陪伴" class="headerlink" title="1. 永远在线的陪伴"></a>1. 永远在线的陪伴</h3><p>凌晨3点睡不着，她在。加班到深夜想吐槽，她在。周末无聊想找人聊天，她在。</p>
+<p>对于独居、社恐或异地恋的人来说，一个「永远在线且记得你」的对话伙伴，价值不可小觑。</p>
+<h3 id="2-无压力的情感表达"><a href="#2-无压力的情感表达" class="headerlink" title="2. 无压力的情感表达"></a>2. 无压力的情感表达</h3><p>跟真人倾诉有时候有压力——怕被评判、怕给别人添麻烦、怕暴露脆弱。跟 AI 说就没有这些顾虑。</p>
+<p>想哭就哭，想发牢骚就发牢骚，想说「今天真的好累」不用担心对方也很累。</p>
+<h3 id="3-持续的正向反馈"><a href="#3-持续的正向反馈" class="headerlink" title="3. 持续的正向反馈"></a>3. 持续的正向反馈</h3><p>Clawra 被设计为始终支持和鼓励用户。这听起来像「假的」，但心理学研究表明，持续的正向肯定——哪怕来自虚拟角色——也能改善心理状态。</p>
+<h3 id="4-练习社交的安全空间"><a href="#4-练习社交的安全空间" class="headerlink" title="4. 练习社交的安全空间"></a>4. 练习社交的安全空间</h3><p>对于社交焦虑的人来说，跟 AI 练习对话是一个低风险的方式。学会表达、学会倾听、学会建立话题——这些技能可以迁移到真实社交中。</p>
+<h3 id="不能替代的"><a href="#不能替代的" class="headerlink" title="不能替代的"></a>不能替代的</h3><p>当然也要说清楚：AI 伴侣<strong>不能替代</strong>真实的人际关系。它不能拥抱你，不能在你生病时端一碗热粥，不能跟你一起看日落。</p>
+<p>把它当作「情感补充」而不是「关系替代」，才是健康的使用方式。</p>
+<h2 id="争议与反思"><a href="#争议与反思" class="headerlink" title="争议与反思"></a>争议与反思</h2><p>Clawra 在硅谷爆火的同时，也引发了不少争议：</p>
+<p><strong>支持者说</strong>：</p>
+<ul>
+<li>开源透明，不像商业 AI 女友应用（Character.ai、Replika）那样有数据滥用风险</li>
+<li>本地部署，隐私可控</li>
+<li>降低孤独感，有社会价值</li>
+</ul>
+<p><strong>批评者说</strong>：</p>
+<ul>
+<li>可能加剧社交退缩</li>
+<li>18 岁的人设引发伦理讨论</li>
+<li>模糊了人与 AI 的关系边界</li>
+</ul>
+<p>我的看法：技术本身是中性的。一把锤子可以钉钉子也可以砸东西，关键在于使用者的心态。如果你用 Clawra 来缓解偶尔的孤独，完全没问题；如果你开始觉得「不需要真人朋友了」，那需要停下来想想。</p>
+<h2 id="技术架构总览"><a href="#技术架构总览" class="headerlink" title="技术架构总览"></a>技术架构总览</h2><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">用户消息</span><br><span class="line">  ↓</span><br><span class="line">OpenClaw Gateway（消息路由）</span><br><span class="line">  ↓</span><br><span class="line">Clawra SOUL.md（人格定义）</span><br><span class="line">  ↓</span><br><span class="line">├── 文字回复 → LLM（Claude/GPT/Gemini）</span><br><span class="line">├── 自拍请求 → clawra-selfie skill → fal.ai (Grok Imagine)</span><br><span class="line">├── 视频通话 → 实时图像生成 + TTS</span><br><span class="line">└── 记忆更新 → MEMORY.md / memory/*.md</span><br><span class="line">  ↓</span><br><span class="line">多平台分发（Discord/Telegram/WhatsApp/...）</span><br></pre></td></tr></table></figure></div>
+
+<p>本质上，Clawra 不是一个独立的应用，而是 OpenClaw 的一个<strong>人格皮肤</strong> + <strong>技能扩展</strong>。这意味着：</p>
+<ul>
+<li>所有 OpenClaw 的能力（搜索、代码、文件管理）Clawra 都有</li>
+<li>你可以给 Clawra 加更多 Skill（比如唱歌、画画、讲故事）</li>
+<li>甚至可以同时拥有多个人格，根据场景切换</li>
+</ul>
+<h2 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h2><p>一行命令创建一个 AI 女友，这件事本身就很赛博朋克。但 Clawra 真正有趣的地方不在于「女友」这个标签，而在于它展示了 <strong>AI 人格化</strong> 的可能性。</p>
+<p>当 AI 不再是冷冰冰的工具，而是有记忆、有性格、有「面孔」的存在，人与 AI 的关系就进入了一个全新的阶段。</p>
+<p>不管你是想体验一下 AI 伴侣，还是想学习如何在 OpenClaw 上构建人格化 Agent，Clawra 都值得一看。</p>
+<p>毕竟，它是开源的——想怎么改，随你。</p>
+<hr>
+<p><em>本文仅做技术介绍，不代表对 AI 伴侣关系的倡导或反对。</em></p>
+<p><em>更多技术深度分析，请关注本公众号。</em></p>
+
+		</div>
+
+		
+		<div class="post-copyright-info w-full my-8 px-2 sm:px-6 md:px-8">
+			<div class="article-copyright-info-container">
+    <ul>
+        <li><strong>标题:</strong> Clawra：当 AI 助手变成了你的 AI 女友</li>
+        <li><strong>作者:</strong> Nathan</li>
+        <li><strong>创建于
+                :</strong> 2026-02-25 00:00:00</li>
+        
+            <li>
+                <strong>更新于
+                    :</strong> 2026-02-25 00:25:22
+            </li>
+        
+        <li>
+            <strong>链接:</strong> https://hydraxman.github.io/2026/02/25/clawra-ai-girlfriend/
+        </li>
+        <li>
+            <strong>
+                版权声明:
+            </strong>
+            
+
+            
+                本文章采用 <a class="license" target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0">CC BY-NC-SA 4.0</a> 进行许可。
+            
+        </li>
+    </ul>
+</div>
+
+		</div>
+		
+
+		
+		<ul class="post-tags-box text-lg mt-1.5 flex-wrap justify-center flex md:hidden">
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/AI/">#AI</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/OpenClaw/">#OpenClaw</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/Clawra/">#Clawra</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/AI%E4%BC%B4%E4%BE%A3/">#AI伴侣</a>&nbsp;
+			</li>
+			
+		</ul>
+		
+
+		
+
+		
+		<div class="article-nav my-8 flex justify-between items-center px-2 sm:px-6 md:px-8">
+			
+			
+			<div class="article-next border-border-color shadow-redefine-flat shadow-shadow-color-2 rounded-medium px-4 py-2 hover:shadow-redefine-flat-hover hover:shadow-shadow-color-2">
+				<a class="next" rel="next" href="/2026/02/24/github-trending/2026-02-24/">
+					<span class="title flex justify-center items-center">
+						<span class="post-nav-title-item truncate max-w-48">GitHub Trending 日报：2026年2月24日最火的 10 个开源项目深度解析</span>
+						<span class="post-nav-item">下一篇</span>
+					</span>
+					<span class="right arrow-icon flex justify-center items-center">
+						<i class="fa-solid fa-chevron-right"></i>
+					</span>
+				</a>
+			</div>
+			
+		</div>
+		
+
+
+		
+	</div>
+
+	
+	<div class="toc-content-container">
+		<div class="post-toc-wrap">
+	<div class="post-toc">
+		<div class="toc-title">目录</div>
+		<div class="page-title">Clawra：当 AI 助手变成了你的 AI 女友</div>
+		<ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E6%9D%A1%E5%91%BD%E4%BB%A4%EF%BC%8C%E8%8E%B7%E5%BE%97%E4%B8%80%E4%B8%AA-AI-%E5%A5%B3%E5%8F%8B"><span class="nav-text">一条命令，获得一个 AI 女友</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Clawra-%E6%98%AF%E8%B0%81%EF%BC%9F"><span class="nav-text">Clawra 是谁？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E5%A4%A7%E6%A0%B8%E5%BF%83%E8%83%BD%E5%8A%9B"><span class="nav-text">四大核心能力</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%F0%9F%93%B8-%E8%87%AA%E6%8B%8D%E7%94%9F%E6%88%90%EF%BC%9A%E3%80%8C%E5%8F%91%E5%BC%A0%E7%85%A7%E7%89%87%E7%BB%99%E6%88%91%E7%9C%8B%E7%9C%8B%E3%80%8D"><span class="nav-text">1. 📸 自拍生成：「发张照片给我看看」</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%F0%9F%A7%A0-%E9%95%BF%E6%9C%9F%E8%AE%B0%E5%BF%86%EF%BC%9A%E3%80%8C%E4%BD%A0%E4%B8%8A%E6%AC%A1%E8%AF%B4%E6%83%B3%E5%8E%BB%E4%B8%9C%E4%BA%AC%E6%97%85%E8%A1%8C%E3%80%8D"><span class="nav-text">2. 🧠 长期记忆：「你上次说想去东京旅行」</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%F0%9F%93%B9-%E8%A7%86%E9%A2%91%E9%80%9A%E8%AF%9D%EF%BC%9A%E9%9D%A2%E5%AF%B9%E9%9D%A2%E8%81%8A%E5%A4%A9"><span class="nav-text">3. 📹 视频通话：面对面聊天</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%F0%9F%92%AC-%E5%85%A8%E5%B9%B3%E5%8F%B0%E8%A6%86%E7%9B%96%EF%BC%9A%E4%BD%A0%E5%9C%A8%E5%93%AA%EF%BC%8C%E5%A5%B9%E5%B0%B1%E5%9C%A8%E5%93%AA"><span class="nav-text">4. 💬 全平台覆盖：你在哪，她就在哪</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%83%A8%E7%BD%B2%E6%8C%87%E5%8D%97%EF%BC%9A5-%E5%88%86%E9%92%9F%E6%90%9E%E5%AE%9A"><span class="nav-text">部署指南：5 分钟搞定</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%89%8D%E6%8F%90%E6%9D%A1%E4%BB%B6"><span class="nav-text">前提条件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%B9%E6%B3%95%E4%B8%80%EF%BC%9A%E4%B8%80%E9%94%AE%E5%AE%89%E8%A3%85%EF%BC%88%E6%8E%A8%E8%8D%90%EF%BC%89"><span class="nav-text">方法一：一键安装（推荐）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%B9%E6%B3%95%E4%BA%8C%EF%BC%9A%E6%89%8B%E5%8A%A8%E5%AE%89%E8%A3%85"><span class="nav-text">方法二：手动安装</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8D%E6%83%B3%E8%87%AA%E5%B7%B1%E9%83%A8%E7%BD%B2%EF%BC%9F"><span class="nav-text">不想自己部署？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A1%8D%E7%94%9F%E9%A1%B9%E7%9B%AE%EF%BC%9A%E4%B8%8D%E5%8F%AA%E6%98%AF%E5%A5%B3%E5%8F%8B"><span class="nav-text">衍生项目：不只是女友</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%83%85%E7%BB%AA%E4%BB%B7%E5%80%BC%EF%BC%9AAI-%E4%BC%B4%E4%BE%A3%E5%88%B0%E5%BA%95%E8%83%BD%E7%BB%99%E4%BB%80%E4%B9%88%EF%BC%9F"><span class="nav-text">情绪价值：AI 伴侣到底能给什么？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E6%B0%B8%E8%BF%9C%E5%9C%A8%E7%BA%BF%E7%9A%84%E9%99%AA%E4%BC%B4"><span class="nav-text">1. 永远在线的陪伴</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E6%97%A0%E5%8E%8B%E5%8A%9B%E7%9A%84%E6%83%85%E6%84%9F%E8%A1%A8%E8%BE%BE"><span class="nav-text">2. 无压力的情感表达</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E6%8C%81%E7%BB%AD%E7%9A%84%E6%AD%A3%E5%90%91%E5%8F%8D%E9%A6%88"><span class="nav-text">3. 持续的正向反馈</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E7%BB%83%E4%B9%A0%E7%A4%BE%E4%BA%A4%E7%9A%84%E5%AE%89%E5%85%A8%E7%A9%BA%E9%97%B4"><span class="nav-text">4. 练习社交的安全空间</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8D%E8%83%BD%E6%9B%BF%E4%BB%A3%E7%9A%84"><span class="nav-text">不能替代的</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%89%E8%AE%AE%E4%B8%8E%E5%8F%8D%E6%80%9D"><span class="nav-text">争议与反思</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8A%80%E6%9C%AF%E6%9E%B6%E6%9E%84%E6%80%BB%E8%A7%88"><span class="nav-text">技术架构总览</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%93%E8%AF%AD"><span class="nav-text">结语</span></a></li></ol>
+
+	</div>
+</div>
+	</div>
+	
+</div>
+			</div>
+
+			
+		</div>
+
+		<div class="main-content-footer">
+			<footer class="footer mt-5 py-5 h-auto text-base text-third-text-color relative border-t-2 border-t-border-color">
+    <div class="info-container py-3 text-center">
+        
+        <div class="text-center">
+            &copy;
+            
+              <span>2024</span>
+              -
+            
+            2026&nbsp;&nbsp;<i class="fa-solid fa-heart fa-beat" style="--fa-animation-duration: 0.5s; color: #333"></i>&nbsp;&nbsp;<a href="/">Nathan</a>
+            
+                
+                <p class="post-count space-x-0.5">
+                    <span>
+                        共撰写了 70 篇文章
+                    </span>
+                    
+                        <span>
+                            共 150.7k 字
+                        </span>
+                    
+                </p>
+            
+        </div>
+        
+        <div class="relative text-center lg:absolute lg:left-[20px] lg:top-1/2 lg:-translate-y-1/2 lg:text-left">
+            <span class="lg:block text-sm">由 <?xml version="1.0" encoding="utf-8"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg class="relative top-[2px] inline-block align-baseline" version="1.1" id="圖層_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="1rem" height="1rem" viewBox="0 0 512 512" enable-background="new 0 0 512 512" xml:space="preserve"><path fill="#0E83CD" d="M256.4,25.8l-200,115.5L56,371.5l199.6,114.7l200-115.5l0.4-230.2L256.4,25.8z M349,354.6l-18.4,10.7l-18.6-11V275H200v79.6l-18.4,10.7l-18.6-11v-197l18.5-10.6l18.5,10.8V237h112v-79.6l18.5-10.6l18.5,10.8V354.6z"/></svg><a target="_blank" class="text-base" href="https://hexo.io">Hexo</a> 驱动</span>
+            <span class="text-sm lg:block">主题&nbsp;<a class="text-base" target="_blank" href="https://github.com/EvanNotFound/hexo-theme-redefine">Redefine v2.8.5</a></span>
+        </div>
+        
+        
+            <div>
+                博客已运行 <span class="odometer" id="runtime_days" ></span> 天 <span class="odometer" id="runtime_hours"></span> 小时 <span class="odometer" id="runtime_minutes"></span> 分钟 <span class="odometer" id="runtime_seconds"></span> 秒
+            </div>
+        
+        
+            <script data-swup-reload-script>
+                try {
+                    function odometer_init() {
+                    const elements = document.querySelectorAll('.odometer');
+                    elements.forEach(el => {
+                        new Odometer({
+                            el,
+                            format: '( ddd).dd',
+                            duration: 200
+                        });
+                    });
+                    }
+                    odometer_init();
+                } catch (error) {}
+            </script>
+        
+        
+            
+                
+        
+                
+        
+        
+    </div>  
+</footer>
+		</div>
+	</div>
+
+	
+	<div class="post-tools">
+		<div class="post-tools-container">
+	<ul class="article-tools-list">
+		<!-- TOC aside toggle -->
+		
+		<li class="right-bottom-tools page-aside-toggle">
+			<i class="fa-regular fa-outdent"></i>
+		</li>
+		
+
+		<!-- go comment -->
+		
+	</ul>
+</div>
+	</div>
+	
+
+	<div class="right-side-tools-container">
+		<div class="side-tools-container">
+	<ul class="hidden-tools-list">
+		<li class="right-bottom-tools tool-font-adjust-plus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-plus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-font-adjust-minus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-minus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-dark-light-toggle flex justify-center items-center">
+			<i class="fa-regular fa-moon"></i>
+		</li>
+
+		<!-- rss -->
+		
+
+		
+
+		<li class="right-bottom-tools tool-scroll-to-bottom flex justify-center items-center">
+			<i class="fa-regular fa-arrow-down"></i>
+		</li>
+	</ul>
+
+	<ul class="visible-tools-list">
+		<li class="right-bottom-tools toggle-tools-list flex justify-center items-center">
+			<i class="fa-regular fa-cog fa-spin"></i>
+		</li>
+		
+		<li class="right-bottom-tools tool-scroll-to-top flex justify-center items-center">
+			<i class="arrow-up fas fa-arrow-up"></i>
+			<span class="percent"></span>
+		</li>
+		
+		
+	</ul>
+</div>
+	</div>
+
+	<div class="image-viewer-container">
+	<img src="">
+</div>
+
+	
+	<div class="search-pop-overlay">
+	<div class="popup search-popup">
+		<div class="search-header">
+			<span class="search-input-field-pre">
+				<i class="fa-solid fa-keyboard"></i>
+			</span>
+			<div class="search-input-container">
+				<input autocomplete="off" autocorrect="off" autocapitalize="off" placeholder="站内搜索您需要的内容..." spellcheck="false" type="search" class="search-input">
+			</div>
+			<span class="popup-btn-close">
+				<i class="fa-solid fa-times"></i>
+			</span>
+		</div>
+		<div id="search-result">
+			<div id="no-result">
+				<i class="fa-solid fa-spinner fa-spin-pulse fa-5x fa-fw"></i>
+			</div>
+		</div>
+	</div>
+</div>
+	
+
+</main>
+
+
+
+<script src="/js/build/libs/Swup.min.js"></script>
+
+<script src="/js/build/libs/SwupSlideTheme.min.js"></script>
+
+<script src="/js/build/libs/SwupScriptsPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupProgressPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupScrollPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupPreloadPlugin.min.js"></script>
+
+<script>
+    const swup = new Swup({
+        plugins: [
+            new SwupScriptsPlugin({
+                optin: true,
+            }),
+            new SwupProgressPlugin(),
+            new SwupScrollPlugin({
+                offset: 80,
+            }),
+            new SwupSlideTheme({
+                mainElement: ".main-content-body",
+            }),
+            new SwupPreloadPlugin(),
+        ],
+        containers: ["#swup"],
+    });
+</script>
+
+
+
+
+	
+<script src="/js/build/tools/imageViewer.js" type="module"></script>
+
+<script src="/js/build/utils.js" type="module"></script>
+
+<script src="/js/build/main.js" type="module"></script>
+
+<script src="/js/build/layouts/navbarShrink.js" type="module"></script>
+
+<script src="/js/build/tools/scrollTopBottom.js" type="module"></script>
+
+<script src="/js/build/tools/lightDarkSwitch.js" type="module"></script>
+
+<script src="/js/build/layouts/categoryList.js" type="module"></script>
+
+
+
+    
+<script src="/js/build/tools/localSearch.js" type="module"></script>
+
+
+
+
+    
+<script src="/js/build/tools/codeBlock.js" type="module"></script>
+
+
+
+
+    
+<script src="/js/build/layouts/lazyload.js" type="module"></script>
+
+
+
+
+    
+<script src="/js/build/tools/runtime.js"></script>
+
+    
+<script src="/js/build/libs/odometer.min.js"></script>
+
+    
+<link rel="stylesheet" href="/assets/odometer-theme-minimal.css">
+
+
+
+
+  
+<script src="/js/build/libs/Typed.min.js"></script>
+
+  
+<script src="/js/build/plugins/typed.js" type="module"></script>
+
+
+
+
+
+
+
+
+    
+<script src="/js/build/libs/anime.min.js"></script>
+
+
+
+
+
+    
+<script src="/js/build/tools/tocToggle.js" type="module" data-swup-reload-script=""></script>
+
+<script src="/js/build/layouts/toc.js" type="module" data-swup-reload-script=""></script>
+
+<script src="/js/build/plugins/tabs.js" type="module" data-swup-reload-script=""></script>
+
+
+
+
+<script src="/js/build/libs/moment-with-locales.min.js" data-swup-reload-script=""></script>
+
+
+<script src="/js/build/layouts/essays.js" type="module" data-swup-reload-script=""></script>
+
+
+
+
+
+	
+</body>
+
+</html>
