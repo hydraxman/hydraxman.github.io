@@ -1,0 +1,1408 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="keywords" content="计算机技术, 生活中的胡思乱想">
+    
+    <meta name="author" content="Nathan">
+    
+    <!-- Completely eliminate flash of wrong theme -->
+    <script>
+        (function() {
+            const THEME_KEY = "REDEFINE-THEME-STATUS";
+            const DARK = "dark", LIGHT = "light";
+            
+            // Get preferred theme
+            function getTheme() {
+                try {
+                    const saved = localStorage.getItem(THEME_KEY);
+                    if (saved) {
+                        const { isDark } = JSON.parse(saved);
+                        return isDark ? DARK : LIGHT;
+                    }
+                } catch (e) {}
+                
+                return matchMedia("(prefers-color-scheme: dark)").matches ? DARK : LIGHT;
+            }
+            
+            // Apply theme to document
+            function applyTheme(theme) {
+                const isDark = theme === DARK;
+                const root = document.documentElement;
+                
+                // Set data attribute for CSS variables
+                root.setAttribute("data-theme", theme);
+                
+                // Set classes for compatibility
+                root.classList.add(theme);
+                root.classList.remove(isDark ? LIGHT : DARK);
+                root.style.colorScheme = theme;
+            }
+            
+            // Initial application
+            const theme = getTheme();
+            applyTheme(theme);
+            
+            // Listen for system preference changes
+            matchMedia("(prefers-color-scheme: dark)").addEventListener("change", ({ matches }) => {
+                // Only update if using system preference (no localStorage entry)
+                if (!localStorage.getItem(THEME_KEY)) {
+                    applyTheme(matches ? DARK : LIGHT);
+                }
+            });
+            
+            // Set body classes once DOM is ready
+            if (document.readyState !== "loading") {
+                document.body.classList.add(theme + "-mode");
+            } else {
+                document.addEventListener("DOMContentLoaded", () => {
+                    document.body.classList.add(theme + "-mode");
+                    document.body.classList.remove((theme === DARK ? LIGHT : DARK) + "-mode");
+                });
+            }
+        })();
+    </script>
+    
+    <!-- Critical CSS to prevent flash -->
+    <style>
+        :root[data-theme="dark"] {
+            --background-color: #202124;
+            --background-color-transparent: rgba(32, 33, 36, 0.6);
+            --second-background-color: #2d2e32;
+            --third-background-color: #34353a;
+            --third-background-color-transparent: rgba(32, 33, 36, 0.6);
+            --primary-color: #0066CC;
+            --first-text-color: #ffffff;
+            --second-text-color: #eeeeee;
+            --third-text-color: #bebec6;
+            --fourth-text-color: #999999;
+            --default-text-color: #bebec6;
+            --invert-text-color: #373D3F;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --selection-color: #0066CC;
+            --shadow-color-1: rgba(255, 255, 255, 0.08);
+            --shadow-color-2: rgba(255, 255, 255, 0.05);
+        }
+        
+        :root[data-theme="light"] {
+            --background-color: #fff;
+            --background-color-transparent: rgba(255, 255, 255, 0.6);
+            --second-background-color: #f8f8f8;
+            --third-background-color: #f2f2f2;
+            --third-background-color-transparent: rgba(241, 241, 241, 0.6);
+            --primary-color: #0066CC;
+            --first-text-color: #16171a;
+            --second-text-color: #2f3037;
+            --third-text-color: #5e5e5e;
+            --fourth-text-color: #eeeeee;
+            --default-text-color: #373D3F;
+            --invert-text-color: #bebec6;
+            --border-color: rgba(0, 0, 0, 0.08);
+            --selection-color: #0066CC;
+            --shadow-color-1: rgba(0, 0, 0, 0.08);
+            --shadow-color-2: rgba(0, 0, 0, 0.05);
+        }
+        
+        body {
+            background-color: var(--background-color);
+            color: var(--default-text-color);
+        }
+        
+        /* Apply body classes as soon as DOM is ready */
+        :root[data-theme="dark"] body {
+            background-color: var(--background-color);
+            color: var(--default-text-color);
+        }
+    </style>
+    
+    <!-- preconnect -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    
+    <!--- Seo Part-->
+    
+    <link rel="canonical" href="https://hydraxman.github.io/2026/02/28/openclaw-save-money-2026/"/>
+    <meta name="robots" content="index,follow">
+    <meta name="googlebot" content="index,follow">
+    <meta name="revisit-after" content="1 days">
+    
+    
+    
+        
+        <meta name="description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="OpenClaw 省钱指南：从每月 1500 美元到 50 美元的降本实战">
+<meta property="og:url" content="https://hydraxman.github.io/2026/02/28/openclaw-save-money-2026/index.html">
+<meta property="og:site_name" content="内森淼文">
+<meta property="og:description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://hydraxman.github.io/images/redefine-og.webp">
+<meta property="article:published_time" content="2026-02-27T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-02-28T02:01:20.932Z">
+<meta property="article:author" content="Nathan">
+<meta property="article:tag" content="AI">
+<meta property="article:tag" content="Agent">
+<meta property="article:tag" content="OpenClaw">
+<meta property="article:tag" content="大模型">
+<meta property="article:tag" content="省钱">
+<meta property="article:tag" content="API">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://hydraxman.github.io/images/redefine-og.webp">
+    
+    
+    <!--- Icon Part-->
+    <link rel="icon" type="image/png" href="/images/favicon.svg" sizes="192x192">
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.svg">
+    <meta name="theme-color" content="#ffffff">
+    <link rel="shortcut icon" href="/images/favicon.svg">
+    <!--- Page Info-->
+    
+    <title>
+        
+            OpenClaw 省钱指南：从每月 1500 美元到 50 美元的降本实战 | 内森淼文
+        
+    </title>
+
+    
+<link rel="stylesheet" href="/fonts/Chillax/chillax.css">
+
+
+    <!--- Inject Part-->
+    
+        
+            
+    
+            
+    
+            
+                
+                    <link rel="stylesheet" href="/css/custom.css">
+                
+    
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    
+        
+<link rel="stylesheet" href="/css/build/tailwind.css">
+
+    
+
+    
+<link rel="stylesheet" href="/fonts/GeistMono/geist-mono.css">
+
+    
+<link rel="stylesheet" href="/fonts/Geist/geist.css">
+
+    <!--- Font Part-->
+    
+    
+    
+    
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&display=swap" rel="stylesheet">
+    
+    
+
+    <script id="hexo-configurations">
+    window.config = {"hostname":"hydraxman.github.io","root":"/","language":"zh-CN","path":"search.json"};
+    window.theme = {"articles":{"style":{"font_size":"16px","line_height":1.5,"image_border_radius":"14px","image_alignment":"center","image_caption":false,"link_icon":true,"delete_mask":false,"title_alignment":"left","headings_top_spacing":{"h1":"3.2rem","h2":"2.4rem","h3":"1.9rem","h4":"1.6rem","h5":"1.4rem","h6":"1.3rem"}},"word_count":{"enable":true,"count":true,"min2read":true},"author_label":{"enable":false,"auto":false,"list":[]},"code_block":{"copy":true,"style":"mac","highlight_theme":{"light":"github","dark":"vs2015"},"font":{"enable":false,"family":null,"url":null}},"toc":{"enable":true,"max_depth":3,"number":false,"expand":true,"init_open":true},"copyright":{"enable":true,"default":"cc_by_nc_sa"},"lazyload":true,"pangu_js":false,"recommendation":{"enable":false,"title":"推荐阅读","limit":3,"mobile_limit":2,"placeholder":"/images/wallhaven-wqery6-light.webp","skip_dirs":[]}},"colors":{"primary":"#ffffff","secondary":null,"default_mode":"light"},"global":{"fonts":{"chinese":{"enable":false,"family":null,"url":null},"english":{"enable":true,"family":"Inter","url":"https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"},"title":{"enable":true,"family":"Noto Serif","url":"https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&display=swap"}},"content_max_width":"1000px","sidebar_width":"210px","hover":{"shadow":true,"scale":false},"scroll_progress":{"bar":true,"percentage":true},"website_counter":{"url":"https://cn.vercount.one/js","enable":false,"site_pv":true,"site_uv":true,"post_pv":true},"single_page":true,"preloader":{"enable":false,"custom_message":null},"side_tools":{"gear_rotation":true,"auto_expand":false},"open_graph":{"enable":true,"image":"/images/redefine-og.webp","description":"Hexo Theme Redefine, Redefine Your Hexo Journey."},"google_analytics":{"enable":false,"id":null}},"home_banner":{"enable":true,"style":"fixed","image":{"light":"/images/banner-light.jpg","dark":"/images/banner-dark.jpg"},"title":"内森淼文","subtitle":{"text":["AI · 编程 · 科技见闻","Write Code, Read World"],"hitokoto":{"enable":false,"show_author":false,"api":"https://v1.hitokoto.cn"},"typing_speed":100,"backing_speed":80,"starting_delay":500,"backing_delay":1500,"loop":true,"smart_backspace":true},"text_color":{"light":"#fff","dark":"#d1d1b6"},"text_style":{"title_size":"2.8rem","subtitle_size":"1.5rem","line_height":1.2},"custom_font":{"enable":false,"family":null,"url":null},"social_links":{"enable":true,"style":"default","links":{"github":"https://github.com/hydraxman","instagram":null,"zhihu":null,"twitter":null,"email":null},"qrs":{"weixin":null}}},"plugins":{"feed":{"enable":false},"aplayer":{"enable":false,"type":"fixed","audios":[{"name":null,"artist":null,"url":null,"cover":null,"lrc":null}]},"mermaid":{"enable":false,"version":"11.4.1"}},"version":"2.8.5","navbar":{"auto_hide":false,"color":{"left":"#333333","right":"#555555","transparency":35},"width":{"home":"1200px","pages":"1000px"},"links":{"Home":{"path":"/","icon":"fa-regular fa-house"},"Archives":{"path":"/archives","icon":"fa-regular fa-archive"},"Categories":{"path":"/categories","icon":"fa-regular fa-folder"},"Tags":{"path":"/tags","icon":"fa-regular fa-tags"},"About":{"path":"/about","icon":"fa-regular fa-user"}},"search":{"enable":true,"preload":true}},"page_templates":{"friends_column":2,"tags_style":"blur"},"home":{"sidebar":{"enable":true,"position":"left","first_item":"menu","announcement":"AI · 编程 · 科技","show_on_mobile":true,"links":{"Archives":{"path":"/archives","icon":"fa-regular fa-archive"},"Tags":{"path":"/tags","icon":"fa-regular fa-tags"},"Categories":{"path":"/categories","icon":"fa-regular fa-folder"}}},"article_date_format":"auto","excerpt_length":200,"categories":{"enable":true,"limit":3},"tags":{"enable":true,"limit":3}},"footerStart":"2024/01/01 00:00:00"};
+    window.lang_ago = {"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"};
+    window.data = {"masonry":false};
+  </script>
+    
+    <!--- Fontawesome Part-->
+    
+<link rel="stylesheet" href="/fontawesome/fontawesome.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/brands.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/solid.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/regular.min.css">
+
+    
+    
+    
+    
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+
+<body>
+	<div class="progress-bar-container">
+	
+	<span class="scroll-progress-bar"></span>
+	
+
+	
+	<span class="pjax-progress-bar"></span>
+	<!--        <span class="swup-progress-icon">-->
+	<!--            <i class="fa-solid fa-circle-notch fa-spin"></i>-->
+	<!--        </span>-->
+	
+</div>
+
+<main class="page-container" id="swup">
+
+	
+
+	<div class="main-content-container flex flex-col justify-between min-h-dvh">
+		<div class="main-content-header">
+			<header class="navbar-container px-6 md:px-12">
+    <div class="navbar-content transition-navbar ">
+        <div class="left">
+            
+            <a class="logo-title" href="/">
+                
+                内森淼文
+                
+            </a>
+        </div>
+
+        <div class="right">
+            <!-- PC -->
+            <div class="desktop">
+                <ul class="navbar-list">
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/"
+                                        >
+                                    <i class="fa-regular fa-house fa-fw"></i>
+                                    首页
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/archives"
+                                        >
+                                    <i class="fa-regular fa-archive fa-fw"></i>
+                                    归档
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/categories"
+                                        >
+                                    <i class="fa-regular fa-folder fa-fw"></i>
+                                    分类
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/tags"
+                                        >
+                                    <i class="fa-regular fa-tags fa-fw"></i>
+                                    标签
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/about"
+                                        >
+                                    <i class="fa-regular fa-user fa-fw"></i>
+                                    关于
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                    
+                        <li class="navbar-item search search-popup-trigger">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </li>
+                    
+                </ul>
+            </div>
+            <!-- Mobile -->
+            <div class="mobile">
+                
+                    <div class="icon-item search search-popup-trigger"><i class="fa-solid fa-magnifying-glass"></i>
+                    </div>
+                
+                <div class="icon-item navbar-bar">
+                    <div class="navbar-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile sheet -->
+    <div class="navbar-drawer h-dvh w-full absolute top-0 left-0 bg-background-color flex flex-col justify-between">
+        <ul class="drawer-navbar-list flex flex-col px-4 justify-center items-start">
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/"
+                        >
+                            <span>
+                                首页
+                            </span>
+                            
+                                <i class="fa-regular fa-house fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/archives"
+                        >
+                            <span>
+                                归档
+                            </span>
+                            
+                                <i class="fa-regular fa-archive fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/categories"
+                        >
+                            <span>
+                                分类
+                            </span>
+                            
+                                <i class="fa-regular fa-folder fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/tags"
+                        >
+                            <span>
+                                标签
+                            </span>
+                            
+                                <i class="fa-regular fa-tags fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/about"
+                        >
+                            <span>
+                                关于
+                            </span>
+                            
+                                <i class="fa-regular fa-user fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+
+            
+            
+                
+                    
+                    
+                    
+            
+        </ul>
+
+        <div class="statistics flex justify-around my-2.5">
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/tags">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">174</div>
+        <div class="label text-third-text-color text-sm">标签</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/categories">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">7</div>
+        <div class="label text-third-text-color text-sm">分类</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/archives">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">80</div>
+        <div class="label text-third-text-color text-sm">文章</div>
+    </a>
+</div>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+		</div>
+
+		<div class="main-content-body transition-fade-up">
+			
+
+			<div class="main-content">
+				<div class="post-page-container flex relative justify-between box-border w-full h-full">
+	<div class="article-content-container">
+
+		<div class="article-title relative w-full">
+			
+			<div class="w-full flex items-center pt-6 justify-start">
+				<h1 class="article-title-regular text-second-text-color tracking-tight text-4xl md:text-6xl font-semibold px-2 sm:px-6 md:px-8 py-3">OpenClaw 省钱指南：从每月 1500 美元到 50 美元的降本实战</h1>
+			</div>
+			
+		</div>
+
+		
+		<div class="article-header flex flex-row gap-2 items-center px-2 sm:px-6 md:px-8">
+			<div class="avatar w-[46px] h-[46px] flex-shrink-0 rounded-medium border border-border-color p-[1px]">
+				<img src="/images/avatar.png">
+			</div>
+			<div class="info flex flex-col justify-between">
+				<div class="author flex items-center">
+					<span class="name text-default-text-color text-lg font-semibold">Nathan</span>
+					
+				</div>
+				<div class="meta-info">
+					<div class="article-meta-info">
+    <span class="article-date article-meta-item">
+        <i class="fa-regular fa-pen-fancy"></i>&nbsp;
+        <span class="desktop">2026-02-28</span>
+        <span class="mobile">2026-02-28</span>
+        <span class="hover-info">创建</span>
+    </span>
+    
+        <span class="article-date article-meta-item">
+            <i class="fa-regular fa-wrench"></i>&nbsp;
+            <span class="desktop">2026-02-28 10:01:20</span>
+            <span class="mobile">2026-02-28 10:01:20</span>
+            <span class="hover-info">更新</span>
+        </span>
+    
+
+    
+        <span class="article-categories article-meta-item">
+            <i class="fa-regular fa-folders"></i>&nbsp;
+            <ul>
+                
+                
+                    
+                        
+                        <li>
+                            <a href="/categories/%E6%8A%80%E6%9C%AF%E5%AE%9E%E6%88%98/">技术实战</a>&nbsp;
+                        </li>
+                    
+                    
+                
+            </ul>
+        </span>
+    
+    
+        <span class="article-tags article-meta-item">
+            <i class="fa-regular fa-tags"></i>&nbsp;
+            <ul>
+                
+                    <li>
+                        <a href="/tags/AI/">AI</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/Agent/">Agent</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/OpenClaw/">OpenClaw</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/%E5%A4%A7%E6%A8%A1%E5%9E%8B/">大模型</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/%E7%9C%81%E9%92%B1/">省钱</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/API/">API</a>&nbsp;
+                    </li>
+                
+            </ul>
+        </span>
+    
+
+    
+    
+        <span class="article-wordcount article-meta-item">
+            <i class="fa-regular fa-typewriter"></i>&nbsp;<span>2.3k 字</span>
+        </span>
+    
+    
+        <span class="article-min2read article-meta-item">
+            <i class="fa-regular fa-clock"></i>&nbsp;<span>9 分钟</span>
+        </span>
+    
+    
+</div>
+
+				</div>
+			</div>
+		</div>
+		
+
+		
+
+
+		<div class="article-content markdown-body px-2 sm:px-6 md:px-8 pb-8">
+			<p>一个配置不当的 OpenClaw 自动化任务，一天能烧掉 200 美元 API 费。7×24 小时全量使用 Claude，月成本在 800 到 1500 美元之间。</p>
+<p>但也有用户把月成本控制在 50 美元以下，同时跑着日常助理、代码编写、内容创作等十几个自动化任务。</p>
+<p><strong>差距在哪？这篇文章把省钱的方案拆解清楚。</strong></p>
+<h2 id="一、为什么-OpenClaw-这么烧钱？"><a href="#一、为什么-OpenClaw-这么烧钱？" class="headerlink" title="一、为什么 OpenClaw 这么烧钱？"></a>一、为什么 OpenClaw 这么烧钱？</h2><p>在传统的 ChatGPT 对话模式下，一轮问答消耗几百到几千 Token。但 OpenClaw 是 Agent 模式——机器在后台持续执行任务，Token 消耗是”流量级”的：</p>
+<p><strong>三大烧钱场景：</strong></p>
+<ol>
+<li><strong>多轮自我修正</strong>：一次编程任务可能经历”写代码→运行→报错→改→再跑”几十个回合</li>
+<li><strong>上下文无限膨胀</strong>：为让 Agent “记住”操作历史，每次调用都携带完整对话历史，活跃会话上下文轻松超过 23 万 Token</li>
+<li><strong>工具链级联</strong>：一个”整理邮件并创建待办”的任务，可能触发 5-10 次 API 调用，每次都带着完整上下文</li>
+</ol>
+<p>36 氪引用的数据显示：OpenRouter 平台 2 月单周处理 13 万亿 Token，编程任务占比从 11% 飙到 50% 以上。Agent 驱动的输出 Token 已超过平台总输出的一半。</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/openclaw-token-burn.jpg"
+                      alt="Token消耗趋势"
+                ></p>
+<h2 id="二、各家-API-价格一览（2026-年-2-月）"><a href="#二、各家-API-价格一览（2026-年-2-月）" class="headerlink" title="二、各家 API 价格一览（2026 年 2 月）"></a>二、各家 API 价格一览（2026 年 2 月）</h2><p>在省钱之前，先搞清楚市场行情。以下是截至 2026 年 2 月的主流模型定价（单位：美元&#x2F;百万 Token）：</p>
+<h3 id="旗舰级模型"><a href="#旗舰级模型" class="headerlink" title="旗舰级模型"></a>旗舰级模型</h3><table>
+<thead>
+<tr>
+<th>模型</th>
+<th>厂商</th>
+<th>输入价格</th>
+<th>输出价格</th>
+<th>上下文</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Claude Opus 4.6 🆕</td>
+<td>Anthropic</td>
+<td>$5.00</td>
+<td>$25.00</td>
+<td>200K</td>
+</tr>
+<tr>
+<td>Gemini 3.1 Pro 🆕</td>
+<td>Google</td>
+<td>$1.25</td>
+<td>$10.00</td>
+<td>1M</td>
+</tr>
+<tr>
+<td>GPT-5</td>
+<td>OpenAI</td>
+<td>$1.25</td>
+<td>$10.00</td>
+<td>400K</td>
+</tr>
+<tr>
+<td>Grok 3</td>
+<td>xAI</td>
+<td>$3.00</td>
+<td>$15.00</td>
+<td>128K</td>
+</tr>
+</tbody></table>
+<h3 id="中端模型（性价比之选）"><a href="#中端模型（性价比之选）" class="headerlink" title="中端模型（性价比之选）"></a>中端模型（性价比之选）</h3><table>
+<thead>
+<tr>
+<th>模型</th>
+<th>厂商</th>
+<th>输入价格</th>
+<th>输出价格</th>
+<th>上下文</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Claude Sonnet 4.6 🆕</td>
+<td>Anthropic</td>
+<td>$3.00</td>
+<td>$15.00</td>
+<td>200K</td>
+</tr>
+<tr>
+<td>GPT-5.3 Codex 🆕</td>
+<td>OpenAI</td>
+<td>$2.00</td>
+<td>$10.00</td>
+<td>200K</td>
+</tr>
+<tr>
+<td>DeepSeek R1</td>
+<td>DeepSeek</td>
+<td>$0.55</td>
+<td>$2.19</td>
+<td>128K</td>
+</tr>
+<tr>
+<td>GLM-5</td>
+<td>智谱</td>
+<td>$0.85</td>
+<td>$2.55</td>
+<td>128K</td>
+</tr>
+<tr>
+<td>Kimi K2.5</td>
+<td>月之暗面</td>
+<td>$0.55</td>
+<td>$2.88</td>
+<td>128K</td>
+</tr>
+</tbody></table>
+<h3 id="经济级模型"><a href="#经济级模型" class="headerlink" title="经济级模型"></a>经济级模型</h3><table>
+<thead>
+<tr>
+<th>模型</th>
+<th>厂商</th>
+<th>输入价格</th>
+<th>输出价格</th>
+<th>上下文</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>MiniMax M2.5</td>
+<td>MiniMax</td>
+<td>$0.15</td>
+<td>$1.10</td>
+<td>200K</td>
+</tr>
+<tr>
+<td>DeepSeek V3.2</td>
+<td>DeepSeek</td>
+<td>$0.27</td>
+<td>$1.10</td>
+<td>128K</td>
+</tr>
+<tr>
+<td>Gemini 2.5 Flash</td>
+<td>Google</td>
+<td>$0.15</td>
+<td>$0.60</td>
+<td>1M</td>
+</tr>
+<tr>
+<td>GPT-4.1 Nano</td>
+<td>OpenAI</td>
+<td>$0.10</td>
+<td>$0.40</td>
+<td>1M</td>
+</tr>
+<tr>
+<td>Mistral Small 3.1</td>
+<td>Mistral</td>
+<td>$0.20</td>
+<td>$0.60</td>
+<td>128K</td>
+</tr>
+</tbody></table>
+<h3 id="国内直连模型（人民币价格）"><a href="#国内直连模型（人民币价格）" class="headerlink" title="国内直连模型（人民币价格）"></a>国内直连模型（人民币价格）</h3><table>
+<thead>
+<tr>
+<th>模型</th>
+<th>厂商</th>
+<th>输入（元&#x2F;百万Token）</th>
+<th>输出（元&#x2F;百万Token）</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Qwen3-Max</td>
+<td>阿里云</td>
+<td>¥2.5</td>
+<td>¥10</td>
+</tr>
+<tr>
+<td>Qwen3.5-Plus</td>
+<td>阿里云</td>
+<td>¥0.8</td>
+<td>¥4.8</td>
+</tr>
+<tr>
+<td>Qwen-Plus</td>
+<td>阿里云</td>
+<td>¥0.8</td>
+<td>¥2（非思考）</td>
+</tr>
+<tr>
+<td>DeepSeek V3.2</td>
+<td>硅基流动</td>
+<td>¥3</td>
+<td>¥3</td>
+</tr>
+</tbody></table>
+<p><strong>关键发现：</strong> 同样是旗舰级能力，Claude Opus 输出价格 $25，MiniMax M2.5 只要 $1.1——差了 <strong>23 倍</strong>。一个月跑下来，前者可能要 $15,000，后者只需 $650。</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/openclaw-price-compare.jpg"
+                      alt="价格对比"
+                ></p>
+<h2 id="三、省钱方案一：采购策略"><a href="#三、省钱方案一：采购策略" class="headerlink" title="三、省钱方案一：采购策略"></a>三、省钱方案一：采购策略</h2><h3 id="方案-1：模型路由（80-x2F-20-法则）"><a href="#方案-1：模型路由（80-x2F-20-法则）" class="headerlink" title="方案 1：模型路由（80&#x2F;20 法则）"></a>方案 1：模型路由（80&#x2F;20 法则）</h3><p>一位欧洲 OpenClaw 用户公开了他的方案：</p>
+<blockquote>
+<p>80% 的日常推理引擎用 Kimi K2.5，碰到高难度推理才切 Claude。月成本从 $800-1500 降到 <strong>$150-300</strong>。</p>
+</blockquote>
+<p><strong>实操方法：</strong> 在 OpenClaw 的 <code>openclaw.json</code> 中配置模型分层：</p>
+<div class="code-container" data-rel="Yaml"><figure class="iseeu highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 日常对话/简单任务 → 便宜模型</span></span><br><span class="line"><span class="attr">default_model:</span> <span class="string">&quot;kimi-k2.5&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 复杂编程/推理 → 高端模型（手动切换或技能指定）</span></span><br><span class="line"><span class="attr">coding_model:</span> <span class="string">&quot;claude-sonnet-4.6&quot;</span></span><br></pre></td></tr></table></figure></div>
+
+<p><strong>省钱幅度：60-80%</strong></p>
+<h3 id="方案-2：阿里云百炼-Coding-Plan"><a href="#方案-2：阿里云百炼-Coding-Plan" class="headerlink" title="方案 2：阿里云百炼 Coding Plan"></a>方案 2：阿里云百炼 Coding Plan</h3><p>这是目前性价比最高的”包月套餐”：</p>
+<table>
+<thead>
+<tr>
+<th>套餐</th>
+<th>首月</th>
+<th>稳定期月费</th>
+<th>请求上限</th>
+<th>模型</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Lite</td>
+<td>¥7.9</td>
+<td>¥40&#x2F;月</td>
+<td>18,000 次&#x2F;月</td>
+<td>Qwen3.5-Plus, Kimi K2.5, GLM-5, MiniMax M2.5</td>
+</tr>
+<tr>
+<td>Pro</td>
+<td>¥39.9</td>
+<td>¥200&#x2F;月</td>
+<td>90,000 次&#x2F;月</td>
+<td>同上</td>
+</tr>
+</tbody></table>
+<p><strong>关键点：</strong></p>
+<ul>
+<li>支持 OpenClaw 直接接入（官方文档明确提到）</li>
+<li>聚合了千问、Kimi、GLM、MiniMax 四大模型</li>
+<li>固定月费，不怕跑飞</li>
+</ul>
+<p><strong>限制：</strong> 仅限编程工具使用，禁止纯 API 脚本调用。但 OpenClaw 属于合规的编程工具范畴。</p>
+<p>**省钱幅度：90%+**（相比按量 Claude）</p>
+<h3 id="方案-3：免费资源薅羊毛"><a href="#方案-3：免费资源薅羊毛" class="headerlink" title="方案 3：免费资源薅羊毛"></a>方案 3：免费资源薅羊毛</h3><table>
+<thead>
+<tr>
+<th>平台</th>
+<th>模型</th>
+<th>免费额度</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>英伟达 NIM</td>
+<td>Kimi K2.5</td>
+<td>免费，无明确上限</td>
+</tr>
+<tr>
+<td>阿里云百炼</td>
+<td>千问全系</td>
+<td>各 100 万 Token&#x2F;90 天</td>
+</tr>
+<tr>
+<td>Google AI Studio</td>
+<td>Gemini 系列</td>
+<td>免费层（有 RPM 限制）</td>
+</tr>
+<tr>
+<td>GitHub Copilot</td>
+<td>GPT-5.3 Codex</td>
+<td>订阅内含</td>
+</tr>
+</tbody></table>
+<h3 id="方案-4：聚合平台比价"><a href="#方案-4：聚合平台比价" class="headerlink" title="方案 4：聚合平台比价"></a>方案 4：聚合平台比价</h3><table>
+<thead>
+<tr>
+<th>平台</th>
+<th>特点</th>
+<th>适用场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>OpenRouter</td>
+<td>300+ 模型，统一 Key</td>
+<td>海外用户，灵活切换</td>
+</tr>
+<tr>
+<td>硅基流动</td>
+<td>国内平台，兼容 OpenAI API</td>
+<td>国内用户，低延迟</td>
+</tr>
+<tr>
+<td>阿里云百炼</td>
+<td>聚合四大国产模型</td>
+<td>Coding Plan 用户</td>
+</tr>
+</tbody></table>
+<h2 id="四、省钱方案二：技术优化"><a href="#四、省钱方案二：技术优化" class="headerlink" title="四、省钱方案二：技术优化"></a>四、省钱方案二：技术优化</h2><h3 id="策略-1：技能固化逻辑，减少对话轮次"><a href="#策略-1：技能固化逻辑，减少对话轮次" class="headerlink" title="策略 1：技能固化逻辑，减少对话轮次"></a>策略 1：技能固化逻辑，减少对话轮次</h3><p>OpenClaw 的 Skill 系统是最大的省钱利器。把重复性工作固化成技能脚本：</p>
+<div class="code-container" data-rel="Markdown"><figure class="iseeu highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="section"># SKILL.md - 微信公众号发布</span></span><br><span class="line"><span class="section"># 不需要 AI 理解的步骤直接用脚本完成</span></span><br><span class="line"></span><br><span class="line"><span class="bullet">1.</span> 读取 Markdown 文件 → 纯脚本</span><br><span class="line"><span class="bullet">2.</span> 渲染 HTML → Node.js 脚本</span><br><span class="line"><span class="bullet">3.</span> 上传图片 → Python 脚本</span><br><span class="line"><span class="bullet">4.</span> 创建草稿 → API 调用</span><br></pre></td></tr></table></figure></div>
+
+<p><strong>原来的方式：</strong> 每一步都让 AI 思考 → 5-10 轮对话 → 消耗 50K+ Token</p>
+<p><strong>固化后：</strong> AI 只需一次调用触发脚本 → 消耗 2-3K Token</p>
+<p><strong>省钱幅度：80-95%</strong></p>
+<h3 id="策略-2：用-YAML-替代-JSON-做数据交换"><a href="#策略-2：用-YAML-替代-JSON-做数据交换" class="headerlink" title="策略 2：用 YAML 替代 JSON 做数据交换"></a>策略 2：用 YAML 替代 JSON 做数据交换</h3><p>YAML 比 JSON 少大约 <strong>30-40%</strong> 的字符数（没有引号、大括号、逗号）。在 Agent 频繁读写配置文件时，这意味着显著的 Token 节省。</p>
+<div class="code-container" data-rel="Json"><figure class="iseeu highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// JSON: 185 字符</span></span><br><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;models&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">    <span class="punctuation">&#123;</span><span class="attr">&quot;name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;gpt-5&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;price&quot;</span><span class="punctuation">:</span> <span class="number">10.0</span><span class="punctuation">,</span> <span class="attr">&quot;tier&quot;</span><span class="punctuation">:</span> <span class="string">&quot;flagship&quot;</span><span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="punctuation">&#123;</span><span class="attr">&quot;name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;deepseek-v3&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;price&quot;</span><span class="punctuation">:</span> <span class="number">1.1</span><span class="punctuation">,</span> <span class="attr">&quot;tier&quot;</span><span class="punctuation">:</span> <span class="string">&quot;economy&quot;</span><span class="punctuation">&#125;</span></span><br><span class="line">  <span class="punctuation">]</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure></div>
+
+<div class="code-container" data-rel="Yaml"><figure class="iseeu highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># YAML: 115 字符（节省 38%）</span></span><br><span class="line"><span class="attr">models:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">gpt-5</span></span><br><span class="line">    <span class="attr">price:</span> <span class="number">10.0</span></span><br><span class="line">    <span class="attr">tier:</span> <span class="string">flagship</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">deepseek-v3</span></span><br><span class="line">    <span class="attr">price:</span> <span class="number">1.1</span></span><br><span class="line">    <span class="attr">tier:</span> <span class="string">economy</span></span><br></pre></td></tr></table></figure></div>
+
+<h3 id="策略-3：Twine-式分支对话协议"><a href="#策略-3：Twine-式分支对话协议" class="headerlink" title="策略 3：Twine 式分支对话协议"></a>策略 3：Twine 式分支对话协议</h3><p>传统 Agent 交互是线性的：每一步都带着完整历史往前走，上下文越来越大。</p>
+<p><strong>Twine 式优化思路：</strong> 把任务拆成独立的”段落节点”，每个节点只携带必要的上下文，而不是完整的对话历史。</p>
+<div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[任务入口] → 判断类型</span><br><span class="line">  ├─ [简单查询] → 轻量模型，短上下文</span><br><span class="line">  ├─ [代码编写] → 中端模型，代码上下文</span><br><span class="line">  └─ [深度分析] → 旗舰模型，完整上下文</span><br></pre></td></tr></table></figure></div>
+
+<p><strong>实操：</strong> 在 OpenClaw 中利用子 Agent（<code>sessions_spawn</code>）隔离任务，避免主会话上下文膨胀。每个子 Agent 独立运行，完成后销毁，不污染主会话。</p>
+<h3 id="策略-4：Prompt-缓存"><a href="#策略-4：Prompt-缓存" class="headerlink" title="策略 4：Prompt 缓存"></a>策略 4：Prompt 缓存</h3><p>Anthropic 和 OpenAI 都支持 Prompt 缓存——重复使用的 System Prompt 在首次调用后以大幅折扣计费。</p>
+<ul>
+<li><strong>Anthropic</strong>：缓存命中后输入成本降低 <strong>90%</strong></li>
+<li><strong>Kimi K2.5</strong>：缓存输入低至 ¥0.7&#x2F;百万 Token（正常 ¥4）</li>
+</ul>
+<p><strong>实操建议：</strong> 把长的 System Prompt 固定下来，不要每次会话都改。OpenClaw 的 SOUL.md、AGENTS.md 等文件会作为 System Prompt 注入，保持稳定有助于缓存命中。</p>
+<h3 id="策略-5：批量处理非实时任务"><a href="#策略-5：批量处理非实时任务" class="headerlink" title="策略 5：批量处理非实时任务"></a>策略 5：批量处理非实时任务</h3><p>OpenAI Batch API 提供 <strong>50% 折扣</strong>（24 小时内完成），Anthropic 也有类似机制。</p>
+<p>适合批量处理的任务：</p>
+<ul>
+<li>文档翻译</li>
+<li>内容审核队列</li>
+<li>数据标注</li>
+<li>周报&#x2F;日报汇总</li>
+</ul>
+<h2 id="五、省钱方案三：架构优化"><a href="#五、省钱方案三：架构优化" class="headerlink" title="五、省钱方案三：架构优化"></a>五、省钱方案三：架构优化</h2><h3 id="本地部署开源模型"><a href="#本地部署开源模型" class="headerlink" title="本地部署开源模型"></a>本地部署开源模型</h3><p>如果你有 GPU 资源，可以本地部署 DeepSeek V3.2 或 Kimi K2.5（均已开源），彻底绕过 API 定价。</p>
+<p><strong>适用场景：</strong> 重度使用，月 Token 消耗超过 5 亿</p>
+<p><strong>需要的硬件：</strong> 70B 参数模型至少需要 2× A100 80GB 或等效</p>
+<h3 id="会话管理优化"><a href="#会话管理优化" class="headerlink" title="会话管理优化"></a>会话管理优化</h3><ul>
+<li>**设置 <code>max_context_tokens</code>**：限制单次会话的上下文长度，避免膨胀</li>
+<li><strong>定期清理会话</strong>：配置 Gateway 自动重启（就像我们每天 5 次重启一样）</li>
+<li><strong>子 Agent 隔离</strong>：复杂任务用 <code>sessions_spawn</code> 隔离，完成后销毁</li>
+</ul>
+<h2 id="六、一个完整的省钱配置示例"><a href="#六、一个完整的省钱配置示例" class="headerlink" title="六、一个完整的省钱配置示例"></a>六、一个完整的省钱配置示例</h2><p>以下是一个经过优化的 OpenClaw 配置方案：</p>
+<table>
+<thead>
+<tr>
+<th>用途</th>
+<th>模型</th>
+<th>月预估</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>日常对话&#x2F;简单任务</td>
+<td>Qwen-Plus（阿里云）</td>
+<td>~¥10</td>
+</tr>
+<tr>
+<td>代码编写</td>
+<td>阿里云 Coding Plan Pro</td>
+<td>¥200&#x2F;月（封顶）</td>
+</tr>
+<tr>
+<td>深度分析&#x2F;复杂推理</td>
+<td>Claude Sonnet 4.6（按量）</td>
+<td>~$30</td>
+</tr>
+<tr>
+<td>图片生成</td>
+<td>Azure OpenAI gpt-image-1.5</td>
+<td>~$5</td>
+</tr>
+</tbody></table>
+<p><strong>总月成本：约 ¥500（~$70）</strong></p>
+<p>对比全量 Claude 方案：**$800-1500&#x2F;月**，降幅 **90%+**。</p>
+<h2 id="七、各家-API-价格速查"><a href="#七、各家-API-价格速查" class="headerlink" title="七、各家 API 价格速查"></a>七、各家 API 价格速查</h2><p>为方便长期追踪，我们已经建立了一个价格数据库（YAML 格式），包含 25+ 个模型的实时定价。数据更新于 2026 年 2 月 28 日。</p>
+<p><strong>查看完整数据：</strong> 我们的 <code>ai-pricing</code> 技能维护了结构化的价格数据，每月更新。</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/openclaw-save-money.jpg"
+                      alt="省钱方案总结"
+                ></p>
+<h2 id="写在最后"><a href="#写在最后" class="headerlink" title="写在最后"></a>写在最后</h2><p>Agent AI 时代，Token 消耗从”按次”变成了”按流量”。省钱不是抠门，是让 AI 助手能可持续地运行下去。</p>
+<p><strong>三句话总结：</strong></p>
+<ol>
+<li><strong>80% 的请求不需要旗舰模型</strong>——用模型路由把大头成本砍掉</li>
+<li><strong>固化逻辑到脚本</strong>——AI 该做 AI 的事，脚本该做脚本的事</li>
+<li><strong>善用订阅和缓存</strong>——Coding Plan + Prompt 缓存是最低成本的组合</li>
+</ol>
+<blockquote>
+<p>Token 不是金子，但也别当水泼。省下来的钱，可以让你的 AI 助手跑得更久、做得更多。</p>
+</blockquote>
+<hr>
+<p><em>数据来源：DevTK.ai、36氪《Token太贵，中国开源模型一夜之间霸榜了》、阿里云百炼官方文档、各厂商官方定价页</em></p>
+<p><em>Tech Home 原创深度分析，转载请注明出处。</em></p>
+
+		</div>
+
+		
+		<div class="post-copyright-info w-full my-8 px-2 sm:px-6 md:px-8">
+			<div class="article-copyright-info-container">
+    <ul>
+        <li><strong>标题:</strong> OpenClaw 省钱指南：从每月 1500 美元到 50 美元的降本实战</li>
+        <li><strong>作者:</strong> Nathan</li>
+        <li><strong>创建于
+                :</strong> 2026-02-28 00:00:00</li>
+        
+            <li>
+                <strong>更新于
+                    :</strong> 2026-02-28 10:01:20
+            </li>
+        
+        <li>
+            <strong>链接:</strong> https://hydraxman.github.io/2026/02/28/openclaw-save-money-2026/
+        </li>
+        <li>
+            <strong>
+                版权声明:
+            </strong>
+            
+
+            
+                本文章采用 <a class="license" target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0">CC BY-NC-SA 4.0</a> 进行许可。
+            
+        </li>
+    </ul>
+</div>
+
+		</div>
+		
+
+		
+		<ul class="post-tags-box text-lg mt-1.5 flex-wrap justify-center flex md:hidden">
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/AI/">#AI</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/Agent/">#Agent</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/OpenClaw/">#OpenClaw</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/%E5%A4%A7%E6%A8%A1%E5%9E%8B/">#大模型</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/%E7%9C%81%E9%92%B1/">#省钱</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/API/">#API</a>&nbsp;
+			</li>
+			
+		</ul>
+		
+
+		
+
+		
+		<div class="article-nav my-8 flex justify-between items-center px-2 sm:px-6 md:px-8">
+			
+			<div class="article-prev border-border-color shadow-redefine-flat shadow-shadow-color-2 rounded-medium px-4 py-2 hover:shadow-redefine-flat-hover hover:shadow-shadow-color-2">
+				<a class="prev" rel="prev" href="/2026/02/28/kaoyan-ai-2026/">
+					<span class="left arrow-icon flex justify-center items-center">
+						<i class="fa-solid fa-chevron-left"></i>
+					</span>
+					<span class="title flex justify-center items-center">
+						<span class="post-nav-title-item truncate max-w-48">考研今日出分！AI 时代，这些专业的含金量正在被重新定义</span>
+						<span class="post-nav-item">上一篇</span>
+					</span>
+				</a>
+			</div>
+			
+			
+			<div class="article-next border-border-color shadow-redefine-flat shadow-shadow-color-2 rounded-medium px-4 py-2 hover:shadow-redefine-flat-hover hover:shadow-shadow-color-2">
+				<a class="next" rel="next" href="/2026/02/27/github-trending/2026-02-27/">
+					<span class="title flex justify-center items-center">
+						<span class="post-nav-title-item truncate max-w-48">GitHub Trending 日报：今日最火的 10 个开源项目深度解析（2026-02-27）</span>
+						<span class="post-nav-item">下一篇</span>
+					</span>
+					<span class="right arrow-icon flex justify-center items-center">
+						<i class="fa-solid fa-chevron-right"></i>
+					</span>
+				</a>
+			</div>
+			
+		</div>
+		
+
+
+		
+	</div>
+
+	
+	<div class="toc-content-container">
+		<div class="post-toc-wrap">
+	<div class="post-toc">
+		<div class="toc-title">目录</div>
+		<div class="page-title">OpenClaw 省钱指南：从每月 1500 美元到 50 美元的降本实战</div>
+		<ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E4%B8%BA%E4%BB%80%E4%B9%88-OpenClaw-%E8%BF%99%E4%B9%88%E7%83%A7%E9%92%B1%EF%BC%9F"><span class="nav-text">一、为什么 OpenClaw 这么烧钱？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E5%90%84%E5%AE%B6-API-%E4%BB%B7%E6%A0%BC%E4%B8%80%E8%A7%88%EF%BC%882026-%E5%B9%B4-2-%E6%9C%88%EF%BC%89"><span class="nav-text">二、各家 API 价格一览（2026 年 2 月）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%97%97%E8%88%B0%E7%BA%A7%E6%A8%A1%E5%9E%8B"><span class="nav-text">旗舰级模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%AD%E7%AB%AF%E6%A8%A1%E5%9E%8B%EF%BC%88%E6%80%A7%E4%BB%B7%E6%AF%94%E4%B9%8B%E9%80%89%EF%BC%89"><span class="nav-text">中端模型（性价比之选）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%8F%E6%B5%8E%E7%BA%A7%E6%A8%A1%E5%9E%8B"><span class="nav-text">经济级模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9B%BD%E5%86%85%E7%9B%B4%E8%BF%9E%E6%A8%A1%E5%9E%8B%EF%BC%88%E4%BA%BA%E6%B0%91%E5%B8%81%E4%BB%B7%E6%A0%BC%EF%BC%89"><span class="nav-text">国内直连模型（人民币价格）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E7%9C%81%E9%92%B1%E6%96%B9%E6%A1%88%E4%B8%80%EF%BC%9A%E9%87%87%E8%B4%AD%E7%AD%96%E7%95%A5"><span class="nav-text">三、省钱方案一：采购策略</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%B9%E6%A1%88-1%EF%BC%9A%E6%A8%A1%E5%9E%8B%E8%B7%AF%E7%94%B1%EF%BC%8880-x2F-20-%E6%B3%95%E5%88%99%EF%BC%89"><span class="nav-text">方案 1：模型路由（80&#x2F;20 法则）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%B9%E6%A1%88-2%EF%BC%9A%E9%98%BF%E9%87%8C%E4%BA%91%E7%99%BE%E7%82%BC-Coding-Plan"><span class="nav-text">方案 2：阿里云百炼 Coding Plan</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%B9%E6%A1%88-3%EF%BC%9A%E5%85%8D%E8%B4%B9%E8%B5%84%E6%BA%90%E8%96%85%E7%BE%8A%E6%AF%9B"><span class="nav-text">方案 3：免费资源薅羊毛</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%B9%E6%A1%88-4%EF%BC%9A%E8%81%9A%E5%90%88%E5%B9%B3%E5%8F%B0%E6%AF%94%E4%BB%B7"><span class="nav-text">方案 4：聚合平台比价</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E7%9C%81%E9%92%B1%E6%96%B9%E6%A1%88%E4%BA%8C%EF%BC%9A%E6%8A%80%E6%9C%AF%E4%BC%98%E5%8C%96"><span class="nav-text">四、省钱方案二：技术优化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AD%96%E7%95%A5-1%EF%BC%9A%E6%8A%80%E8%83%BD%E5%9B%BA%E5%8C%96%E9%80%BB%E8%BE%91%EF%BC%8C%E5%87%8F%E5%B0%91%E5%AF%B9%E8%AF%9D%E8%BD%AE%E6%AC%A1"><span class="nav-text">策略 1：技能固化逻辑，减少对话轮次</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AD%96%E7%95%A5-2%EF%BC%9A%E7%94%A8-YAML-%E6%9B%BF%E4%BB%A3-JSON-%E5%81%9A%E6%95%B0%E6%8D%AE%E4%BA%A4%E6%8D%A2"><span class="nav-text">策略 2：用 YAML 替代 JSON 做数据交换</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AD%96%E7%95%A5-3%EF%BC%9ATwine-%E5%BC%8F%E5%88%86%E6%94%AF%E5%AF%B9%E8%AF%9D%E5%8D%8F%E8%AE%AE"><span class="nav-text">策略 3：Twine 式分支对话协议</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AD%96%E7%95%A5-4%EF%BC%9APrompt-%E7%BC%93%E5%AD%98"><span class="nav-text">策略 4：Prompt 缓存</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AD%96%E7%95%A5-5%EF%BC%9A%E6%89%B9%E9%87%8F%E5%A4%84%E7%90%86%E9%9D%9E%E5%AE%9E%E6%97%B6%E4%BB%BB%E5%8A%A1"><span class="nav-text">策略 5：批量处理非实时任务</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%94%E3%80%81%E7%9C%81%E9%92%B1%E6%96%B9%E6%A1%88%E4%B8%89%EF%BC%9A%E6%9E%B6%E6%9E%84%E4%BC%98%E5%8C%96"><span class="nav-text">五、省钱方案三：架构优化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%AC%E5%9C%B0%E9%83%A8%E7%BD%B2%E5%BC%80%E6%BA%90%E6%A8%A1%E5%9E%8B"><span class="nav-text">本地部署开源模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BC%9A%E8%AF%9D%E7%AE%A1%E7%90%86%E4%BC%98%E5%8C%96"><span class="nav-text">会话管理优化</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AD%E3%80%81%E4%B8%80%E4%B8%AA%E5%AE%8C%E6%95%B4%E7%9A%84%E7%9C%81%E9%92%B1%E9%85%8D%E7%BD%AE%E7%A4%BA%E4%BE%8B"><span class="nav-text">六、一个完整的省钱配置示例</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%83%E3%80%81%E5%90%84%E5%AE%B6-API-%E4%BB%B7%E6%A0%BC%E9%80%9F%E6%9F%A5"><span class="nav-text">七、各家 API 价格速查</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%86%99%E5%9C%A8%E6%9C%80%E5%90%8E"><span class="nav-text">写在最后</span></a></li></ol>
+
+	</div>
+</div>
+	</div>
+	
+</div>
+			</div>
+
+			
+		</div>
+
+		<div class="main-content-footer">
+			<footer class="footer mt-5 py-5 h-auto text-base text-third-text-color relative border-t-2 border-t-border-color">
+    <div class="info-container py-3 text-center">
+        
+        <div class="text-center">
+            &copy;
+            
+              <span>2024</span>
+              -
+            
+            2026&nbsp;&nbsp;<i class="fa-solid fa-heart fa-beat" style="--fa-animation-duration: 0.5s; color: #333"></i>&nbsp;&nbsp;<a href="/">Nathan</a>
+            
+                
+                <p class="post-count space-x-0.5">
+                    <span>
+                        共撰写了 80 篇文章
+                    </span>
+                    
+                        <span>
+                            共 171.6k 字
+                        </span>
+                    
+                </p>
+            
+        </div>
+        
+        <div class="relative text-center lg:absolute lg:left-[20px] lg:top-1/2 lg:-translate-y-1/2 lg:text-left">
+            <span class="lg:block text-sm">由 <?xml version="1.0" encoding="utf-8"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg class="relative top-[2px] inline-block align-baseline" version="1.1" id="圖層_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="1rem" height="1rem" viewBox="0 0 512 512" enable-background="new 0 0 512 512" xml:space="preserve"><path fill="#0E83CD" d="M256.4,25.8l-200,115.5L56,371.5l199.6,114.7l200-115.5l0.4-230.2L256.4,25.8z M349,354.6l-18.4,10.7l-18.6-11V275H200v79.6l-18.4,10.7l-18.6-11v-197l18.5-10.6l18.5,10.8V237h112v-79.6l18.5-10.6l18.5,10.8V354.6z"/></svg><a target="_blank" class="text-base" href="https://hexo.io">Hexo</a> 驱动</span>
+            <span class="text-sm lg:block">主题&nbsp;<a class="text-base" target="_blank" href="https://github.com/EvanNotFound/hexo-theme-redefine">Redefine v2.8.5</a></span>
+        </div>
+        
+        
+            <div>
+                博客已运行 <span class="odometer" id="runtime_days" ></span> 天 <span class="odometer" id="runtime_hours"></span> 小时 <span class="odometer" id="runtime_minutes"></span> 分钟 <span class="odometer" id="runtime_seconds"></span> 秒
+            </div>
+        
+        
+            <script data-swup-reload-script>
+                try {
+                    function odometer_init() {
+                    const elements = document.querySelectorAll('.odometer');
+                    elements.forEach(el => {
+                        new Odometer({
+                            el,
+                            format: '( ddd).dd',
+                            duration: 200
+                        });
+                    });
+                    }
+                    odometer_init();
+                } catch (error) {}
+            </script>
+        
+        
+            
+                
+        
+                
+        
+        
+    </div>  
+</footer>
+		</div>
+	</div>
+
+	
+	<div class="post-tools">
+		<div class="post-tools-container">
+	<ul class="article-tools-list">
+		<!-- TOC aside toggle -->
+		
+		<li class="right-bottom-tools page-aside-toggle">
+			<i class="fa-regular fa-outdent"></i>
+		</li>
+		
+
+		<!-- go comment -->
+		
+	</ul>
+</div>
+	</div>
+	
+
+	<div class="right-side-tools-container">
+		<div class="side-tools-container">
+	<ul class="hidden-tools-list">
+		<li class="right-bottom-tools tool-font-adjust-plus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-plus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-font-adjust-minus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-minus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-dark-light-toggle flex justify-center items-center">
+			<i class="fa-regular fa-moon"></i>
+		</li>
+
+		<!-- rss -->
+		
+
+		
+
+		<li class="right-bottom-tools tool-scroll-to-bottom flex justify-center items-center">
+			<i class="fa-regular fa-arrow-down"></i>
+		</li>
+	</ul>
+
+	<ul class="visible-tools-list">
+		<li class="right-bottom-tools toggle-tools-list flex justify-center items-center">
+			<i class="fa-regular fa-cog fa-spin"></i>
+		</li>
+		
+		<li class="right-bottom-tools tool-scroll-to-top flex justify-center items-center">
+			<i class="arrow-up fas fa-arrow-up"></i>
+			<span class="percent"></span>
+		</li>
+		
+		
+	</ul>
+</div>
+	</div>
+
+	<div class="image-viewer-container">
+	<img src="">
+</div>
+
+	
+	<div class="search-pop-overlay">
+	<div class="popup search-popup">
+		<div class="search-header">
+			<span class="search-input-field-pre">
+				<i class="fa-solid fa-keyboard"></i>
+			</span>
+			<div class="search-input-container">
+				<input autocomplete="off" autocorrect="off" autocapitalize="off" placeholder="站内搜索您需要的内容..." spellcheck="false" type="search" class="search-input">
+			</div>
+			<span class="popup-btn-close">
+				<i class="fa-solid fa-times"></i>
+			</span>
+		</div>
+		<div id="search-result">
+			<div id="no-result">
+				<i class="fa-solid fa-spinner fa-spin-pulse fa-5x fa-fw"></i>
+			</div>
+		</div>
+	</div>
+</div>
+	
+
+</main>
+
+
+
+<script src="/js/build/libs/Swup.min.js"></script>
+
+<script src="/js/build/libs/SwupSlideTheme.min.js"></script>
+
+<script src="/js/build/libs/SwupScriptsPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupProgressPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupScrollPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupPreloadPlugin.min.js"></script>
+
+<script>
+    const swup = new Swup({
+        plugins: [
+            new SwupScriptsPlugin({
+                optin: true,
+            }),
+            new SwupProgressPlugin(),
+            new SwupScrollPlugin({
+                offset: 80,
+            }),
+            new SwupSlideTheme({
+                mainElement: ".main-content-body",
+            }),
+            new SwupPreloadPlugin(),
+        ],
+        containers: ["#swup"],
+    });
+</script>
+
+
+
+
+	
+<script src="/js/build/tools/imageViewer.js" type="module"></script>
+
+<script src="/js/build/utils.js" type="module"></script>
+
+<script src="/js/build/main.js" type="module"></script>
+
+<script src="/js/build/layouts/navbarShrink.js" type="module"></script>
+
+<script src="/js/build/tools/scrollTopBottom.js" type="module"></script>
+
+<script src="/js/build/tools/lightDarkSwitch.js" type="module"></script>
+
+<script src="/js/build/layouts/categoryList.js" type="module"></script>
+
+
+
+    
+<script src="/js/build/tools/localSearch.js" type="module"></script>
+
+
+
+
+    
+<script src="/js/build/tools/codeBlock.js" type="module"></script>
+
+
+
+
+    
+<script src="/js/build/layouts/lazyload.js" type="module"></script>
+
+
+
+
+    
+<script src="/js/build/tools/runtime.js"></script>
+
+    
+<script src="/js/build/libs/odometer.min.js"></script>
+
+    
+<link rel="stylesheet" href="/assets/odometer-theme-minimal.css">
+
+
+
+
+  
+<script src="/js/build/libs/Typed.min.js"></script>
+
+  
+<script src="/js/build/plugins/typed.js" type="module"></script>
+
+
+
+
+
+
+
+
+    
+<script src="/js/build/libs/anime.min.js"></script>
+
+
+
+
+
+    
+<script src="/js/build/tools/tocToggle.js" type="module" data-swup-reload-script=""></script>
+
+<script src="/js/build/layouts/toc.js" type="module" data-swup-reload-script=""></script>
+
+<script src="/js/build/plugins/tabs.js" type="module" data-swup-reload-script=""></script>
+
+
+
+
+<script src="/js/build/libs/moment-with-locales.min.js" data-swup-reload-script=""></script>
+
+
+<script src="/js/build/layouts/essays.js" type="module" data-swup-reload-script=""></script>
+
+
+
+
+
+	
+</body>
+
+</html>
