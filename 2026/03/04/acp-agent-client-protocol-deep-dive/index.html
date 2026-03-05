@@ -1,0 +1,1377 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="keywords" content="计算机技术, 生活中的胡思乱想">
+    
+    <meta name="author" content="Nathan">
+    
+    <!-- Completely eliminate flash of wrong theme -->
+    <script>
+        (function() {
+            const THEME_KEY = "REDEFINE-THEME-STATUS";
+            const DARK = "dark", LIGHT = "light";
+            
+            // Get preferred theme
+            function getTheme() {
+                try {
+                    const saved = localStorage.getItem(THEME_KEY);
+                    if (saved) {
+                        const { isDark } = JSON.parse(saved);
+                        return isDark ? DARK : LIGHT;
+                    }
+                } catch (e) {}
+                
+                return matchMedia("(prefers-color-scheme: dark)").matches ? DARK : LIGHT;
+            }
+            
+            // Apply theme to document
+            function applyTheme(theme) {
+                const isDark = theme === DARK;
+                const root = document.documentElement;
+                
+                // Set data attribute for CSS variables
+                root.setAttribute("data-theme", theme);
+                
+                // Set classes for compatibility
+                root.classList.add(theme);
+                root.classList.remove(isDark ? LIGHT : DARK);
+                root.style.colorScheme = theme;
+            }
+            
+            // Initial application
+            const theme = getTheme();
+            applyTheme(theme);
+            
+            // Listen for system preference changes
+            matchMedia("(prefers-color-scheme: dark)").addEventListener("change", ({ matches }) => {
+                // Only update if using system preference (no localStorage entry)
+                if (!localStorage.getItem(THEME_KEY)) {
+                    applyTheme(matches ? DARK : LIGHT);
+                }
+            });
+            
+            // Set body classes once DOM is ready
+            if (document.readyState !== "loading") {
+                document.body.classList.add(theme + "-mode");
+            } else {
+                document.addEventListener("DOMContentLoaded", () => {
+                    document.body.classList.add(theme + "-mode");
+                    document.body.classList.remove((theme === DARK ? LIGHT : DARK) + "-mode");
+                });
+            }
+        })();
+    </script>
+    
+    <!-- Critical CSS to prevent flash -->
+    <style>
+        :root[data-theme="dark"] {
+            --background-color: #202124;
+            --background-color-transparent: rgba(32, 33, 36, 0.6);
+            --second-background-color: #2d2e32;
+            --third-background-color: #34353a;
+            --third-background-color-transparent: rgba(32, 33, 36, 0.6);
+            --primary-color: #0066CC;
+            --first-text-color: #ffffff;
+            --second-text-color: #eeeeee;
+            --third-text-color: #bebec6;
+            --fourth-text-color: #999999;
+            --default-text-color: #bebec6;
+            --invert-text-color: #373D3F;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --selection-color: #0066CC;
+            --shadow-color-1: rgba(255, 255, 255, 0.08);
+            --shadow-color-2: rgba(255, 255, 255, 0.05);
+        }
+        
+        :root[data-theme="light"] {
+            --background-color: #fff;
+            --background-color-transparent: rgba(255, 255, 255, 0.6);
+            --second-background-color: #f8f8f8;
+            --third-background-color: #f2f2f2;
+            --third-background-color-transparent: rgba(241, 241, 241, 0.6);
+            --primary-color: #0066CC;
+            --first-text-color: #16171a;
+            --second-text-color: #2f3037;
+            --third-text-color: #5e5e5e;
+            --fourth-text-color: #eeeeee;
+            --default-text-color: #373D3F;
+            --invert-text-color: #bebec6;
+            --border-color: rgba(0, 0, 0, 0.08);
+            --selection-color: #0066CC;
+            --shadow-color-1: rgba(0, 0, 0, 0.08);
+            --shadow-color-2: rgba(0, 0, 0, 0.05);
+        }
+        
+        body {
+            background-color: var(--background-color);
+            color: var(--default-text-color);
+        }
+        
+        /* Apply body classes as soon as DOM is ready */
+        :root[data-theme="dark"] body {
+            background-color: var(--background-color);
+            color: var(--default-text-color);
+        }
+    </style>
+    
+    <!-- preconnect -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    
+    <!--- Seo Part-->
+    
+    <link rel="canonical" href="https://hydraxman.github.io/2026/03/04/acp-agent-client-protocol-deep-dive/"/>
+    <meta name="robots" content="index,follow">
+    <meta name="googlebot" content="index,follow">
+    <meta name="revisit-after" content="1 days">
+    
+    
+    
+        
+        <meta name="description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ACP 深度解读：AI编程Agent的「万能插头」是怎么炼成的">
+<meta property="og:url" content="https://hydraxman.github.io/2026/03/04/acp-agent-client-protocol-deep-dive/index.html">
+<meta property="og:site_name" content="内森淼文">
+<meta property="og:description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://hydraxman.github.io/images/redefine-og.webp">
+<meta property="article:published_time" content="2026-03-03T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-03-04T13:06:44.845Z">
+<meta property="article:author" content="Nathan">
+<meta property="article:tag" content="ACP">
+<meta property="article:tag" content="Agent Client Protocol">
+<meta property="article:tag" content="AI编程">
+<meta property="article:tag" content="MCP">
+<meta property="article:tag" content="Coding Agent">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://hydraxman.github.io/images/redefine-og.webp">
+    
+    
+    <!--- Icon Part-->
+    <link rel="icon" type="image/png" href="/images/favicon.svg" sizes="192x192">
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.svg">
+    <meta name="theme-color" content="#ffffff">
+    <link rel="shortcut icon" href="/images/favicon.svg">
+    <!--- Page Info-->
+    
+    <title>
+        
+            ACP 深度解读：AI编程Agent的「万能插头」是怎么炼成的 | 内森淼文
+        
+    </title>
+
+    
+<link rel="stylesheet" href="/fonts/Chillax/chillax.css">
+
+
+    <!--- Inject Part-->
+    
+        
+            
+    
+            
+    
+            
+                
+                    <link rel="stylesheet" href="/css/custom.css">
+                
+    
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    
+        
+<link rel="stylesheet" href="/css/build/tailwind.css">
+
+    
+
+    
+<link rel="stylesheet" href="/fonts/GeistMono/geist-mono.css">
+
+    
+<link rel="stylesheet" href="/fonts/Geist/geist.css">
+
+    <!--- Font Part-->
+    
+    
+    
+    
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&display=swap" rel="stylesheet">
+    
+    
+
+    <script id="hexo-configurations">
+    window.config = {"hostname":"hydraxman.github.io","root":"/","language":"zh-CN","path":"search.json"};
+    window.theme = {"articles":{"style":{"font_size":"16px","line_height":1.5,"image_border_radius":"14px","image_alignment":"center","image_caption":false,"link_icon":true,"delete_mask":false,"title_alignment":"left","headings_top_spacing":{"h1":"3.2rem","h2":"2.4rem","h3":"1.9rem","h4":"1.6rem","h5":"1.4rem","h6":"1.3rem"}},"word_count":{"enable":true,"count":true,"min2read":true},"author_label":{"enable":false,"auto":false,"list":[]},"code_block":{"copy":true,"style":"mac","highlight_theme":{"light":"github","dark":"vs2015"},"font":{"enable":false,"family":null,"url":null}},"toc":{"enable":true,"max_depth":3,"number":false,"expand":true,"init_open":true},"copyright":{"enable":true,"default":"cc_by_nc_sa"},"lazyload":true,"pangu_js":false,"recommendation":{"enable":false,"title":"推荐阅读","limit":3,"mobile_limit":2,"placeholder":"/images/wallhaven-wqery6-light.webp","skip_dirs":[]}},"colors":{"primary":"#ffffff","secondary":null,"default_mode":"light"},"global":{"fonts":{"chinese":{"enable":false,"family":null,"url":null},"english":{"enable":true,"family":"Inter","url":"https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"},"title":{"enable":true,"family":"Noto Serif","url":"https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&display=swap"}},"content_max_width":"1000px","sidebar_width":"210px","hover":{"shadow":true,"scale":false},"scroll_progress":{"bar":true,"percentage":true},"website_counter":{"url":"https://cn.vercount.one/js","enable":false,"site_pv":true,"site_uv":true,"post_pv":true},"single_page":true,"preloader":{"enable":false,"custom_message":null},"side_tools":{"gear_rotation":true,"auto_expand":false},"open_graph":{"enable":true,"image":"/images/redefine-og.webp","description":"Hexo Theme Redefine, Redefine Your Hexo Journey."},"google_analytics":{"enable":false,"id":null}},"home_banner":{"enable":true,"style":"fixed","image":{"light":"/images/banner-light.jpg","dark":"/images/banner-dark.jpg"},"title":"内森淼文","subtitle":{"text":["AI · 编程 · 科技见闻","Write Code, Read World"],"hitokoto":{"enable":false,"show_author":false,"api":"https://v1.hitokoto.cn"},"typing_speed":100,"backing_speed":80,"starting_delay":500,"backing_delay":1500,"loop":true,"smart_backspace":true},"text_color":{"light":"#fff","dark":"#d1d1b6"},"text_style":{"title_size":"2.8rem","subtitle_size":"1.5rem","line_height":1.2},"custom_font":{"enable":false,"family":null,"url":null},"social_links":{"enable":true,"style":"default","links":{"github":"https://github.com/hydraxman","instagram":null,"zhihu":null,"twitter":null,"email":null},"qrs":{"weixin":null}}},"plugins":{"feed":{"enable":false},"aplayer":{"enable":false,"type":"fixed","audios":[{"name":null,"artist":null,"url":null,"cover":null,"lrc":null}]},"mermaid":{"enable":false,"version":"11.4.1"}},"version":"2.8.5","navbar":{"auto_hide":false,"color":{"left":"#333333","right":"#555555","transparency":35},"width":{"home":"1200px","pages":"1000px"},"links":{"Home":{"path":"/","icon":"fa-regular fa-house"},"Archives":{"path":"/archives","icon":"fa-regular fa-archive"},"Categories":{"path":"/categories","icon":"fa-regular fa-folder"},"Tags":{"path":"/tags","icon":"fa-regular fa-tags"},"About":{"path":"/about","icon":"fa-regular fa-user"}},"search":{"enable":true,"preload":true}},"page_templates":{"friends_column":2,"tags_style":"blur"},"home":{"sidebar":{"enable":true,"position":"left","first_item":"menu","announcement":"AI · 编程 · 科技","show_on_mobile":true,"links":{"Archives":{"path":"/archives","icon":"fa-regular fa-archive"},"Tags":{"path":"/tags","icon":"fa-regular fa-tags"},"Categories":{"path":"/categories","icon":"fa-regular fa-folder"}}},"article_date_format":"auto","excerpt_length":200,"categories":{"enable":true,"limit":3},"tags":{"enable":true,"limit":3}},"footerStart":"2024/01/01 00:00:00"};
+    window.lang_ago = {"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"};
+    window.data = {"masonry":false};
+  </script>
+    
+    <!--- Fontawesome Part-->
+    
+<link rel="stylesheet" href="/fontawesome/fontawesome.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/brands.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/solid.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/regular.min.css">
+
+    
+    
+    
+    
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+
+<body>
+	<div class="progress-bar-container">
+	
+	<span class="scroll-progress-bar"></span>
+	
+
+	
+	<span class="pjax-progress-bar"></span>
+	<!--        <span class="swup-progress-icon">-->
+	<!--            <i class="fa-solid fa-circle-notch fa-spin"></i>-->
+	<!--        </span>-->
+	
+</div>
+
+<main class="page-container" id="swup">
+
+	
+
+	<div class="main-content-container flex flex-col justify-between min-h-dvh">
+		<div class="main-content-header">
+			<header class="navbar-container px-6 md:px-12">
+    <div class="navbar-content transition-navbar ">
+        <div class="left">
+            
+            <a class="logo-title" href="/">
+                
+                内森淼文
+                
+            </a>
+        </div>
+
+        <div class="right">
+            <!-- PC -->
+            <div class="desktop">
+                <ul class="navbar-list">
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/"
+                                        >
+                                    <i class="fa-regular fa-house fa-fw"></i>
+                                    首页
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/archives"
+                                        >
+                                    <i class="fa-regular fa-archive fa-fw"></i>
+                                    归档
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/categories"
+                                        >
+                                    <i class="fa-regular fa-folder fa-fw"></i>
+                                    分类
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/tags"
+                                        >
+                                    <i class="fa-regular fa-tags fa-fw"></i>
+                                    标签
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/about"
+                                        >
+                                    <i class="fa-regular fa-user fa-fw"></i>
+                                    关于
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                    
+                        <li class="navbar-item search search-popup-trigger">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </li>
+                    
+                </ul>
+            </div>
+            <!-- Mobile -->
+            <div class="mobile">
+                
+                    <div class="icon-item search search-popup-trigger"><i class="fa-solid fa-magnifying-glass"></i>
+                    </div>
+                
+                <div class="icon-item navbar-bar">
+                    <div class="navbar-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile sheet -->
+    <div class="navbar-drawer h-dvh w-full absolute top-0 left-0 bg-background-color flex flex-col justify-between">
+        <ul class="drawer-navbar-list flex flex-col px-4 justify-center items-start">
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/"
+                        >
+                            <span>
+                                首页
+                            </span>
+                            
+                                <i class="fa-regular fa-house fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/archives"
+                        >
+                            <span>
+                                归档
+                            </span>
+                            
+                                <i class="fa-regular fa-archive fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/categories"
+                        >
+                            <span>
+                                分类
+                            </span>
+                            
+                                <i class="fa-regular fa-folder fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/tags"
+                        >
+                            <span>
+                                标签
+                            </span>
+                            
+                                <i class="fa-regular fa-tags fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/about"
+                        >
+                            <span>
+                                关于
+                            </span>
+                            
+                                <i class="fa-regular fa-user fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+
+            
+            
+                
+                    
+                    
+                    
+            
+        </ul>
+
+        <div class="statistics flex justify-around my-2.5">
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/tags">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">182</div>
+        <div class="label text-third-text-color text-sm">标签</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/categories">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">8</div>
+        <div class="label text-third-text-color text-sm">分类</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/archives">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">95</div>
+        <div class="label text-third-text-color text-sm">文章</div>
+    </a>
+</div>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+		</div>
+
+		<div class="main-content-body transition-fade-up">
+			
+
+			<div class="main-content">
+				<div class="post-page-container flex relative justify-between box-border w-full h-full">
+	<div class="article-content-container">
+
+		<div class="article-title relative w-full">
+			
+			
+			
+			<img src="/images/acp-deep-dive-cover.png" alt="ACP 深度解读：AI编程Agent的「万能插头」是怎么炼成的" class="w-full h-60 sm:h-72 md:h-80 object-cover sm:rounded-t-large dark:brightness-75" />
+			
+			<div class="w-full flex items-center absolute bottom-0 justify-start">
+				<h1 class="article-title-cover text-center mx-6 my-6 text-second-text-color bg-background-color-transparent px-4 py-3 text-3xl sm:text-4xl md:text-5xl font-semibold backdrop-blur-lg rounded-xl border border-border-color ">ACP 深度解读：AI编程Agent的「万能插头」是怎么炼成的</h1>
+			</div>
+			
+		</div>
+
+		
+		<div class="article-header flex flex-row gap-2 items-center px-2 sm:px-6 md:px-8">
+			<div class="avatar w-[46px] h-[46px] flex-shrink-0 rounded-medium border border-border-color p-[1px]">
+				<img src="/images/avatar.png">
+			</div>
+			<div class="info flex flex-col justify-between">
+				<div class="author flex items-center">
+					<span class="name text-default-text-color text-lg font-semibold">Nathan</span>
+					
+				</div>
+				<div class="meta-info">
+					<div class="article-meta-info">
+    <span class="article-date article-meta-item">
+        <i class="fa-regular fa-pen-fancy"></i>&nbsp;
+        <span class="desktop">2026-03-04</span>
+        <span class="mobile">2026-03-04</span>
+        <span class="hover-info">创建</span>
+    </span>
+    
+        <span class="article-date article-meta-item">
+            <i class="fa-regular fa-wrench"></i>&nbsp;
+            <span class="desktop">2026-03-04 21:06:44</span>
+            <span class="mobile">2026-03-04 21:06:44</span>
+            <span class="hover-info">更新</span>
+        </span>
+    
+
+    
+        <span class="article-categories article-meta-item">
+            <i class="fa-regular fa-folders"></i>&nbsp;
+            <ul>
+                
+                
+                    
+                        
+                        <li>
+                            <a href="/categories/AI%E5%89%8D%E6%B2%BF/">AI前沿</a>&nbsp;
+                        </li>
+                    
+                    
+                
+            </ul>
+        </span>
+    
+    
+        <span class="article-tags article-meta-item">
+            <i class="fa-regular fa-tags"></i>&nbsp;
+            <ul>
+                
+                    <li>
+                        <a href="/tags/ACP/">ACP</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/Agent-Client-Protocol/">Agent Client Protocol</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/AI%E7%BC%96%E7%A8%8B/">AI编程</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/MCP/">MCP</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/Coding-Agent/">Coding Agent</a>&nbsp;
+                    </li>
+                
+            </ul>
+        </span>
+    
+
+    
+    
+        <span class="article-wordcount article-meta-item">
+            <i class="fa-regular fa-typewriter"></i>&nbsp;<span>3.4k 字</span>
+        </span>
+    
+    
+        <span class="article-min2read article-meta-item">
+            <i class="fa-regular fa-clock"></i>&nbsp;<span>13 分钟</span>
+        </span>
+    
+    
+</div>
+
+				</div>
+			</div>
+		</div>
+		
+
+		
+
+
+		<div class="article-content markdown-body px-2 sm:px-6 md:px-8 pb-8">
+			<blockquote>
+<p>Agent Client Protocol（ACP）正在成为 AI 编程领域的 LSP。Zed 发起、JetBrains 加入、Google&#x2F;Anthropic&#x2F;OpenAI 的 Agent 纷纷适配——这个协议凭什么？</p>
+</blockquote>
+<h2 id="一、从一个真实痛点说起"><a href="#一、从一个真实痛点说起" class="headerlink" title="一、从一个真实痛点说起"></a>一、从一个真实痛点说起</h2><p>2025年初，一个典型的 AI 辅助编程工作流长这样：</p>
+<p><strong>左屏</strong>放编辑器写代码，<strong>右屏</strong>开一个 AI Agent（比如 Claude Code 或 Gemini CLI）对话，<strong>浏览器</strong>看效果。三个窗口来回切换，上下文不断打断。</p>
+<p>更要命的是 <strong>绑定问题</strong>：</p>
+<ul>
+<li>想用 Cursor？那你的 Agent 就是 Cursor 内置的，不能换</li>
+<li>想用 Claude Code？得开终端跑 CLI，编辑器和 Agent 之间没有结构化通信</li>
+<li>想在 JetBrains 里用 Goose？对不起，没有插件</li>
+</ul>
+<p>每个编辑器都要为每个 Agent 写一套插件，每个 Agent 都要为每个编辑器做适配。<strong>M × N 的组合爆炸</strong>，和 LSP 出现之前的编程语言支持一模一样。</p>
+<h2 id="二、LSP-的启示：一个协议解决-M-×-N-问题"><a href="#二、LSP-的启示：一个协议解决-M-×-N-问题" class="headerlink" title="二、LSP 的启示：一个协议解决 M × N 问题"></a>二、LSP 的启示：一个协议解决 M × N 问题</h2><p>2016 年，微软推出了 Language Server Protocol（LSP）。在此之前，每个编辑器要为每种编程语言单独写语法高亮、补全、跳转定义的插件。有了 LSP，语言工具只需要实现一次协议，就能在所有支持 LSP 的编辑器里使用。</p>
+<p><strong>从 M × N → M + N。</strong></p>
+<p>ACP 的灵感完全来自这里。它要解决的问题是：<strong>让任何 AI 编程 Agent 能在任何编辑器里工作</strong>。</p>
+<p>不是 MCP（Model Context Protocol）——MCP 解决的是 Agent 怎么访问外部工具和数据（Agent ↔ 工具）。ACP 解决的是 Agent 怎么跟编辑器交互（Agent ↔ 编辑器 UI）。</p>
+<p>这个区别至关重要。</p>
+<h2 id="三、ACP-的诞生：从-Zed-的内部需求到开放标准"><a href="#三、ACP-的诞生：从-Zed-的内部需求到开放标准" class="headerlink" title="三、ACP 的诞生：从 Zed 的内部需求到开放标准"></a>三、ACP 的诞生：从 Zed 的内部需求到开放标准</h2><h3 id="3-1-起源故事"><a href="#3-1-起源故事" class="headerlink" title="3.1 起源故事"></a>3.1 起源故事</h3><p>2025 年初，Zed 编辑器团队正在做「agentic editing」实验——让 AI Agent 能自主执行多步代码修改。恰好 Google 找上门来，想让 Gemini CLI 深度集成进 Zed。</p>
+<p>问题来了：Gemini CLI 已经能在 Zed 的内嵌终端里跑，但那只是 ANSI 转义码的文本交互，没有结构化的通信。Agent 想展示一个 diff？只能打印文本。Agent 想请求文件访问权限？没有标准方式。</p>
+<p>Zed 的开发者回忆说：</p>
+<blockquote>
+<p>“我们需要一种比 ANSI 转义码更结构化的通信方式。”</p>
+</blockquote>
+<p>于是他们定义了一组最小化的 JSON-RPC 端点，用来在 Agent 和编辑器之间传递请求和响应。<strong>这就是 ACP 的原型。</strong></p>
+<h3 id="3-2-关键决策"><a href="#3-2-关键决策" class="headerlink" title="3.2 关键决策"></a>3.2 关键决策</h3><p>Zed 做了一个大胆的决定：<strong>把自己内置的 AI 助手也重构为 ACP 协议</strong>。</p>
+<p>这意味着 Zed 自家的 Agent 和第三方 Agent 走完全相同的接口。没有「特权通道」，没有「内部 API」。这个决定释放了强烈的信号：ACP 不是「给外人用的二等公民接口」，而是 Zed 自己 all-in 的架构选择。</p>
+<h3 id="3-3-时间线"><a href="#3-3-时间线" class="headerlink" title="3.3 时间线"></a>3.3 时间线</h3><table>
+<thead>
+<tr>
+<th>时间</th>
+<th>里程碑</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>2025年8月</td>
+<td>Zed 发布「Bring Your Own Agent」功能，ACP 作为开放标准公布（Apache License）</td>
+</tr>
+<tr>
+<td>2025年8月</td>
+<td>Google Gemini CLI 成为首个参考实现</td>
+</tr>
+<tr>
+<td>2025年9月</td>
+<td>Neovim 社区通过 CodeCompanion 插件接入 ACP</td>
+</tr>
+<tr>
+<td>2025年10月</td>
+<td><strong>JetBrains 宣布与 Zed 合作，在 IntelliJ&#x2F;PyCharm 等 IDE 中支持 ACP</strong></td>
+</tr>
+<tr>
+<td>2025年10月</td>
+<td>Block（Square 母公司）的 Goose Agent 接入 ACP</td>
+</tr>
+<tr>
+<td>2025年12月</td>
+<td>JetBrains 发文阐述「Agents, Protocols, and Why We’re Not Playing Favorites」</td>
+</tr>
+<tr>
+<td>2026年1月</td>
+<td>JetBrains 上线 ACP Agent Registry（Beta）</td>
+</tr>
+<tr>
+<td>2026年1月</td>
+<td>GitHub Copilot CLI 公开预览 ACP 支持</td>
+</tr>
+</tbody></table>
+<p><strong>不到半年时间，从一个编辑器的内部实验变成了整个行业的标准。</strong></p>
+<h2 id="四、ACP-技术架构：深入协议设计"><a href="#四、ACP-技术架构：深入协议设计" class="headerlink" title="四、ACP 技术架构：深入协议设计"></a>四、ACP 技术架构：深入协议设计</h2><h3 id="4-1-通信层：JSON-RPC-over-stdio"><a href="#4-1-通信层：JSON-RPC-over-stdio" class="headerlink" title="4.1 通信层：JSON-RPC over stdio"></a>4.1 通信层：JSON-RPC over stdio</h3><p>ACP 使用 <strong>JSON-RPC 2.0</strong> 协议，通信方式是 <strong>stdin&#x2F;stdout 管道</strong>。当用户在编辑器里激活一个 Agent 时：</p>
+<ol>
+<li>编辑器以子进程方式启动 Agent</li>
+<li>所有通信通过 stdin&#x2F;stdout 的 JSON-RPC 消息完成</li>
+<li>支持双向通信——Agent 也可以向编辑器发请求</li>
+</ol>
+<p>和 LSP 一模一样的通信模型，成熟、简单、可靠。</p>
+<h3 id="4-2-消息类型"><a href="#4-2-消息类型" class="headerlink" title="4.2 消息类型"></a>4.2 消息类型</h3><p>ACP 定义了两种消息：</p>
+<ul>
+<li><strong>Methods（方法调用）</strong>：请求-响应模式，期望对方返回结果或错误</li>
+<li><strong>Notifications（通知）</strong>：单向消息，不期望响应。Agent 用它来流式推送更新</li>
+</ul>
+<h3 id="4-3-核心会话生命周期"><a href="#4-3-核心会话生命周期" class="headerlink" title="4.3 核心会话生命周期"></a>4.3 核心会话生命周期</h3><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">初始化阶段</span><br><span class="line">    Client → Agent: initialize（协商版本和能力）</span><br><span class="line">    Client → Agent: authenticate（如果 Agent 需要认证）</span><br><span class="line"></span><br><span class="line">会话建立</span><br><span class="line">    Client → Agent: session/new（创建新会话）</span><br><span class="line">    或</span><br><span class="line">    Client → Agent: session/load（恢复已有会话）</span><br><span class="line"></span><br><span class="line">对话轮次（可重复）</span><br><span class="line">    Client → Agent: session/prompt（发送用户消息）</span><br><span class="line">    Agent → Client: session/update（流式推送思考过程、代码修改等）</span><br><span class="line">    Agent → Client: session/request_permission（请求文件/终端权限）</span><br><span class="line">    Client → Agent: session/cancel（用户取消操作）</span><br></pre></td></tr></table></figure></div>
+
+<h3 id="4-4-Agent-端核心方法"><a href="#4-4-Agent-端核心方法" class="headerlink" title="4.4 Agent 端核心方法"></a>4.4 Agent 端核心方法</h3><table>
+<thead>
+<tr>
+<th>方法</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>initialize</code></td>
+<td>协商版本，交换能力声明</td>
+</tr>
+<tr>
+<td><code>authenticate</code></td>
+<td>Agent 认证（如 API Key）</td>
+</tr>
+<tr>
+<td><code>session/new</code></td>
+<td>创建新会话</td>
+</tr>
+<tr>
+<td><code>session/prompt</code></td>
+<td>接收用户输入</td>
+</tr>
+<tr>
+<td><code>session/load</code></td>
+<td>恢复历史会话（可选）</td>
+</tr>
+<tr>
+<td><code>session/set_mode</code></td>
+<td>切换工作模式（如 plan&#x2F;code&#x2F;review）</td>
+</tr>
+</tbody></table>
+<h3 id="4-5-Client-端核心方法"><a href="#4-5-Client-端核心方法" class="headerlink" title="4.5 Client 端核心方法"></a>4.5 Client 端核心方法</h3><p>编辑器作为 Client，需要实现这些方法供 Agent 调用：</p>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>session/request_permission</code></td>
+<td>Agent 请求执行敏感操作前获取用户授权</td>
+</tr>
+<tr>
+<td><code>fs/read_text_file</code></td>
+<td>读取文件内容</td>
+</tr>
+<tr>
+<td><code>fs/write_text_file</code></td>
+<td>写入文件内容</td>
+</tr>
+<tr>
+<td><code>terminal/create</code></td>
+<td>创建终端执行命令</td>
+</tr>
+<tr>
+<td><code>terminal/output</code></td>
+<td>获取终端输出</td>
+</tr>
+<tr>
+<td><code>terminal/kill</code></td>
+<td>终止终端进程</td>
+</tr>
+</tbody></table>
+<p>这个设计非常巧妙——<strong>Agent 不直接操作文件系统，而是通过编辑器代理访问</strong>。编辑器作为信任中介，可以：</p>
+<ul>
+<li>在 Agent 写文件前展示 diff 让用户确认</li>
+<li>限制 Agent 只能访问项目目录</li>
+<li>拦截危险的终端命令</li>
+</ul>
+<h3 id="4-6-流式更新与实时-UI"><a href="#4-6-流式更新与实时-UI" class="headerlink" title="4.6 流式更新与实时 UI"></a>4.6 流式更新与实时 UI</h3><p>ACP 大量使用 JSON-RPC 通知来实现实时 UI 更新。Agent 的 <code>session/update</code> 通知可以推送：</p>
+<ul>
+<li><strong>文本块</strong>（思考过程、代码解释）</li>
+<li><strong>代码 diff</strong>（多文件修改的结构化表示）</li>
+<li><strong>工具调用状态</strong>（正在执行什么、执行结果）</li>
+<li><strong>执行计划</strong>（Agent 打算做哪些步骤）</li>
+<li><strong>模式切换</strong>（从分析模式切到编码模式）</li>
+</ul>
+<p>编辑器收到这些通知后，可以用原生 UI 渲染——不是把 Markdown 文本糊到一个对话框里，而是真正集成到编辑器的 diff 视图、文件树、终端面板中。</p>
+<h2 id="五、ACP-vs-MCP：互补，不是竞争"><a href="#五、ACP-vs-MCP：互补，不是竞争" class="headerlink" title="五、ACP vs MCP：互补，不是竞争"></a>五、ACP vs MCP：互补，不是竞争</h2><p>这是最容易搞混的部分。很多人第一次听说 ACP 会问：「MCP 不是已经有了吗？为什么还需要 ACP？」</p>
+<p>答案是：<strong>它们解决完全不同的问题。</strong></p>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>MCP（Model Context Protocol）</th>
+<th>ACP（Agent Client Protocol）</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>解决的问题</td>
+<td>Agent 如何访问外部工具和数据</td>
+<td>Agent 如何在编辑器中展示 UI</td>
+</tr>
+<tr>
+<td>通信方向</td>
+<td>Agent ↔ 工具&#x2F;数据源</td>
+<td>Agent ↔ 编辑器&#x2F;用户界面</td>
+</tr>
+<tr>
+<td>类比</td>
+<td>给 Agent 装「手」</td>
+<td>给 Agent 装「嘴」和「眼睛」</td>
+</tr>
+<tr>
+<td>创建者</td>
+<td>Anthropic</td>
+<td>Zed Industries</td>
+</tr>
+<tr>
+<td>协议</td>
+<td>JSON-RPC</td>
+<td>JSON-RPC</td>
+</tr>
+<tr>
+<td>传输</td>
+<td>stdio &#x2F; HTTP SSE &#x2F; Streamable HTTP</td>
+<td>stdio</td>
+</tr>
+</tbody></table>
+<p><strong>它们不仅不冲突，还被设计为协同工作：</strong></p>
+<ol>
+<li>编辑器配置了 MCP 服务器（比如数据库查询、API 文档搜索）</li>
+<li>当 ACP 会话建立时，编辑器把 MCP 服务器的配置传给 Agent</li>
+<li>Agent 直接连接 MCP 服务器获取工具能力</li>
+<li>Agent 通过 ACP 把执行结果展示给用户</li>
+</ol>
+<p>ACP 协议文档明确说：「ACP 有意复用 MCP 的数据类型，这样集成者不需要为常见数据类型重新发明轮子。」</p>
+<h3 id="⚠️-别跟-IBM-的-ACP-搞混"><a href="#⚠️-别跟-IBM-的-ACP-搞混" class="headerlink" title="⚠️ 别跟 IBM 的 ACP 搞混"></a>⚠️ 别跟 IBM 的 ACP 搞混</h3><p>另一个值得注意的点：IBM 在 2025 年提出过一个也叫 “ACP” 的协议——<strong>Agent Communication Protocol</strong>。那个 ACP 是做 Agent 之间通信的（类似 Google 的 A2A），和 Zed 的 Agent <strong>Client</strong> Protocol 完全不同。</p>
+<p>IBM 的 Agent Communication Protocol 已于 2025 年 8 月合并入 Google 主导的 A2A（Agent-to-Agent Protocol），不再独立发展。</p>
+<p>所以现在说 ACP，默认就是指 Zed 的 <strong>Agent Client Protocol</strong>。</p>
+<h2 id="六、生态系统：谁在用-ACP？"><a href="#六、生态系统：谁在用-ACP？" class="headerlink" title="六、生态系统：谁在用 ACP？"></a>六、生态系统：谁在用 ACP？</h2><h3 id="6-1-Agent-端（已接入-ACP-的-AI-编程助手）"><a href="#6-1-Agent-端（已接入-ACP-的-AI-编程助手）" class="headerlink" title="6.1 Agent 端（已接入 ACP 的 AI 编程助手）"></a>6.1 Agent 端（已接入 ACP 的 AI 编程助手）</h3><p>截至 2026 年 3 月，已有 <strong>30+ 个 Agent</strong> 支持 ACP，包括：</p>
+<p><strong>头部玩家：</strong></p>
+<ul>
+<li><strong>Claude Agent</strong>（Anthropic）——通过 Zed 的 SDK 适配器</li>
+<li><strong>Codex CLI</strong>（OpenAI）——通过 Zed 的适配器</li>
+<li><strong>Gemini CLI</strong>（Google）——首个参考实现</li>
+<li><strong>GitHub Copilot</strong>——2026年1月公开预览 ACP</li>
+<li><strong>Junie</strong>（JetBrains）</li>
+<li><strong>Goose</strong>（Block&#x2F;Square）</li>
+</ul>
+<p><strong>中国团队：</strong></p>
+<ul>
+<li><strong>Kimi CLI</strong>（Moonshot AI &#x2F; 月之暗面）</li>
+<li><strong>Qwen Code</strong>（通义千问）</li>
+<li><strong>OpenClaw</strong></li>
+</ul>
+<p><strong>其他值得关注：</strong></p>
+<ul>
+<li>Augment Code、Cline、Docker cagent、Mistral Vibe、OpenHands…</li>
+</ul>
+<h3 id="6-2-Client-端（支持-ACP-的编辑器-x2F-IDE）"><a href="#6-2-Client-端（支持-ACP-的编辑器-x2F-IDE）" class="headerlink" title="6.2 Client 端（支持 ACP 的编辑器&#x2F;IDE）"></a>6.2 Client 端（支持 ACP 的编辑器&#x2F;IDE）</h3><p><strong>编辑器&#x2F;IDE：</strong></p>
+<ul>
+<li><strong>Zed</strong>——ACP 的发源地</li>
+<li><strong>JetBrains</strong> 全家桶（IntelliJ、PyCharm、WebStorm 等）</li>
+<li><strong>Neovim</strong>——通过 CodeCompanion &#x2F; avante.nvim &#x2F; agentic.nvim 插件</li>
+<li><strong>VS Code</strong>——通过 ACP Client 扩展</li>
+<li><strong>Emacs</strong>——通过 agent-shell.el</li>
+</ul>
+<p><strong>非编辑器 Client（ACP 的延伸）：</strong></p>
+<ul>
+<li><strong>Obsidian</strong>（笔记应用）</li>
+<li><strong>marimo</strong>（Python notebook）</li>
+<li><strong>OpenClaw</strong>（同时是 Agent 和 Client）</li>
+<li><strong>Telegram ACP Bot</strong></li>
+<li><strong>Chrome ACP</strong>（浏览器扩展）</li>
+<li><strong>DuckDB</strong>（通过 ACP 扩展查询 Agent）</li>
+</ul>
+<p>这个名单说明 ACP 已经<strong>突破了「编辑器协议」的边界</strong>——任何需要嵌入 AI Agent 交互的应用都可以当 ACP Client。</p>
+<h2 id="七、ACP-进阶特性"><a href="#七、ACP-进阶特性" class="headerlink" title="七、ACP 进阶特性"></a>七、ACP 进阶特性</h2><h3 id="7-1-会话管理"><a href="#7-1-会话管理" class="headerlink" title="7.1 会话管理"></a>7.1 会话管理</h3><p>ACP 支持完整的会话生命周期：</p>
+<ul>
+<li><strong>session&#x2F;new</strong>：创建新会话</li>
+<li><strong>session&#x2F;load</strong>：恢复历史会话（需要 Agent 声明 <code>loadSession</code> 能力）</li>
+<li><strong>session&#x2F;fork</strong>（提案中）：从某个节点分叉会话</li>
+<li><strong>session&#x2F;stop</strong>（提案中）：停止活跃会话</li>
+<li><strong>session&#x2F;delete</strong>（提案中）：删除会话</li>
+</ul>
+<p>这意味着你可以在 Zed 里开始一个 Claude Code 会话，关闭编辑器，第二天重新打开继续。</p>
+<h3 id="7-2-Session-Modes（工作模式）"><a href="#7-2-Session-Modes（工作模式）" class="headerlink" title="7.2 Session Modes（工作模式）"></a>7.2 Session Modes（工作模式）</h3><p>Agent 可以声明多种工作模式，比如：</p>
+<ul>
+<li><strong>Plan 模式</strong>：只分析和规划，不修改代码</li>
+<li><strong>Code 模式</strong>：直接编写和修改代码</li>
+<li><strong>Review 模式</strong>：审查代码，提出建议</li>
+</ul>
+<p>编辑器 UI 可以展示模式切换按钮，用户一键切换 Agent 的行为模式。</p>
+<h3 id="7-3-Slash-Commands"><a href="#7-3-Slash-Commands" class="headerlink" title="7.3 Slash Commands"></a>7.3 Slash Commands</h3><p>Agent 可以向编辑器注册自定义斜杠命令（类似 Discord 的 &#x2F;命令）：</p>
+<ul>
+<li><code>/test</code> 运行测试</li>
+<li><code>/refactor</code> 重构选中代码</li>
+<li><code>/explain</code> 解释代码逻辑</li>
+</ul>
+<p>编辑器在 prompt 输入框里提供自动补全和提示。</p>
+<h3 id="7-4-Agent-Plan（执行计划）"><a href="#7-4-Agent-Plan（执行计划）" class="headerlink" title="7.4 Agent Plan（执行计划）"></a>7.4 Agent Plan（执行计划）</h3><p>Agent 可以在执行前先告诉编辑器「我打算做什么」：</p>
+<ol>
+<li>读取 <code>src/auth.ts</code> 了解当前认证逻辑</li>
+<li>修改 <code>src/auth.ts</code> 添加 JWT 验证</li>
+<li>创建 <code>src/auth.test.ts</code> 编写单元测试</li>
+<li>运行 <code>npm test</code> 验证</li>
+</ol>
+<p>编辑器以清晰的 UI 展示这个计划，用户可以审查、修改或取消。</p>
+<h3 id="7-5-MCP-over-ACP（提案中）"><a href="#7-5-MCP-over-ACP（提案中）" class="headerlink" title="7.5 MCP-over-ACP（提案中）"></a>7.5 MCP-over-ACP（提案中）</h3><p>一个正在讨论的 RFD（Request for Dialog）提案：<strong>在 ACP 通道上转发 MCP 消息</strong>。这样 Agent 不需要单独建立 MCP 连接，一根管道搞定所有通信。</p>
+<h3 id="7-6-可扩展性"><a href="#7-6-可扩展性" class="headerlink" title="7.6 可扩展性"></a>7.6 可扩展性</h3><ul>
+<li>用 <code>_meta</code> 字段携带自定义数据</li>
+<li>用 <code>_</code> 前缀定义自定义方法</li>
+<li>在 <code>initialize</code> 时声明自定义能力</li>
+</ul>
+<h2 id="八、对比-A2A：不同层次的标准化"><a href="#八、对比-A2A：不同层次的标准化" class="headerlink" title="八、对比 A2A：不同层次的标准化"></a>八、对比 A2A：不同层次的标准化</h2><p>Google 的 A2A（Agent-to-Agent Protocol）解决的是 <strong>Agent 之间的通信</strong>——比如一个「旅行规划 Agent」怎么调用一个「航班搜索 Agent」。</p>
+<p>把三个协议放在一起，层次就清晰了：</p>
+<div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">┌─────────────────────────────────────┐</span><br><span class="line">│         用户 / 编辑器 UI            │</span><br><span class="line">│              (ACP)                  │  ← Agent ↔ 编辑器</span><br><span class="line">├─────────────────────────────────────┤</span><br><span class="line">│         AI Agent                    │</span><br><span class="line">│     ┌───────┐  ┌───────┐           │</span><br><span class="line">│     │  MCP  │  │  A2A  │           │  ← Agent ↔ 工具 / Agent ↔ Agent</span><br><span class="line">│     └───┬───┘  └───┬───┘           │</span><br><span class="line">├─────────┼──────────┼───────────────┤</span><br><span class="line">│    工具/数据源   其他Agent          │</span><br><span class="line">└─────────────────────────────────────┘</span><br></pre></td></tr></table></figure></div>
+
+<table>
+<thead>
+<tr>
+<th>协议</th>
+<th>连接</th>
+<th>类比</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ACP</td>
+<td>Agent ↔ 编辑器</td>
+<td>Agent 的「嘴巴和眼睛」</td>
+</tr>
+<tr>
+<td>MCP</td>
+<td>Agent ↔ 工具</td>
+<td>Agent 的「手」</td>
+</tr>
+<tr>
+<td>A2A</td>
+<td>Agent ↔ Agent</td>
+<td>Agent 的「社交能力」</td>
+</tr>
+</tbody></table>
+<p><strong>三层协议，各司其职，合在一起构成 AI Agent 的完整通信栈。</strong></p>
+<h2 id="九、实际体验：在-Zed-里用-Claude-Code"><a href="#九、实际体验：在-Zed-里用-Claude-Code" class="headerlink" title="九、实际体验：在 Zed 里用 Claude Code"></a>九、实际体验：在 Zed 里用 Claude Code</h2><p>以最典型的场景为例，ACP 的实际体验是这样的：</p>
+<ol>
+<li><strong>安装 Claude Code</strong>：<code>npm install -g @anthropic-ai/claude-code</code></li>
+<li><strong>在 Zed 配置</strong>：添加 Claude Code 为外部 Agent</li>
+<li><strong>打开项目</strong>，在 Agent 面板发送 prompt</li>
+<li>Claude Code 通过 ACP 接收 prompt → 分析项目 → 通过 <code>session/update</code> 流式推送分析结果 → 通过 <code>fs/read_text_file</code> 读取相关文件 → 生成修改 → 通过 <code>session/request_permission</code> 请求写入权限 → 编辑器展示 diff → 用户确认 → 写入</li>
+</ol>
+<p>全程在编辑器里完成。没有窗口切换，没有复制粘贴，Agent 的每一步操作都在编辑器的原生 UI 中可视化。</p>
+<h2 id="十、ACP-的意义与未来"><a href="#十、ACP-的意义与未来" class="headerlink" title="十、ACP 的意义与未来"></a>十、ACP 的意义与未来</h2><h3 id="10-1-为什么-ACP-能成功？"><a href="#10-1-为什么-ACP-能成功？" class="headerlink" title="10.1 为什么 ACP 能成功？"></a>10.1 为什么 ACP 能成功？</h3><ol>
+<li><strong>解决了真实痛点</strong>——Agent 和编辑器的集成确实是 M × N 问题</li>
+<li><strong>Zed 自己 all-in</strong>——不是做给别人用的二等接口</li>
+<li><strong>JetBrains 的背书</strong>——全球最大的商业 IDE 厂商加入</li>
+<li><strong>时机恰好</strong>——AI 编程 Agent 在 2025 年爆发，行业急需标准</li>
+<li><strong>设计克制</strong>——基于 JSON-RPC，不过度设计，不搞复杂的抽象</li>
+</ol>
+<h3 id="10-2-挑战"><a href="#10-2-挑战" class="headerlink" title="10.2 挑战"></a>10.2 挑战</h3><ul>
+<li><strong>Web IDE 支持</strong>——ACP 目前基于 stdio，浏览器环境（如 GitHub Codespaces）需要额外适配</li>
+<li><strong>非编码场景</strong>——ACP 高度优化了编程工作流，能否扩展到其他领域？</li>
+<li><strong>与 A2A 的边界</strong>——当一个 Agent 需要同时和编辑器交互（ACP）又和其他 Agent 协作（A2A），集成方式还需要探索</li>
+</ul>
+<h3 id="10-3-我的判断"><a href="#10-3-我的判断" class="headerlink" title="10.3 我的判断"></a>10.3 我的判断</h3><p>ACP 是 2025-2026 年 AI 基础设施领域最重要的协议之一。</p>
+<p>它不像 MCP 那样声势浩大（毕竟 Anthropic 有足够的 PR 火力），也不像 A2A 那样有 Google 的号召力。但 ACP 解决的问题实在、方案务实、生态增长迅猛。</p>
+<p><strong>如果 LSP 是编程语言的「万能插头」，ACP 就是 AI 编程 Agent 的「万能插头」。</strong></p>
+<p>从 2025 年 8 月发布至今不到 7 个月，30+ Agent、15+ Client 接入。按这个势头，ACP 会成为 AI 编程领域的事实标准——就像 LSP 在语言工具领域做到的那样。</p>
+<hr>
+<p><em>参考资料：</em></p>
+<ul>
+<li><em><a class="link"   target="_blank" rel="noopener" href="https://agentclientprotocol.com/" >ACP 官方文档<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></em></li>
+<li><em><a class="link"   target="_blank" rel="noopener" href="https://blog.jetbrains.com/ai/2025/10/jetbrains-zed-open-interoperability-for-ai-coding-agents-in-your-ide/" >JetBrains × Zed 合作公告<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></em></li>
+<li><em><a class="link"   target="_blank" rel="noopener" href="https://block.github.io/goose/blog/2025/10/24/intro-to-agent-client-protocol-acp/" >Goose 团队的 ACP 介绍<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></em></li>
+<li><em><a class="link"   target="_blank" rel="noopener" href="https://blog.promptlayer.com/agent-client-protocol-the-lsp-for-ai-coding-agents/" >PromptLayer 深度分析<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></em></li>
+<li><em><a class="link"   target="_blank" rel="noopener" href="https://blog.jetbrains.com/ai/2026/01/acp-agent-registry/" >ACP Agent Registry（JetBrains）<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></em></li>
+</ul>
+
+		</div>
+
+		
+		<div class="post-copyright-info w-full my-8 px-2 sm:px-6 md:px-8">
+			<div class="article-copyright-info-container">
+    <ul>
+        <li><strong>标题:</strong> ACP 深度解读：AI编程Agent的「万能插头」是怎么炼成的</li>
+        <li><strong>作者:</strong> Nathan</li>
+        <li><strong>创建于
+                :</strong> 2026-03-04 00:00:00</li>
+        
+            <li>
+                <strong>更新于
+                    :</strong> 2026-03-04 21:06:44
+            </li>
+        
+        <li>
+            <strong>链接:</strong> https://hydraxman.github.io/2026/03/04/acp-agent-client-protocol-deep-dive/
+        </li>
+        <li>
+            <strong>
+                版权声明:
+            </strong>
+            
+
+            
+                本文章采用 <a class="license" target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0">CC BY-NC-SA 4.0</a> 进行许可。
+            
+        </li>
+    </ul>
+</div>
+
+		</div>
+		
+
+		
+		<ul class="post-tags-box text-lg mt-1.5 flex-wrap justify-center flex md:hidden">
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/ACP/">#ACP</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/Agent-Client-Protocol/">#Agent Client Protocol</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/AI%E7%BC%96%E7%A8%8B/">#AI编程</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/MCP/">#MCP</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/Coding-Agent/">#Coding Agent</a>&nbsp;
+			</li>
+			
+		</ul>
+		
+
+		
+
+		
+		<div class="article-nav my-8 flex justify-between items-center px-2 sm:px-6 md:px-8">
+			
+			<div class="article-prev border-border-color shadow-redefine-flat shadow-shadow-color-2 rounded-medium px-4 py-2 hover:shadow-redefine-flat-hover hover:shadow-shadow-color-2">
+				<a class="prev" rel="prev" href="/2026/03/04/2026-03-04-morning-news/">
+					<span class="left arrow-icon flex justify-center items-center">
+						<i class="fa-solid fa-chevron-left"></i>
+					</span>
+					<span class="title flex justify-center items-center">
+						<span class="post-nav-title-item truncate max-w-48">2026年03月04日早间要闻</span>
+						<span class="post-nav-item">上一篇</span>
+					</span>
+				</a>
+			</div>
+			
+			
+			<div class="article-next border-border-color shadow-redefine-flat shadow-shadow-color-2 rounded-medium px-4 py-2 hover:shadow-redefine-flat-hover hover:shadow-shadow-color-2">
+				<a class="next" rel="next" href="/2026/03/04/acp-vs-a2a/">
+					<span class="title flex justify-center items-center">
+						<span class="post-nav-title-item truncate max-w-48">AI Agent 通信协议大战：ACP vs A2A，谁将统一多智能体时代？</span>
+						<span class="post-nav-item">下一篇</span>
+					</span>
+					<span class="right arrow-icon flex justify-center items-center">
+						<i class="fa-solid fa-chevron-right"></i>
+					</span>
+				</a>
+			</div>
+			
+		</div>
+		
+
+
+		
+	</div>
+
+	
+	<div class="toc-content-container">
+		<div class="post-toc-wrap">
+	<div class="post-toc">
+		<div class="toc-title">目录</div>
+		<div class="page-title">ACP 深度解读：AI编程Agent的「万能插头」是怎么炼成的</div>
+		<ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E4%BB%8E%E4%B8%80%E4%B8%AA%E7%9C%9F%E5%AE%9E%E7%97%9B%E7%82%B9%E8%AF%B4%E8%B5%B7"><span class="nav-text">一、从一个真实痛点说起</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81LSP-%E7%9A%84%E5%90%AF%E7%A4%BA%EF%BC%9A%E4%B8%80%E4%B8%AA%E5%8D%8F%E8%AE%AE%E8%A7%A3%E5%86%B3-M-%C3%97-N-%E9%97%AE%E9%A2%98"><span class="nav-text">二、LSP 的启示：一个协议解决 M × N 问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81ACP-%E7%9A%84%E8%AF%9E%E7%94%9F%EF%BC%9A%E4%BB%8E-Zed-%E7%9A%84%E5%86%85%E9%83%A8%E9%9C%80%E6%B1%82%E5%88%B0%E5%BC%80%E6%94%BE%E6%A0%87%E5%87%86"><span class="nav-text">三、ACP 的诞生：从 Zed 的内部需求到开放标准</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-%E8%B5%B7%E6%BA%90%E6%95%85%E4%BA%8B"><span class="nav-text">3.1 起源故事</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-%E5%85%B3%E9%94%AE%E5%86%B3%E7%AD%96"><span class="nav-text">3.2 关键决策</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-3-%E6%97%B6%E9%97%B4%E7%BA%BF"><span class="nav-text">3.3 时间线</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81ACP-%E6%8A%80%E6%9C%AF%E6%9E%B6%E6%9E%84%EF%BC%9A%E6%B7%B1%E5%85%A5%E5%8D%8F%E8%AE%AE%E8%AE%BE%E8%AE%A1"><span class="nav-text">四、ACP 技术架构：深入协议设计</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#4-1-%E9%80%9A%E4%BF%A1%E5%B1%82%EF%BC%9AJSON-RPC-over-stdio"><span class="nav-text">4.1 通信层：JSON-RPC over stdio</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-2-%E6%B6%88%E6%81%AF%E7%B1%BB%E5%9E%8B"><span class="nav-text">4.2 消息类型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-3-%E6%A0%B8%E5%BF%83%E4%BC%9A%E8%AF%9D%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F"><span class="nav-text">4.3 核心会话生命周期</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-4-Agent-%E7%AB%AF%E6%A0%B8%E5%BF%83%E6%96%B9%E6%B3%95"><span class="nav-text">4.4 Agent 端核心方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-5-Client-%E7%AB%AF%E6%A0%B8%E5%BF%83%E6%96%B9%E6%B3%95"><span class="nav-text">4.5 Client 端核心方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-6-%E6%B5%81%E5%BC%8F%E6%9B%B4%E6%96%B0%E4%B8%8E%E5%AE%9E%E6%97%B6-UI"><span class="nav-text">4.6 流式更新与实时 UI</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%94%E3%80%81ACP-vs-MCP%EF%BC%9A%E4%BA%92%E8%A1%A5%EF%BC%8C%E4%B8%8D%E6%98%AF%E7%AB%9E%E4%BA%89"><span class="nav-text">五、ACP vs MCP：互补，不是竞争</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E2%9A%A0%EF%B8%8F-%E5%88%AB%E8%B7%9F-IBM-%E7%9A%84-ACP-%E6%90%9E%E6%B7%B7"><span class="nav-text">⚠️ 别跟 IBM 的 ACP 搞混</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AD%E3%80%81%E7%94%9F%E6%80%81%E7%B3%BB%E7%BB%9F%EF%BC%9A%E8%B0%81%E5%9C%A8%E7%94%A8-ACP%EF%BC%9F"><span class="nav-text">六、生态系统：谁在用 ACP？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#6-1-Agent-%E7%AB%AF%EF%BC%88%E5%B7%B2%E6%8E%A5%E5%85%A5-ACP-%E7%9A%84-AI-%E7%BC%96%E7%A8%8B%E5%8A%A9%E6%89%8B%EF%BC%89"><span class="nav-text">6.1 Agent 端（已接入 ACP 的 AI 编程助手）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-2-Client-%E7%AB%AF%EF%BC%88%E6%94%AF%E6%8C%81-ACP-%E7%9A%84%E7%BC%96%E8%BE%91%E5%99%A8-x2F-IDE%EF%BC%89"><span class="nav-text">6.2 Client 端（支持 ACP 的编辑器&#x2F;IDE）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%83%E3%80%81ACP-%E8%BF%9B%E9%98%B6%E7%89%B9%E6%80%A7"><span class="nav-text">七、ACP 进阶特性</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#7-1-%E4%BC%9A%E8%AF%9D%E7%AE%A1%E7%90%86"><span class="nav-text">7.1 会话管理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-2-Session-Modes%EF%BC%88%E5%B7%A5%E4%BD%9C%E6%A8%A1%E5%BC%8F%EF%BC%89"><span class="nav-text">7.2 Session Modes（工作模式）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-3-Slash-Commands"><span class="nav-text">7.3 Slash Commands</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-4-Agent-Plan%EF%BC%88%E6%89%A7%E8%A1%8C%E8%AE%A1%E5%88%92%EF%BC%89"><span class="nav-text">7.4 Agent Plan（执行计划）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-5-MCP-over-ACP%EF%BC%88%E6%8F%90%E6%A1%88%E4%B8%AD%EF%BC%89"><span class="nav-text">7.5 MCP-over-ACP（提案中）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-6-%E5%8F%AF%E6%89%A9%E5%B1%95%E6%80%A7"><span class="nav-text">7.6 可扩展性</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AB%E3%80%81%E5%AF%B9%E6%AF%94-A2A%EF%BC%9A%E4%B8%8D%E5%90%8C%E5%B1%82%E6%AC%A1%E7%9A%84%E6%A0%87%E5%87%86%E5%8C%96"><span class="nav-text">八、对比 A2A：不同层次的标准化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B9%9D%E3%80%81%E5%AE%9E%E9%99%85%E4%BD%93%E9%AA%8C%EF%BC%9A%E5%9C%A8-Zed-%E9%87%8C%E7%94%A8-Claude-Code"><span class="nav-text">九、实际体验：在 Zed 里用 Claude Code</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%81%E3%80%81ACP-%E7%9A%84%E6%84%8F%E4%B9%89%E4%B8%8E%E6%9C%AA%E6%9D%A5"><span class="nav-text">十、ACP 的意义与未来</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#10-1-%E4%B8%BA%E4%BB%80%E4%B9%88-ACP-%E8%83%BD%E6%88%90%E5%8A%9F%EF%BC%9F"><span class="nav-text">10.1 为什么 ACP 能成功？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-2-%E6%8C%91%E6%88%98"><span class="nav-text">10.2 挑战</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-3-%E6%88%91%E7%9A%84%E5%88%A4%E6%96%AD"><span class="nav-text">10.3 我的判断</span></a></li></ol></li></ol>
+
+	</div>
+</div>
+	</div>
+	
+</div>
+			</div>
+
+			
+		</div>
+
+		<div class="main-content-footer">
+			<footer class="footer mt-5 py-5 h-auto text-base text-third-text-color relative border-t-2 border-t-border-color">
+    <div class="info-container py-3 text-center">
+        
+        <div class="text-center">
+            &copy;
+            
+              <span>2024</span>
+              -
+            
+            2026&nbsp;&nbsp;<i class="fa-solid fa-heart fa-beat" style="--fa-animation-duration: 0.5s; color: #333"></i>&nbsp;&nbsp;<a href="/">Nathan</a>
+            
+                
+                <p class="post-count space-x-0.5">
+                    <span>
+                        共撰写了 95 篇文章
+                    </span>
+                    
+                        <span>
+                            共 205.4k 字
+                        </span>
+                    
+                </p>
+            
+        </div>
+        
+        <div class="relative text-center lg:absolute lg:left-[20px] lg:top-1/2 lg:-translate-y-1/2 lg:text-left">
+            <span class="lg:block text-sm">由 <?xml version="1.0" encoding="utf-8"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg class="relative top-[2px] inline-block align-baseline" version="1.1" id="圖層_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="1rem" height="1rem" viewBox="0 0 512 512" enable-background="new 0 0 512 512" xml:space="preserve"><path fill="#0E83CD" d="M256.4,25.8l-200,115.5L56,371.5l199.6,114.7l200-115.5l0.4-230.2L256.4,25.8z M349,354.6l-18.4,10.7l-18.6-11V275H200v79.6l-18.4,10.7l-18.6-11v-197l18.5-10.6l18.5,10.8V237h112v-79.6l18.5-10.6l18.5,10.8V354.6z"/></svg><a target="_blank" class="text-base" href="https://hexo.io">Hexo</a> 驱动</span>
+            <span class="text-sm lg:block">主题&nbsp;<a class="text-base" target="_blank" href="https://github.com/EvanNotFound/hexo-theme-redefine">Redefine v2.8.5</a></span>
+        </div>
+        
+        
+            <div>
+                博客已运行 <span class="odometer" id="runtime_days" ></span> 天 <span class="odometer" id="runtime_hours"></span> 小时 <span class="odometer" id="runtime_minutes"></span> 分钟 <span class="odometer" id="runtime_seconds"></span> 秒
+            </div>
+        
+        
+            <script data-swup-reload-script>
+                try {
+                    function odometer_init() {
+                    const elements = document.querySelectorAll('.odometer');
+                    elements.forEach(el => {
+                        new Odometer({
+                            el,
+                            format: '( ddd).dd',
+                            duration: 200
+                        });
+                    });
+                    }
+                    odometer_init();
+                } catch (error) {}
+            </script>
+        
+        
+            
+                
+        
+                
+        
+        
+    </div>  
+</footer>
+		</div>
+	</div>
+
+	
+	<div class="post-tools">
+		<div class="post-tools-container">
+	<ul class="article-tools-list">
+		<!-- TOC aside toggle -->
+		
+		<li class="right-bottom-tools page-aside-toggle">
+			<i class="fa-regular fa-outdent"></i>
+		</li>
+		
+
+		<!-- go comment -->
+		
+	</ul>
+</div>
+	</div>
+	
+
+	<div class="right-side-tools-container">
+		<div class="side-tools-container">
+	<ul class="hidden-tools-list">
+		<li class="right-bottom-tools tool-font-adjust-plus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-plus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-font-adjust-minus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-minus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-dark-light-toggle flex justify-center items-center">
+			<i class="fa-regular fa-moon"></i>
+		</li>
+
+		<!-- rss -->
+		
+
+		
+
+		<li class="right-bottom-tools tool-scroll-to-bottom flex justify-center items-center">
+			<i class="fa-regular fa-arrow-down"></i>
+		</li>
+	</ul>
+
+	<ul class="visible-tools-list">
+		<li class="right-bottom-tools toggle-tools-list flex justify-center items-center">
+			<i class="fa-regular fa-cog fa-spin"></i>
+		</li>
+		
+		<li class="right-bottom-tools tool-scroll-to-top flex justify-center items-center">
+			<i class="arrow-up fas fa-arrow-up"></i>
+			<span class="percent"></span>
+		</li>
+		
+		
+	</ul>
+</div>
+	</div>
+
+	<div class="image-viewer-container">
+	<img src="">
+</div>
+
+	
+	<div class="search-pop-overlay">
+	<div class="popup search-popup">
+		<div class="search-header">
+			<span class="search-input-field-pre">
+				<i class="fa-solid fa-keyboard"></i>
+			</span>
+			<div class="search-input-container">
+				<input autocomplete="off" autocorrect="off" autocapitalize="off" placeholder="站内搜索您需要的内容..." spellcheck="false" type="search" class="search-input">
+			</div>
+			<span class="popup-btn-close">
+				<i class="fa-solid fa-times"></i>
+			</span>
+		</div>
+		<div id="search-result">
+			<div id="no-result">
+				<i class="fa-solid fa-spinner fa-spin-pulse fa-5x fa-fw"></i>
+			</div>
+		</div>
+	</div>
+</div>
+	
+
+</main>
+
+
+
+<script src="/js/build/libs/Swup.min.js"></script>
+
+<script src="/js/build/libs/SwupSlideTheme.min.js"></script>
+
+<script src="/js/build/libs/SwupScriptsPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupProgressPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupScrollPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupPreloadPlugin.min.js"></script>
+
+<script>
+    const swup = new Swup({
+        plugins: [
+            new SwupScriptsPlugin({
+                optin: true,
+            }),
+            new SwupProgressPlugin(),
+            new SwupScrollPlugin({
+                offset: 80,
+            }),
+            new SwupSlideTheme({
+                mainElement: ".main-content-body",
+            }),
+            new SwupPreloadPlugin(),
+        ],
+        containers: ["#swup"],
+    });
+</script>
+
+
+
+
+	
+<script src="/js/build/tools/imageViewer.js" type="module"></script>
+
+<script src="/js/build/utils.js" type="module"></script>
+
+<script src="/js/build/main.js" type="module"></script>
+
+<script src="/js/build/layouts/navbarShrink.js" type="module"></script>
+
+<script src="/js/build/tools/scrollTopBottom.js" type="module"></script>
+
+<script src="/js/build/tools/lightDarkSwitch.js" type="module"></script>
+
+<script src="/js/build/layouts/categoryList.js" type="module"></script>
+
+
+
+    
+<script src="/js/build/tools/localSearch.js" type="module"></script>
+
+
+
+
+    
+<script src="/js/build/tools/codeBlock.js" type="module"></script>
+
+
+
+
+    
+<script src="/js/build/layouts/lazyload.js" type="module"></script>
+
+
+
+
+    
+<script src="/js/build/tools/runtime.js"></script>
+
+    
+<script src="/js/build/libs/odometer.min.js"></script>
+
+    
+<link rel="stylesheet" href="/assets/odometer-theme-minimal.css">
+
+
+
+
+  
+<script src="/js/build/libs/Typed.min.js"></script>
+
+  
+<script src="/js/build/plugins/typed.js" type="module"></script>
+
+
+
+
+
+
+
+
+    
+<script src="/js/build/libs/anime.min.js"></script>
+
+
+
+
+
+    
+<script src="/js/build/tools/tocToggle.js" type="module" data-swup-reload-script=""></script>
+
+<script src="/js/build/layouts/toc.js" type="module" data-swup-reload-script=""></script>
+
+<script src="/js/build/plugins/tabs.js" type="module" data-swup-reload-script=""></script>
+
+
+
+
+<script src="/js/build/libs/moment-with-locales.min.js" data-swup-reload-script=""></script>
+
+
+<script src="/js/build/layouts/essays.js" type="module" data-swup-reload-script=""></script>
+
+
+
+
+
+	
+</body>
+
+</html>
