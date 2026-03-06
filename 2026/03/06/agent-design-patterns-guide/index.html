@@ -1,0 +1,1162 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="keywords" content="计算机技术, 生活中的胡思乱想">
+    
+    <meta name="author" content="Nathan">
+    
+    <!-- Completely eliminate flash of wrong theme -->
+    <script>
+        (function() {
+            const THEME_KEY = "REDEFINE-THEME-STATUS";
+            const DARK = "dark", LIGHT = "light";
+            
+            // Get preferred theme
+            function getTheme() {
+                try {
+                    const saved = localStorage.getItem(THEME_KEY);
+                    if (saved) {
+                        const { isDark } = JSON.parse(saved);
+                        return isDark ? DARK : LIGHT;
+                    }
+                } catch (e) {}
+                
+                return matchMedia("(prefers-color-scheme: dark)").matches ? DARK : LIGHT;
+            }
+            
+            // Apply theme to document
+            function applyTheme(theme) {
+                const isDark = theme === DARK;
+                const root = document.documentElement;
+                
+                // Set data attribute for CSS variables
+                root.setAttribute("data-theme", theme);
+                
+                // Set classes for compatibility
+                root.classList.add(theme);
+                root.classList.remove(isDark ? LIGHT : DARK);
+                root.style.colorScheme = theme;
+            }
+            
+            // Initial application
+            const theme = getTheme();
+            applyTheme(theme);
+            
+            // Listen for system preference changes
+            matchMedia("(prefers-color-scheme: dark)").addEventListener("change", ({ matches }) => {
+                // Only update if using system preference (no localStorage entry)
+                if (!localStorage.getItem(THEME_KEY)) {
+                    applyTheme(matches ? DARK : LIGHT);
+                }
+            });
+            
+            // Set body classes once DOM is ready
+            if (document.readyState !== "loading") {
+                document.body.classList.add(theme + "-mode");
+            } else {
+                document.addEventListener("DOMContentLoaded", () => {
+                    document.body.classList.add(theme + "-mode");
+                    document.body.classList.remove((theme === DARK ? LIGHT : DARK) + "-mode");
+                });
+            }
+        })();
+    </script>
+    
+    <!-- Critical CSS to prevent flash -->
+    <style>
+        :root[data-theme="dark"] {
+            --background-color: #202124;
+            --background-color-transparent: rgba(32, 33, 36, 0.6);
+            --second-background-color: #2d2e32;
+            --third-background-color: #34353a;
+            --third-background-color-transparent: rgba(32, 33, 36, 0.6);
+            --primary-color: #0066CC;
+            --first-text-color: #ffffff;
+            --second-text-color: #eeeeee;
+            --third-text-color: #bebec6;
+            --fourth-text-color: #999999;
+            --default-text-color: #bebec6;
+            --invert-text-color: #373D3F;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --selection-color: #0066CC;
+            --shadow-color-1: rgba(255, 255, 255, 0.08);
+            --shadow-color-2: rgba(255, 255, 255, 0.05);
+        }
+        
+        :root[data-theme="light"] {
+            --background-color: #fff;
+            --background-color-transparent: rgba(255, 255, 255, 0.6);
+            --second-background-color: #f8f8f8;
+            --third-background-color: #f2f2f2;
+            --third-background-color-transparent: rgba(241, 241, 241, 0.6);
+            --primary-color: #0066CC;
+            --first-text-color: #16171a;
+            --second-text-color: #2f3037;
+            --third-text-color: #5e5e5e;
+            --fourth-text-color: #eeeeee;
+            --default-text-color: #373D3F;
+            --invert-text-color: #bebec6;
+            --border-color: rgba(0, 0, 0, 0.08);
+            --selection-color: #0066CC;
+            --shadow-color-1: rgba(0, 0, 0, 0.08);
+            --shadow-color-2: rgba(0, 0, 0, 0.05);
+        }
+        
+        body {
+            background-color: var(--background-color);
+            color: var(--default-text-color);
+        }
+        
+        /* Apply body classes as soon as DOM is ready */
+        :root[data-theme="dark"] body {
+            background-color: var(--background-color);
+            color: var(--default-text-color);
+        }
+    </style>
+    
+    <!-- preconnect -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    
+    <!--- Seo Part-->
+    
+    <link rel="canonical" href="https://hydraxman.github.io/2026/03/06/agent-design-patterns-guide/"/>
+    <meta name="robots" content="index,follow">
+    <meta name="googlebot" content="index,follow">
+    <meta name="revisit-after" content="1 days">
+    
+    
+    
+        
+        <meta name="description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AI Agent 设计模式全解：21种架构心法，从 OpenClaw 到企业级智能体开发">
+<meta property="og:url" content="https://hydraxman.github.io/2026/03/06/agent-design-patterns-guide/index.html">
+<meta property="og:site_name" content="内森淼文">
+<meta property="og:description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://hydraxman.github.io/images/redefine-og.webp">
+<meta property="article:published_time" content="2026-03-06T10:00:00.000Z">
+<meta property="article:modified_time" content="2026-03-06T09:39:46.648Z">
+<meta property="article:author" content="Nathan">
+<meta property="article:tag" content="AI Agent">
+<meta property="article:tag" content="多智能体">
+<meta property="article:tag" content="LLM">
+<meta property="article:tag" content="OpenClaw">
+<meta property="article:tag" content="设计模式">
+<meta property="article:tag" content="架构设计">
+<meta property="article:tag" content="ReAct">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://hydraxman.github.io/images/redefine-og.webp">
+    
+    
+    <!--- Icon Part-->
+    <link rel="icon" type="image/png" href="/images/favicon.svg" sizes="192x192">
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.svg">
+    <meta name="theme-color" content="#ffffff">
+    <link rel="shortcut icon" href="/images/favicon.svg">
+    <!--- Page Info-->
+    
+    <title>
+        
+            AI Agent 设计模式全解：21种架构心法，从 OpenClaw 到企业级智能体开发 | 内森淼文
+        
+    </title>
+
+    
+<link rel="stylesheet" href="/fonts/Chillax/chillax.css">
+
+
+    <!--- Inject Part-->
+    
+        
+            
+    
+            
+    
+            
+                
+                    <link rel="stylesheet" href="/css/custom.css">
+                
+    
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    
+        
+<link rel="stylesheet" href="/css/build/tailwind.css">
+
+    
+
+    
+<link rel="stylesheet" href="/fonts/GeistMono/geist-mono.css">
+
+    
+<link rel="stylesheet" href="/fonts/Geist/geist.css">
+
+    <!--- Font Part-->
+    
+    
+    
+    
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&display=swap" rel="stylesheet">
+    
+    
+
+    <script id="hexo-configurations">
+    window.config = {"hostname":"hydraxman.github.io","root":"/","language":"zh-CN","path":"search.json"};
+    window.theme = {"articles":{"style":{"font_size":"16px","line_height":1.5,"image_border_radius":"14px","image_alignment":"center","image_caption":false,"link_icon":true,"delete_mask":false,"title_alignment":"left","headings_top_spacing":{"h1":"3.2rem","h2":"2.4rem","h3":"1.9rem","h4":"1.6rem","h5":"1.4rem","h6":"1.3rem"}},"word_count":{"enable":true,"count":true,"min2read":true},"author_label":{"enable":false,"auto":false,"list":[]},"code_block":{"copy":true,"style":"mac","highlight_theme":{"light":"github","dark":"vs2015"},"font":{"enable":false,"family":null,"url":null}},"toc":{"enable":true,"max_depth":3,"number":false,"expand":true,"init_open":true},"copyright":{"enable":true,"default":"cc_by_nc_sa"},"lazyload":true,"pangu_js":false,"recommendation":{"enable":false,"title":"推荐阅读","limit":3,"mobile_limit":2,"placeholder":"/images/wallhaven-wqery6-light.webp","skip_dirs":[]}},"colors":{"primary":"#ffffff","secondary":null,"default_mode":"light"},"global":{"fonts":{"chinese":{"enable":false,"family":null,"url":null},"english":{"enable":true,"family":"Inter","url":"https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"},"title":{"enable":true,"family":"Noto Serif","url":"https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&display=swap"}},"content_max_width":"1000px","sidebar_width":"210px","hover":{"shadow":true,"scale":false},"scroll_progress":{"bar":true,"percentage":true},"website_counter":{"url":"https://cn.vercount.one/js","enable":false,"site_pv":true,"site_uv":true,"post_pv":true},"single_page":true,"preloader":{"enable":false,"custom_message":null},"side_tools":{"gear_rotation":true,"auto_expand":false},"open_graph":{"enable":true,"image":"/images/redefine-og.webp","description":"Hexo Theme Redefine, Redefine Your Hexo Journey."},"google_analytics":{"enable":false,"id":null}},"home_banner":{"enable":true,"style":"fixed","image":{"light":"/images/banner-light.jpg","dark":"/images/banner-dark.jpg"},"title":"内森淼文","subtitle":{"text":["AI · 编程 · 科技见闻","Write Code, Read World"],"hitokoto":{"enable":false,"show_author":false,"api":"https://v1.hitokoto.cn"},"typing_speed":100,"backing_speed":80,"starting_delay":500,"backing_delay":1500,"loop":true,"smart_backspace":true},"text_color":{"light":"#fff","dark":"#d1d1b6"},"text_style":{"title_size":"2.8rem","subtitle_size":"1.5rem","line_height":1.2},"custom_font":{"enable":false,"family":null,"url":null},"social_links":{"enable":true,"style":"default","links":{"github":"https://github.com/hydraxman","instagram":null,"zhihu":null,"twitter":null,"email":null},"qrs":{"weixin":null}}},"plugins":{"feed":{"enable":false},"aplayer":{"enable":false,"type":"fixed","audios":[{"name":null,"artist":null,"url":null,"cover":null,"lrc":null}]},"mermaid":{"enable":false,"version":"11.4.1"}},"version":"2.8.5","navbar":{"auto_hide":false,"color":{"left":"#333333","right":"#555555","transparency":35},"width":{"home":"1200px","pages":"1000px"},"links":{"Home":{"path":"/","icon":"fa-regular fa-house"},"Archives":{"path":"/archives","icon":"fa-regular fa-archive"},"Categories":{"path":"/categories","icon":"fa-regular fa-folder"},"Tags":{"path":"/tags","icon":"fa-regular fa-tags"},"About":{"path":"/about","icon":"fa-regular fa-user"}},"search":{"enable":true,"preload":true}},"page_templates":{"friends_column":2,"tags_style":"blur"},"home":{"sidebar":{"enable":true,"position":"left","first_item":"menu","announcement":"AI · 编程 · 科技","show_on_mobile":true,"links":{"Archives":{"path":"/archives","icon":"fa-regular fa-archive"},"Tags":{"path":"/tags","icon":"fa-regular fa-tags"},"Categories":{"path":"/categories","icon":"fa-regular fa-folder"}}},"article_date_format":"auto","excerpt_length":200,"categories":{"enable":true,"limit":3},"tags":{"enable":true,"limit":3}},"footerStart":"2024/01/01 00:00:00"};
+    window.lang_ago = {"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"};
+    window.data = {"masonry":false};
+  </script>
+    
+    <!--- Fontawesome Part-->
+    
+<link rel="stylesheet" href="/fontawesome/fontawesome.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/brands.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/solid.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/regular.min.css">
+
+    
+    
+    
+    
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+
+<body>
+	<div class="progress-bar-container">
+	
+	<span class="scroll-progress-bar"></span>
+	
+
+	
+	<span class="pjax-progress-bar"></span>
+	<!--        <span class="swup-progress-icon">-->
+	<!--            <i class="fa-solid fa-circle-notch fa-spin"></i>-->
+	<!--        </span>-->
+	
+</div>
+
+<main class="page-container" id="swup">
+
+	
+
+	<div class="main-content-container flex flex-col justify-between min-h-dvh">
+		<div class="main-content-header">
+			<header class="navbar-container px-6 md:px-12">
+    <div class="navbar-content transition-navbar ">
+        <div class="left">
+            
+            <a class="logo-title" href="/">
+                
+                内森淼文
+                
+            </a>
+        </div>
+
+        <div class="right">
+            <!-- PC -->
+            <div class="desktop">
+                <ul class="navbar-list">
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/"
+                                        >
+                                    <i class="fa-regular fa-house fa-fw"></i>
+                                    首页
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/archives"
+                                        >
+                                    <i class="fa-regular fa-archive fa-fw"></i>
+                                    归档
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/categories"
+                                        >
+                                    <i class="fa-regular fa-folder fa-fw"></i>
+                                    分类
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/tags"
+                                        >
+                                    <i class="fa-regular fa-tags fa-fw"></i>
+                                    标签
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/about"
+                                        >
+                                    <i class="fa-regular fa-user fa-fw"></i>
+                                    关于
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                    
+                        <li class="navbar-item search search-popup-trigger">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </li>
+                    
+                </ul>
+            </div>
+            <!-- Mobile -->
+            <div class="mobile">
+                
+                    <div class="icon-item search search-popup-trigger"><i class="fa-solid fa-magnifying-glass"></i>
+                    </div>
+                
+                <div class="icon-item navbar-bar">
+                    <div class="navbar-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile sheet -->
+    <div class="navbar-drawer h-dvh w-full absolute top-0 left-0 bg-background-color flex flex-col justify-between">
+        <ul class="drawer-navbar-list flex flex-col px-4 justify-center items-start">
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/"
+                        >
+                            <span>
+                                首页
+                            </span>
+                            
+                                <i class="fa-regular fa-house fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/archives"
+                        >
+                            <span>
+                                归档
+                            </span>
+                            
+                                <i class="fa-regular fa-archive fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/categories"
+                        >
+                            <span>
+                                分类
+                            </span>
+                            
+                                <i class="fa-regular fa-folder fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/tags"
+                        >
+                            <span>
+                                标签
+                            </span>
+                            
+                                <i class="fa-regular fa-tags fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/about"
+                        >
+                            <span>
+                                关于
+                            </span>
+                            
+                                <i class="fa-regular fa-user fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+
+            
+            
+                
+                    
+                    
+                    
+            
+        </ul>
+
+        <div class="statistics flex justify-around my-2.5">
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/tags">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">189</div>
+        <div class="label text-third-text-color text-sm">标签</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/categories">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">8</div>
+        <div class="label text-third-text-color text-sm">分类</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/archives">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">100</div>
+        <div class="label text-third-text-color text-sm">文章</div>
+    </a>
+</div>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+		</div>
+
+		<div class="main-content-body transition-fade-up">
+			
+
+			<div class="main-content">
+				<div class="post-page-container flex relative justify-between box-border w-full h-full">
+	<div class="article-content-container">
+
+		<div class="article-title relative w-full">
+			
+			
+			
+			<img src="/images/agent-patterns/cover.png" alt="AI Agent 设计模式全解：21种架构心法，从 OpenClaw 到企业级智能体开发" class="w-full h-60 sm:h-72 md:h-80 object-cover sm:rounded-t-large dark:brightness-75" />
+			
+			<div class="w-full flex items-center absolute bottom-0 justify-start">
+				<h1 class="article-title-cover text-center mx-6 my-6 text-second-text-color bg-background-color-transparent px-4 py-3 text-3xl sm:text-4xl md:text-5xl font-semibold backdrop-blur-lg rounded-xl border border-border-color ">AI Agent 设计模式全解：21种架构心法，从 OpenClaw 到企业级智能体开发</h1>
+			</div>
+			
+		</div>
+
+		
+		<div class="article-header flex flex-row gap-2 items-center px-2 sm:px-6 md:px-8">
+			<div class="avatar w-[46px] h-[46px] flex-shrink-0 rounded-medium border border-border-color p-[1px]">
+				<img src="/images/avatar.png">
+			</div>
+			<div class="info flex flex-col justify-between">
+				<div class="author flex items-center">
+					<span class="name text-default-text-color text-lg font-semibold">Nathan</span>
+					
+				</div>
+				<div class="meta-info">
+					<div class="article-meta-info">
+    <span class="article-date article-meta-item">
+        <i class="fa-regular fa-pen-fancy"></i>&nbsp;
+        <span class="desktop">2026-03-06 18:00</span>
+        <span class="mobile">2026-03-06 18:00</span>
+        <span class="hover-info">创建</span>
+    </span>
+    
+        <span class="article-date article-meta-item">
+            <i class="fa-regular fa-wrench"></i>&nbsp;
+            <span class="desktop">2026-03-06 17:39:46</span>
+            <span class="mobile">2026-03-06 17:39:46</span>
+            <span class="hover-info">更新</span>
+        </span>
+    
+
+    
+        <span class="article-categories article-meta-item">
+            <i class="fa-regular fa-folders"></i>&nbsp;
+            <ul>
+                
+                
+                    
+                        
+                        <li>
+                            <a href="/categories/AI%E5%89%8D%E6%B2%BF/">AI前沿</a>&nbsp;
+                        </li>
+                    
+                    
+                
+            </ul>
+        </span>
+    
+    
+        <span class="article-tags article-meta-item">
+            <i class="fa-regular fa-tags"></i>&nbsp;
+            <ul>
+                
+                    <li>
+                        <a href="/tags/AI-Agent/">AI Agent</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/%E5%A4%9A%E6%99%BA%E8%83%BD%E4%BD%93/">多智能体</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/LLM/">LLM</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/OpenClaw/">OpenClaw</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/">设计模式</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1/">架构设计</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/ReAct/">ReAct</a>&nbsp;
+                    </li>
+                
+            </ul>
+        </span>
+    
+
+    
+    
+        <span class="article-wordcount article-meta-item">
+            <i class="fa-regular fa-typewriter"></i>&nbsp;<span>2.7k 字</span>
+        </span>
+    
+    
+        <span class="article-min2read article-meta-item">
+            <i class="fa-regular fa-clock"></i>&nbsp;<span>9 分钟</span>
+        </span>
+    
+    
+</div>
+
+				</div>
+			</div>
+		</div>
+		
+
+		
+
+
+		<div class="article-content markdown-body px-2 sm:px-6 md:px-8 pb-8">
+			<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/agent-patterns/cover.png"
+                      alt="AI Agent 设计模式"
+                ></p>
+<p>OpenClaw 一夜爆火，GPT-5.4 原生支持电脑操控，Codex 用户突破百万——2026年，AI Agent 已经不是概念，而是生产力工具。</p>
+<p>但一个尴尬的现实是：<strong>大多数人只会用 Agent，却不知道如何设计一个好的 Agent。</strong></p>
+<p>你可能用过 ChatGPT、OpenClaw、Claude Code，但如果让你从零搭建一个能自主规划、调用工具、记忆上下文、反思纠错的 Agent 系统，你会怎么开始？</p>
+<p>最近，一本名为《Agent 设计模式：图解可复用智能体架构》的技术书引起了我的注意。作者黄佳（笔名”咖哥”）是新加坡科研局资深研究员，此前已出版《大模型应用开发：动手做 AI Agent》《GPT 图解》等多本畅销书。这一次，他跳出代码层面，从<strong>架构和设计模式</strong>的高度，系统拆解了 21 个 AI Agent 核心设计模式。</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/agent-patterns/book-poster.jpg"
+                      alt="书籍海报"
+                ></p>
+<p>这篇文章不是书评，而是借这本书的框架，结合 Google、OpenAI、Anthropic 等公司的最新实践，<strong>系统梳理 AI Agent 设计模式的全景图</strong>——无论你是想开发自己的 Agent，还是想理解 OpenClaw、Codex 这些产品背后的设计逻辑，这篇文章都值得收藏。</p>
+<h2 id="为什么-Agent-需要”设计模式”？"><a href="#为什么-Agent-需要”设计模式”？" class="headerlink" title="为什么 Agent 需要”设计模式”？"></a>为什么 Agent 需要”设计模式”？</h2><p>1994年，GoF（四人组）提出了 23 种经典设计模式，影响了整整一代软件工程师。30 年后的今天，AI Agent 对软件工程范式提出了全新挑战：</p>
+<ul>
+<li><strong>传统软件是确定性的</strong>：输入 A 必然得到输出 B</li>
+<li><strong>Agent 是概率性的</strong>：同样的提示，可能产生不同的推理路径和结果</li>
+<li><strong>传统设计模式解决的是”如何组织代码”</strong></li>
+<li><strong>Agent 设计模式解决的是”如何在不确定性上构建可靠系统”</strong></li>
+</ul>
+<p>这就是为什么我们需要一套新的设计模式——不是替代 GoF，而是在 LLM 时代的延伸。</p>
+<h2 id="五条核心设计原则"><a href="#五条核心设计原则" class="headerlink" title="五条核心设计原则"></a>五条核心设计原则</h2><p>在进入具体模式之前，先建立思维框架。以下五条原则贯穿所有 Agent 设计：</p>
+<p><strong>1. 目标优先</strong>：从”要达成什么”出发，而不是”能调用什么工具”。太多 Agent 项目一上来就堆工具，结果做成了一个 API 调度器而不是智能体。</p>
+<p><strong>2. 上下文为王</strong>：提示词只是冰山一角，真正决定 Agent 行为的是<strong>上下文工程</strong>和<strong>记忆治理</strong>。OpenClaw 的 MEMORY.md、SOUL.md 机制就是这个原则的完美实践。</p>
+<p><strong>3. 显式反馈</strong>：将反思和纠错内建于系统设计中，而不是上线后的补救。GPT-5.4 Thinking 的”先展示思考计划”功能，就是显式反馈的产品化。</p>
+<p><strong>4. 渐进自治</strong>：在安全护栏内逐步提升自治能力，始终保留人类介入权。Claude Code 的权限确认机制、OpenClaw 的 <code>commands.restart</code> 开关，都是渐进自治的体现。</p>
+<p><strong>5. 对齐与护栏</strong>：将安全和合规嵌入架构，而不是外包给运气。</p>
+<h2 id="六大模式主轴：21个核心模式"><a href="#六大模式主轴：21个核心模式" class="headerlink" title="六大模式主轴：21个核心模式"></a>六大模式主轴：21个核心模式</h2><p>整个 Agent 设计模式体系围绕六大能力展开：<strong>感知、记忆、推理、行动、反思、协作</strong>。</p>
+<h3 id="一、感知模式：Agent-如何”看”世界"><a href="#一、感知模式：Agent-如何”看”世界" class="headerlink" title="一、感知模式：Agent 如何”看”世界"></a>一、感知模式：Agent 如何”看”世界</h3><p>感知是 Agent 与环境交互的第一步。三个关键模式：</p>
+<p><strong>注意力聚焦模式</strong> —— 构建”认知漏斗”，用最低的 Token 成本换取最高的上下文质量。实际应用中，这就是为什么 GPT-5.4 引入了 Tool Search（按需检索工具定义）而不是在 system prompt 中塞入所有工具——减少噪声，聚焦关键信息。</p>
+<p><strong>多模态融合模式</strong> —— 让 Agent 整合文字、图像、音频等多类型信息。GPT-5.4 将视觉理解能力提升到 10.24 百万像素，正是多模态融合的基础设施。</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/agent-patterns/book-excerpt-multimodal.jpg"
+                      alt="多模态对齐机制"
+                ></p>
+<p><strong>主动感知模式</strong> —— 将 Agent 从”被动答题者”转变为”主动调查员”。OpenClaw 的 Heartbeat 机制就是典型的主动感知：定时检查邮件、日历、社交通知，主动发现需要处理的事务。</p>
+<h3 id="二、记忆模式：Agent-的”大脑”如何存储信息"><a href="#二、记忆模式：Agent-的”大脑”如何存储信息" class="headerlink" title="二、记忆模式：Agent 的”大脑”如何存储信息"></a>二、记忆模式：Agent 的”大脑”如何存储信息</h3><p>记忆是 Agent 持续性的基础。三个模式：</p>
+<p><strong>分层记忆模式</strong> —— 突破 LLM 上下文窗口限制。OpenClaw 的设计堪称教科书：</p>
+<ul>
+<li>工作记忆 &#x3D; 当前对话上下文</li>
+<li>短期记忆 &#x3D; <code>memory/YYYY-MM-DD.md</code> 每日笔记</li>
+<li>长期记忆 &#x3D; <code>MEMORY.md</code> 精炼的核心记忆</li>
+</ul>
+<p>这套分层设计让 Agent 在有限上下文窗口内，实现了”理论上无限”的记忆容量。</p>
+<p><strong>RAG 模式</strong> —— 检索增强生成，将外部知识与模型生成能力解耦。让 Agent 不依赖训练数据就能获取最新信息。</p>
+<p><strong>情节记忆模式</strong> —— 捕获带有时空上下文的交互轨迹。你跟 Agent 说”上次那个项目”，它能回忆起完整的交互历史——这依赖于情节记忆的实现。</p>
+<h3 id="三、推理模式：Agent-如何”思考”"><a href="#三、推理模式：Agent-如何”思考”" class="headerlink" title="三、推理模式：Agent 如何”思考”"></a>三、推理模式：Agent 如何”思考”</h3><p>推理是 Agent 的核心智能。四个模式，层层递进：</p>
+<p><strong>思维链（Chain of Thought）</strong> —— 最基础也最重要的模式。通过显式的过程分解，将复杂推理拆成一步步可验证的逻辑链条。GPT-5.4 Thinking 的整个产品逻辑都建立在 CoT 之上。</p>
+<p><strong>思维树（Tree of Thoughts）</strong> —— 当思维链不够用时，引入分支探索和回溯。适合需要全局规划或容易陷入局部最优的问题。</p>
+<p><strong>思维图（Graph of Thoughts）</strong> —— 在思维树基础上增加”合并”和”循环”能力，适合需要综合多重视角的复杂任务。</p>
+<p><strong>类比推理模式</strong> —— 从历史案例中检索相似问题，将解决方案迁移到当前任务。这是人类解决问题的核心方式之一，也是 Agent 最接近”经验”的能力。</p>
+<h3 id="四、行动模式：Agent-如何”做事”"><a href="#四、行动模式：Agent-如何”做事”" class="headerlink" title="四、行动模式：Agent 如何”做事”"></a>四、行动模式：Agent 如何”做事”</h3><p>这是 Agent 区别于聊天机器人的关键——从”说”到”做”。四个模式：</p>
+<p><strong>ReAct 模式</strong> —— “思考-行动-观察”的动态循环，是目前最主流的 Agent 架构。Google Cloud 的官方文档专门推荐 ReAct 用于”需要持续规划和适应的复杂动态任务”。OpenClaw、Codex、Claude Code 的核心循环都是 ReAct 的变体。</p>
+<p><strong>规划-执行模式</strong> —— 自顶向下的任务分解 + DAG 调度。当 Agent 需要处理长程任务时（比如”写一篇5000字的技术文章，包括搜索、爬取、分析、写作、配图、发布”），规划-执行模式比纯 ReAct 更高效。</p>
+<p><strong>工具编排模式</strong> —— 构建标准化接口，让 Agent 调度海量外部能力。GPT-5.4 的 Tool Search 就是工具编排的升级版——当你有几百个工具时，不可能全塞进 prompt，需要让模型自己检索需要的工具。</p>
+<p><strong>自适应策略模式</strong> —— 通过强化学习或多臂老虎机机制，在探索与利用之间寻求最优平衡。</p>
+<h3 id="五、反思模式：Agent-如何”自我纠错”"><a href="#五、反思模式：Agent-如何”自我纠错”" class="headerlink" title="五、反思模式：Agent 如何”自我纠错”"></a>五、反思模式：Agent 如何”自我纠错”</h3><p>反思是 Agent 从”能用”到”好用”的关键跃迁。三个模式：</p>
+<p><strong>自我修正模式</strong> —— 借助模型自身的批判能力或外部验证，识别并纠正幻觉、逻辑错误。GPT-5.4 声称幻觉减少 33%，背后就是更强的自我修正机制。</p>
+<p><strong>反思记忆模式</strong> —— 将失败经验转化为长期记忆。犯过的错不会再犯——这是人类学习的核心模式，也是 Agent 最需要的能力。</p>
+<p><strong>元学习模式</strong> —— 从大量执行轨迹中自动迭代优化系统参数，实现架构层面的持续进化。</p>
+<h3 id="六、协作模式：多个-Agent-如何”团队作战”"><a href="#六、协作模式：多个-Agent-如何”团队作战”" class="headerlink" title="六、协作模式：多个 Agent 如何”团队作战”"></a>六、协作模式：多个 Agent 如何”团队作战”</h3><p>单个 Agent 总有能力上限，协作模式解锁了更大的可能性。四个模式：</p>
+<p><strong>辩论模式</strong> —— 多 Agent 对抗性交互，揭示单体思维盲点。用于需要高可靠性的场景（法律分析、医疗诊断等）。</p>
+<p><strong>委托模式</strong> —— “分而治之”，缓解单 Agent 的上下文窗口和注意力瓶颈。OpenClaw 的子 Agent 机制（<code>sessions_spawn</code>）就是委托模式的工程实现。</p>
+<p><strong>路由模式</strong> —— 星型网络，由一个协调者 Agent 将任务分发给最合适的专家 Agent。</p>
+<p><strong>群体模式</strong> —— 异构 Agent 集群，通过”群体智慧”实现整体性能最优。想象一下：一个 Agent 负责搜索，一个负责分析，一个负责写作，一个负责审校——各自用最适合的模型，成本最优、效果最好。</p>
+<h2 id="实战视角：OpenClaw-用了哪些模式？"><a href="#实战视角：OpenClaw-用了哪些模式？" class="headerlink" title="实战视角：OpenClaw 用了哪些模式？"></a>实战视角：OpenClaw 用了哪些模式？</h2><p>让我们用这套框架来拆解 OpenClaw 的架构：</p>
+<table>
+<thead>
+<tr>
+<th>设计模式</th>
+<th>OpenClaw 实现</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>注意力聚焦</td>
+<td>SOUL.md + USER.md 定义人格和用户画像</td>
+</tr>
+<tr>
+<td>主动感知</td>
+<td>Heartbeat 定时检查机制</td>
+</tr>
+<tr>
+<td>分层记忆</td>
+<td>MEMORY.md（长期）+ memory&#x2F;日期.md（短期）+ 对话上下文（工作）</td>
+</tr>
+<tr>
+<td>ReAct</td>
+<td>核心循环：思考 → 调用工具 → 观察结果 → 继续</td>
+</tr>
+<tr>
+<td>工具编排</td>
+<td>Skills 技能系统 + 各类工具函数</td>
+</tr>
+<tr>
+<td>委托</td>
+<td>子 Agent 机制（sessions_spawn）</td>
+</tr>
+<tr>
+<td>自我修正</td>
+<td>工具调用失败时自动重试和调整策略</td>
+</tr>
+<tr>
+<td>渐进自治</td>
+<td>敏感操作需确认，安全操作自动执行</td>
+</tr>
+</tbody></table>
+<p>这就是为什么 OpenClaw 如此强大——它不是简单地把 LLM 套个壳，而是在架构层面<strong>系统性地实现了多种 Agent 设计模式</strong>。</p>
+<h2 id="2026-年-Agent-设计趋势"><a href="#2026-年-Agent-设计趋势" class="headerlink" title="2026 年 Agent 设计趋势"></a>2026 年 Agent 设计趋势</h2><p>基于对行业动态的观察，几个值得关注的趋势：</p>
+<p><strong>1. 原生工具使用成为标配</strong>：GPT-5.4 原生支持电脑操控，Google Gemini 3.1 集成 Computer Use。模型层面的工具使用正在取代框架层面的工具编排。</p>
+<p><strong>2. 记忆治理越来越重要</strong>：Anthropic 将记忆功能开放给免费用户，并提供记忆导入工具。记忆不再是附加功能，而是 Agent 的核心竞争力。</p>
+<p><strong>3. 多 Agent 协作从理论走向工程</strong>：ACP（Agent Communication Protocol）、A2A（Agent-to-Agent）等协议的出现，正在为多 Agent 协作建立标准化基础。</p>
+<p><strong>4. 安全和对齐成为架构一等公民</strong>：MIT 最新研究指出 30 种主流 Agent 系统普遍缺乏安全披露。GPT-5.4 的 CoT 透明性测试、OpenClaw 的安全护栏设计，都在推动行业重视 Agent 安全。</p>
+<h2 id="写在最后"><a href="#写在最后" class="headerlink" title="写在最后"></a>写在最后</h2><p>从 GoF 的 23 种经典设计模式到 Agent 时代的 21 种智能体模式，软件工程正在经历一次范式级的跃迁。</p>
+<p>理解这些设计模式，不是为了背诵概念，而是为了在构建 Agent 时有一套<strong>可复用的思维工具箱</strong>。无论你用的是 LangChain、AutoGen、CrewAI 还是 OpenClaw，底层的架构逻辑是相通的。</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/agent-patterns/lobster-party.jpg"
+                      alt="龙虾与 Agent 的时代"
+                ></p>
+<p>The claw is the law，但 law 需要 patterns。🦞</p>
+<hr>
+<p><em>参考资料：</em><br><em>《Agent 设计模式：图解可复用智能体架构》黄佳著，人民邮电出版社</em><br><em>Google Cloud - Choose a Design Pattern for Your Agentic AI System</em><br><em>SitePoint - Agentic Design Patterns: The 2026 Guide</em><br><em>Machine Learning Mastery - 7 Agentic AI Trends to Watch in 2026</em><br><em>OpenAI - Introducing GPT-5.4</em></p>
+
+		</div>
+
+		
+		<div class="post-copyright-info w-full my-8 px-2 sm:px-6 md:px-8">
+			<div class="article-copyright-info-container">
+    <ul>
+        <li><strong>标题:</strong> AI Agent 设计模式全解：21种架构心法，从 OpenClaw 到企业级智能体开发</li>
+        <li><strong>作者:</strong> Nathan</li>
+        <li><strong>创建于
+                :</strong> 2026-03-06 18:00:00</li>
+        
+            <li>
+                <strong>更新于
+                    :</strong> 2026-03-06 17:39:46
+            </li>
+        
+        <li>
+            <strong>链接:</strong> https://hydraxman.github.io/2026/03/06/agent-design-patterns-guide/
+        </li>
+        <li>
+            <strong>
+                版权声明:
+            </strong>
+            
+
+            
+                本文章采用 <a class="license" target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0">CC BY-NC-SA 4.0</a> 进行许可。
+            
+        </li>
+    </ul>
+</div>
+
+		</div>
+		
+
+		
+		<ul class="post-tags-box text-lg mt-1.5 flex-wrap justify-center flex md:hidden">
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/AI-Agent/">#AI Agent</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/%E5%A4%9A%E6%99%BA%E8%83%BD%E4%BD%93/">#多智能体</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/LLM/">#LLM</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/OpenClaw/">#OpenClaw</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/">#设计模式</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1/">#架构设计</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/ReAct/">#ReAct</a>&nbsp;
+			</li>
+			
+		</ul>
+		
+
+		
+
+		
+		<div class="article-nav my-8 flex justify-between items-center px-2 sm:px-6 md:px-8">
+			
+			
+			<div class="article-next border-border-color shadow-redefine-flat shadow-shadow-color-2 rounded-medium px-4 py-2 hover:shadow-redefine-flat-hover hover:shadow-shadow-color-2">
+				<a class="next" rel="next" href="/2026/03/06/github-trending/2026-03-06/">
+					<span class="title flex justify-center items-center">
+						<span class="post-nav-title-item truncate max-w-48">GitHub Trending 日报：2026年3月6日最火的 10 个开源项目深度解析</span>
+						<span class="post-nav-item">下一篇</span>
+					</span>
+					<span class="right arrow-icon flex justify-center items-center">
+						<i class="fa-solid fa-chevron-right"></i>
+					</span>
+				</a>
+			</div>
+			
+		</div>
+		
+
+
+		
+	</div>
+
+	
+	<div class="toc-content-container">
+		<div class="post-toc-wrap">
+	<div class="post-toc">
+		<div class="toc-title">目录</div>
+		<div class="page-title">AI Agent 设计模式全解：21种架构心法，从 OpenClaw 到企业级智能体开发</div>
+		<ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88-Agent-%E9%9C%80%E8%A6%81%E2%80%9D%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E2%80%9D%EF%BC%9F"><span class="nav-text">为什么 Agent 需要”设计模式”？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%94%E6%9D%A1%E6%A0%B8%E5%BF%83%E8%AE%BE%E8%AE%A1%E5%8E%9F%E5%88%99"><span class="nav-text">五条核心设计原则</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AD%E5%A4%A7%E6%A8%A1%E5%BC%8F%E4%B8%BB%E8%BD%B4%EF%BC%9A21%E4%B8%AA%E6%A0%B8%E5%BF%83%E6%A8%A1%E5%BC%8F"><span class="nav-text">六大模式主轴：21个核心模式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E6%84%9F%E7%9F%A5%E6%A8%A1%E5%BC%8F%EF%BC%9AAgent-%E5%A6%82%E4%BD%95%E2%80%9D%E7%9C%8B%E2%80%9D%E4%B8%96%E7%95%8C"><span class="nav-text">一、感知模式：Agent 如何”看”世界</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E8%AE%B0%E5%BF%86%E6%A8%A1%E5%BC%8F%EF%BC%9AAgent-%E7%9A%84%E2%80%9D%E5%A4%A7%E8%84%91%E2%80%9D%E5%A6%82%E4%BD%95%E5%AD%98%E5%82%A8%E4%BF%A1%E6%81%AF"><span class="nav-text">二、记忆模式：Agent 的”大脑”如何存储信息</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E6%8E%A8%E7%90%86%E6%A8%A1%E5%BC%8F%EF%BC%9AAgent-%E5%A6%82%E4%BD%95%E2%80%9D%E6%80%9D%E8%80%83%E2%80%9D"><span class="nav-text">三、推理模式：Agent 如何”思考”</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E8%A1%8C%E5%8A%A8%E6%A8%A1%E5%BC%8F%EF%BC%9AAgent-%E5%A6%82%E4%BD%95%E2%80%9D%E5%81%9A%E4%BA%8B%E2%80%9D"><span class="nav-text">四、行动模式：Agent 如何”做事”</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%94%E3%80%81%E5%8F%8D%E6%80%9D%E6%A8%A1%E5%BC%8F%EF%BC%9AAgent-%E5%A6%82%E4%BD%95%E2%80%9D%E8%87%AA%E6%88%91%E7%BA%A0%E9%94%99%E2%80%9D"><span class="nav-text">五、反思模式：Agent 如何”自我纠错”</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%AD%E3%80%81%E5%8D%8F%E4%BD%9C%E6%A8%A1%E5%BC%8F%EF%BC%9A%E5%A4%9A%E4%B8%AA-Agent-%E5%A6%82%E4%BD%95%E2%80%9D%E5%9B%A2%E9%98%9F%E4%BD%9C%E6%88%98%E2%80%9D"><span class="nav-text">六、协作模式：多个 Agent 如何”团队作战”</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E6%88%98%E8%A7%86%E8%A7%92%EF%BC%9AOpenClaw-%E7%94%A8%E4%BA%86%E5%93%AA%E4%BA%9B%E6%A8%A1%E5%BC%8F%EF%BC%9F"><span class="nav-text">实战视角：OpenClaw 用了哪些模式？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2026-%E5%B9%B4-Agent-%E8%AE%BE%E8%AE%A1%E8%B6%8B%E5%8A%BF"><span class="nav-text">2026 年 Agent 设计趋势</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%86%99%E5%9C%A8%E6%9C%80%E5%90%8E"><span class="nav-text">写在最后</span></a></li></ol>
+
+	</div>
+</div>
+	</div>
+	
+</div>
+			</div>
+
+			
+		</div>
+
+		<div class="main-content-footer">
+			<footer class="footer mt-5 py-5 h-auto text-base text-third-text-color relative border-t-2 border-t-border-color">
+    <div class="info-container py-3 text-center">
+        
+        <div class="text-center">
+            &copy;
+            
+              <span>2024</span>
+              -
+            
+            2026&nbsp;&nbsp;<i class="fa-solid fa-heart fa-beat" style="--fa-animation-duration: 0.5s; color: #333"></i>&nbsp;&nbsp;<a href="/">Nathan</a>
+            
+                
+                <p class="post-count space-x-0.5">
+                    <span>
+                        共撰写了 100 篇文章
+                    </span>
+                    
+                        <span>
+                            共 218.2k 字
+                        </span>
+                    
+                </p>
+            
+        </div>
+        
+        <div class="relative text-center lg:absolute lg:left-[20px] lg:top-1/2 lg:-translate-y-1/2 lg:text-left">
+            <span class="lg:block text-sm">由 <?xml version="1.0" encoding="utf-8"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg class="relative top-[2px] inline-block align-baseline" version="1.1" id="圖層_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="1rem" height="1rem" viewBox="0 0 512 512" enable-background="new 0 0 512 512" xml:space="preserve"><path fill="#0E83CD" d="M256.4,25.8l-200,115.5L56,371.5l199.6,114.7l200-115.5l0.4-230.2L256.4,25.8z M349,354.6l-18.4,10.7l-18.6-11V275H200v79.6l-18.4,10.7l-18.6-11v-197l18.5-10.6l18.5,10.8V237h112v-79.6l18.5-10.6l18.5,10.8V354.6z"/></svg><a target="_blank" class="text-base" href="https://hexo.io">Hexo</a> 驱动</span>
+            <span class="text-sm lg:block">主题&nbsp;<a class="text-base" target="_blank" href="https://github.com/EvanNotFound/hexo-theme-redefine">Redefine v2.8.5</a></span>
+        </div>
+        
+        
+            <div>
+                博客已运行 <span class="odometer" id="runtime_days" ></span> 天 <span class="odometer" id="runtime_hours"></span> 小时 <span class="odometer" id="runtime_minutes"></span> 分钟 <span class="odometer" id="runtime_seconds"></span> 秒
+            </div>
+        
+        
+            <script data-swup-reload-script>
+                try {
+                    function odometer_init() {
+                    const elements = document.querySelectorAll('.odometer');
+                    elements.forEach(el => {
+                        new Odometer({
+                            el,
+                            format: '( ddd).dd',
+                            duration: 200
+                        });
+                    });
+                    }
+                    odometer_init();
+                } catch (error) {}
+            </script>
+        
+        
+            
+                
+        
+                
+        
+        
+    </div>  
+</footer>
+		</div>
+	</div>
+
+	
+	<div class="post-tools">
+		<div class="post-tools-container">
+	<ul class="article-tools-list">
+		<!-- TOC aside toggle -->
+		
+		<li class="right-bottom-tools page-aside-toggle">
+			<i class="fa-regular fa-outdent"></i>
+		</li>
+		
+
+		<!-- go comment -->
+		
+	</ul>
+</div>
+	</div>
+	
+
+	<div class="right-side-tools-container">
+		<div class="side-tools-container">
+	<ul class="hidden-tools-list">
+		<li class="right-bottom-tools tool-font-adjust-plus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-plus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-font-adjust-minus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-minus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-dark-light-toggle flex justify-center items-center">
+			<i class="fa-regular fa-moon"></i>
+		</li>
+
+		<!-- rss -->
+		
+
+		
+
+		<li class="right-bottom-tools tool-scroll-to-bottom flex justify-center items-center">
+			<i class="fa-regular fa-arrow-down"></i>
+		</li>
+	</ul>
+
+	<ul class="visible-tools-list">
+		<li class="right-bottom-tools toggle-tools-list flex justify-center items-center">
+			<i class="fa-regular fa-cog fa-spin"></i>
+		</li>
+		
+		<li class="right-bottom-tools tool-scroll-to-top flex justify-center items-center">
+			<i class="arrow-up fas fa-arrow-up"></i>
+			<span class="percent"></span>
+		</li>
+		
+		
+	</ul>
+</div>
+	</div>
+
+	<div class="image-viewer-container">
+	<img src="">
+</div>
+
+	
+	<div class="search-pop-overlay">
+	<div class="popup search-popup">
+		<div class="search-header">
+			<span class="search-input-field-pre">
+				<i class="fa-solid fa-keyboard"></i>
+			</span>
+			<div class="search-input-container">
+				<input autocomplete="off" autocorrect="off" autocapitalize="off" placeholder="站内搜索您需要的内容..." spellcheck="false" type="search" class="search-input">
+			</div>
+			<span class="popup-btn-close">
+				<i class="fa-solid fa-times"></i>
+			</span>
+		</div>
+		<div id="search-result">
+			<div id="no-result">
+				<i class="fa-solid fa-spinner fa-spin-pulse fa-5x fa-fw"></i>
+			</div>
+		</div>
+	</div>
+</div>
+	
+
+</main>
+
+
+
+<script src="/js/build/libs/Swup.min.js"></script>
+
+<script src="/js/build/libs/SwupSlideTheme.min.js"></script>
+
+<script src="/js/build/libs/SwupScriptsPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupProgressPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupScrollPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupPreloadPlugin.min.js"></script>
+
+<script>
+    const swup = new Swup({
+        plugins: [
+            new SwupScriptsPlugin({
+                optin: true,
+            }),
+            new SwupProgressPlugin(),
+            new SwupScrollPlugin({
+                offset: 80,
+            }),
+            new SwupSlideTheme({
+                mainElement: ".main-content-body",
+            }),
+            new SwupPreloadPlugin(),
+        ],
+        containers: ["#swup"],
+    });
+</script>
+
+
+
+
+	
+<script src="/js/build/tools/imageViewer.js" type="module"></script>
+
+<script src="/js/build/utils.js" type="module"></script>
+
+<script src="/js/build/main.js" type="module"></script>
+
+<script src="/js/build/layouts/navbarShrink.js" type="module"></script>
+
+<script src="/js/build/tools/scrollTopBottom.js" type="module"></script>
+
+<script src="/js/build/tools/lightDarkSwitch.js" type="module"></script>
+
+<script src="/js/build/layouts/categoryList.js" type="module"></script>
+
+
+
+    
+<script src="/js/build/tools/localSearch.js" type="module"></script>
+
+
+
+
+    
+<script src="/js/build/tools/codeBlock.js" type="module"></script>
+
+
+
+
+    
+<script src="/js/build/layouts/lazyload.js" type="module"></script>
+
+
+
+
+    
+<script src="/js/build/tools/runtime.js"></script>
+
+    
+<script src="/js/build/libs/odometer.min.js"></script>
+
+    
+<link rel="stylesheet" href="/assets/odometer-theme-minimal.css">
+
+
+
+
+  
+<script src="/js/build/libs/Typed.min.js"></script>
+
+  
+<script src="/js/build/plugins/typed.js" type="module"></script>
+
+
+
+
+
+
+
+
+    
+<script src="/js/build/libs/anime.min.js"></script>
+
+
+
+
+
+    
+<script src="/js/build/tools/tocToggle.js" type="module" data-swup-reload-script=""></script>
+
+<script src="/js/build/layouts/toc.js" type="module" data-swup-reload-script=""></script>
+
+<script src="/js/build/plugins/tabs.js" type="module" data-swup-reload-script=""></script>
+
+
+
+
+<script src="/js/build/libs/moment-with-locales.min.js" data-swup-reload-script=""></script>
+
+
+<script src="/js/build/layouts/essays.js" type="module" data-swup-reload-script=""></script>
+
+
+
+
+
+	
+</body>
+
+</html>
