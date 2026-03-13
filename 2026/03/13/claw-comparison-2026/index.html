@@ -1,0 +1,1369 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="keywords" content="计算机技术, 生活中的胡思乱想">
+    
+    <meta name="author" content="Nathan">
+    
+    <!-- Completely eliminate flash of wrong theme -->
+    <script>
+        (function() {
+            const THEME_KEY = "REDEFINE-THEME-STATUS";
+            const DARK = "dark", LIGHT = "light";
+            
+            // Get preferred theme
+            function getTheme() {
+                try {
+                    const saved = localStorage.getItem(THEME_KEY);
+                    if (saved) {
+                        const { isDark } = JSON.parse(saved);
+                        return isDark ? DARK : LIGHT;
+                    }
+                } catch (e) {}
+                
+                return matchMedia("(prefers-color-scheme: dark)").matches ? DARK : LIGHT;
+            }
+            
+            // Apply theme to document
+            function applyTheme(theme) {
+                const isDark = theme === DARK;
+                const root = document.documentElement;
+                
+                // Set data attribute for CSS variables
+                root.setAttribute("data-theme", theme);
+                
+                // Set classes for compatibility
+                root.classList.add(theme);
+                root.classList.remove(isDark ? LIGHT : DARK);
+                root.style.colorScheme = theme;
+            }
+            
+            // Initial application
+            const theme = getTheme();
+            applyTheme(theme);
+            
+            // Listen for system preference changes
+            matchMedia("(prefers-color-scheme: dark)").addEventListener("change", ({ matches }) => {
+                // Only update if using system preference (no localStorage entry)
+                if (!localStorage.getItem(THEME_KEY)) {
+                    applyTheme(matches ? DARK : LIGHT);
+                }
+            });
+            
+            // Set body classes once DOM is ready
+            if (document.readyState !== "loading") {
+                document.body.classList.add(theme + "-mode");
+            } else {
+                document.addEventListener("DOMContentLoaded", () => {
+                    document.body.classList.add(theme + "-mode");
+                    document.body.classList.remove((theme === DARK ? LIGHT : DARK) + "-mode");
+                });
+            }
+        })();
+    </script>
+    
+    <!-- Critical CSS to prevent flash -->
+    <style>
+        :root[data-theme="dark"] {
+            --background-color: #202124;
+            --background-color-transparent: rgba(32, 33, 36, 0.6);
+            --second-background-color: #2d2e32;
+            --third-background-color: #34353a;
+            --third-background-color-transparent: rgba(32, 33, 36, 0.6);
+            --primary-color: #0066CC;
+            --first-text-color: #ffffff;
+            --second-text-color: #eeeeee;
+            --third-text-color: #bebec6;
+            --fourth-text-color: #999999;
+            --default-text-color: #bebec6;
+            --invert-text-color: #373D3F;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --selection-color: #0066CC;
+            --shadow-color-1: rgba(255, 255, 255, 0.08);
+            --shadow-color-2: rgba(255, 255, 255, 0.05);
+        }
+        
+        :root[data-theme="light"] {
+            --background-color: #fff;
+            --background-color-transparent: rgba(255, 255, 255, 0.6);
+            --second-background-color: #f8f8f8;
+            --third-background-color: #f2f2f2;
+            --third-background-color-transparent: rgba(241, 241, 241, 0.6);
+            --primary-color: #0066CC;
+            --first-text-color: #16171a;
+            --second-text-color: #2f3037;
+            --third-text-color: #5e5e5e;
+            --fourth-text-color: #eeeeee;
+            --default-text-color: #373D3F;
+            --invert-text-color: #bebec6;
+            --border-color: rgba(0, 0, 0, 0.08);
+            --selection-color: #0066CC;
+            --shadow-color-1: rgba(0, 0, 0, 0.08);
+            --shadow-color-2: rgba(0, 0, 0, 0.05);
+        }
+        
+        body {
+            background-color: var(--background-color);
+            color: var(--default-text-color);
+        }
+        
+        /* Apply body classes as soon as DOM is ready */
+        :root[data-theme="dark"] body {
+            background-color: var(--background-color);
+            color: var(--default-text-color);
+        }
+    </style>
+    
+    <!-- preconnect -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    
+    <!--- Seo Part-->
+    
+    <link rel="canonical" href="https://hydraxman.github.io/2026/03/13/claw-comparison-2026/"/>
+    <meta name="robots" content="index,follow">
+    <meta name="googlebot" content="index,follow">
+    <meta name="revisit-after" content="1 days">
+    
+    
+    
+        
+        <meta name="description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="深度解析｜六大Claw混战：QClaw、KimiClaw、DuClaw、MaxClaw、CoPaw，谁才是最好用的AI Agent？">
+<meta property="og:url" content="https://hydraxman.github.io/2026/03/13/claw-comparison-2026/index.html">
+<meta property="og:site_name" content="内森淼文">
+<meta property="og:description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://hydraxman.github.io/images/redefine-og.webp">
+<meta property="article:published_time" content="2026-03-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-03-13T07:29:09.504Z">
+<meta property="article:author" content="Nathan">
+<meta property="article:tag" content="AI">
+<meta property="article:tag" content="OpenClaw">
+<meta property="article:tag" content="Agent">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://hydraxman.github.io/images/redefine-og.webp">
+    
+    
+    <!--- Icon Part-->
+    <link rel="icon" type="image/png" href="/images/favicon.svg" sizes="192x192">
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.svg">
+    <meta name="theme-color" content="#ffffff">
+    <link rel="shortcut icon" href="/images/favicon.svg">
+    <!--- Page Info-->
+    
+    <title>
+        
+            深度解析｜六大Claw混战：QClaw、KimiClaw、DuClaw、MaxClaw、CoPaw，谁才是最好用的AI Agent？ | 内森淼文
+        
+    </title>
+
+    
+<link rel="stylesheet" href="/fonts/Chillax/chillax.css">
+
+
+    <!--- Inject Part-->
+    
+        
+            
+    
+            
+    
+            
+                
+                    <link rel="stylesheet" href="/css/custom.css">
+                
+    
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    
+        
+<link rel="stylesheet" href="/css/build/tailwind.css">
+
+    
+
+    
+<link rel="stylesheet" href="/fonts/GeistMono/geist-mono.css">
+
+    
+<link rel="stylesheet" href="/fonts/Geist/geist.css">
+
+    <!--- Font Part-->
+    
+    
+    
+    
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&display=swap" rel="stylesheet">
+    
+    
+
+    <script id="hexo-configurations">
+    window.config = {"hostname":"hydraxman.github.io","root":"/","language":"zh-CN","path":"search.json"};
+    window.theme = {"articles":{"style":{"font_size":"16px","line_height":1.5,"image_border_radius":"14px","image_alignment":"center","image_caption":false,"link_icon":true,"delete_mask":false,"title_alignment":"left","headings_top_spacing":{"h1":"3.2rem","h2":"2.4rem","h3":"1.9rem","h4":"1.6rem","h5":"1.4rem","h6":"1.3rem"}},"word_count":{"enable":true,"count":true,"min2read":true},"author_label":{"enable":false,"auto":false,"list":[]},"code_block":{"copy":true,"style":"mac","highlight_theme":{"light":"github","dark":"vs2015"},"font":{"enable":false,"family":null,"url":null}},"toc":{"enable":true,"max_depth":3,"number":false,"expand":true,"init_open":true},"copyright":{"enable":true,"default":"cc_by_nc_sa"},"lazyload":true,"pangu_js":false,"recommendation":{"enable":false,"title":"推荐阅读","limit":3,"mobile_limit":2,"placeholder":"/images/wallhaven-wqery6-light.webp","skip_dirs":[]}},"colors":{"primary":"#ffffff","secondary":null,"default_mode":"light"},"global":{"fonts":{"chinese":{"enable":false,"family":null,"url":null},"english":{"enable":true,"family":"Inter","url":"https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"},"title":{"enable":true,"family":"Noto Serif","url":"https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&display=swap"}},"content_max_width":"1000px","sidebar_width":"210px","hover":{"shadow":true,"scale":false},"scroll_progress":{"bar":true,"percentage":true},"website_counter":{"url":"https://cn.vercount.one/js","enable":false,"site_pv":true,"site_uv":true,"post_pv":true},"single_page":true,"preloader":{"enable":false,"custom_message":null},"side_tools":{"gear_rotation":true,"auto_expand":false},"open_graph":{"enable":true,"image":"/images/redefine-og.webp","description":"Hexo Theme Redefine, Redefine Your Hexo Journey."},"google_analytics":{"enable":false,"id":null}},"home_banner":{"enable":true,"style":"fixed","image":{"light":"/images/banner-light.jpg","dark":"/images/banner-dark.jpg"},"title":"内森淼文","subtitle":{"text":["AI · 编程 · 科技见闻","Write Code, Read World"],"hitokoto":{"enable":false,"show_author":false,"api":"https://v1.hitokoto.cn"},"typing_speed":100,"backing_speed":80,"starting_delay":500,"backing_delay":1500,"loop":true,"smart_backspace":true},"text_color":{"light":"#fff","dark":"#d1d1b6"},"text_style":{"title_size":"2.8rem","subtitle_size":"1.5rem","line_height":1.2},"custom_font":{"enable":false,"family":null,"url":null},"social_links":{"enable":true,"style":"default","links":{"github":"https://github.com/hydraxman","instagram":null,"zhihu":null,"twitter":null,"email":null},"qrs":{"weixin":null}}},"plugins":{"feed":{"enable":false},"aplayer":{"enable":false,"type":"fixed","audios":[{"name":null,"artist":null,"url":null,"cover":null,"lrc":null}]},"mermaid":{"enable":false,"version":"11.4.1"}},"version":"2.8.5","navbar":{"auto_hide":false,"color":{"left":"#333333","right":"#555555","transparency":35},"width":{"home":"1200px","pages":"1000px"},"links":{"Home":{"path":"/","icon":"fa-regular fa-house"},"Archives":{"path":"/archives","icon":"fa-regular fa-archive"},"Categories":{"path":"/categories","icon":"fa-regular fa-folder"},"Tags":{"path":"/tags","icon":"fa-regular fa-tags"},"About":{"path":"/about","icon":"fa-regular fa-user"}},"search":{"enable":true,"preload":true}},"page_templates":{"friends_column":2,"tags_style":"blur"},"home":{"sidebar":{"enable":true,"position":"left","first_item":"menu","announcement":"AI · 编程 · 科技","show_on_mobile":true,"links":{"Archives":{"path":"/archives","icon":"fa-regular fa-archive"},"Tags":{"path":"/tags","icon":"fa-regular fa-tags"},"Categories":{"path":"/categories","icon":"fa-regular fa-folder"}}},"article_date_format":"auto","excerpt_length":200,"categories":{"enable":true,"limit":3},"tags":{"enable":true,"limit":3}},"footerStart":"2024/01/01 00:00:00"};
+    window.lang_ago = {"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"};
+    window.data = {"masonry":false};
+  </script>
+    
+    <!--- Fontawesome Part-->
+    
+<link rel="stylesheet" href="/fontawesome/fontawesome.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/brands.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/solid.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/regular.min.css">
+
+    
+    
+    
+    
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+
+<body>
+	<div class="progress-bar-container">
+	
+	<span class="scroll-progress-bar"></span>
+	
+
+	
+	<span class="pjax-progress-bar"></span>
+	<!--        <span class="swup-progress-icon">-->
+	<!--            <i class="fa-solid fa-circle-notch fa-spin"></i>-->
+	<!--        </span>-->
+	
+</div>
+
+<main class="page-container" id="swup">
+
+	
+
+	<div class="main-content-container flex flex-col justify-between min-h-dvh">
+		<div class="main-content-header">
+			<header class="navbar-container px-6 md:px-12">
+    <div class="navbar-content transition-navbar ">
+        <div class="left">
+            
+            <a class="logo-title" href="/">
+                
+                内森淼文
+                
+            </a>
+        </div>
+
+        <div class="right">
+            <!-- PC -->
+            <div class="desktop">
+                <ul class="navbar-list">
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/"
+                                        >
+                                    <i class="fa-regular fa-house fa-fw"></i>
+                                    首页
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/archives"
+                                        >
+                                    <i class="fa-regular fa-archive fa-fw"></i>
+                                    归档
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/categories"
+                                        >
+                                    <i class="fa-regular fa-folder fa-fw"></i>
+                                    分类
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/tags"
+                                        >
+                                    <i class="fa-regular fa-tags fa-fw"></i>
+                                    标签
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/about"
+                                        >
+                                    <i class="fa-regular fa-user fa-fw"></i>
+                                    关于
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                    
+                        <li class="navbar-item search search-popup-trigger">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </li>
+                    
+                </ul>
+            </div>
+            <!-- Mobile -->
+            <div class="mobile">
+                
+                    <div class="icon-item search search-popup-trigger"><i class="fa-solid fa-magnifying-glass"></i>
+                    </div>
+                
+                <div class="icon-item navbar-bar">
+                    <div class="navbar-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile sheet -->
+    <div class="navbar-drawer h-dvh w-full absolute top-0 left-0 bg-background-color flex flex-col justify-between">
+        <ul class="drawer-navbar-list flex flex-col px-4 justify-center items-start">
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/"
+                        >
+                            <span>
+                                首页
+                            </span>
+                            
+                                <i class="fa-regular fa-house fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/archives"
+                        >
+                            <span>
+                                归档
+                            </span>
+                            
+                                <i class="fa-regular fa-archive fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/categories"
+                        >
+                            <span>
+                                分类
+                            </span>
+                            
+                                <i class="fa-regular fa-folder fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/tags"
+                        >
+                            <span>
+                                标签
+                            </span>
+                            
+                                <i class="fa-regular fa-tags fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/about"
+                        >
+                            <span>
+                                关于
+                            </span>
+                            
+                                <i class="fa-regular fa-user fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+
+            
+            
+                
+                    
+                    
+                    
+            
+        </ul>
+
+        <div class="statistics flex justify-around my-2.5">
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/tags">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">205</div>
+        <div class="label text-third-text-color text-sm">标签</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/categories">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">8</div>
+        <div class="label text-third-text-color text-sm">分类</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/archives">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">118</div>
+        <div class="label text-third-text-color text-sm">文章</div>
+    </a>
+</div>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+		</div>
+
+		<div class="main-content-body transition-fade-up">
+			
+
+			<div class="main-content">
+				<div class="post-page-container flex relative justify-between box-border w-full h-full">
+	<div class="article-content-container">
+
+		<div class="article-title relative w-full">
+			
+			
+			
+			<img src="/images/claw-comparison-cover.png" alt="深度解析｜六大Claw混战：QClaw、KimiClaw、DuClaw、MaxClaw、CoPaw，谁才是最好用的AI Agent？" class="w-full h-60 sm:h-72 md:h-80 object-cover sm:rounded-t-large dark:brightness-75" />
+			
+			<div class="w-full flex items-center absolute bottom-0 justify-start">
+				<h1 class="article-title-cover text-center mx-6 my-6 text-second-text-color bg-background-color-transparent px-4 py-3 text-3xl sm:text-4xl md:text-5xl font-semibold backdrop-blur-lg rounded-xl border border-border-color ">深度解析｜六大Claw混战：QClaw、KimiClaw、DuClaw、MaxClaw、CoPaw，谁才是最好用的AI Agent？</h1>
+			</div>
+			
+		</div>
+
+		
+		<div class="article-header flex flex-row gap-2 items-center px-2 sm:px-6 md:px-8">
+			<div class="avatar w-[46px] h-[46px] flex-shrink-0 rounded-medium border border-border-color p-[1px]">
+				<img src="/images/avatar.png">
+			</div>
+			<div class="info flex flex-col justify-between">
+				<div class="author flex items-center">
+					<span class="name text-default-text-color text-lg font-semibold">Nathan</span>
+					
+				</div>
+				<div class="meta-info">
+					<div class="article-meta-info">
+    <span class="article-date article-meta-item">
+        <i class="fa-regular fa-pen-fancy"></i>&nbsp;
+        <span class="desktop">2026-03-13</span>
+        <span class="mobile">2026-03-13</span>
+        <span class="hover-info">创建</span>
+    </span>
+    
+        <span class="article-date article-meta-item">
+            <i class="fa-regular fa-wrench"></i>&nbsp;
+            <span class="desktop">2026-03-13 15:29:09</span>
+            <span class="mobile">2026-03-13 15:29:09</span>
+            <span class="hover-info">更新</span>
+        </span>
+    
+
+    
+        <span class="article-categories article-meta-item">
+            <i class="fa-regular fa-folders"></i>&nbsp;
+            <ul>
+                
+                
+                    
+                        
+                        <li>
+                            <a href="/categories/%E6%B7%B1%E5%BA%A6%E5%88%86%E6%9E%90/">深度分析</a>&nbsp;
+                        </li>
+                    
+                    
+                
+            </ul>
+        </span>
+    
+    
+        <span class="article-tags article-meta-item">
+            <i class="fa-regular fa-tags"></i>&nbsp;
+            <ul>
+                
+                    <li>
+                        <a href="/tags/AI/">AI</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/OpenClaw/">OpenClaw</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/Agent/">Agent</a>&nbsp;
+                    </li>
+                
+            </ul>
+        </span>
+    
+
+    
+    
+        <span class="article-wordcount article-meta-item">
+            <i class="fa-regular fa-typewriter"></i>&nbsp;<span>3.5k 字</span>
+        </span>
+    
+    
+        <span class="article-min2read article-meta-item">
+            <i class="fa-regular fa-clock"></i>&nbsp;<span>12 分钟</span>
+        </span>
+    
+    
+</div>
+
+				</div>
+			</div>
+		</div>
+		
+
+		
+
+
+		<div class="article-content markdown-body px-2 sm:px-6 md:px-8 pb-8">
+			<h1 id="六大Claw混战：谁才是最好用的AI-Agent？"><a href="#六大Claw混战：谁才是最好用的AI-Agent？" class="headerlink" title="六大Claw混战：谁才是最好用的AI Agent？"></a>六大Claw混战：谁才是最好用的AI Agent？</h1><p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/claw-comparison-cover.png"
+                      alt="六大Claw混战评测"
+                ></p>
+<blockquote>
+<p>2026年的春天，AI Agent赛道突然热闹起来。一个月内，腾讯、百度、月之暗面、MiniMax、阿里先后入局，基于OpenClaw框架推出了自己的”Claw”产品。这场混战背后，是一场关于AI落地的终极之问：<strong>谁能让普通人真正用上AI Agent？</strong></p>
+</blockquote>
+<h2 id="为什么突然冒出这么多Claw？"><a href="#为什么突然冒出这么多Claw？" class="headerlink" title="为什么突然冒出这么多Claw？"></a>为什么突然冒出这么多Claw？</h2><p>2025年底，开源AI Agent框架OpenClaw在GitHub上以惊人的速度蹿升至<strong>24.7万星</strong>，成为有史以来增长最快的开源项目之一。它让每个人都能在自己的电脑上运行一个全天候AI助手——连接微信、飞书、Telegram，自动处理邮件、管理日程、写代码、搜信息。</p>
+<p>但OpenClaw有一个致命门槛：<strong>你得会配置</strong>。Node.js环境、API Key、渠道对接、技能安装……对开发者来说不算难，但对普通用户来说，这就是一道天堑。</p>
+<p>于是，大厂们嗅到了机会：<strong>把OpenClaw的强大能力，包装成普通人也能用的产品</strong>。</p>
+<p>2026年2月到3月，短短一个月内，五款”Claw”产品密集发布：</p>
+<table>
+<thead>
+<tr>
+<th>产品</th>
+<th>厂商</th>
+<th>发布时间</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>KimiClaw</td>
+<td>月之暗面</td>
+<td>2月15日</td>
+</tr>
+<tr>
+<td>MaxClaw</td>
+<td>MiniMax</td>
+<td>2月25日</td>
+</tr>
+<tr>
+<td>CoPaw</td>
+<td>阿里通义</td>
+<td>2月28日</td>
+</tr>
+<tr>
+<td>QClaw</td>
+<td>腾讯</td>
+<td>3月9日</td>
+</tr>
+<tr>
+<td>DuClaw</td>
+<td>百度</td>
+<td>3月11日</td>
+</tr>
+</tbody></table>
+<p>加上原版OpenClaw，市面上一共六大Claw。接下来，我们逐一拆解。</p>
+<hr>
+<h2 id="一、OpenClaw：开山鼻祖，极客之选"><a href="#一、OpenClaw：开山鼻祖，极客之选" class="headerlink" title="一、OpenClaw：开山鼻祖，极客之选"></a>一、OpenClaw：开山鼻祖，极客之选</h2><p><strong>一句话定位：</strong> 给有技术能力的人，最大的自由度。</p>
+<p>OpenClaw是一切的起点。它是一个完全开源、本地部署的AI Agent框架，由奥地利开发者创建，核心理念是：<strong>你的AI助手，跑在你自己的机器上，数据完全属于你</strong>。</p>
+<p><strong>核心能力：</strong></p>
+<ul>
+<li>支持几乎所有主流LLM（Claude、GPT、Gemini、Qwen、DeepSeek等）</li>
+<li>多渠道接入：Telegram、WhatsApp、Discord、飞书、Signal、iMessage、微信</li>
+<li>技能系统（Skills）+ MCP工具协议</li>
+<li>子Agent编排、记忆系统、定时任务</li>
+<li>完全本地运行，隐私可控</li>
+</ul>
+<p><strong>优势：</strong></p>
+<ul>
+<li>✅ 完全免费开源</li>
+<li>✅ 自由度最高，想接什么接什么</li>
+<li>✅ 数据100%在本地，隐私最强</li>
+<li>✅ 社区活跃，技能生态丰富</li>
+<li>✅ 支持渠道最多</li>
+</ul>
+<p><strong>劣势：</strong></p>
+<ul>
+<li>❌ 需要技术基础（Node.js、命令行、API配置）</li>
+<li>❌ 需要自己维护和更新</li>
+<li>❌ 需要一台24小时在线的机器</li>
+<li>❌ 出问题只能自己排查</li>
+</ul>
+<p><strong>适合人群：</strong> 开发者、技术爱好者、极度重视隐私的用户</p>
+<p><strong>评分：⭐⭐⭐⭐⭐</strong>（自由度和能力天花板）&#x2F; <strong>⭐⭐</strong>（易用性）</p>
+<hr>
+<h2 id="二、QClaw（腾讯）：微信生态的核武器"><a href="#二、QClaw（腾讯）：微信生态的核武器" class="headerlink" title="二、QClaw（腾讯）：微信生态的核武器"></a>二、QClaw（腾讯）：微信生态的核武器</h2><p><strong>一句话定位：</strong> 在微信里控制你的电脑，腾讯生态的AI Agent化。</p>
+<p>QClaw是这次混战中最大的话题制造者。3月9日腾讯开始内测的消息一出，<strong>腾讯股价单日暴涨超过10%<strong>，市值飙升近500亿美元。为什么？因为QClaw打通了一个所有人都在用的东西——</strong>微信</strong>。</p>
+<p><strong>核心能力：</strong></p>
+<ul>
+<li>基于OpenClaw，一键安装器，极度简化部署</li>
+<li>深度集成微信和QQ</li>
+<li>通过微信&#x2F;QQ发送自然语言指令，控制本地PC</li>
+<li>本地运行，但安装过程傻瓜化</li>
+</ul>
+<p><strong>这意味着什么？</strong> 想象一下：你在外面开会，微信发一条”帮我把桌面上那个PPT发给张总”，你的电脑就自动完成了。或者”帮我查一下上周的销售数据，整理成表格发到工作群”——QClaw可以在你的PC上执行这些操作，然后通过微信回复你。</p>
+<p><strong>优势：</strong></p>
+<ul>
+<li>✅ 微信+QQ集成，触达12亿用户</li>
+<li>✅ 一键安装，技术门槛极低</li>
+<li>✅ 本地运行，数据不出机器</li>
+<li>✅ 腾讯资源加持，生态潜力巨大</li>
+</ul>
+<p><strong>劣势：</strong></p>
+<ul>
+<li>❌ 目前仅限内测，普通用户还用不上</li>
+<li>❌ 仅支持微信&#x2F;QQ渠道（目前）</li>
+<li>❌ 底层模型未公开（可能默认混元？）</li>
+<li>❌ 闭源，自定义空间有限</li>
+<li>❌ 隐私争议：微信消息经过腾讯服务器</li>
+</ul>
+<p><strong>适合人群：</strong> 微信重度用户、办公场景、非技术人群</p>
+<p><strong>评分：⭐⭐⭐⭐⭐</strong>（生态潜力）&#x2F; <strong>⭐⭐⭐</strong>（当前可用性，因为还在内测）</p>
+<hr>
+<h2 id="三、KimiClaw（月之暗面）：云端开箱即用"><a href="#三、KimiClaw（月之暗面）：云端开箱即用" class="headerlink" title="三、KimiClaw（月之暗面）：云端开箱即用"></a>三、KimiClaw（月之暗面）：云端开箱即用</h2><p><strong>一句话定位：</strong> 打开浏览器就能用的AI Agent，开发者平台野心。</p>
+<p>KimiClaw是最早发布的”Claw”产品之一。月之暗面直接把OpenClaw搬到了kimi.com上——打开浏览器，登录账号，你就有了一个24&#x2F;7在线的AI Agent，不需要装任何东西。</p>
+<p><strong>核心能力：</strong></p>
+<ul>
+<li>云端原生，浏览器直接使用</li>
+<li>基于Kimi K2.5模型（万亿参数MoE架构）</li>
+<li>5000+ 社区技能库</li>
+<li>40GB 云存储空间</li>
+<li>24&#x2F;7 持续在线</li>
+</ul>
+<p><strong>优势：</strong></p>
+<ul>
+<li>✅ 零安装零部署，打开浏览器就用</li>
+<li>✅ K2.5模型能力强（万亿参数）</li>
+<li>✅ 技能库丰富（5000+）</li>
+<li>✅ 24&#x2F;7在线，不需要自己的机器</li>
+<li>✅ 40GB云存储，文件管理方便</li>
+</ul>
+<p><strong>劣势：</strong></p>
+<ul>
+<li>❌ <strong>$39&#x2F;月</strong>，价格不菲（对比自托管OpenClaw约$2&#x2F;月）</li>
+<li>❌ 数据在云端，隐私不如本地方案</li>
+<li>❌ 渠道支持有限（主要是Web界面）</li>
+<li>❌ 依赖月之暗面的服务稳定性</li>
+<li>❌ 国内访问体验和海外可能有差异</li>
+</ul>
+<p><strong>适合人群：</strong> 不想折腾部署的开发者、数据科学家、愿意付费的专业用户</p>
+<p><strong>评分：⭐⭐⭐⭐</strong>（开箱即用体验）&#x2F; <strong>⭐⭐⭐</strong>（性价比）</p>
+<hr>
+<h2 id="四、MaxClaw（MiniMax-x2F-海螺AI）：性价比之王"><a href="#四、MaxClaw（MiniMax-x2F-海螺AI）：性价比之王" class="headerlink" title="四、MaxClaw（MiniMax &#x2F; 海螺AI）：性价比之王"></a>四、MaxClaw（MiniMax &#x2F; 海螺AI）：性价比之王</h2><p><strong>一句话定位：</strong> Claude级推理能力，十分之一的价格。</p>
+<p>MiniMax的MaxClaw在2月25日发布，主打一个概念：<strong>你不需要花大价钱用Claude，我们的M2.5模型就能给你同等质量的推理能力</strong>。</p>
+<p><strong>核心能力：</strong></p>
+<ul>
+<li>云端托管，一键部署</li>
+<li>基于MiniMax M2.5模型</li>
+<li>号称Claude 4.6级推理能力</li>
+<li>10000+ 专家AI Agent可用</li>
+<li>集成在 agent.minimax.io 平台</li>
+</ul>
+<p><strong>优势：</strong></p>
+<ul>
+<li>✅ 性价比突出，成本约为Claude方案的10%</li>
+<li>✅ 一键部署，无需服务器</li>
+<li>✅ Agent生态丰富（10000+专家Agent）</li>
+<li>✅ M2.5模型在中文场景表现不错</li>
+</ul>
+<p><strong>劣势：</strong></p>
+<ul>
+<li>❌ “Claude 4.6级”的说法需要打问号，实际复杂任务差距明显</li>
+<li>❌ 渠道支持有限</li>
+<li>❌ 品牌认知度低于其他几家</li>
+<li>❌ 云端方案，隐私不如本地</li>
+<li>❌ 长期稳定性待验证</li>
+</ul>
+<p><strong>适合人群：</strong> 预算有限但需要云端Agent的用户、中文场景为主的开发者</p>
+<p><strong>评分：⭐⭐⭐⭐</strong>（性价比）&#x2F; <strong>⭐⭐⭐</strong>（综合能力）</p>
+<hr>
+<h2 id="五、DuClaw（百度）：价格屠夫"><a href="#五、DuClaw（百度）：价格屠夫" class="headerlink" title="五、DuClaw（百度）：价格屠夫"></a>五、DuClaw（百度）：价格屠夫</h2><p><strong>一句话定位：</strong> 两块五一个月，百度想让所有人都用上AI Agent。</p>
+<p>DuClaw是发布最晚的（3月11日），但打法最激进——<strong>约$2.50&#x2F;月</strong>的价格几乎就是白送。百度的策略很清楚：用低价抢市场，用百度云生态留住用户。</p>
+<p><strong>核心能力：</strong></p>
+<ul>
+<li>百度智能云零部署服务</li>
+<li>支持多种主流大模型（不限于文心一言）</li>
+<li>包含百度预置技能（搜索、翻译、百度地图等）</li>
+<li>约$2.50&#x2F;月超低价</li>
+</ul>
+<p><strong>优势：</strong></p>
+<ul>
+<li>✅ <strong>价格最低</strong>，几乎没有门槛</li>
+<li>✅ 零部署，注册即用</li>
+<li>✅ 支持多模型选择（不锁定单一模型）</li>
+<li>✅ 百度生态技能（搜索、地图、翻译等）</li>
+<li>✅ 面向小白用户友好</li>
+</ul>
+<p><strong>劣势：</strong></p>
+<ul>
+<li>❌ 刚发布，生态还不成熟</li>
+<li>❌ 百度品牌在AI圈信任度一般</li>
+<li>❌ 渠道支持和自定义能力待完善</li>
+<li>❌ 低价策略能否持续存疑</li>
+<li>❌ 技能库深度不如KimiClaw</li>
+</ul>
+<p><strong>适合人群：</strong> 想低成本尝鲜的用户、百度生态用户、非技术人群</p>
+<p><strong>评分：⭐⭐⭐⭐⭐</strong>（价格）&#x2F; <strong>⭐⭐⭐</strong>（综合体验）</p>
+<hr>
+<h2 id="六、CoPaw（阿里通义）：开发者的瑞士军刀"><a href="#六、CoPaw（阿里通义）：开发者的瑞士军刀" class="headerlink" title="六、CoPaw（阿里通义）：开发者的瑞士军刀"></a>六、CoPaw（阿里通义）：开发者的瑞士军刀</h2><p><strong>一句话定位：</strong> 阿里开源的个人Agent工作站，给开发者最大的定制空间。</p>
+<p>CoPaw走了一条和QClaw、KimiClaw完全不同的路——它不追求”傻瓜化”，而是做一个<strong>开发者友好的开源Agent工作站</strong>。基于阿里的AgentScope框架，CoPaw让开发者可以用Python快速扩展Agent能力。</p>
+<p><strong>核心能力：</strong></p>
+<ul>
+<li>完全开源（Apache-2.0），GitHub 10700+ stars</li>
+<li>基于AgentScope框架</li>
+<li>支持多渠道（Discord、iMessage等）</li>
+<li>Python技能扩展，开发者友好</li>
+<li>支持本地LLM（Qwen系列）和云端模型</li>
+<li>内存管理和多通道工作流</li>
+</ul>
+<p><strong>优势：</strong></p>
+<ul>
+<li>✅ 完全开源免费</li>
+<li>✅ Python生态，扩展性极强</li>
+<li>✅ 阿里通义团队背书，持续维护</li>
+<li>✅ AgentScope框架成熟度高</li>
+<li>✅ 支持本地模型，隐私可控</li>
+</ul>
+<p><strong>劣势：</strong></p>
+<ul>
+<li>❌ 需要Python开发能力</li>
+<li>❌ 社区生态不如OpenClaw（stars差20倍）</li>
+<li>❌ 微信&#x2F;飞书等国内渠道支持不足</li>
+<li>❌ 文档和教程还在完善中</li>
+<li>❌ 与OpenClaw技能不兼容</li>
+</ul>
+<p><strong>适合人群：</strong> Python开发者、阿里云用户、需要深度定制的技术团队</p>
+<p><strong>评分：⭐⭐⭐⭐</strong>（技术深度）&#x2F; <strong>⭐⭐</strong>（普通用户友好度）</p>
+<hr>
+<h2 id="综合对比：一张表看清六大Claw"><a href="#综合对比：一张表看清六大Claw" class="headerlink" title="综合对比：一张表看清六大Claw"></a>综合对比：一张表看清六大Claw</h2><table>
+<thead>
+<tr>
+<th>维度</th>
+<th>OpenClaw</th>
+<th>QClaw</th>
+<th>KimiClaw</th>
+<th>MaxClaw</th>
+<th>DuClaw</th>
+<th>CoPaw</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>厂商</strong></td>
+<td>社区</td>
+<td>腾讯</td>
+<td>月之暗面</td>
+<td>MiniMax</td>
+<td>百度</td>
+<td>阿里</td>
+</tr>
+<tr>
+<td><strong>部署方式</strong></td>
+<td>本地自托管</td>
+<td>本地一键装</td>
+<td>云端</td>
+<td>云端</td>
+<td>云端</td>
+<td>本地自托管</td>
+</tr>
+<tr>
+<td><strong>价格</strong></td>
+<td>免费</td>
+<td>免费（内测）</td>
+<td>$39&#x2F;月</td>
+<td>低于KimiClaw</td>
+<td>~$2.5&#x2F;月</td>
+<td>免费</td>
+</tr>
+<tr>
+<td><strong>底层模型</strong></td>
+<td>自选任意</td>
+<td>混元？</td>
+<td>K2.5</td>
+<td>M2.5</td>
+<td>多模型可选</td>
+<td>Qwen&#x2F;自选</td>
+</tr>
+<tr>
+<td><strong>技能生态</strong></td>
+<td>⭐⭐⭐⭐⭐</td>
+<td>⭐⭐</td>
+<td>⭐⭐⭐⭐</td>
+<td>⭐⭐⭐⭐</td>
+<td>⭐⭐⭐</td>
+<td>⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>渠道支持</strong></td>
+<td>最全</td>
+<td>微信&#x2F;QQ</td>
+<td>Web</td>
+<td>Web&#x2F;API</td>
+<td>Web</td>
+<td>Discord等</td>
+</tr>
+<tr>
+<td><strong>隐私保护</strong></td>
+<td>⭐⭐⭐⭐⭐</td>
+<td>⭐⭐⭐⭐</td>
+<td>⭐⭐</td>
+<td>⭐⭐</td>
+<td>⭐⭐</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>上手难度</strong></td>
+<td>高</td>
+<td>低</td>
+<td>极低</td>
+<td>低</td>
+<td>极低</td>
+<td>高</td>
+</tr>
+<tr>
+<td><strong>开源</strong></td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><strong>24&#x2F;7在线</strong></td>
+<td>需自建</td>
+<td>需自建</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>需自建</td>
+</tr>
+<tr>
+<td><strong>适合人群</strong></td>
+<td>极客</td>
+<td>微信用户</td>
+<td>专业用户</td>
+<td>性价比用户</td>
+<td>尝鲜用户</td>
+<td>Python开发者</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="综合排名与推荐"><a href="#综合排名与推荐" class="headerlink" title="综合排名与推荐"></a>综合排名与推荐</h2><p>经过全面对比，我的排名如下：</p>
+<h3 id="🥇-第一名：OpenClaw（原版）"><a href="#🥇-第一名：OpenClaw（原版）" class="headerlink" title="🥇 第一名：OpenClaw（原版）"></a>🥇 第一名：OpenClaw（原版）</h3><p>没有悬念。原版OpenClaw依然是<strong>能力天花板最高</strong>的方案。自由选择模型、自由接入渠道、完整的技能生态、本地运行保护隐私——如果你有技术能力，没有理由不选它。所有其他Claw本质上都是OpenClaw的”简化版”或”托管版”，在自由度和能力上都有所削减。</p>
+<p><strong>推荐理由：</strong> 如果你会用命令行，直接用OpenClaw。省钱、自由、强大。</p>
+<h3 id="🥈-第二名：QClaw（腾讯）"><a href="#🥈-第二名：QClaw（腾讯）" class="headerlink" title="🥈 第二名：QClaw（腾讯）"></a>🥈 第二名：QClaw（腾讯）</h3><p>QClaw的排名这么高，不是因为它现在最好用（毕竟还在内测），而是因为它的<strong>战略位势无人能比</strong>。微信12亿用户的入口，意味着一旦QClaw正式发布，它将成为中国用户接触AI Agent的<strong>第一触点</strong>。在微信里发消息就能控制电脑——这个体验足够颠覆。</p>
+<p><strong>推荐理由：</strong> 关注并等待正式发布。一旦开放，强烈建议第一时间试用。</p>
+<h3 id="🥉-第三名：KimiClaw（月之暗面）"><a href="#🥉-第三名：KimiClaw（月之暗面）" class="headerlink" title="🥉 第三名：KimiClaw（月之暗面）"></a>🥉 第三名：KimiClaw（月之暗面）</h3><p>KimiClaw是<strong>当前最完善的云端Claw方案</strong>。K2.5模型能力强，5000+技能库丰富，40GB存储实用，24&#x2F;7在线稳定。唯一的问题是$39&#x2F;月的价格——对比DuClaw的$2.5，显得有点贵。但一分钱一分货，KimiClaw的整体体验确实更成熟。</p>
+<p><strong>推荐理由：</strong> 如果你愿意付费、追求开箱即用的云端体验，KimiClaw是目前最靠谱的选择。</p>
+<h3 id="第四名：CoPaw（阿里）"><a href="#第四名：CoPaw（阿里）" class="headerlink" title="第四名：CoPaw（阿里）"></a>第四名：CoPaw（阿里）</h3><p>CoPaw走了差异化路线——不做”傻瓜化”，而是做开发者工具。如果你是Python开发者，想要一个高度可定制的Agent框架，CoPaw值得关注。AgentScope框架的成熟度比OpenClaw的Node.js体系更适合数据科学和ML工程场景。</p>
+<p><strong>推荐理由：</strong> Python开发者的备选方案，尤其是已经在用阿里云&#x2F;通义API的团队。</p>
+<h3 id="第五名：MaxClaw（MiniMax）"><a href="#第五名：MaxClaw（MiniMax）" class="headerlink" title="第五名：MaxClaw（MiniMax）"></a>第五名：MaxClaw（MiniMax）</h3><p>MaxClaw的卖点是”Claude级推理、十分之一价格”。但说实话，M2.5和Claude 4.6之间的差距在复杂任务上还是明显的。不过作为轻度使用的云端Agent，MaxClaw确实性价比不错，10000+预置Agent生态也有看点。</p>
+<p><strong>推荐理由：</strong> 预算有限、轻度使用的云端Agent需求。</p>
+<h3 id="第六名：DuClaw（百度）"><a href="#第六名：DuClaw（百度）" class="headerlink" title="第六名：DuClaw（百度）"></a>第六名：DuClaw（百度）</h3><p>DuClaw排在最后不是因为它差，而是因为它<strong>太新了</strong>——3月11日才发布，生态、稳定性、功能深度都需要时间验证。$2.5&#x2F;月的价格确实诱人，但低价策略能否转化为好产品，还需要观察。百度在AI领域的口碑也需要通过实际产品来重建。</p>
+<p><strong>推荐理由：</strong> 想花最少钱尝鲜AI Agent的用户，可以试试。</p>
+<hr>
+<h2 id="趋势分析：Claw大战的三个判断"><a href="#趋势分析：Claw大战的三个判断" class="headerlink" title="趋势分析：Claw大战的三个判断"></a>趋势分析：Claw大战的三个判断</h2><h3 id="1-云端vs本地，最终会走向混合"><a href="#1-云端vs本地，最终会走向混合" class="headerlink" title="1. 云端vs本地，最终会走向混合"></a>1. 云端vs本地，最终会走向混合</h3><p>当前的六大Claw分为两个阵营：本地派（OpenClaw、QClaw、CoPaw）和云端派（KimiClaw、MaxClaw、DuClaw）。但这种分裂不会持续——未来一定是<strong>本地+云端的混合架构</strong>。敏感数据本地处理，算力密集型任务上云，渠道管理灵活切换。OpenClaw已经在朝这个方向演进。</p>
+<h3 id="2-渠道之争才是真正的战场"><a href="#2-渠道之争才是真正的战场" class="headerlink" title="2. 渠道之争才是真正的战场"></a>2. 渠道之争才是真正的战场</h3><p>技术层面，这些Claw差距不大——底层都是LLM+工具调用+记忆系统。真正的差异化在<strong>渠道</strong>。QClaw有微信，这是它最大的武器。KimiClaw有浏览器原生体验。DuClaw有百度搜索生态。谁能占据用户最常用的入口，谁就赢了。</p>
+<p>在中国市场，微信就是那个入口。这也是为什么QClaw的消息一出，腾讯股价就暴涨。</p>
+<h3 id="3-价格战已经开始，-0才是终局"><a href="#3-价格战已经开始，-0才是终局" class="headerlink" title="3. 价格战已经开始，$0才是终局"></a>3. 价格战已经开始，$0才是终局</h3><p>从KimiClaw的$39&#x2F;月，到DuClaw的$2.5&#x2F;月，价格在一个月内跌了93%。这个趋势不会停。AI Agent的边际成本接近于零（模型推理成本在持续下降），最终云端Agent服务可能会像邮箱一样——<strong>基础功能免费，增值服务收费</strong>。</p>
+<hr>
+<h2 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h2><p>2026年3月的Claw大战，本质上是一场<strong>AI Agent民主化</strong>运动。OpenClaw证明了AI Agent的可能性，而这些大厂的”Claw”们正在把这种可能性变成普通人的现实。</p>
+<p>如果你是技术人，用OpenClaw，享受最大的自由度。</p>
+<p>如果你是普通用户，等QClaw正式发布，在微信里体验AI Agent的魔力。</p>
+<p>如果你等不及，KimiClaw今天就能用，打开浏览器就行。</p>
+<p>如果你只想花两块五试试——DuClaw欢迎你。</p>
+<p>无论选哪个，2026年是AI Agent真正走入日常生活的元年。你准备好了吗？</p>
+<hr>
+<p><em>本文由 TechHome 原创，转载请注明出处。</em></p>
+
+		</div>
+
+		
+		<div class="post-copyright-info w-full my-8 px-2 sm:px-6 md:px-8">
+			<div class="article-copyright-info-container">
+    <ul>
+        <li><strong>标题:</strong> 深度解析｜六大Claw混战：QClaw、KimiClaw、DuClaw、MaxClaw、CoPaw，谁才是最好用的AI Agent？</li>
+        <li><strong>作者:</strong> Nathan</li>
+        <li><strong>创建于
+                :</strong> 2026-03-13 00:00:00</li>
+        
+            <li>
+                <strong>更新于
+                    :</strong> 2026-03-13 15:29:09
+            </li>
+        
+        <li>
+            <strong>链接:</strong> https://hydraxman.github.io/2026/03/13/claw-comparison-2026/
+        </li>
+        <li>
+            <strong>
+                版权声明:
+            </strong>
+            
+
+            
+                本文章采用 <a class="license" target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0">CC BY-NC-SA 4.0</a> 进行许可。
+            
+        </li>
+    </ul>
+</div>
+
+		</div>
+		
+
+		
+		<ul class="post-tags-box text-lg mt-1.5 flex-wrap justify-center flex md:hidden">
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/AI/">#AI</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/OpenClaw/">#OpenClaw</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/Agent/">#Agent</a>&nbsp;
+			</li>
+			
+		</ul>
+		
+
+		
+
+		
+		<div class="article-nav my-8 flex justify-between items-center px-2 sm:px-6 md:px-8">
+			
+			<div class="article-prev border-border-color shadow-redefine-flat shadow-shadow-color-2 rounded-medium px-4 py-2 hover:shadow-redefine-flat-hover hover:shadow-shadow-color-2">
+				<a class="prev" rel="prev" href="/2026/03/13/2026-03-13-morning-news/">
+					<span class="left arrow-icon flex justify-center items-center">
+						<i class="fa-solid fa-chevron-left"></i>
+					</span>
+					<span class="title flex justify-center items-center">
+						<span class="post-nav-title-item truncate max-w-48">2026年03月13日早间要闻</span>
+						<span class="post-nav-item">上一篇</span>
+					</span>
+				</a>
+			</div>
+			
+			
+			<div class="article-next border-border-color shadow-redefine-flat shadow-shadow-color-2 rounded-medium px-4 py-2 hover:shadow-redefine-flat-hover hover:shadow-shadow-color-2">
+				<a class="next" rel="next" href="/2026/03/12/2026-03-12-morning-news/">
+					<span class="title flex justify-center items-center">
+						<span class="post-nav-title-item truncate max-w-48">2026年03月12日早间要闻</span>
+						<span class="post-nav-item">下一篇</span>
+					</span>
+					<span class="right arrow-icon flex justify-center items-center">
+						<i class="fa-solid fa-chevron-right"></i>
+					</span>
+				</a>
+			</div>
+			
+		</div>
+		
+
+
+		
+	</div>
+
+	
+	<div class="toc-content-container">
+		<div class="post-toc-wrap">
+	<div class="post-toc">
+		<div class="toc-title">目录</div>
+		<div class="page-title">深度解析｜六大Claw混战：QClaw、KimiClaw、DuClaw、MaxClaw、CoPaw，谁才是最好用的AI Agent？</div>
+		<ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%85%AD%E5%A4%A7Claw%E6%B7%B7%E6%88%98%EF%BC%9A%E8%B0%81%E6%89%8D%E6%98%AF%E6%9C%80%E5%A5%BD%E7%94%A8%E7%9A%84AI-Agent%EF%BC%9F"><span class="nav-text">六大Claw混战：谁才是最好用的AI Agent？</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E7%AA%81%E7%84%B6%E5%86%92%E5%87%BA%E8%BF%99%E4%B9%88%E5%A4%9AClaw%EF%BC%9F"><span class="nav-text">为什么突然冒出这么多Claw？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81OpenClaw%EF%BC%9A%E5%BC%80%E5%B1%B1%E9%BC%BB%E7%A5%96%EF%BC%8C%E6%9E%81%E5%AE%A2%E4%B9%8B%E9%80%89"><span class="nav-text">一、OpenClaw：开山鼻祖，极客之选</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81QClaw%EF%BC%88%E8%85%BE%E8%AE%AF%EF%BC%89%EF%BC%9A%E5%BE%AE%E4%BF%A1%E7%94%9F%E6%80%81%E7%9A%84%E6%A0%B8%E6%AD%A6%E5%99%A8"><span class="nav-text">二、QClaw（腾讯）：微信生态的核武器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81KimiClaw%EF%BC%88%E6%9C%88%E4%B9%8B%E6%9A%97%E9%9D%A2%EF%BC%89%EF%BC%9A%E4%BA%91%E7%AB%AF%E5%BC%80%E7%AE%B1%E5%8D%B3%E7%94%A8"><span class="nav-text">三、KimiClaw（月之暗面）：云端开箱即用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81MaxClaw%EF%BC%88MiniMax-x2F-%E6%B5%B7%E8%9E%BAAI%EF%BC%89%EF%BC%9A%E6%80%A7%E4%BB%B7%E6%AF%94%E4%B9%8B%E7%8E%8B"><span class="nav-text">四、MaxClaw（MiniMax &#x2F; 海螺AI）：性价比之王</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%94%E3%80%81DuClaw%EF%BC%88%E7%99%BE%E5%BA%A6%EF%BC%89%EF%BC%9A%E4%BB%B7%E6%A0%BC%E5%B1%A0%E5%A4%AB"><span class="nav-text">五、DuClaw（百度）：价格屠夫</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AD%E3%80%81CoPaw%EF%BC%88%E9%98%BF%E9%87%8C%E9%80%9A%E4%B9%89%EF%BC%89%EF%BC%9A%E5%BC%80%E5%8F%91%E8%80%85%E7%9A%84%E7%91%9E%E5%A3%AB%E5%86%9B%E5%88%80"><span class="nav-text">六、CoPaw（阿里通义）：开发者的瑞士军刀</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%BC%E5%90%88%E5%AF%B9%E6%AF%94%EF%BC%9A%E4%B8%80%E5%BC%A0%E8%A1%A8%E7%9C%8B%E6%B8%85%E5%85%AD%E5%A4%A7Claw"><span class="nav-text">综合对比：一张表看清六大Claw</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%BC%E5%90%88%E6%8E%92%E5%90%8D%E4%B8%8E%E6%8E%A8%E8%8D%90"><span class="nav-text">综合排名与推荐</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%F0%9F%A5%87-%E7%AC%AC%E4%B8%80%E5%90%8D%EF%BC%9AOpenClaw%EF%BC%88%E5%8E%9F%E7%89%88%EF%BC%89"><span class="nav-text">🥇 第一名：OpenClaw（原版）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%F0%9F%A5%88-%E7%AC%AC%E4%BA%8C%E5%90%8D%EF%BC%9AQClaw%EF%BC%88%E8%85%BE%E8%AE%AF%EF%BC%89"><span class="nav-text">🥈 第二名：QClaw（腾讯）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%F0%9F%A5%89-%E7%AC%AC%E4%B8%89%E5%90%8D%EF%BC%9AKimiClaw%EF%BC%88%E6%9C%88%E4%B9%8B%E6%9A%97%E9%9D%A2%EF%BC%89"><span class="nav-text">🥉 第三名：KimiClaw（月之暗面）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E5%9B%9B%E5%90%8D%EF%BC%9ACoPaw%EF%BC%88%E9%98%BF%E9%87%8C%EF%BC%89"><span class="nav-text">第四名：CoPaw（阿里）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E4%BA%94%E5%90%8D%EF%BC%9AMaxClaw%EF%BC%88MiniMax%EF%BC%89"><span class="nav-text">第五名：MaxClaw（MiniMax）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E5%85%AD%E5%90%8D%EF%BC%9ADuClaw%EF%BC%88%E7%99%BE%E5%BA%A6%EF%BC%89"><span class="nav-text">第六名：DuClaw（百度）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B6%8B%E5%8A%BF%E5%88%86%E6%9E%90%EF%BC%9AClaw%E5%A4%A7%E6%88%98%E7%9A%84%E4%B8%89%E4%B8%AA%E5%88%A4%E6%96%AD"><span class="nav-text">趋势分析：Claw大战的三个判断</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E4%BA%91%E7%AB%AFvs%E6%9C%AC%E5%9C%B0%EF%BC%8C%E6%9C%80%E7%BB%88%E4%BC%9A%E8%B5%B0%E5%90%91%E6%B7%B7%E5%90%88"><span class="nav-text">1. 云端vs本地，最终会走向混合</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E6%B8%A0%E9%81%93%E4%B9%8B%E4%BA%89%E6%89%8D%E6%98%AF%E7%9C%9F%E6%AD%A3%E7%9A%84%E6%88%98%E5%9C%BA"><span class="nav-text">2. 渠道之争才是真正的战场</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E4%BB%B7%E6%A0%BC%E6%88%98%E5%B7%B2%E7%BB%8F%E5%BC%80%E5%A7%8B%EF%BC%8C-0%E6%89%8D%E6%98%AF%E7%BB%88%E5%B1%80"><span class="nav-text">3. 价格战已经开始，$0才是终局</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%93%E8%AF%AD"><span class="nav-text">结语</span></a></li></ol></li></ol>
+
+	</div>
+</div>
+	</div>
+	
+</div>
+			</div>
+
+			
+		</div>
+
+		<div class="main-content-footer">
+			<footer class="footer mt-5 py-5 h-auto text-base text-third-text-color relative border-t-2 border-t-border-color">
+    <div class="info-container py-3 text-center">
+        
+        <div class="text-center">
+            &copy;
+            
+              <span>2024</span>
+              -
+            
+            2026&nbsp;&nbsp;<i class="fa-solid fa-heart fa-beat" style="--fa-animation-duration: 0.5s; color: #333"></i>&nbsp;&nbsp;<a href="/">Nathan</a>
+            
+                
+                <p class="post-count space-x-0.5">
+                    <span>
+                        共撰写了 118 篇文章
+                    </span>
+                    
+                        <span>
+                            共 253.9k 字
+                        </span>
+                    
+                </p>
+            
+        </div>
+        
+        <div class="relative text-center lg:absolute lg:left-[20px] lg:top-1/2 lg:-translate-y-1/2 lg:text-left">
+            <span class="lg:block text-sm">由 <?xml version="1.0" encoding="utf-8"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg class="relative top-[2px] inline-block align-baseline" version="1.1" id="圖層_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="1rem" height="1rem" viewBox="0 0 512 512" enable-background="new 0 0 512 512" xml:space="preserve"><path fill="#0E83CD" d="M256.4,25.8l-200,115.5L56,371.5l199.6,114.7l200-115.5l0.4-230.2L256.4,25.8z M349,354.6l-18.4,10.7l-18.6-11V275H200v79.6l-18.4,10.7l-18.6-11v-197l18.5-10.6l18.5,10.8V237h112v-79.6l18.5-10.6l18.5,10.8V354.6z"/></svg><a target="_blank" class="text-base" href="https://hexo.io">Hexo</a> 驱动</span>
+            <span class="text-sm lg:block">主题&nbsp;<a class="text-base" target="_blank" href="https://github.com/EvanNotFound/hexo-theme-redefine">Redefine v2.8.5</a></span>
+        </div>
+        
+        
+            <div>
+                博客已运行 <span class="odometer" id="runtime_days" ></span> 天 <span class="odometer" id="runtime_hours"></span> 小时 <span class="odometer" id="runtime_minutes"></span> 分钟 <span class="odometer" id="runtime_seconds"></span> 秒
+            </div>
+        
+        
+            <script data-swup-reload-script>
+                try {
+                    function odometer_init() {
+                    const elements = document.querySelectorAll('.odometer');
+                    elements.forEach(el => {
+                        new Odometer({
+                            el,
+                            format: '( ddd).dd',
+                            duration: 200
+                        });
+                    });
+                    }
+                    odometer_init();
+                } catch (error) {}
+            </script>
+        
+        
+            
+                
+        
+                
+        
+        
+    </div>  
+</footer>
+		</div>
+	</div>
+
+	
+	<div class="post-tools">
+		<div class="post-tools-container">
+	<ul class="article-tools-list">
+		<!-- TOC aside toggle -->
+		
+		<li class="right-bottom-tools page-aside-toggle">
+			<i class="fa-regular fa-outdent"></i>
+		</li>
+		
+
+		<!-- go comment -->
+		
+	</ul>
+</div>
+	</div>
+	
+
+	<div class="right-side-tools-container">
+		<div class="side-tools-container">
+	<ul class="hidden-tools-list">
+		<li class="right-bottom-tools tool-font-adjust-plus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-plus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-font-adjust-minus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-minus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-dark-light-toggle flex justify-center items-center">
+			<i class="fa-regular fa-moon"></i>
+		</li>
+
+		<!-- rss -->
+		
+
+		
+
+		<li class="right-bottom-tools tool-scroll-to-bottom flex justify-center items-center">
+			<i class="fa-regular fa-arrow-down"></i>
+		</li>
+	</ul>
+
+	<ul class="visible-tools-list">
+		<li class="right-bottom-tools toggle-tools-list flex justify-center items-center">
+			<i class="fa-regular fa-cog fa-spin"></i>
+		</li>
+		
+		<li class="right-bottom-tools tool-scroll-to-top flex justify-center items-center">
+			<i class="arrow-up fas fa-arrow-up"></i>
+			<span class="percent"></span>
+		</li>
+		
+		
+	</ul>
+</div>
+	</div>
+
+	<div class="image-viewer-container">
+	<img src="">
+</div>
+
+	
+	<div class="search-pop-overlay">
+	<div class="popup search-popup">
+		<div class="search-header">
+			<span class="search-input-field-pre">
+				<i class="fa-solid fa-keyboard"></i>
+			</span>
+			<div class="search-input-container">
+				<input autocomplete="off" autocorrect="off" autocapitalize="off" placeholder="站内搜索您需要的内容..." spellcheck="false" type="search" class="search-input">
+			</div>
+			<span class="popup-btn-close">
+				<i class="fa-solid fa-times"></i>
+			</span>
+		</div>
+		<div id="search-result">
+			<div id="no-result">
+				<i class="fa-solid fa-spinner fa-spin-pulse fa-5x fa-fw"></i>
+			</div>
+		</div>
+	</div>
+</div>
+	
+
+</main>
+
+
+
+<script src="/js/build/libs/Swup.min.js"></script>
+
+<script src="/js/build/libs/SwupSlideTheme.min.js"></script>
+
+<script src="/js/build/libs/SwupScriptsPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupProgressPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupScrollPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupPreloadPlugin.min.js"></script>
+
+<script>
+    const swup = new Swup({
+        plugins: [
+            new SwupScriptsPlugin({
+                optin: true,
+            }),
+            new SwupProgressPlugin(),
+            new SwupScrollPlugin({
+                offset: 80,
+            }),
+            new SwupSlideTheme({
+                mainElement: ".main-content-body",
+            }),
+            new SwupPreloadPlugin(),
+        ],
+        containers: ["#swup"],
+    });
+</script>
+
+
+
+
+	
+<script src="/js/build/tools/imageViewer.js" type="module"></script>
+
+<script src="/js/build/utils.js" type="module"></script>
+
+<script src="/js/build/main.js" type="module"></script>
+
+<script src="/js/build/layouts/navbarShrink.js" type="module"></script>
+
+<script src="/js/build/tools/scrollTopBottom.js" type="module"></script>
+
+<script src="/js/build/tools/lightDarkSwitch.js" type="module"></script>
+
+<script src="/js/build/layouts/categoryList.js" type="module"></script>
+
+
+
+    
+<script src="/js/build/tools/localSearch.js" type="module"></script>
+
+
+
+
+    
+<script src="/js/build/tools/codeBlock.js" type="module"></script>
+
+
+
+
+    
+<script src="/js/build/layouts/lazyload.js" type="module"></script>
+
+
+
+
+    
+<script src="/js/build/tools/runtime.js"></script>
+
+    
+<script src="/js/build/libs/odometer.min.js"></script>
+
+    
+<link rel="stylesheet" href="/assets/odometer-theme-minimal.css">
+
+
+
+
+  
+<script src="/js/build/libs/Typed.min.js"></script>
+
+  
+<script src="/js/build/plugins/typed.js" type="module"></script>
+
+
+
+
+
+
+
+
+    
+<script src="/js/build/libs/anime.min.js"></script>
+
+
+
+
+
+    
+<script src="/js/build/tools/tocToggle.js" type="module" data-swup-reload-script=""></script>
+
+<script src="/js/build/layouts/toc.js" type="module" data-swup-reload-script=""></script>
+
+<script src="/js/build/plugins/tabs.js" type="module" data-swup-reload-script=""></script>
+
+
+
+
+<script src="/js/build/libs/moment-with-locales.min.js" data-swup-reload-script=""></script>
+
+
+<script src="/js/build/layouts/essays.js" type="module" data-swup-reload-script=""></script>
+
+
+
+
+
+	
+</body>
+
+</html>
