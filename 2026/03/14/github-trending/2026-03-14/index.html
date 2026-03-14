@@ -1,0 +1,1158 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="keywords" content="计算机技术, 生活中的胡思乱想">
+    
+    <meta name="author" content="Nathan">
+    
+    <!-- Completely eliminate flash of wrong theme -->
+    <script>
+        (function() {
+            const THEME_KEY = "REDEFINE-THEME-STATUS";
+            const DARK = "dark", LIGHT = "light";
+            
+            // Get preferred theme
+            function getTheme() {
+                try {
+                    const saved = localStorage.getItem(THEME_KEY);
+                    if (saved) {
+                        const { isDark } = JSON.parse(saved);
+                        return isDark ? DARK : LIGHT;
+                    }
+                } catch (e) {}
+                
+                return matchMedia("(prefers-color-scheme: dark)").matches ? DARK : LIGHT;
+            }
+            
+            // Apply theme to document
+            function applyTheme(theme) {
+                const isDark = theme === DARK;
+                const root = document.documentElement;
+                
+                // Set data attribute for CSS variables
+                root.setAttribute("data-theme", theme);
+                
+                // Set classes for compatibility
+                root.classList.add(theme);
+                root.classList.remove(isDark ? LIGHT : DARK);
+                root.style.colorScheme = theme;
+            }
+            
+            // Initial application
+            const theme = getTheme();
+            applyTheme(theme);
+            
+            // Listen for system preference changes
+            matchMedia("(prefers-color-scheme: dark)").addEventListener("change", ({ matches }) => {
+                // Only update if using system preference (no localStorage entry)
+                if (!localStorage.getItem(THEME_KEY)) {
+                    applyTheme(matches ? DARK : LIGHT);
+                }
+            });
+            
+            // Set body classes once DOM is ready
+            if (document.readyState !== "loading") {
+                document.body.classList.add(theme + "-mode");
+            } else {
+                document.addEventListener("DOMContentLoaded", () => {
+                    document.body.classList.add(theme + "-mode");
+                    document.body.classList.remove((theme === DARK ? LIGHT : DARK) + "-mode");
+                });
+            }
+        })();
+    </script>
+    
+    <!-- Critical CSS to prevent flash -->
+    <style>
+        :root[data-theme="dark"] {
+            --background-color: #202124;
+            --background-color-transparent: rgba(32, 33, 36, 0.6);
+            --second-background-color: #2d2e32;
+            --third-background-color: #34353a;
+            --third-background-color-transparent: rgba(32, 33, 36, 0.6);
+            --primary-color: #0066CC;
+            --first-text-color: #ffffff;
+            --second-text-color: #eeeeee;
+            --third-text-color: #bebec6;
+            --fourth-text-color: #999999;
+            --default-text-color: #bebec6;
+            --invert-text-color: #373D3F;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --selection-color: #0066CC;
+            --shadow-color-1: rgba(255, 255, 255, 0.08);
+            --shadow-color-2: rgba(255, 255, 255, 0.05);
+        }
+        
+        :root[data-theme="light"] {
+            --background-color: #fff;
+            --background-color-transparent: rgba(255, 255, 255, 0.6);
+            --second-background-color: #f8f8f8;
+            --third-background-color: #f2f2f2;
+            --third-background-color-transparent: rgba(241, 241, 241, 0.6);
+            --primary-color: #0066CC;
+            --first-text-color: #16171a;
+            --second-text-color: #2f3037;
+            --third-text-color: #5e5e5e;
+            --fourth-text-color: #eeeeee;
+            --default-text-color: #373D3F;
+            --invert-text-color: #bebec6;
+            --border-color: rgba(0, 0, 0, 0.08);
+            --selection-color: #0066CC;
+            --shadow-color-1: rgba(0, 0, 0, 0.08);
+            --shadow-color-2: rgba(0, 0, 0, 0.05);
+        }
+        
+        body {
+            background-color: var(--background-color);
+            color: var(--default-text-color);
+        }
+        
+        /* Apply body classes as soon as DOM is ready */
+        :root[data-theme="dark"] body {
+            background-color: var(--background-color);
+            color: var(--default-text-color);
+        }
+    </style>
+    
+    <!-- preconnect -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    
+    <!--- Seo Part-->
+    
+    <link rel="canonical" href="https://hydraxman.github.io/2026/03/14/github-trending/2026-03-14/"/>
+    <meta name="robots" content="index,follow">
+    <meta name="googlebot" content="index,follow">
+    <meta name="revisit-after" content="1 days">
+    
+    
+    
+        
+        <meta name="description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="GitHub Trending 日报：2026年3月14日最火的 10 个开源项目深度解析">
+<meta property="og:url" content="https://hydraxman.github.io/2026/03/14/github-trending/2026-03-14/index.html">
+<meta property="og:site_name" content="内森淼文">
+<meta property="og:description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://hydraxman.github.io/images/redefine-og.webp">
+<meta property="article:published_time" content="2026-03-14T03:00:00.000Z">
+<meta property="article:modified_time" content="2026-03-14T03:02:00.870Z">
+<meta property="article:author" content="Nathan">
+<meta property="article:tag" content="开源">
+<meta property="article:tag" content="GitHub">
+<meta property="article:tag" content="Trending">
+<meta property="article:tag" content="技术日报">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://hydraxman.github.io/images/redefine-og.webp">
+    
+    
+    <!--- Icon Part-->
+    <link rel="icon" type="image/png" href="/images/favicon.svg" sizes="192x192">
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.svg">
+    <meta name="theme-color" content="#ffffff">
+    <link rel="shortcut icon" href="/images/favicon.svg">
+    <!--- Page Info-->
+    
+    <title>
+        
+            GitHub Trending 日报：2026年3月14日最火的 10 个开源项目深度解析 | 内森淼文
+        
+    </title>
+
+    
+<link rel="stylesheet" href="/fonts/Chillax/chillax.css">
+
+
+    <!--- Inject Part-->
+    
+        
+            
+    
+            
+    
+            
+                
+                    <link rel="stylesheet" href="/css/custom.css">
+                
+    
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    
+        
+<link rel="stylesheet" href="/css/build/tailwind.css">
+
+    
+
+    
+<link rel="stylesheet" href="/fonts/GeistMono/geist-mono.css">
+
+    
+<link rel="stylesheet" href="/fonts/Geist/geist.css">
+
+    <!--- Font Part-->
+    
+    
+    
+    
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&display=swap" rel="stylesheet">
+    
+    
+
+    <script id="hexo-configurations">
+    window.config = {"hostname":"hydraxman.github.io","root":"/","language":"zh-CN","path":"search.json"};
+    window.theme = {"articles":{"style":{"font_size":"16px","line_height":1.5,"image_border_radius":"14px","image_alignment":"center","image_caption":false,"link_icon":true,"delete_mask":false,"title_alignment":"left","headings_top_spacing":{"h1":"3.2rem","h2":"2.4rem","h3":"1.9rem","h4":"1.6rem","h5":"1.4rem","h6":"1.3rem"}},"word_count":{"enable":true,"count":true,"min2read":true},"author_label":{"enable":false,"auto":false,"list":[]},"code_block":{"copy":true,"style":"mac","highlight_theme":{"light":"github","dark":"vs2015"},"font":{"enable":false,"family":null,"url":null}},"toc":{"enable":true,"max_depth":3,"number":false,"expand":true,"init_open":true},"copyright":{"enable":true,"default":"cc_by_nc_sa"},"lazyload":true,"pangu_js":false,"recommendation":{"enable":false,"title":"推荐阅读","limit":3,"mobile_limit":2,"placeholder":"/images/wallhaven-wqery6-light.webp","skip_dirs":[]}},"colors":{"primary":"#ffffff","secondary":null,"default_mode":"light"},"global":{"fonts":{"chinese":{"enable":false,"family":null,"url":null},"english":{"enable":true,"family":"Inter","url":"https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"},"title":{"enable":true,"family":"Noto Serif","url":"https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&display=swap"}},"content_max_width":"1000px","sidebar_width":"210px","hover":{"shadow":true,"scale":false},"scroll_progress":{"bar":true,"percentage":true},"website_counter":{"url":"https://cn.vercount.one/js","enable":false,"site_pv":true,"site_uv":true,"post_pv":true},"single_page":true,"preloader":{"enable":false,"custom_message":null},"side_tools":{"gear_rotation":true,"auto_expand":false},"open_graph":{"enable":true,"image":"/images/redefine-og.webp","description":"Hexo Theme Redefine, Redefine Your Hexo Journey."},"google_analytics":{"enable":false,"id":null}},"home_banner":{"enable":true,"style":"fixed","image":{"light":"/images/banner-light.jpg","dark":"/images/banner-dark.jpg"},"title":"内森淼文","subtitle":{"text":["AI · 编程 · 科技见闻","Write Code, Read World"],"hitokoto":{"enable":false,"show_author":false,"api":"https://v1.hitokoto.cn"},"typing_speed":100,"backing_speed":80,"starting_delay":500,"backing_delay":1500,"loop":true,"smart_backspace":true},"text_color":{"light":"#fff","dark":"#d1d1b6"},"text_style":{"title_size":"2.8rem","subtitle_size":"1.5rem","line_height":1.2},"custom_font":{"enable":false,"family":null,"url":null},"social_links":{"enable":true,"style":"default","links":{"github":"https://github.com/hydraxman","instagram":null,"zhihu":null,"twitter":null,"email":null},"qrs":{"weixin":null}}},"plugins":{"feed":{"enable":false},"aplayer":{"enable":false,"type":"fixed","audios":[{"name":null,"artist":null,"url":null,"cover":null,"lrc":null}]},"mermaid":{"enable":false,"version":"11.4.1"}},"version":"2.8.5","navbar":{"auto_hide":false,"color":{"left":"#333333","right":"#555555","transparency":35},"width":{"home":"1200px","pages":"1000px"},"links":{"Home":{"path":"/","icon":"fa-regular fa-house"},"Archives":{"path":"/archives","icon":"fa-regular fa-archive"},"Categories":{"path":"/categories","icon":"fa-regular fa-folder"},"Tags":{"path":"/tags","icon":"fa-regular fa-tags"},"About":{"path":"/about","icon":"fa-regular fa-user"}},"search":{"enable":true,"preload":true}},"page_templates":{"friends_column":2,"tags_style":"blur"},"home":{"sidebar":{"enable":true,"position":"left","first_item":"menu","announcement":"AI · 编程 · 科技","show_on_mobile":true,"links":{"Archives":{"path":"/archives","icon":"fa-regular fa-archive"},"Tags":{"path":"/tags","icon":"fa-regular fa-tags"},"Categories":{"path":"/categories","icon":"fa-regular fa-folder"}}},"article_date_format":"auto","excerpt_length":200,"categories":{"enable":true,"limit":3},"tags":{"enable":true,"limit":3}},"footerStart":"2024/01/01 00:00:00"};
+    window.lang_ago = {"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"};
+    window.data = {"masonry":false};
+  </script>
+    
+    <!--- Fontawesome Part-->
+    
+<link rel="stylesheet" href="/fontawesome/fontawesome.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/brands.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/solid.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/regular.min.css">
+
+    
+    
+    
+    
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+
+<body>
+	<div class="progress-bar-container">
+	
+	<span class="scroll-progress-bar"></span>
+	
+
+	
+	<span class="pjax-progress-bar"></span>
+	<!--        <span class="swup-progress-icon">-->
+	<!--            <i class="fa-solid fa-circle-notch fa-spin"></i>-->
+	<!--        </span>-->
+	
+</div>
+
+<main class="page-container" id="swup">
+
+	
+
+	<div class="main-content-container flex flex-col justify-between min-h-dvh">
+		<div class="main-content-header">
+			<header class="navbar-container px-6 md:px-12">
+    <div class="navbar-content transition-navbar ">
+        <div class="left">
+            
+            <a class="logo-title" href="/">
+                
+                内森淼文
+                
+            </a>
+        </div>
+
+        <div class="right">
+            <!-- PC -->
+            <div class="desktop">
+                <ul class="navbar-list">
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/"
+                                        >
+                                    <i class="fa-regular fa-house fa-fw"></i>
+                                    首页
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/archives"
+                                        >
+                                    <i class="fa-regular fa-archive fa-fw"></i>
+                                    归档
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/categories"
+                                        >
+                                    <i class="fa-regular fa-folder fa-fw"></i>
+                                    分类
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/tags"
+                                        >
+                                    <i class="fa-regular fa-tags fa-fw"></i>
+                                    标签
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/about"
+                                        >
+                                    <i class="fa-regular fa-user fa-fw"></i>
+                                    关于
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                    
+                        <li class="navbar-item search search-popup-trigger">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </li>
+                    
+                </ul>
+            </div>
+            <!-- Mobile -->
+            <div class="mobile">
+                
+                    <div class="icon-item search search-popup-trigger"><i class="fa-solid fa-magnifying-glass"></i>
+                    </div>
+                
+                <div class="icon-item navbar-bar">
+                    <div class="navbar-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile sheet -->
+    <div class="navbar-drawer h-dvh w-full absolute top-0 left-0 bg-background-color flex flex-col justify-between">
+        <ul class="drawer-navbar-list flex flex-col px-4 justify-center items-start">
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/"
+                        >
+                            <span>
+                                首页
+                            </span>
+                            
+                                <i class="fa-regular fa-house fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/archives"
+                        >
+                            <span>
+                                归档
+                            </span>
+                            
+                                <i class="fa-regular fa-archive fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/categories"
+                        >
+                            <span>
+                                分类
+                            </span>
+                            
+                                <i class="fa-regular fa-folder fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/tags"
+                        >
+                            <span>
+                                标签
+                            </span>
+                            
+                                <i class="fa-regular fa-tags fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/about"
+                        >
+                            <span>
+                                关于
+                            </span>
+                            
+                                <i class="fa-regular fa-user fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+
+            
+            
+                
+                    
+                    
+                    
+            
+        </ul>
+
+        <div class="statistics flex justify-around my-2.5">
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/tags">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">205</div>
+        <div class="label text-third-text-color text-sm">标签</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/categories">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">8</div>
+        <div class="label text-third-text-color text-sm">分类</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/archives">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">120</div>
+        <div class="label text-third-text-color text-sm">文章</div>
+    </a>
+</div>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+		</div>
+
+		<div class="main-content-body transition-fade-up">
+			
+
+			<div class="main-content">
+				<div class="post-page-container flex relative justify-between box-border w-full h-full">
+	<div class="article-content-container">
+
+		<div class="article-title relative w-full">
+			
+			
+			
+			<img src="/images/morning-news-cover.png" alt="GitHub Trending 日报：2026年3月14日最火的 10 个开源项目深度解析" class="w-full h-60 sm:h-72 md:h-80 object-cover sm:rounded-t-large dark:brightness-75" />
+			
+			<div class="w-full flex items-center absolute bottom-0 justify-start">
+				<h1 class="article-title-cover text-center mx-6 my-6 text-second-text-color bg-background-color-transparent px-4 py-3 text-3xl sm:text-4xl md:text-5xl font-semibold backdrop-blur-lg rounded-xl border border-border-color ">GitHub Trending 日报：2026年3月14日最火的 10 个开源项目深度解析</h1>
+			</div>
+			
+		</div>
+
+		
+		<div class="article-header flex flex-row gap-2 items-center px-2 sm:px-6 md:px-8">
+			<div class="avatar w-[46px] h-[46px] flex-shrink-0 rounded-medium border border-border-color p-[1px]">
+				<img src="/images/avatar.png">
+			</div>
+			<div class="info flex flex-col justify-between">
+				<div class="author flex items-center">
+					<span class="name text-default-text-color text-lg font-semibold">Nathan</span>
+					
+				</div>
+				<div class="meta-info">
+					<div class="article-meta-info">
+    <span class="article-date article-meta-item">
+        <i class="fa-regular fa-pen-fancy"></i>&nbsp;
+        <span class="desktop">2026-03-14 11:00</span>
+        <span class="mobile">2026-03-14 11:00</span>
+        <span class="hover-info">创建</span>
+    </span>
+    
+        <span class="article-date article-meta-item">
+            <i class="fa-regular fa-wrench"></i>&nbsp;
+            <span class="desktop">2026-03-14 11:02</span>
+            <span class="mobile">2026-03-14 11:02</span>
+            <span class="hover-info">更新</span>
+        </span>
+    
+
+    
+    
+        <span class="article-tags article-meta-item">
+            <i class="fa-regular fa-tags"></i>&nbsp;
+            <ul>
+                
+                    <li>
+                        <a href="/tags/%E5%BC%80%E6%BA%90/">开源</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/GitHub/">GitHub</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/Trending/">Trending</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/%E6%8A%80%E6%9C%AF%E6%97%A5%E6%8A%A5/">技术日报</a>&nbsp;
+                    </li>
+                
+            </ul>
+        </span>
+    
+
+    
+    
+        <span class="article-wordcount article-meta-item">
+            <i class="fa-regular fa-typewriter"></i>&nbsp;<span>2.3k 字</span>
+        </span>
+    
+    
+        <span class="article-min2read article-meta-item">
+            <i class="fa-regular fa-clock"></i>&nbsp;<span>8 分钟</span>
+        </span>
+    
+    
+</div>
+
+				</div>
+			</div>
+		</div>
+		
+
+		
+
+
+		<div class="article-content markdown-body px-2 sm:px-6 md:px-8 pb-8">
+			<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>今天是 2026 年 3 月 14 日（没错，π Day 🥧），GitHub Trending 呈现出一个清晰的主题：<strong>AI Agent 生态工具链的全面爆发</strong>。从微软的 1-bit 大模型推理框架，到 Google 的 Agent-to-UI 标准，再到各种 Agent 编排工具，开源社区正在以极快的速度构建 AI 原生的开发基础设施。</p>
+<p>让我们逐一拆解今天最火的 10 个项目。</p>
+<hr>
+<h2 id="1-microsoft-x2F-BitNet-—-1-bit-大模型推理框架"><a href="#1-microsoft-x2F-BitNet-—-1-bit-大模型推理框架" class="headerlink" title="1. microsoft&#x2F;BitNet — 1-bit 大模型推理框架"></a>1. microsoft&#x2F;BitNet — 1-bit 大模型推理框架</h2><blockquote>
+<p>⭐ 34,064 | 📈 +2,227 today | Language: Python</p>
+</blockquote>
+<p>微软的 <strong>bitnet.cpp</strong> 是 1-bit LLM（如 BitNet b1.58）的官方推理框架。核心卖点：在 CPU 上就能跑大模型，且速度惊人。</p>
+<h3 id="为什么火？"><a href="#为什么火？" class="headerlink" title="为什么火？"></a>为什么火？</h3><p>传统大模型动辄需要多块 GPU，而 BitNet b1.58 通过极端量化（1.58-bit），让 <strong>100B 参数模型在单颗 CPU 上以人类阅读速度运行</strong>（5-7 tokens&#x2F;s）。ARM CPU 上加速 1.37x-5.07x，能耗降低 55%-70%。</p>
+<h3 id="技术亮点"><a href="#技术亮点" class="headerlink" title="技术亮点"></a>技术亮点</h3><ul>
+<li>专门优化的 1-bit 推理内核，支持 CPU 和 GPU</li>
+<li>并行 kernel 实现 + 可配置 tiling + embedding 量化</li>
+<li>在原有基础上再加速 1.15x-2.1x</li>
+<li>即将支持 NPU</li>
+</ul>
+<h3 id="适用场景"><a href="#适用场景" class="headerlink" title="适用场景"></a>适用场景</h3><p>边缘部署、移动端推理、低成本 AI 服务。对于想在本地跑大模型又不想买 GPU 的开发者，这可能是目前最实用的方案。</p>
+<hr>
+<h2 id="2-langflow-ai-x2F-openrag-—-一站式-RAG-平台"><a href="#2-langflow-ai-x2F-openrag-—-一站式-RAG-平台" class="headerlink" title="2. langflow-ai&#x2F;openrag — 一站式 RAG 平台"></a>2. langflow-ai&#x2F;openrag — 一站式 RAG 平台</h2><blockquote>
+<p>⭐ 2,310 | 📈 +905 today | Language: Python</p>
+</blockquote>
+<p>OpenRAG 是一个”开箱即用”的 RAG（检索增强生成）平台，基于 <strong>Langflow + Docling + OpenSearch</strong> 三件套。</p>
+<h3 id="为什么火？-1"><a href="#为什么火？-1" class="headerlink" title="为什么火？"></a>为什么火？</h3><p>RAG 是当前企业 AI 应用的核心架构，但搭建一套完整的 RAG 系统依然繁琐。OpenRAG 把文档解析、向量存储、检索编排、多 Agent 协调全部打包好了，<code>uv run openrag</code> 一条命令就能跑起来。</p>
+<h3 id="技术亮点-1"><a href="#技术亮点-1" class="headerlink" title="技术亮点"></a>技术亮点</h3><ul>
+<li>Langflow 提供可视化拖拽式工作流编排</li>
+<li>Docling 处理”脏数据”（PDF、扫描件等真实文档）</li>
+<li>OpenSearch 提供生产级语义搜索</li>
+<li>支持 Agentic RAG 工作流（重排序 + 多 Agent 协调）</li>
+</ul>
+<h3 id="适用场景-1"><a href="#适用场景-1" class="headerlink" title="适用场景"></a>适用场景</h3><p>企业知识库、内部文档搜索、客服系统。如果你之前用 LangChain 搭 RAG 搭到头秃，可以试试这个。</p>
+<hr>
+<h2 id="3-lightpanda-io-x2F-browser-—-为-AI-而生的无头浏览器"><a href="#3-lightpanda-io-x2F-browser-—-为-AI-而生的无头浏览器" class="headerlink" title="3. lightpanda-io&#x2F;browser — 为 AI 而生的无头浏览器"></a>3. lightpanda-io&#x2F;browser — 为 AI 而生的无头浏览器</h2><blockquote>
+<p>⭐ 15,604 | 📈 +2,093 today | Language: Zig</p>
+</blockquote>
+<p>Lightpanda 是一款专为 AI 和自动化设计的无头浏览器，用 <strong>Zig</strong> 编写。</p>
+<h3 id="为什么火？-2"><a href="#为什么火？-2" class="headerlink" title="为什么火？"></a>为什么火？</h3><p>数字说话：<strong>比 Chrome 快 11 倍，内存占用低 9 倍</strong>。在 AI Agent 大量需要网页交互的今天，Chrome&#x2F;Chromium 太重了。Lightpanda 兼容 Playwright、Puppeteer、chromedp（通过 CDP 协议），可以无缝替换现有工具链。</p>
+<h3 id="技术亮点-2"><a href="#技术亮点-2" class="headerlink" title="技术亮点"></a>技术亮点</h3><ul>
+<li>Zig 编写，极致性能和低内存</li>
+<li>支持 JavaScript 执行和部分 Web APIs</li>
+<li>CDP 协议兼容，即插即用</li>
+<li>Docker 一键部署</li>
+</ul>
+<h3 id="适用场景-2"><a href="#适用场景-2" class="headerlink" title="适用场景"></a>适用场景</h3><p>AI Agent 的网页爬取、大规模自动化测试、LLM 训练数据采集。性能敏感场景下的 Chrome 替代品。</p>
+<hr>
+<h2 id="4-obra-x2F-superpowers-—-Agent-编码方法论框架"><a href="#4-obra-x2F-superpowers-—-Agent-编码方法论框架" class="headerlink" title="4. obra&#x2F;superpowers — Agent 编码方法论框架"></a>4. obra&#x2F;superpowers — Agent 编码方法论框架</h2><blockquote>
+<p>⭐ 82,005 | 📈 +2,106 today | Language: Shell</p>
+</blockquote>
+<p>Superpowers 是一套完整的 <strong>AI 编码 Agent 工作流方法论</strong>，支持 Claude Code、Cursor、Codex 等主流工具。</p>
+<h3 id="为什么火？-3"><a href="#为什么火？-3" class="headerlink" title="为什么火？"></a>为什么火？</h3><p>8 万+ star，这不是一个工具库——这是一套 <strong>编码 Agent 的操作系统</strong>。它改变了 AI 编码的方式：不是直接让 AI 写代码，而是先让 AI 理解需求 → 拆分规格 → 制定实施计划 → 然后启动子 Agent 逐个执行任务，同时做代码审查。</p>
+<h3 id="技术亮点-3"><a href="#技术亮点-3" class="headerlink" title="技术亮点"></a>技术亮点</h3><ul>
+<li>子 Agent 驱动开发（Subagent-driven Development）</li>
+<li>强调 TDD、YAGNI、DRY 原则</li>
+<li>可组合的 Skill 系统</li>
+<li>Claude 可以连续自主工作数小时不偏离方向</li>
+</ul>
+<h3 id="适用场景-3"><a href="#适用场景-3" class="headerlink" title="适用场景"></a>适用场景</h3><p>任何使用 AI 编码工具的开发者。这不是”又一个 prompt 模板”，而是让你的 AI 编码助手从”初级实习生”升级为”有方法论的工程师”。</p>
+<hr>
+<h2 id="5-public-apis-x2F-public-apis-—-免费-API-集合"><a href="#5-public-apis-x2F-public-apis-—-免费-API-集合" class="headerlink" title="5. public-apis&#x2F;public-apis — 免费 API 集合"></a>5. public-apis&#x2F;public-apis — 免费 API 集合</h2><blockquote>
+<p>⭐ 409,566 | 📈 +892 today | Language: Python</p>
+</blockquote>
+<p>GitHub 上 star 最多的项目之一，汇集了互联网上可用的免费公开 API。</p>
+<h3 id="为什么还在涨？"><a href="#为什么还在涨？" class="headerlink" title="为什么还在涨？"></a>为什么还在涨？</h3><p>40 万 star 依然在日增 900+，说明开发者对免费 API 的需求永远存在。在 AI Agent 需要调用各种外部服务的时代，这个项目的价值反而更大了——它是 Agent 工具箱的”黄页”。</p>
+<h3 id="适用场景-4"><a href="#适用场景-4" class="headerlink" title="适用场景"></a>适用场景</h3><p>快速原型开发、Agent 外部工具集成、教学和 Hackathon。</p>
+<hr>
+<h2 id="6-promptfoo-x2F-promptfoo-—-LLM-评测与红队测试"><a href="#6-promptfoo-x2F-promptfoo-—-LLM-评测与红队测试" class="headerlink" title="6. promptfoo&#x2F;promptfoo — LLM 评测与红队测试"></a>6. promptfoo&#x2F;promptfoo — LLM 评测与红队测试</h2><blockquote>
+<p>⭐ 15,347 | 📈 +1,668 today | Language: TypeScript</p>
+</blockquote>
+<p>promptfoo 是一个 LLM 应用的评测和安全测试框架，CLI + 可视化界面。</p>
+<h3 id="为什么火？-4"><a href="#为什么火？-4" class="headerlink" title="为什么火？"></a>为什么火？</h3><p>当每个公司都在部署 AI 应用时，”怎么确保它靠谱”成了关键问题。promptfoo 提供了 <strong>评测 + 红队测试 + CI&#x2F;CD 集成</strong> 一条龙服务。你可以比较 GPT、Claude、Gemini、Llama 的表现，还能自动扫描 prompt 注入等安全漏洞。</p>
+<h3 id="技术亮点-4"><a href="#技术亮点-4" class="headerlink" title="技术亮点"></a>技术亮点</h3><ul>
+<li>声明式配置，开发者友好</li>
+<li>所有评测 100% 本地运行，数据不外泄</li>
+<li>支持自动化红队测试和漏洞报告</li>
+<li>CI&#x2F;CD 和代码扫描集成</li>
+</ul>
+<h3 id="适用场景-5"><a href="#适用场景-5" class="headerlink" title="适用场景"></a>适用场景</h3><p>任何上线 LLM 应用的团队。不做评测就上线 AI 产品，等于闭着眼开车。</p>
+<hr>
+<h2 id="7-msitarzewski-x2F-agency-agents-—-AI-Agent-人设模板库"><a href="#7-msitarzewski-x2F-agency-agents-—-AI-Agent-人设模板库" class="headerlink" title="7. msitarzewski&#x2F;agency-agents — AI Agent 人设模板库"></a>7. msitarzewski&#x2F;agency-agents — AI Agent 人设模板库</h2><blockquote>
+<p>⭐ 40,454 | 📈 +5,745 today | Language: Shell</p>
+</blockquote>
+<p>今日涨幅王！一个精心设计的 AI Agent 人设（Persona）集合，每个 Agent 都有独特的专业领域、性格和工作流程。</p>
+<h3 id="为什么火？-5"><a href="#为什么火？-5" class="headerlink" title="为什么火？"></a>为什么火？</h3><p>日增 5745 star，这说明开发者已经从”让 AI 写代码”进化到”让 AI 扮演特定角色做特定工作”。这个仓库提供了前端开发者、后端架构师、DevOps、内容策略师等数十种 Agent 模板，每个都有详细的 prompt 工程。</p>
+<h3 id="技术亮点-5"><a href="#技术亮点-5" class="headerlink" title="技术亮点"></a>技术亮点</h3><ul>
+<li>支持 Claude Code、Cursor、Aider、Windsurf、Gemini CLI 等</li>
+<li>自动安装脚本，一键集成</li>
+<li>每个 Agent 有明确的交付物和成功指标</li>
+<li>不是简单的 prompt 模板，而是完整的角色定义</li>
+</ul>
+<h3 id="适用场景-6"><a href="#适用场景-6" class="headerlink" title="适用场景"></a>适用场景</h3><p>构建 AI 工作流、多 Agent 协作系统、或者单纯想让你的 AI 助手更专业化。</p>
+<hr>
+<h2 id="8-dolthub-x2F-dolt-—-Git-for-Data"><a href="#8-dolthub-x2F-dolt-—-Git-for-Data" class="headerlink" title="8. dolthub&#x2F;dolt — Git for Data"></a>8. dolthub&#x2F;dolt — Git for Data</h2><blockquote>
+<p>⭐ 21,115 | 📈 +60 today | Language: Go</p>
+</blockquote>
+<p>Dolt 是一个支持 Git 式版本控制的 SQL 数据库。fork、clone、branch、merge，所有 Git 操作都适用于数据表。</p>
+<h3 id="为什么火？-6"><a href="#为什么火？-6" class="headerlink" title="为什么火？"></a>为什么火？</h3><p>虽然今日增长不高，但 Dolt 是一个”慢热型”项目。在 AI 时代，<strong>数据版本管理</strong> 的需求越来越强烈——你需要追踪训练数据的变化、回滚错误的数据变更、在多人协作中合并数据。Dolt 就是为此而生。</p>
+<h3 id="技术亮点-6"><a href="#技术亮点-6" class="headerlink" title="技术亮点"></a>技术亮点</h3><ul>
+<li>完全兼容 MySQL 协议</li>
+<li>可作为现有 MySQL 的 binlog 副本</li>
+<li>每次写入自动成为一个 commit</li>
+<li>支持 Postgres 版本（Doltgres）</li>
+</ul>
+<h3 id="适用场景-7"><a href="#适用场景-7" class="headerlink" title="适用场景"></a>适用场景</h3><p>ML 数据管理、数据审计合规、多团队数据协作。如果你的 AI 项目经常因为”谁改了训练数据”而扯皮，Dolt 就是答案。</p>
+<hr>
+<h2 id="9-google-x2F-A2UI-—-Agent-to-User-Interface-标准"><a href="#9-google-x2F-A2UI-—-Agent-to-User-Interface-标准" class="headerlink" title="9. google&#x2F;A2UI — Agent-to-User Interface 标准"></a>9. google&#x2F;A2UI — Agent-to-User Interface 标准</h2><blockquote>
+<p>⭐ 13,079 | 📈 +635 today | Language: TypeScript</p>
+</blockquote>
+<p>Google 推出的开源标准，让 AI Agent 能够生成安全的、跨平台的富 UI。</p>
+<h3 id="为什么火？-7"><a href="#为什么火？-7" class="headerlink" title="为什么火？"></a>为什么火？</h3><p>这可能是今天最具前瞻性的项目。当 AI Agent 成为主要交互方式时，”Agent 怎么给用户展示 UI”就成了核心问题。A2UI 提出了一个优雅的方案：Agent 发送声明式 JSON 描述 UI 意图，客户端用原生组件渲染。<strong>像数据一样安全，像代码一样表达力强</strong>。</p>
+<h3 id="技术亮点-7"><a href="#技术亮点-7" class="headerlink" title="技术亮点"></a>技术亮点</h3><ul>
+<li>声明式 JSON 格式，LLM 友好</li>
+<li>支持增量更新（流式渲染）</li>
+<li>框架无关（Flutter、Angular、Lit、React、SwiftUI）</li>
+<li>安全优先——不执行代码，只渲染预审批的组件</li>
+</ul>
+<h3 id="适用场景-8"><a href="#适用场景-8" class="headerlink" title="适用场景"></a>适用场景</h3><p>构建 Agent 驱动的应用、多 Agent 编排系统的 UI 层、企业内部的 AI 工作台。这是 Agent 生态的基础设施级项目。</p>
+<hr>
+<h2 id="10-fishaudio-x2F-fish-speech-—-开源-TTS-之王"><a href="#10-fishaudio-x2F-fish-speech-—-开源-TTS-之王" class="headerlink" title="10. fishaudio&#x2F;fish-speech — 开源 TTS 之王"></a>10. fishaudio&#x2F;fish-speech — 开源 TTS 之王</h2><blockquote>
+<p>⭐ 26,898 | 📈 +559 today | Language: Python</p>
+</blockquote>
+<p>Fish Speech S2 是目前开源和闭源 TTS 系统中表现最好的之一，由 Fish Audio 开发。</p>
+<h3 id="为什么火？-8"><a href="#为什么火？-8" class="headerlink" title="为什么火？"></a>为什么火？</h3><p>训练数据超过 <strong>1000 万小时、约 50 种语言</strong>，结合强化学习对齐和双自回归架构。支持内联情感控制标签如 <code>[laugh]</code>、<code>[whispers]</code>、<code>[super happy]</code>，这已经不是简单的”文字转语音”了。</p>
+<h3 id="技术亮点-8"><a href="#技术亮点-8" class="headerlink" title="技术亮点"></a>技术亮点</h3><ul>
+<li>双自回归（Dual-Autoregressive）架构</li>
+<li>强化学习对齐</li>
+<li>细粒度韵律和情感控制</li>
+<li>原生多说话人、多轮对话生成</li>
+</ul>
+<h3 id="适用场景-9"><a href="#适用场景-9" class="headerlink" title="适用场景"></a>适用场景</h3><p>AI 语音助手、有声书制作、视频配音、游戏 NPC 语音。如果你还在用那些机械感满满的 TTS，是时候升级了。</p>
+<hr>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>今天的 Trending 画出了一幅清晰的 AI 开发生态图谱：</p>
+<table>
+<thead>
+<tr>
+<th>层级</th>
+<th>项目</th>
+<th>解决的问题</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>模型推理</td>
+<td>BitNet</td>
+<td>低成本本地推理</td>
+</tr>
+<tr>
+<td>数据管道</td>
+<td>OpenRAG, Dolt</td>
+<td>知识检索、数据版本管理</td>
+</tr>
+<tr>
+<td>Agent 基础设施</td>
+<td>Superpowers, Agency-Agents</td>
+<td>Agent 编排和角色定义</td>
+</tr>
+<tr>
+<td>安全与质量</td>
+<td>promptfoo</td>
+<td>AI 应用评测和安全</td>
+</tr>
+<tr>
+<td>交互层</td>
+<td>A2UI, Lightpanda, Fish Speech</td>
+<td>UI 生成、网页操控、语音输出</td>
+</tr>
+<tr>
+<td>工具层</td>
+<td>public-apis</td>
+<td>Agent 外部能力扩展</td>
+</tr>
+</tbody></table>
+<p><strong>一句话总结：AI Agent 不再是概念，它的整个工具链正在以开源的方式被快速构建。</strong> 🚀</p>
+
+		</div>
+
+		
+		<div class="post-copyright-info w-full my-8 px-2 sm:px-6 md:px-8">
+			<div class="article-copyright-info-container">
+    <ul>
+        <li><strong>标题:</strong> GitHub Trending 日报：2026年3月14日最火的 10 个开源项目深度解析</li>
+        <li><strong>作者:</strong> Nathan</li>
+        <li><strong>创建于
+                :</strong> 2026-03-14 11:00:00</li>
+        
+            <li>
+                <strong>更新于
+                    :</strong> 2026-03-14 11:02:00
+            </li>
+        
+        <li>
+            <strong>链接:</strong> https://hydraxman.github.io/2026/03/14/github-trending/2026-03-14/
+        </li>
+        <li>
+            <strong>
+                版权声明:
+            </strong>
+            
+
+            
+                本文章采用 <a class="license" target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0">CC BY-NC-SA 4.0</a> 进行许可。
+            
+        </li>
+    </ul>
+</div>
+
+		</div>
+		
+
+		
+		<ul class="post-tags-box text-lg mt-1.5 flex-wrap justify-center flex md:hidden">
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/%E5%BC%80%E6%BA%90/">#开源</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/GitHub/">#GitHub</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/Trending/">#Trending</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/%E6%8A%80%E6%9C%AF%E6%97%A5%E6%8A%A5/">#技术日报</a>&nbsp;
+			</li>
+			
+		</ul>
+		
+
+		
+
+		
+		<div class="article-nav my-8 flex justify-between items-center px-2 sm:px-6 md:px-8">
+			
+			
+			<div class="article-next border-border-color shadow-redefine-flat shadow-shadow-color-2 rounded-medium px-4 py-2 hover:shadow-redefine-flat-hover hover:shadow-shadow-color-2">
+				<a class="next" rel="next" href="/2026/03/14/2026-03-14-morning-news/">
+					<span class="title flex justify-center items-center">
+						<span class="post-nav-title-item truncate max-w-48">2026年03月14日早间要闻</span>
+						<span class="post-nav-item">下一篇</span>
+					</span>
+					<span class="right arrow-icon flex justify-center items-center">
+						<i class="fa-solid fa-chevron-right"></i>
+					</span>
+				</a>
+			</div>
+			
+		</div>
+		
+
+
+		
+	</div>
+
+	
+	<div class="toc-content-container">
+		<div class="post-toc-wrap">
+	<div class="post-toc">
+		<div class="toc-title">目录</div>
+		<div class="page-title">GitHub Trending 日报：2026年3月14日最火的 10 个开源项目深度解析</div>
+		<ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-microsoft-x2F-BitNet-%E2%80%94-1-bit-%E5%A4%A7%E6%A8%A1%E5%9E%8B%E6%8E%A8%E7%90%86%E6%A1%86%E6%9E%B6"><span class="nav-text">1. microsoft&#x2F;BitNet — 1-bit 大模型推理框架</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E7%81%AB%EF%BC%9F"><span class="nav-text">为什么火？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8A%80%E6%9C%AF%E4%BA%AE%E7%82%B9"><span class="nav-text">技术亮点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%82%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="nav-text">适用场景</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-langflow-ai-x2F-openrag-%E2%80%94-%E4%B8%80%E7%AB%99%E5%BC%8F-RAG-%E5%B9%B3%E5%8F%B0"><span class="nav-text">2. langflow-ai&#x2F;openrag — 一站式 RAG 平台</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E7%81%AB%EF%BC%9F-1"><span class="nav-text">为什么火？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8A%80%E6%9C%AF%E4%BA%AE%E7%82%B9-1"><span class="nav-text">技术亮点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%82%E7%94%A8%E5%9C%BA%E6%99%AF-1"><span class="nav-text">适用场景</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-lightpanda-io-x2F-browser-%E2%80%94-%E4%B8%BA-AI-%E8%80%8C%E7%94%9F%E7%9A%84%E6%97%A0%E5%A4%B4%E6%B5%8F%E8%A7%88%E5%99%A8"><span class="nav-text">3. lightpanda-io&#x2F;browser — 为 AI 而生的无头浏览器</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E7%81%AB%EF%BC%9F-2"><span class="nav-text">为什么火？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8A%80%E6%9C%AF%E4%BA%AE%E7%82%B9-2"><span class="nav-text">技术亮点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%82%E7%94%A8%E5%9C%BA%E6%99%AF-2"><span class="nav-text">适用场景</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-obra-x2F-superpowers-%E2%80%94-Agent-%E7%BC%96%E7%A0%81%E6%96%B9%E6%B3%95%E8%AE%BA%E6%A1%86%E6%9E%B6"><span class="nav-text">4. obra&#x2F;superpowers — Agent 编码方法论框架</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E7%81%AB%EF%BC%9F-3"><span class="nav-text">为什么火？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8A%80%E6%9C%AF%E4%BA%AE%E7%82%B9-3"><span class="nav-text">技术亮点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%82%E7%94%A8%E5%9C%BA%E6%99%AF-3"><span class="nav-text">适用场景</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-public-apis-x2F-public-apis-%E2%80%94-%E5%85%8D%E8%B4%B9-API-%E9%9B%86%E5%90%88"><span class="nav-text">5. public-apis&#x2F;public-apis — 免费 API 集合</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E8%BF%98%E5%9C%A8%E6%B6%A8%EF%BC%9F"><span class="nav-text">为什么还在涨？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%82%E7%94%A8%E5%9C%BA%E6%99%AF-4"><span class="nav-text">适用场景</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-promptfoo-x2F-promptfoo-%E2%80%94-LLM-%E8%AF%84%E6%B5%8B%E4%B8%8E%E7%BA%A2%E9%98%9F%E6%B5%8B%E8%AF%95"><span class="nav-text">6. promptfoo&#x2F;promptfoo — LLM 评测与红队测试</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E7%81%AB%EF%BC%9F-4"><span class="nav-text">为什么火？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8A%80%E6%9C%AF%E4%BA%AE%E7%82%B9-4"><span class="nav-text">技术亮点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%82%E7%94%A8%E5%9C%BA%E6%99%AF-5"><span class="nav-text">适用场景</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7-msitarzewski-x2F-agency-agents-%E2%80%94-AI-Agent-%E4%BA%BA%E8%AE%BE%E6%A8%A1%E6%9D%BF%E5%BA%93"><span class="nav-text">7. msitarzewski&#x2F;agency-agents — AI Agent 人设模板库</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E7%81%AB%EF%BC%9F-5"><span class="nav-text">为什么火？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8A%80%E6%9C%AF%E4%BA%AE%E7%82%B9-5"><span class="nav-text">技术亮点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%82%E7%94%A8%E5%9C%BA%E6%99%AF-6"><span class="nav-text">适用场景</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#8-dolthub-x2F-dolt-%E2%80%94-Git-for-Data"><span class="nav-text">8. dolthub&#x2F;dolt — Git for Data</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E7%81%AB%EF%BC%9F-6"><span class="nav-text">为什么火？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8A%80%E6%9C%AF%E4%BA%AE%E7%82%B9-6"><span class="nav-text">技术亮点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%82%E7%94%A8%E5%9C%BA%E6%99%AF-7"><span class="nav-text">适用场景</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#9-google-x2F-A2UI-%E2%80%94-Agent-to-User-Interface-%E6%A0%87%E5%87%86"><span class="nav-text">9. google&#x2F;A2UI — Agent-to-User Interface 标准</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E7%81%AB%EF%BC%9F-7"><span class="nav-text">为什么火？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8A%80%E6%9C%AF%E4%BA%AE%E7%82%B9-7"><span class="nav-text">技术亮点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%82%E7%94%A8%E5%9C%BA%E6%99%AF-8"><span class="nav-text">适用场景</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#10-fishaudio-x2F-fish-speech-%E2%80%94-%E5%BC%80%E6%BA%90-TTS-%E4%B9%8B%E7%8E%8B"><span class="nav-text">10. fishaudio&#x2F;fish-speech — 开源 TTS 之王</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E7%81%AB%EF%BC%9F-8"><span class="nav-text">为什么火？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8A%80%E6%9C%AF%E4%BA%AE%E7%82%B9-8"><span class="nav-text">技术亮点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%82%E7%94%A8%E5%9C%BA%E6%99%AF-9"><span class="nav-text">适用场景</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-text">总结</span></a></li></ol>
+
+	</div>
+</div>
+	</div>
+	
+</div>
+			</div>
+
+			
+		</div>
+
+		<div class="main-content-footer">
+			<footer class="footer mt-5 py-5 h-auto text-base text-third-text-color relative border-t-2 border-t-border-color">
+    <div class="info-container py-3 text-center">
+        
+        <div class="text-center">
+            &copy;
+            
+              <span>2024</span>
+              -
+            
+            2026&nbsp;&nbsp;<i class="fa-solid fa-heart fa-beat" style="--fa-animation-duration: 0.5s; color: #333"></i>&nbsp;&nbsp;<a href="/">Nathan</a>
+            
+                
+                <p class="post-count space-x-0.5">
+                    <span>
+                        共撰写了 120 篇文章
+                    </span>
+                    
+                        <span>
+                            共 257.2k 字
+                        </span>
+                    
+                </p>
+            
+        </div>
+        
+        <div class="relative text-center lg:absolute lg:left-[20px] lg:top-1/2 lg:-translate-y-1/2 lg:text-left">
+            <span class="lg:block text-sm">由 <?xml version="1.0" encoding="utf-8"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg class="relative top-[2px] inline-block align-baseline" version="1.1" id="圖層_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="1rem" height="1rem" viewBox="0 0 512 512" enable-background="new 0 0 512 512" xml:space="preserve"><path fill="#0E83CD" d="M256.4,25.8l-200,115.5L56,371.5l199.6,114.7l200-115.5l0.4-230.2L256.4,25.8z M349,354.6l-18.4,10.7l-18.6-11V275H200v79.6l-18.4,10.7l-18.6-11v-197l18.5-10.6l18.5,10.8V237h112v-79.6l18.5-10.6l18.5,10.8V354.6z"/></svg><a target="_blank" class="text-base" href="https://hexo.io">Hexo</a> 驱动</span>
+            <span class="text-sm lg:block">主题&nbsp;<a class="text-base" target="_blank" href="https://github.com/EvanNotFound/hexo-theme-redefine">Redefine v2.8.5</a></span>
+        </div>
+        
+        
+            <div>
+                博客已运行 <span class="odometer" id="runtime_days" ></span> 天 <span class="odometer" id="runtime_hours"></span> 小时 <span class="odometer" id="runtime_minutes"></span> 分钟 <span class="odometer" id="runtime_seconds"></span> 秒
+            </div>
+        
+        
+            <script data-swup-reload-script>
+                try {
+                    function odometer_init() {
+                    const elements = document.querySelectorAll('.odometer');
+                    elements.forEach(el => {
+                        new Odometer({
+                            el,
+                            format: '( ddd).dd',
+                            duration: 200
+                        });
+                    });
+                    }
+                    odometer_init();
+                } catch (error) {}
+            </script>
+        
+        
+            
+                
+        
+                
+        
+        
+    </div>  
+</footer>
+		</div>
+	</div>
+
+	
+	<div class="post-tools">
+		<div class="post-tools-container">
+	<ul class="article-tools-list">
+		<!-- TOC aside toggle -->
+		
+		<li class="right-bottom-tools page-aside-toggle">
+			<i class="fa-regular fa-outdent"></i>
+		</li>
+		
+
+		<!-- go comment -->
+		
+	</ul>
+</div>
+	</div>
+	
+
+	<div class="right-side-tools-container">
+		<div class="side-tools-container">
+	<ul class="hidden-tools-list">
+		<li class="right-bottom-tools tool-font-adjust-plus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-plus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-font-adjust-minus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-minus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-dark-light-toggle flex justify-center items-center">
+			<i class="fa-regular fa-moon"></i>
+		</li>
+
+		<!-- rss -->
+		
+
+		
+
+		<li class="right-bottom-tools tool-scroll-to-bottom flex justify-center items-center">
+			<i class="fa-regular fa-arrow-down"></i>
+		</li>
+	</ul>
+
+	<ul class="visible-tools-list">
+		<li class="right-bottom-tools toggle-tools-list flex justify-center items-center">
+			<i class="fa-regular fa-cog fa-spin"></i>
+		</li>
+		
+		<li class="right-bottom-tools tool-scroll-to-top flex justify-center items-center">
+			<i class="arrow-up fas fa-arrow-up"></i>
+			<span class="percent"></span>
+		</li>
+		
+		
+	</ul>
+</div>
+	</div>
+
+	<div class="image-viewer-container">
+	<img src="">
+</div>
+
+	
+	<div class="search-pop-overlay">
+	<div class="popup search-popup">
+		<div class="search-header">
+			<span class="search-input-field-pre">
+				<i class="fa-solid fa-keyboard"></i>
+			</span>
+			<div class="search-input-container">
+				<input autocomplete="off" autocorrect="off" autocapitalize="off" placeholder="站内搜索您需要的内容..." spellcheck="false" type="search" class="search-input">
+			</div>
+			<span class="popup-btn-close">
+				<i class="fa-solid fa-times"></i>
+			</span>
+		</div>
+		<div id="search-result">
+			<div id="no-result">
+				<i class="fa-solid fa-spinner fa-spin-pulse fa-5x fa-fw"></i>
+			</div>
+		</div>
+	</div>
+</div>
+	
+
+</main>
+
+
+
+<script src="/js/build/libs/Swup.min.js"></script>
+
+<script src="/js/build/libs/SwupSlideTheme.min.js"></script>
+
+<script src="/js/build/libs/SwupScriptsPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupProgressPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupScrollPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupPreloadPlugin.min.js"></script>
+
+<script>
+    const swup = new Swup({
+        plugins: [
+            new SwupScriptsPlugin({
+                optin: true,
+            }),
+            new SwupProgressPlugin(),
+            new SwupScrollPlugin({
+                offset: 80,
+            }),
+            new SwupSlideTheme({
+                mainElement: ".main-content-body",
+            }),
+            new SwupPreloadPlugin(),
+        ],
+        containers: ["#swup"],
+    });
+</script>
+
+
+
+
+	
+<script src="/js/build/tools/imageViewer.js" type="module"></script>
+
+<script src="/js/build/utils.js" type="module"></script>
+
+<script src="/js/build/main.js" type="module"></script>
+
+<script src="/js/build/layouts/navbarShrink.js" type="module"></script>
+
+<script src="/js/build/tools/scrollTopBottom.js" type="module"></script>
+
+<script src="/js/build/tools/lightDarkSwitch.js" type="module"></script>
+
+<script src="/js/build/layouts/categoryList.js" type="module"></script>
+
+
+
+    
+<script src="/js/build/tools/localSearch.js" type="module"></script>
+
+
+
+
+    
+<script src="/js/build/tools/codeBlock.js" type="module"></script>
+
+
+
+
+    
+<script src="/js/build/layouts/lazyload.js" type="module"></script>
+
+
+
+
+    
+<script src="/js/build/tools/runtime.js"></script>
+
+    
+<script src="/js/build/libs/odometer.min.js"></script>
+
+    
+<link rel="stylesheet" href="/assets/odometer-theme-minimal.css">
+
+
+
+
+  
+<script src="/js/build/libs/Typed.min.js"></script>
+
+  
+<script src="/js/build/plugins/typed.js" type="module"></script>
+
+
+
+
+
+
+
+
+    
+<script src="/js/build/libs/anime.min.js"></script>
+
+
+
+
+
+    
+<script src="/js/build/tools/tocToggle.js" type="module" data-swup-reload-script=""></script>
+
+<script src="/js/build/layouts/toc.js" type="module" data-swup-reload-script=""></script>
+
+<script src="/js/build/plugins/tabs.js" type="module" data-swup-reload-script=""></script>
+
+
+
+
+<script src="/js/build/libs/moment-with-locales.min.js" data-swup-reload-script=""></script>
+
+
+<script src="/js/build/layouts/essays.js" type="module" data-swup-reload-script=""></script>
+
+
+
+
+
+	
+</body>
+
+</html>
