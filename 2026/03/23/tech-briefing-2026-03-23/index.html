@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="keywords" content="计算机技术, 生活中的胡思乱想">
+    
+    <meta name="author" content="Nathan">
+    
+    <!-- Completely eliminate flash of wrong theme -->
+    <script>
+        (function() {
+            const THEME_KEY = "REDEFINE-THEME-STATUS";
+            const DARK = "dark", LIGHT = "light";
+            
+            // Get preferred theme
+            function getTheme() {
+                try {
+                    const saved = localStorage.getItem(THEME_KEY);
+                    if (saved) {
+                        const { isDark } = JSON.parse(saved);
+                        return isDark ? DARK : LIGHT;
+                    }
+                } catch (e) {}
+                
+                return matchMedia("(prefers-color-scheme: dark)").matches ? DARK : LIGHT;
+            }
+            
+            // Apply theme to document
+            function applyTheme(theme) {
+                const isDark = theme === DARK;
+                const root = document.documentElement;
+                
+                // Set data attribute for CSS variables
+                root.setAttribute("data-theme", theme);
+                
+                // Set classes for compatibility
+                root.classList.add(theme);
+                root.classList.remove(isDark ? LIGHT : DARK);
+                root.style.colorScheme = theme;
+            }
+            
+            // Initial application
+            const theme = getTheme();
+            applyTheme(theme);
+            
+            // Listen for system preference changes
+            matchMedia("(prefers-color-scheme: dark)").addEventListener("change", ({ matches }) => {
+                // Only update if using system preference (no localStorage entry)
+                if (!localStorage.getItem(THEME_KEY)) {
+                    applyTheme(matches ? DARK : LIGHT);
+                }
+            });
+            
+            // Set body classes once DOM is ready
+            if (document.readyState !== "loading") {
+                document.body.classList.add(theme + "-mode");
+            } else {
+                document.addEventListener("DOMContentLoaded", () => {
+                    document.body.classList.add(theme + "-mode");
+                    document.body.classList.remove((theme === DARK ? LIGHT : DARK) + "-mode");
+                });
+            }
+        })();
+    </script>
+    
+    <!-- Critical CSS to prevent flash -->
+    <style>
+        :root[data-theme="dark"] {
+            --background-color: #202124;
+            --background-color-transparent: rgba(32, 33, 36, 0.6);
+            --second-background-color: #2d2e32;
+            --third-background-color: #34353a;
+            --third-background-color-transparent: rgba(32, 33, 36, 0.6);
+            --primary-color: #0066CC;
+            --first-text-color: #ffffff;
+            --second-text-color: #eeeeee;
+            --third-text-color: #bebec6;
+            --fourth-text-color: #999999;
+            --default-text-color: #bebec6;
+            --invert-text-color: #373D3F;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --selection-color: #0066CC;
+            --shadow-color-1: rgba(255, 255, 255, 0.08);
+            --shadow-color-2: rgba(255, 255, 255, 0.05);
+        }
+        
+        :root[data-theme="light"] {
+            --background-color: #fff;
+            --background-color-transparent: rgba(255, 255, 255, 0.6);
+            --second-background-color: #f8f8f8;
+            --third-background-color: #f2f2f2;
+            --third-background-color-transparent: rgba(241, 241, 241, 0.6);
+            --primary-color: #0066CC;
+            --first-text-color: #16171a;
+            --second-text-color: #2f3037;
+            --third-text-color: #5e5e5e;
+            --fourth-text-color: #eeeeee;
+            --default-text-color: #373D3F;
+            --invert-text-color: #bebec6;
+            --border-color: rgba(0, 0, 0, 0.08);
+            --selection-color: #0066CC;
+            --shadow-color-1: rgba(0, 0, 0, 0.08);
+            --shadow-color-2: rgba(0, 0, 0, 0.05);
+        }
+        
+        body {
+            background-color: var(--background-color);
+            color: var(--default-text-color);
+        }
+        
+        /* Apply body classes as soon as DOM is ready */
+        :root[data-theme="dark"] body {
+            background-color: var(--background-color);
+            color: var(--default-text-color);
+        }
+    </style>
+    
+    <!-- preconnect -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    
+    <!--- Seo Part-->
+    
+    <link rel="canonical" href="https://hydraxman.github.io/2026/03/23/tech-briefing-2026-03-23/"/>
+    <meta name="robots" content="index,follow">
+    <meta name="googlebot" content="index,follow">
+    <meta name="revisit-after" content="1 days">
+    
+    
+    
+        
+        <meta name="description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="元内参 | 霍尔穆兹48小时倒计时、Musk $250亿造芯、Cursor套壳风波">
+<meta property="og:url" content="https://hydraxman.github.io/2026/03/23/tech-briefing-2026-03-23/index.html">
+<meta property="og:site_name" content="内森淼文">
+<meta property="og:description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://hydraxman.github.io/images/redefine-og.webp">
+<meta property="article:published_time" content="2026-03-22T23:00:00.000Z">
+<meta property="article:modified_time" content="2026-03-22T23:03:55.755Z">
+<meta property="article:author" content="Nathan">
+<meta property="article:tag" content="AI编程">
+<meta property="article:tag" content="投资">
+<meta property="article:tag" content="地缘政治">
+<meta property="article:tag" content="芯片制造">
+<meta property="article:tag" content="云计算">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://hydraxman.github.io/images/redefine-og.webp">
+    
+    
+    <!--- Icon Part-->
+    <link rel="icon" type="image/png" href="/images/favicon.svg" sizes="192x192">
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.svg">
+    <meta name="theme-color" content="#ffffff">
+    <link rel="shortcut icon" href="/images/favicon.svg">
+    <!--- Page Info-->
+    
+    <title>
+        
+            元内参 | 霍尔穆兹48小时倒计时、Musk $250亿造芯、Cursor套壳风波 | 内森淼文
+        
+    </title>
+
+    
+<link rel="stylesheet" href="/fonts/Chillax/chillax.css">
+
+
+    <!--- Inject Part-->
+    
+        
+            
+    
+            
+    
+            
+                
+                    <link rel="stylesheet" href="/css/custom.css">
+                
+    
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    
+        
+<link rel="stylesheet" href="/css/build/tailwind.css">
+
+    
+
+    
+<link rel="stylesheet" href="/fonts/GeistMono/geist-mono.css">
+
+    
+<link rel="stylesheet" href="/fonts/Geist/geist.css">
+
+    <!--- Font Part-->
+    
+    
+    
+    
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&display=swap" rel="stylesheet">
+    
+    
+
+    <script id="hexo-configurations">
+    window.config = {"hostname":"hydraxman.github.io","root":"/","language":"zh-CN","path":"search.json"};
+    window.theme = {"articles":{"style":{"font_size":"16px","line_height":1.5,"image_border_radius":"14px","image_alignment":"center","image_caption":false,"link_icon":true,"delete_mask":false,"title_alignment":"left","headings_top_spacing":{"h1":"3.2rem","h2":"2.4rem","h3":"1.9rem","h4":"1.6rem","h5":"1.4rem","h6":"1.3rem"}},"word_count":{"enable":true,"count":true,"min2read":true},"author_label":{"enable":false,"auto":false,"list":[]},"code_block":{"copy":true,"style":"mac","highlight_theme":{"light":"github","dark":"vs2015"},"font":{"enable":false,"family":null,"url":null}},"toc":{"enable":true,"max_depth":3,"number":false,"expand":true,"init_open":true},"copyright":{"enable":true,"default":"cc_by_nc_sa"},"lazyload":true,"pangu_js":false,"recommendation":{"enable":false,"title":"推荐阅读","limit":3,"mobile_limit":2,"placeholder":"/images/wallhaven-wqery6-light.webp","skip_dirs":[]}},"colors":{"primary":"#ffffff","secondary":null,"default_mode":"light"},"global":{"fonts":{"chinese":{"enable":false,"family":null,"url":null},"english":{"enable":true,"family":"Inter","url":"https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"},"title":{"enable":true,"family":"Noto Serif","url":"https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&display=swap"}},"content_max_width":"1000px","sidebar_width":"210px","hover":{"shadow":true,"scale":false},"scroll_progress":{"bar":true,"percentage":true},"website_counter":{"url":"https://cn.vercount.one/js","enable":false,"site_pv":true,"site_uv":true,"post_pv":true},"single_page":true,"preloader":{"enable":false,"custom_message":null},"side_tools":{"gear_rotation":true,"auto_expand":false},"open_graph":{"enable":true,"image":"/images/redefine-og.webp","description":"Hexo Theme Redefine, Redefine Your Hexo Journey."},"google_analytics":{"enable":false,"id":null}},"home_banner":{"enable":true,"style":"fixed","image":{"light":"/images/banner-light.jpg","dark":"/images/banner-dark.jpg"},"title":"内森淼文","subtitle":{"text":["AI · 编程 · 科技见闻","Write Code, Read World"],"hitokoto":{"enable":false,"show_author":false,"api":"https://v1.hitokoto.cn"},"typing_speed":100,"backing_speed":80,"starting_delay":500,"backing_delay":1500,"loop":true,"smart_backspace":true},"text_color":{"light":"#fff","dark":"#d1d1b6"},"text_style":{"title_size":"2.8rem","subtitle_size":"1.5rem","line_height":1.2},"custom_font":{"enable":false,"family":null,"url":null},"social_links":{"enable":true,"style":"default","links":{"github":"https://github.com/hydraxman","instagram":null,"zhihu":null,"twitter":null,"email":null},"qrs":{"weixin":null}}},"plugins":{"feed":{"enable":false},"aplayer":{"enable":false,"type":"fixed","audios":[{"name":null,"artist":null,"url":null,"cover":null,"lrc":null}]},"mermaid":{"enable":false,"version":"11.4.1"}},"version":"2.8.5","navbar":{"auto_hide":false,"color":{"left":"#333333","right":"#555555","transparency":35},"width":{"home":"1200px","pages":"1000px"},"links":{"Home":{"path":"/","icon":"fa-regular fa-house"},"Archives":{"path":"/archives","icon":"fa-regular fa-archive"},"Categories":{"path":"/categories","icon":"fa-regular fa-folder"},"Tags":{"path":"/tags","icon":"fa-regular fa-tags"},"About":{"path":"/about","icon":"fa-regular fa-user"}},"search":{"enable":true,"preload":true}},"page_templates":{"friends_column":2,"tags_style":"blur"},"home":{"sidebar":{"enable":true,"position":"left","first_item":"menu","announcement":"AI · 编程 · 科技","show_on_mobile":true,"links":{"Archives":{"path":"/archives","icon":"fa-regular fa-archive"},"Tags":{"path":"/tags","icon":"fa-regular fa-tags"},"Categories":{"path":"/categories","icon":"fa-regular fa-folder"}}},"article_date_format":"auto","excerpt_length":200,"categories":{"enable":true,"limit":3},"tags":{"enable":true,"limit":3}},"footerStart":"2024/01/01 00:00:00"};
+    window.lang_ago = {"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"};
+    window.data = {"masonry":false};
+  </script>
+    
+    <!--- Fontawesome Part-->
+    
+<link rel="stylesheet" href="/fontawesome/fontawesome.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/brands.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/solid.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/regular.min.css">
+
+    
+    
+    
+    
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+
+<body>
+	<div class="progress-bar-container">
+	
+	<span class="scroll-progress-bar"></span>
+	
+
+	
+	<span class="pjax-progress-bar"></span>
+	<!--        <span class="swup-progress-icon">-->
+	<!--            <i class="fa-solid fa-circle-notch fa-spin"></i>-->
+	<!--        </span>-->
+	
+</div>
+
+<main class="page-container" id="swup">
+
+	
+
+	<div class="main-content-container flex flex-col justify-between min-h-dvh">
+		<div class="main-content-header">
+			<header class="navbar-container px-6 md:px-12">
+    <div class="navbar-content transition-navbar ">
+        <div class="left">
+            
+            <a class="logo-title" href="/">
+                
+                内森淼文
+                
+            </a>
+        </div>
+
+        <div class="right">
+            <!-- PC -->
+            <div class="desktop">
+                <ul class="navbar-list">
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/"
+                                        >
+                                    <i class="fa-regular fa-house fa-fw"></i>
+                                    首页
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/archives"
+                                        >
+                                    <i class="fa-regular fa-archive fa-fw"></i>
+                                    归档
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/categories"
+                                        >
+                                    <i class="fa-regular fa-folder fa-fw"></i>
+                                    分类
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/tags"
+                                        >
+                                    <i class="fa-regular fa-tags fa-fw"></i>
+                                    标签
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/about"
+                                        >
+                                    <i class="fa-regular fa-user fa-fw"></i>
+                                    关于
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                    
+                        <li class="navbar-item search search-popup-trigger">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </li>
+                    
+                </ul>
+            </div>
+            <!-- Mobile -->
+            <div class="mobile">
+                
+                    <div class="icon-item search search-popup-trigger"><i class="fa-solid fa-magnifying-glass"></i>
+                    </div>
+                
+                <div class="icon-item navbar-bar">
+                    <div class="navbar-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile sheet -->
+    <div class="navbar-drawer h-dvh w-full absolute top-0 left-0 bg-background-color flex flex-col justify-between">
+        <ul class="drawer-navbar-list flex flex-col px-4 justify-center items-start">
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/"
+                        >
+                            <span>
+                                首页
+                            </span>
+                            
+                                <i class="fa-regular fa-house fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/archives"
+                        >
+                            <span>
+                                归档
+                            </span>
+                            
+                                <i class="fa-regular fa-archive fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/categories"
+                        >
+                            <span>
+                                分类
+                            </span>
+                            
+                                <i class="fa-regular fa-folder fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/tags"
+                        >
+                            <span>
+                                标签
+                            </span>
+                            
+                                <i class="fa-regular fa-tags fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/about"
+                        >
+                            <span>
+                                关于
+                            </span>
+                            
+                                <i class="fa-regular fa-user fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+
+            
+            
+                
+                    
+                    
+                    
+            
+        </ul>
+
+        <div class="statistics flex justify-around my-2.5">
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/tags">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">244</div>
+        <div class="label text-third-text-color text-sm">标签</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/categories">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">8</div>
+        <div class="label text-third-text-color text-sm">分类</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/archives">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">143</div>
+        <div class="label text-third-text-color text-sm">文章</div>
+    </a>
+</div>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+		</div>
+
+		<div class="main-content-body transition-fade-up">
+			
+
+			<div class="main-content">
+				<div class="post-page-container flex relative justify-between box-border w-full h-full">
+	<div class="article-content-container">
+
+		<div class="article-title relative w-full">
+			
+			
+			
+			<img src="/images/meta-insider-20260323-cover.jpg" alt="元内参 | 霍尔穆兹48小时倒计时、Musk $250亿造芯、Cursor套壳风波" class="w-full h-60 sm:h-72 md:h-80 object-cover sm:rounded-t-large dark:brightness-75" />
+			
+			<div class="w-full flex items-center absolute bottom-0 justify-start">
+				<h1 class="article-title-cover text-center mx-6 my-6 text-second-text-color bg-background-color-transparent px-4 py-3 text-3xl sm:text-4xl md:text-5xl font-semibold backdrop-blur-lg rounded-xl border border-border-color ">元内参 | 霍尔穆兹48小时倒计时、Musk $250亿造芯、Cursor套壳风波</h1>
+			</div>
+			
+		</div>
+
+		
+		<div class="article-header flex flex-row gap-2 items-center px-2 sm:px-6 md:px-8">
+			<div class="avatar w-[46px] h-[46px] flex-shrink-0 rounded-medium border border-border-color p-[1px]">
+				<img src="/images/avatar.png">
+			</div>
+			<div class="info flex flex-col justify-between">
+				<div class="author flex items-center">
+					<span class="name text-default-text-color text-lg font-semibold">Nathan</span>
+					
+				</div>
+				<div class="meta-info">
+					<div class="article-meta-info">
+    <span class="article-date article-meta-item">
+        <i class="fa-regular fa-pen-fancy"></i>&nbsp;
+        <span class="desktop">2026-03-23 07:00</span>
+        <span class="mobile">2026-03-23 07:00</span>
+        <span class="hover-info">创建</span>
+    </span>
+    
+        <span class="article-date article-meta-item">
+            <i class="fa-regular fa-wrench"></i>&nbsp;
+            <span class="desktop">2026-03-23 07:03:55</span>
+            <span class="mobile">2026-03-23 07:03:55</span>
+            <span class="hover-info">更新</span>
+        </span>
+    
+
+    
+        <span class="article-categories article-meta-item">
+            <i class="fa-regular fa-folders"></i>&nbsp;
+            <ul>
+                
+                
+                    
+                        
+                        <li>
+                            <a href="/categories/%E6%B7%B1%E5%BA%A6%E5%88%86%E6%9E%90/">深度分析</a>&nbsp;
+                        </li>
+                    
+                    
+                
+            </ul>
+        </span>
+    
+    
+        <span class="article-tags article-meta-item">
+            <i class="fa-regular fa-tags"></i>&nbsp;
+            <ul>
+                
+                    <li>
+                        <a href="/tags/AI%E7%BC%96%E7%A8%8B/">AI编程</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/%E6%8A%95%E8%B5%84/">投资</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/%E5%9C%B0%E7%BC%98%E6%94%BF%E6%B2%BB/">地缘政治</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/%E8%8A%AF%E7%89%87%E5%88%B6%E9%80%A0/">芯片制造</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/%E4%BA%91%E8%AE%A1%E7%AE%97/">云计算</a>&nbsp;
+                    </li>
+                
+            </ul>
+        </span>
+    
+
+    
+    
+        <span class="article-wordcount article-meta-item">
+            <i class="fa-regular fa-typewriter"></i>&nbsp;<span>2.6k 字</span>
+        </span>
+    
+    
+        <span class="article-min2read article-meta-item">
+            <i class="fa-regular fa-clock"></i>&nbsp;<span>8 分钟</span>
+        </span>
+    
+    
+</div>
+
+				</div>
+			</div>
+		</div>
+		
+
+		
+
+
+		<div class="article-content markdown-body px-2 sm:px-6 md:px-8 pb-8">
+			<p>三月的最后一个周一，世界正站在几个重大十字路口上：中东的炮火逼近全球油价命门，硅谷的芯片野心正在重新洗牌，而AI编程赛道的一场信任危机，则暴露了行业增长光环下的暗流。</p>
+<hr>
+<h2 id="🔥-一、霍尔穆兹海峡48小时倒计时：全球能源的达摩克利斯之剑"><a href="#🔥-一、霍尔穆兹海峡48小时倒计时：全球能源的达摩克利斯之剑" class="headerlink" title="🔥 一、霍尔穆兹海峡48小时倒计时：全球能源的达摩克利斯之剑"></a>🔥 一、霍尔穆兹海峡48小时倒计时：全球能源的达摩克利斯之剑</h2><p><strong>关注等级：⭐⭐⭐⭐⭐</strong></p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/meta-insider-20260323-hormuz.jpg"
+                      alt="霍尔穆兹海峡危机"
+                ></p>
+<p>特朗普周六在Truth Social上发出了迄今为止最强硬的最后通牒：<strong>伊朗必须在48小时内全面重新开放霍尔穆兹海峡，否则美国将”摧毁”其全部能源基础设施。</strong></p>
+<p>这不是普通的外交施压。霍尔穆兹海峡承载着全球约20%的石油和液化天然气运输量。伊朗的回应同样强硬——声称海峡”对所有非敌国船只开放”，但实际上绝大多数商船已经因恐惧袭击而绕行。</p>
+<p>与此同时，伊朗对以色列发动了有史以来最具破坏力的导弹攻击。<strong>导弹绕过了以色列的防空系统，在核设施附近的迪莫纳和阿拉德造成180人受伤</strong>——这让以色列不得不重新评估自己的防御体系是否真的固若金汤。</p>
+<p>以色列随即对德黑兰发动了新一轮空袭。BBC分析指出，伊朗对美以基地造成的损害已达<strong>8亿美元</strong>。油价分析师警告，如果局势进一步恶化，油价可能飙升至<strong>每桶180美元</strong>。</p>
+<p>36氪热搜中”伊朗战事持续或致油价升至180美元”赫然在列，说明中国市场对能源冲击的敏感度正在急剧上升。</p>
+<blockquote>
+<p>📈 <strong>投资视角：</strong> 能源股短期看涨，但不确定性极高。关注替代航运路线受益方（好望角绕行的航运公司）、防务板块、以及中国战略石油储备释放的时间窗口。对冲基金正在大举买入原油看涨期权——但48小时后，一切都可能反转。</p>
+</blockquote>
+<hr>
+<h2 id="🏭-二、Musk的Terafab：250亿美元芯片豪赌，是远见还是狂想？"><a href="#🏭-二、Musk的Terafab：250亿美元芯片豪赌，是远见还是狂想？" class="headerlink" title="🏭 二、Musk的Terafab：250亿美元芯片豪赌，是远见还是狂想？"></a>🏭 二、Musk的Terafab：250亿美元芯片豪赌，是远见还是狂想？</h2><p><strong>关注等级：⭐⭐⭐⭐⭐</strong></p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/meta-insider-20260323-terafab.jpg"
+                      alt="Terafab芯片工厂"
+                ></p>
+<p>马斯克这个周末正式揭晓了他酝酿已久的大计划：<strong>Terafab</strong>——一座由Tesla和SpaceX联合运营的芯片制造工厂，选址德克萨斯州奥斯汀，投资规模高达<strong>250亿美元</strong>。</p>
+<p>这座工厂的目标是每年生产1000亿到2000亿颗定制AI和存储芯片，服务于三大场景：</p>
+<ul>
+<li><strong>Tesla的全自动驾驶</strong>（FSD）和Cybercab无人出租车</li>
+<li><strong>Optimus人形机器人</strong>的边缘计算</li>
+<li><strong>SpaceX的太空AI卫星</strong>——D3芯片专为轨道环境设计</li>
+</ul>
+<p>马斯克表示，AI5芯片的小批量生产将在2026年启动，量产要等到2027年。</p>
+<p>但Electrek的分析毫不客气地指出：**这”散发着绝望的气息”**。马斯克的承诺记录并不出色（记得Roadster 2.0吗？），而且芯片制造是一个需要极端精密和长期积累的领域。台积电花了几十年才做到今天的位置，Musk想在两年内从零开始？</p>
+<p>不过，从战略角度看，这个举动的逻辑是成立的。<strong>芯片供应链已经成为AI时代的最大瓶颈</strong>，不管是英伟达的产能紧张，还是地缘政治风险（台海局势），拥有自研芯片能力的公司，将在下一个十年拥有巨大优势。</p>
+<blockquote>
+<p>📈 <strong>投资视角：</strong> 短期对Tesla股价的提振有限——华尔街对马斯克的”画饼”已经产生免疫力。但长期关注芯片设备供应商（ASML、应用材料）在新晶圆厂建设中的订单增量。更值得思考的问题是：如果Musk真的造出了芯片，谁会是输家？答案是英伟达的定价权。</p>
+</blockquote>
+<hr>
+<h2 id="🧩-三、Cursor承认套壳Kimi：AI编程赛道的信任裂痕"><a href="#🧩-三、Cursor承认套壳Kimi：AI编程赛道的信任裂痕" class="headerlink" title="🧩 三、Cursor承认套壳Kimi：AI编程赛道的信任裂痕"></a>🧩 三、Cursor承认套壳Kimi：AI编程赛道的信任裂痕</h2><p><strong>关注等级：⭐⭐⭐⭐</strong></p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/meta-insider-20260323-cursor.jpg"
+                      alt="AI编程工具竞争"
+                ></p>
+<p>估值已达<strong>293亿美元</strong>的AI编程公司Cursor，本周发布了旗舰模型Composer 2，号称拥有”前沿级编码智能”。然而一位X平台用户很快发现：<strong>Composer 2的底层是月之暗面（Moonshot AI）的Kimi模型</strong>。</p>
+<p>Cursor创始人的回应令人大跌眼镜——称”忘记署名了”。尽管公司随后澄清Kimi仅占Composer 2约四分之一的计算量，经过了大量额外训练，但这个事件在开发者社区引发了信任危机。</p>
+<p>知乎热榜上”Cursor被曝套壳国产开源模型Kimi”引爆讨论。更深层的问题是：<strong>在中美AI竞争白热化的当下，一家美国明星公司建立在中国模型之上，这意味着什么？</strong></p>
+<p>Fortune的报道则指出了更大的隐忧：Anthropic的Claude Code正在迅速崛起，凭借3800亿美元的资金支持，可能很快取代Cursor的市场地位。WSJ甚至将这场竞争定义为”万亿美元自动化竞赛”。</p>
+<p>AI编程赛道正在经历一场残酷的洗牌。Cursor、Claude Code、GitHub Copilot三强格局尚未稳定，而底层模型的”黑箱”问题正在成为新的监管焦点。</p>
+<blockquote>
+<p>📈 <strong>投资视角：</strong> Cursor的私募估值可能面临下调压力。关注Anthropic（背后的Google和Salesforce）以及微软在GitHub Copilot上的持续投入。对开发者工具赛道的投资逻辑没有改变——AI编程是确定性最高的应用场景之一，但押注在哪家公司上，现在变得更加微妙。</p>
+</blockquote>
+<hr>
+<h2 id="💾-四、Amazon-Trainium的逆袭：从追赶者到”AI芯片新宠”"><a href="#💾-四、Amazon-Trainium的逆袭：从追赶者到”AI芯片新宠”" class="headerlink" title="💾 四、Amazon Trainium的逆袭：从追赶者到”AI芯片新宠”"></a>💾 四、Amazon Trainium的逆袭：从追赶者到”AI芯片新宠”</h2><p><strong>关注等级：⭐⭐⭐⭐</strong></p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/meta-insider-20260323-trainium.jpg"
+                      alt="Amazon Trainium芯片实验室"
+                ></p>
+<p>在英伟达和Musk抢占芯片头条的同时，亚马逊正在悄悄改变游戏规则。</p>
+<p>TechCrunch获得独家邀请参观了<strong>Amazon Trainium芯片实验室</strong>——这是AWS 500亿美元投资OpenAI交易的核心资产。令人惊讶的是，Trainium不仅赢得了OpenAI的青睐，还拿下了<strong>Anthropic和Apple</strong>。</p>
+<p>OpenAI已承诺通过AWS基础设施消耗<strong>2GW的Trainium算力</strong>。这意味着：在AI训练芯片市场，英伟达的统治地位正在被打破——不是被另一家芯片公司，而是被一家云计算巨头。</p>
+<p>亚马逊的策略很聪明：不跟英伟达比通用GPU性能，而是提供<strong>深度集成的全栈方案</strong>——芯片+云+服务，以极具竞争力的价格绑定大客户。当你的芯片客户同时也是你的云客户时，切换成本就变得极高。</p>
+<blockquote>
+<p>📈 <strong>投资视角：</strong> Amazon（AMZN）在AI基础设施上的布局被市场严重低估。Trainium的成功不只是芯片故事——它是AWS飞轮效应的又一个加速器。关注AWS在下一季财报中的AI相关收入增速。</p>
+</blockquote>
+<hr>
+<h2 id="🎮-五、英伟达GTC：一万亿美元的AI豪言与华尔街的冷眼"><a href="#🎮-五、英伟达GTC：一万亿美元的AI豪言与华尔街的冷眼" class="headerlink" title="🎮 五、英伟达GTC：一万亿美元的AI豪言与华尔街的冷眼"></a>🎮 五、英伟达GTC：一万亿美元的AI豪言与华尔街的冷眼</h2><p><strong>关注等级：⭐⭐⭐⭐</strong></p>
+<p>黄仁勋穿着标志性的皮夹克，在GTC大会上做了长达两个半小时的主题演讲，核心数字是：<strong>到2027年，AI芯片销售额将达到1万亿美元</strong>。</p>
+<p>他发布了下一代数据中心平台<strong>Vera Rubin</strong>和GPU架构<strong>Rubin Ultra</strong>，宣称量子计算将成为AI的下一个增长引擎，还搬出了一个由机器人操控的”雪宝”（Olaf）来展示AI在机器人领域的潜力——尽管这个演示最后因为太过冗长被掐了麦。</p>
+<p>但华尔街并不买账。英伟达股价在GTC期间不升反降。投资者的核心担忧是：<strong>AI泡沫的风险正在上升</strong>。当一家公司的估值建立在”所有公司都需要AI战略”这个假设上时，任何需求放缓的信号都可能引发雪崩。</p>
+<blockquote>
+<p>📈 <strong>投资视角：</strong> 英伟达依然是AI基础设施的王者，但4万亿美元的市值已经price in了大量乐观预期。短期不建议追高，等待回调或下一季财报验证需求趋势。关注其在量子计算领域的布局——这可能是下一个故事的起点。</p>
+</blockquote>
+<hr>
+<h2 id="📡-六、本周值得追踪的产业动态"><a href="#📡-六、本周值得追踪的产业动态" class="headerlink" title="📡 六、本周值得追踪的产业动态"></a>📡 六、本周值得追踪的产业动态</h2><h3 id="🇺🇸-美国"><a href="#🇺🇸-美国" class="headerlink" title="🇺🇸 美国"></a>🇺🇸 美国</h3><table>
+<thead>
+<tr>
+<th>事件</th>
+<th>要点</th>
+<th>影响</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>🏛️ DHS部分关停持续</td>
+<td>TSA安检员无薪工作，特朗普令ICE特工进驻机场</td>
+<td>航空旅客体验恶化，政治博弈加剧</td>
+</tr>
+<tr>
+<td>⚖️ 马斯克误导Twitter投资者</td>
+<td>旧金山陪审团裁定Musk在收购期间误导投资者</td>
+<td>可能面临巨额赔偿，X平台估值承压</td>
+</tr>
+<tr>
+<td>🎬 出版社撤回疑似AI生成小说</td>
+<td>Hachette拒绝出版恐怖小说《Shy Girl》</td>
+<td>AI内容审查进入出版业，版权问题升温</td>
+</tr>
+<tr>
+<td>🏛️ 五角大楼媒体限制违宪</td>
+<td>联邦法官裁定国防部新闻规则违反第一修正案</td>
+<td>新闻自由保障的重要判例</td>
+</tr>
+<tr>
+<td>📱 微软回撤Copilot AI膨胀</td>
+<td>Windows系统中Copilot入口减少</td>
+<td>承认AI功能过度推送导致用户反感</td>
+</tr>
+</tbody></table>
+<h3 id="🇨🇳-中国"><a href="#🇨🇳-中国" class="headerlink" title="🇨🇳 中国"></a>🇨🇳 中国</h3><table>
+<thead>
+<tr>
+<th>事件</th>
+<th>要点</th>
+<th>影响</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>🤖 宇树科技IPO来袭</td>
+<td>年收入17亿，人形机器人占比超50%</td>
+<td>中国机器人赛道迎来标杆上市</td>
+</tr>
+<tr>
+<td>🧠 阿里&#x2F;Kimi&#x2F;蚂蚁押注混合注意力</td>
+<td>混合注意力机制从”可选”变”必选”</td>
+<td>AI大模型架构演进方向明确</td>
+</tr>
+<tr>
+<td>💊 腾讯盯上创新药</td>
+<td>腾讯加码医药领域投资</td>
+<td>科技巨头跨界医疗再添新兵</td>
+</tr>
+<tr>
+<td>🎭 “男二以下全换AI”引热议</td>
+<td>影视行业AI替代讨论白热化</td>
+<td>配音演员集体维权，文创AI伦理争议</td>
+</tr>
+<tr>
+<td>🏠 深圳西安保租房降价50%</td>
+<td>政策性住房大幅降低租金</td>
+<td>租房市场格局可能重塑</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="📅-本周关键日历"><a href="#📅-本周关键日历" class="headerlink" title="📅 本周关键日历"></a>📅 本周关键日历</h2><table>
+<thead>
+<tr>
+<th>日期</th>
+<th>事件</th>
+<th>关注度</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>3&#x2F;23（周一）</td>
+<td>🔴 特朗普对伊朗48小时最后通牒到期倒计时</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td>3&#x2F;23（周一）</td>
+<td>🇮🇹 意大利司法改革公投结果揭晓</td>
+<td>⭐⭐⭐</td>
+</tr>
+<tr>
+<td>3&#x2F;25-31</td>
+<td>🛒 Amazon Big Spring Sale 大促</td>
+<td>⭐⭐⭐</td>
+</tr>
+<tr>
+<td>3&#x2F;26（周三）</td>
+<td>🏏 巴基斯坦PSL在石油危机下空场开赛</td>
+<td>⭐⭐</td>
+</tr>
+<tr>
+<td>本周</td>
+<td>🇺🇦 美国-乌克兰佛罗里达谈判</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td>本周</td>
+<td>📊 各大科技公司GTC后续动态跟进</td>
+<td>⭐⭐⭐</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>以上内容基于公开信息整理分析，不构成投资建议。</em></p>
+
+		</div>
+
+		
+		<div class="post-copyright-info w-full my-8 px-2 sm:px-6 md:px-8">
+			<div class="article-copyright-info-container">
+    <ul>
+        <li><strong>标题:</strong> 元内参 | 霍尔穆兹48小时倒计时、Musk $250亿造芯、Cursor套壳风波</li>
+        <li><strong>作者:</strong> Nathan</li>
+        <li><strong>创建于
+                :</strong> 2026-03-23 07:00:00</li>
+        
+            <li>
+                <strong>更新于
+                    :</strong> 2026-03-23 07:03:55
+            </li>
+        
+        <li>
+            <strong>链接:</strong> https://hydraxman.github.io/2026/03/23/tech-briefing-2026-03-23/
+        </li>
+        <li>
+            <strong>
+                版权声明:
+            </strong>
+            
+
+            
+                本文章采用 <a class="license" target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0">CC BY-NC-SA 4.0</a> 进行许可。
+            
+        </li>
+    </ul>
+</div>
+
+		</div>
+		
+
+		
+		<ul class="post-tags-box text-lg mt-1.5 flex-wrap justify-center flex md:hidden">
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/AI%E7%BC%96%E7%A8%8B/">#AI编程</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/%E6%8A%95%E8%B5%84/">#投资</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/%E5%9C%B0%E7%BC%98%E6%94%BF%E6%B2%BB/">#地缘政治</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/%E8%8A%AF%E7%89%87%E5%88%B6%E9%80%A0/">#芯片制造</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/%E4%BA%91%E8%AE%A1%E7%AE%97/">#云计算</a>&nbsp;
+			</li>
+			
+		</ul>
+		
+
+		
+
+		
+		<div class="article-nav my-8 flex justify-between items-center px-2 sm:px-6 md:px-8">
+			
+			
+			<div class="article-next border-border-color shadow-redefine-flat shadow-shadow-color-2 rounded-medium px-4 py-2 hover:shadow-redefine-flat-hover hover:shadow-shadow-color-2">
+				<a class="next" rel="next" href="/2026/03/22/github-trending/2026-03-22/">
+					<span class="title flex justify-center items-center">
+						<span class="post-nav-title-item truncate max-w-48">GitHub Trending 日报：2026年3月22日最火的开源项目深度解析</span>
+						<span class="post-nav-item">下一篇</span>
+					</span>
+					<span class="right arrow-icon flex justify-center items-center">
+						<i class="fa-solid fa-chevron-right"></i>
+					</span>
+				</a>
+			</div>
+			
+		</div>
+		
+
+
+		
+	</div>
+
+	
+	<div class="toc-content-container">
+		<div class="post-toc-wrap">
+	<div class="post-toc">
+		<div class="toc-title">目录</div>
+		<div class="page-title">元内参 | 霍尔穆兹48小时倒计时、Musk $250亿造芯、Cursor套壳风波</div>
+		<ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%F0%9F%94%A5-%E4%B8%80%E3%80%81%E9%9C%8D%E5%B0%94%E7%A9%86%E5%85%B9%E6%B5%B7%E5%B3%A148%E5%B0%8F%E6%97%B6%E5%80%92%E8%AE%A1%E6%97%B6%EF%BC%9A%E5%85%A8%E7%90%83%E8%83%BD%E6%BA%90%E7%9A%84%E8%BE%BE%E6%91%A9%E5%85%8B%E5%88%A9%E6%96%AF%E4%B9%8B%E5%89%91"><span class="nav-text">🔥 一、霍尔穆兹海峡48小时倒计时：全球能源的达摩克利斯之剑</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%F0%9F%8F%AD-%E4%BA%8C%E3%80%81Musk%E7%9A%84Terafab%EF%BC%9A250%E4%BA%BF%E7%BE%8E%E5%85%83%E8%8A%AF%E7%89%87%E8%B1%AA%E8%B5%8C%EF%BC%8C%E6%98%AF%E8%BF%9C%E8%A7%81%E8%BF%98%E6%98%AF%E7%8B%82%E6%83%B3%EF%BC%9F"><span class="nav-text">🏭 二、Musk的Terafab：250亿美元芯片豪赌，是远见还是狂想？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%F0%9F%A7%A9-%E4%B8%89%E3%80%81Cursor%E6%89%BF%E8%AE%A4%E5%A5%97%E5%A3%B3Kimi%EF%BC%9AAI%E7%BC%96%E7%A8%8B%E8%B5%9B%E9%81%93%E7%9A%84%E4%BF%A1%E4%BB%BB%E8%A3%82%E7%97%95"><span class="nav-text">🧩 三、Cursor承认套壳Kimi：AI编程赛道的信任裂痕</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%F0%9F%92%BE-%E5%9B%9B%E3%80%81Amazon-Trainium%E7%9A%84%E9%80%86%E8%A2%AD%EF%BC%9A%E4%BB%8E%E8%BF%BD%E8%B5%B6%E8%80%85%E5%88%B0%E2%80%9DAI%E8%8A%AF%E7%89%87%E6%96%B0%E5%AE%A0%E2%80%9D"><span class="nav-text">💾 四、Amazon Trainium的逆袭：从追赶者到”AI芯片新宠”</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%F0%9F%8E%AE-%E4%BA%94%E3%80%81%E8%8B%B1%E4%BC%9F%E8%BE%BEGTC%EF%BC%9A%E4%B8%80%E4%B8%87%E4%BA%BF%E7%BE%8E%E5%85%83%E7%9A%84AI%E8%B1%AA%E8%A8%80%E4%B8%8E%E5%8D%8E%E5%B0%94%E8%A1%97%E7%9A%84%E5%86%B7%E7%9C%BC"><span class="nav-text">🎮 五、英伟达GTC：一万亿美元的AI豪言与华尔街的冷眼</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%F0%9F%93%A1-%E5%85%AD%E3%80%81%E6%9C%AC%E5%91%A8%E5%80%BC%E5%BE%97%E8%BF%BD%E8%B8%AA%E7%9A%84%E4%BA%A7%E4%B8%9A%E5%8A%A8%E6%80%81"><span class="nav-text">📡 六、本周值得追踪的产业动态</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%F0%9F%87%BA%F0%9F%87%B8-%E7%BE%8E%E5%9B%BD"><span class="nav-text">🇺🇸 美国</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%F0%9F%87%A8%F0%9F%87%B3-%E4%B8%AD%E5%9B%BD"><span class="nav-text">🇨🇳 中国</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%F0%9F%93%85-%E6%9C%AC%E5%91%A8%E5%85%B3%E9%94%AE%E6%97%A5%E5%8E%86"><span class="nav-text">📅 本周关键日历</span></a></li></ol>
+
+	</div>
+</div>
+	</div>
+	
+</div>
+			</div>
+
+			
+		</div>
+
+		<div class="main-content-footer">
+			<footer class="footer mt-5 py-5 h-auto text-base text-third-text-color relative border-t-2 border-t-border-color">
+    <div class="info-container py-3 text-center">
+        
+        <div class="text-center">
+            &copy;
+            
+              <span>2024</span>
+              -
+            
+            2026&nbsp;&nbsp;<i class="fa-solid fa-heart fa-beat" style="--fa-animation-duration: 0.5s; color: #333"></i>&nbsp;&nbsp;<a href="/">Nathan</a>
+            
+                
+                <p class="post-count space-x-0.5">
+                    <span>
+                        共撰写了 143 篇文章
+                    </span>
+                    
+                        <span>
+                            共 306.9k 字
+                        </span>
+                    
+                </p>
+            
+        </div>
+        
+        <div class="relative text-center lg:absolute lg:left-[20px] lg:top-1/2 lg:-translate-y-1/2 lg:text-left">
+            <span class="lg:block text-sm">由 <?xml version="1.0" encoding="utf-8"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg class="relative top-[2px] inline-block align-baseline" version="1.1" id="圖層_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="1rem" height="1rem" viewBox="0 0 512 512" enable-background="new 0 0 512 512" xml:space="preserve"><path fill="#0E83CD" d="M256.4,25.8l-200,115.5L56,371.5l199.6,114.7l200-115.5l0.4-230.2L256.4,25.8z M349,354.6l-18.4,10.7l-18.6-11V275H200v79.6l-18.4,10.7l-18.6-11v-197l18.5-10.6l18.5,10.8V237h112v-79.6l18.5-10.6l18.5,10.8V354.6z"/></svg><a target="_blank" class="text-base" href="https://hexo.io">Hexo</a> 驱动</span>
+            <span class="text-sm lg:block">主题&nbsp;<a class="text-base" target="_blank" href="https://github.com/EvanNotFound/hexo-theme-redefine">Redefine v2.8.5</a></span>
+        </div>
+        
+        
+            <div>
+                博客已运行 <span class="odometer" id="runtime_days" ></span> 天 <span class="odometer" id="runtime_hours"></span> 小时 <span class="odometer" id="runtime_minutes"></span> 分钟 <span class="odometer" id="runtime_seconds"></span> 秒
+            </div>
+        
+        
+            <script data-swup-reload-script>
+                try {
+                    function odometer_init() {
+                    const elements = document.querySelectorAll('.odometer');
+                    elements.forEach(el => {
+                        new Odometer({
+                            el,
+                            format: '( ddd).dd',
+                            duration: 200
+                        });
+                    });
+                    }
+                    odometer_init();
+                } catch (error) {}
+            </script>
+        
+        
+            
+                
+        
+                
+        
+        
+    </div>  
+</footer>
+		</div>
+	</div>
+
+	
+	<div class="post-tools">
+		<div class="post-tools-container">
+	<ul class="article-tools-list">
+		<!-- TOC aside toggle -->
+		
+		<li class="right-bottom-tools page-aside-toggle">
+			<i class="fa-regular fa-outdent"></i>
+		</li>
+		
+
+		<!-- go comment -->
+		
+	</ul>
+</div>
+	</div>
+	
+
+	<div class="right-side-tools-container">
+		<div class="side-tools-container">
+	<ul class="hidden-tools-list">
+		<li class="right-bottom-tools tool-font-adjust-plus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-plus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-font-adjust-minus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-minus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-dark-light-toggle flex justify-center items-center">
+			<i class="fa-regular fa-moon"></i>
+		</li>
+
+		<!-- rss -->
+		
+
+		
+
+		<li class="right-bottom-tools tool-scroll-to-bottom flex justify-center items-center">
+			<i class="fa-regular fa-arrow-down"></i>
+		</li>
+	</ul>
+
+	<ul class="visible-tools-list">
+		<li class="right-bottom-tools toggle-tools-list flex justify-center items-center">
+			<i class="fa-regular fa-cog fa-spin"></i>
+		</li>
+		
+		<li class="right-bottom-tools tool-scroll-to-top flex justify-center items-center">
+			<i class="arrow-up fas fa-arrow-up"></i>
+			<span class="percent"></span>
+		</li>
+		
+		
+	</ul>
+</div>
+	</div>
+
+	<div class="image-viewer-container">
+	<img src="">
+</div>
+
+	
+	<div class="search-pop-overlay">
+	<div class="popup search-popup">
+		<div class="search-header">
+			<span class="search-input-field-pre">
+				<i class="fa-solid fa-keyboard"></i>
+			</span>
+			<div class="search-input-container">
+				<input autocomplete="off" autocorrect="off" autocapitalize="off" placeholder="站内搜索您需要的内容..." spellcheck="false" type="search" class="search-input">
+			</div>
+			<span class="popup-btn-close">
+				<i class="fa-solid fa-times"></i>
+			</span>
+		</div>
+		<div id="search-result">
+			<div id="no-result">
+				<i class="fa-solid fa-spinner fa-spin-pulse fa-5x fa-fw"></i>
+			</div>
+		</div>
+	</div>
+</div>
+	
+
+</main>
+
+
+
+<script src="/js/build/libs/Swup.min.js"></script>
+
+<script src="/js/build/libs/SwupSlideTheme.min.js"></script>
+
+<script src="/js/build/libs/SwupScriptsPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupProgressPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupScrollPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupPreloadPlugin.min.js"></script>
+
+<script>
+    const swup = new Swup({
+        plugins: [
+            new SwupScriptsPlugin({
+                optin: true,
+            }),
+            new SwupProgressPlugin(),
+            new SwupScrollPlugin({
+                offset: 80,
+            }),
+            new SwupSlideTheme({
+                mainElement: ".main-content-body",
+            }),
+            new SwupPreloadPlugin(),
+        ],
+        containers: ["#swup"],
+    });
+</script>
+
+
+
+
+	
+<script src="/js/build/tools/imageViewer.js" type="module"></script>
+
+<script src="/js/build/utils.js" type="module"></script>
+
+<script src="/js/build/main.js" type="module"></script>
+
+<script src="/js/build/layouts/navbarShrink.js" type="module"></script>
+
+<script src="/js/build/tools/scrollTopBottom.js" type="module"></script>
+
+<script src="/js/build/tools/lightDarkSwitch.js" type="module"></script>
+
+<script src="/js/build/layouts/categoryList.js" type="module"></script>
+
+
+
+    
+<script src="/js/build/tools/localSearch.js" type="module"></script>
+
+
+
+
+    
+<script src="/js/build/tools/codeBlock.js" type="module"></script>
+
+
+
+
+    
+<script src="/js/build/layouts/lazyload.js" type="module"></script>
+
+
+
+
+    
+<script src="/js/build/tools/runtime.js"></script>
+
+    
+<script src="/js/build/libs/odometer.min.js"></script>
+
+    
+<link rel="stylesheet" href="/assets/odometer-theme-minimal.css">
+
+
+
+
+  
+<script src="/js/build/libs/Typed.min.js"></script>
+
+  
+<script src="/js/build/plugins/typed.js" type="module"></script>
+
+
+
+
+
+
+
+
+    
+<script src="/js/build/libs/anime.min.js"></script>
+
+
+
+
+
+    
+<script src="/js/build/tools/tocToggle.js" type="module" data-swup-reload-script=""></script>
+
+<script src="/js/build/layouts/toc.js" type="module" data-swup-reload-script=""></script>
+
+<script src="/js/build/plugins/tabs.js" type="module" data-swup-reload-script=""></script>
+
+
+
+
+<script src="/js/build/libs/moment-with-locales.min.js" data-swup-reload-script=""></script>
+
+
+<script src="/js/build/layouts/essays.js" type="module" data-swup-reload-script=""></script>
+
+
+
+
+
+	
+</body>
+
+</html>
