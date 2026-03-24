@@ -1,0 +1,1187 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="keywords" content="计算机技术, 生活中的胡思乱想">
+    
+    <meta name="author" content="Nathan">
+    
+    <!-- Completely eliminate flash of wrong theme -->
+    <script>
+        (function() {
+            const THEME_KEY = "REDEFINE-THEME-STATUS";
+            const DARK = "dark", LIGHT = "light";
+            
+            // Get preferred theme
+            function getTheme() {
+                try {
+                    const saved = localStorage.getItem(THEME_KEY);
+                    if (saved) {
+                        const { isDark } = JSON.parse(saved);
+                        return isDark ? DARK : LIGHT;
+                    }
+                } catch (e) {}
+                
+                return matchMedia("(prefers-color-scheme: dark)").matches ? DARK : LIGHT;
+            }
+            
+            // Apply theme to document
+            function applyTheme(theme) {
+                const isDark = theme === DARK;
+                const root = document.documentElement;
+                
+                // Set data attribute for CSS variables
+                root.setAttribute("data-theme", theme);
+                
+                // Set classes for compatibility
+                root.classList.add(theme);
+                root.classList.remove(isDark ? LIGHT : DARK);
+                root.style.colorScheme = theme;
+            }
+            
+            // Initial application
+            const theme = getTheme();
+            applyTheme(theme);
+            
+            // Listen for system preference changes
+            matchMedia("(prefers-color-scheme: dark)").addEventListener("change", ({ matches }) => {
+                // Only update if using system preference (no localStorage entry)
+                if (!localStorage.getItem(THEME_KEY)) {
+                    applyTheme(matches ? DARK : LIGHT);
+                }
+            });
+            
+            // Set body classes once DOM is ready
+            if (document.readyState !== "loading") {
+                document.body.classList.add(theme + "-mode");
+            } else {
+                document.addEventListener("DOMContentLoaded", () => {
+                    document.body.classList.add(theme + "-mode");
+                    document.body.classList.remove((theme === DARK ? LIGHT : DARK) + "-mode");
+                });
+            }
+        })();
+    </script>
+    
+    <!-- Critical CSS to prevent flash -->
+    <style>
+        :root[data-theme="dark"] {
+            --background-color: #202124;
+            --background-color-transparent: rgba(32, 33, 36, 0.6);
+            --second-background-color: #2d2e32;
+            --third-background-color: #34353a;
+            --third-background-color-transparent: rgba(32, 33, 36, 0.6);
+            --primary-color: #0066CC;
+            --first-text-color: #ffffff;
+            --second-text-color: #eeeeee;
+            --third-text-color: #bebec6;
+            --fourth-text-color: #999999;
+            --default-text-color: #bebec6;
+            --invert-text-color: #373D3F;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --selection-color: #0066CC;
+            --shadow-color-1: rgba(255, 255, 255, 0.08);
+            --shadow-color-2: rgba(255, 255, 255, 0.05);
+        }
+        
+        :root[data-theme="light"] {
+            --background-color: #fff;
+            --background-color-transparent: rgba(255, 255, 255, 0.6);
+            --second-background-color: #f8f8f8;
+            --third-background-color: #f2f2f2;
+            --third-background-color-transparent: rgba(241, 241, 241, 0.6);
+            --primary-color: #0066CC;
+            --first-text-color: #16171a;
+            --second-text-color: #2f3037;
+            --third-text-color: #5e5e5e;
+            --fourth-text-color: #eeeeee;
+            --default-text-color: #373D3F;
+            --invert-text-color: #bebec6;
+            --border-color: rgba(0, 0, 0, 0.08);
+            --selection-color: #0066CC;
+            --shadow-color-1: rgba(0, 0, 0, 0.08);
+            --shadow-color-2: rgba(0, 0, 0, 0.05);
+        }
+        
+        body {
+            background-color: var(--background-color);
+            color: var(--default-text-color);
+        }
+        
+        /* Apply body classes as soon as DOM is ready */
+        :root[data-theme="dark"] body {
+            background-color: var(--background-color);
+            color: var(--default-text-color);
+        }
+    </style>
+    
+    <!-- preconnect -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    
+    <!--- Seo Part-->
+    
+    <link rel="canonical" href="https://hydraxman.github.io/2026/03/25/tech-briefing-2026-03-25/"/>
+    <meta name="robots" content="index,follow">
+    <meta name="googlebot" content="index,follow">
+    <meta name="revisit-after" content="1 days">
+    
+    
+    
+        
+        <meta name="description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="元内参 | Meta被判赔3.75亿美元、OpenAI关停Sora、Anthropic与五角大楼对峙">
+<meta property="og:url" content="https://hydraxman.github.io/2026/03/25/tech-briefing-2026-03-25/index.html">
+<meta property="og:site_name" content="内森淼文">
+<meta property="og:description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://hydraxman.github.io/images/redefine-og.webp">
+<meta property="article:published_time" content="2026-03-24T23:00:00.000Z">
+<meta property="article:modified_time" content="2026-03-24T23:03:28.139Z">
+<meta property="article:author" content="Nathan">
+<meta property="article:tag" content="AI">
+<meta property="article:tag" content="Anthropic">
+<meta property="article:tag" content="OpenAI">
+<meta property="article:tag" content="Meta">
+<meta property="article:tag" content="科技产业">
+<meta property="article:tag" content="Epic Games">
+<meta property="article:tag" content="小米">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://hydraxman.github.io/images/redefine-og.webp">
+    
+    
+    <!--- Icon Part-->
+    <link rel="icon" type="image/png" href="/images/favicon.svg" sizes="192x192">
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.svg">
+    <meta name="theme-color" content="#ffffff">
+    <link rel="shortcut icon" href="/images/favicon.svg">
+    <!--- Page Info-->
+    
+    <title>
+        
+            元内参 | Meta被判赔3.75亿美元、OpenAI关停Sora、Anthropic与五角大楼对峙 | 内森淼文
+        
+    </title>
+
+    
+<link rel="stylesheet" href="/fonts/Chillax/chillax.css">
+
+
+    <!--- Inject Part-->
+    
+        
+            
+    
+            
+    
+            
+                
+                    <link rel="stylesheet" href="/css/custom.css">
+                
+    
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    
+        
+<link rel="stylesheet" href="/css/build/tailwind.css">
+
+    
+
+    
+<link rel="stylesheet" href="/fonts/GeistMono/geist-mono.css">
+
+    
+<link rel="stylesheet" href="/fonts/Geist/geist.css">
+
+    <!--- Font Part-->
+    
+    
+    
+    
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&display=swap" rel="stylesheet">
+    
+    
+
+    <script id="hexo-configurations">
+    window.config = {"hostname":"hydraxman.github.io","root":"/","language":"zh-CN","path":"search.json"};
+    window.theme = {"articles":{"style":{"font_size":"16px","line_height":1.5,"image_border_radius":"14px","image_alignment":"center","image_caption":false,"link_icon":true,"delete_mask":false,"title_alignment":"left","headings_top_spacing":{"h1":"3.2rem","h2":"2.4rem","h3":"1.9rem","h4":"1.6rem","h5":"1.4rem","h6":"1.3rem"}},"word_count":{"enable":true,"count":true,"min2read":true},"author_label":{"enable":false,"auto":false,"list":[]},"code_block":{"copy":true,"style":"mac","highlight_theme":{"light":"github","dark":"vs2015"},"font":{"enable":false,"family":null,"url":null}},"toc":{"enable":true,"max_depth":3,"number":false,"expand":true,"init_open":true},"copyright":{"enable":true,"default":"cc_by_nc_sa"},"lazyload":true,"pangu_js":false,"recommendation":{"enable":false,"title":"推荐阅读","limit":3,"mobile_limit":2,"placeholder":"/images/wallhaven-wqery6-light.webp","skip_dirs":[]}},"colors":{"primary":"#ffffff","secondary":null,"default_mode":"light"},"global":{"fonts":{"chinese":{"enable":false,"family":null,"url":null},"english":{"enable":true,"family":"Inter","url":"https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"},"title":{"enable":true,"family":"Noto Serif","url":"https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&display=swap"}},"content_max_width":"1000px","sidebar_width":"210px","hover":{"shadow":true,"scale":false},"scroll_progress":{"bar":true,"percentage":true},"website_counter":{"url":"https://cn.vercount.one/js","enable":false,"site_pv":true,"site_uv":true,"post_pv":true},"single_page":true,"preloader":{"enable":false,"custom_message":null},"side_tools":{"gear_rotation":true,"auto_expand":false},"open_graph":{"enable":true,"image":"/images/redefine-og.webp","description":"Hexo Theme Redefine, Redefine Your Hexo Journey."},"google_analytics":{"enable":false,"id":null}},"home_banner":{"enable":true,"style":"fixed","image":{"light":"/images/banner-light.jpg","dark":"/images/banner-dark.jpg"},"title":"内森淼文","subtitle":{"text":["AI · 编程 · 科技见闻","Write Code, Read World"],"hitokoto":{"enable":false,"show_author":false,"api":"https://v1.hitokoto.cn"},"typing_speed":100,"backing_speed":80,"starting_delay":500,"backing_delay":1500,"loop":true,"smart_backspace":true},"text_color":{"light":"#fff","dark":"#d1d1b6"},"text_style":{"title_size":"2.8rem","subtitle_size":"1.5rem","line_height":1.2},"custom_font":{"enable":false,"family":null,"url":null},"social_links":{"enable":true,"style":"default","links":{"github":"https://github.com/hydraxman","instagram":null,"zhihu":null,"twitter":null,"email":null},"qrs":{"weixin":null}}},"plugins":{"feed":{"enable":false},"aplayer":{"enable":false,"type":"fixed","audios":[{"name":null,"artist":null,"url":null,"cover":null,"lrc":null}]},"mermaid":{"enable":false,"version":"11.4.1"}},"version":"2.8.5","navbar":{"auto_hide":false,"color":{"left":"#333333","right":"#555555","transparency":35},"width":{"home":"1200px","pages":"1000px"},"links":{"Home":{"path":"/","icon":"fa-regular fa-house"},"Archives":{"path":"/archives","icon":"fa-regular fa-archive"},"Categories":{"path":"/categories","icon":"fa-regular fa-folder"},"Tags":{"path":"/tags","icon":"fa-regular fa-tags"},"About":{"path":"/about","icon":"fa-regular fa-user"}},"search":{"enable":true,"preload":true}},"page_templates":{"friends_column":2,"tags_style":"blur"},"home":{"sidebar":{"enable":true,"position":"left","first_item":"menu","announcement":"AI · 编程 · 科技","show_on_mobile":true,"links":{"Archives":{"path":"/archives","icon":"fa-regular fa-archive"},"Tags":{"path":"/tags","icon":"fa-regular fa-tags"},"Categories":{"path":"/categories","icon":"fa-regular fa-folder"}}},"article_date_format":"auto","excerpt_length":200,"categories":{"enable":true,"limit":3},"tags":{"enable":true,"limit":3}},"footerStart":"2024/01/01 00:00:00"};
+    window.lang_ago = {"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"};
+    window.data = {"masonry":false};
+  </script>
+    
+    <!--- Fontawesome Part-->
+    
+<link rel="stylesheet" href="/fontawesome/fontawesome.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/brands.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/solid.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/regular.min.css">
+
+    
+    
+    
+    
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+
+<body>
+	<div class="progress-bar-container">
+	
+	<span class="scroll-progress-bar"></span>
+	
+
+	
+	<span class="pjax-progress-bar"></span>
+	<!--        <span class="swup-progress-icon">-->
+	<!--            <i class="fa-solid fa-circle-notch fa-spin"></i>-->
+	<!--        </span>-->
+	
+</div>
+
+<main class="page-container" id="swup">
+
+	
+
+	<div class="main-content-container flex flex-col justify-between min-h-dvh">
+		<div class="main-content-header">
+			<header class="navbar-container px-6 md:px-12">
+    <div class="navbar-content transition-navbar ">
+        <div class="left">
+            
+            <a class="logo-title" href="/">
+                
+                内森淼文
+                
+            </a>
+        </div>
+
+        <div class="right">
+            <!-- PC -->
+            <div class="desktop">
+                <ul class="navbar-list">
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/"
+                                        >
+                                    <i class="fa-regular fa-house fa-fw"></i>
+                                    首页
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/archives"
+                                        >
+                                    <i class="fa-regular fa-archive fa-fw"></i>
+                                    归档
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/categories"
+                                        >
+                                    <i class="fa-regular fa-folder fa-fw"></i>
+                                    分类
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/tags"
+                                        >
+                                    <i class="fa-regular fa-tags fa-fw"></i>
+                                    标签
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/about"
+                                        >
+                                    <i class="fa-regular fa-user fa-fw"></i>
+                                    关于
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                    
+                        <li class="navbar-item search search-popup-trigger">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </li>
+                    
+                </ul>
+            </div>
+            <!-- Mobile -->
+            <div class="mobile">
+                
+                    <div class="icon-item search search-popup-trigger"><i class="fa-solid fa-magnifying-glass"></i>
+                    </div>
+                
+                <div class="icon-item navbar-bar">
+                    <div class="navbar-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile sheet -->
+    <div class="navbar-drawer h-dvh w-full absolute top-0 left-0 bg-background-color flex flex-col justify-between">
+        <ul class="drawer-navbar-list flex flex-col px-4 justify-center items-start">
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/"
+                        >
+                            <span>
+                                首页
+                            </span>
+                            
+                                <i class="fa-regular fa-house fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/archives"
+                        >
+                            <span>
+                                归档
+                            </span>
+                            
+                                <i class="fa-regular fa-archive fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/categories"
+                        >
+                            <span>
+                                分类
+                            </span>
+                            
+                                <i class="fa-regular fa-folder fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/tags"
+                        >
+                            <span>
+                                标签
+                            </span>
+                            
+                                <i class="fa-regular fa-tags fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/about"
+                        >
+                            <span>
+                                关于
+                            </span>
+                            
+                                <i class="fa-regular fa-user fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+
+            
+            
+                
+                    
+                    
+                    
+            
+        </ul>
+
+        <div class="statistics flex justify-around my-2.5">
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/tags">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">251</div>
+        <div class="label text-third-text-color text-sm">标签</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/categories">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">8</div>
+        <div class="label text-third-text-color text-sm">分类</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/archives">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">148</div>
+        <div class="label text-third-text-color text-sm">文章</div>
+    </a>
+</div>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+		</div>
+
+		<div class="main-content-body transition-fade-up">
+			
+
+			<div class="main-content">
+				<div class="post-page-container flex relative justify-between box-border w-full h-full">
+	<div class="article-content-container">
+
+		<div class="article-title relative w-full">
+			
+			
+			
+			<img src="/images/meta-insider-20260325-cover.jpg" alt="元内参 | Meta被判赔3.75亿美元、OpenAI关停Sora、Anthropic与五角大楼对峙" class="w-full h-60 sm:h-72 md:h-80 object-cover sm:rounded-t-large dark:brightness-75" />
+			
+			<div class="w-full flex items-center absolute bottom-0 justify-start">
+				<h1 class="article-title-cover text-center mx-6 my-6 text-second-text-color bg-background-color-transparent px-4 py-3 text-3xl sm:text-4xl md:text-5xl font-semibold backdrop-blur-lg rounded-xl border border-border-color ">元内参 | Meta被判赔3.75亿美元、OpenAI关停Sora、Anthropic与五角大楼对峙</h1>
+			</div>
+			
+		</div>
+
+		
+		<div class="article-header flex flex-row gap-2 items-center px-2 sm:px-6 md:px-8">
+			<div class="avatar w-[46px] h-[46px] flex-shrink-0 rounded-medium border border-border-color p-[1px]">
+				<img src="/images/avatar.png">
+			</div>
+			<div class="info flex flex-col justify-between">
+				<div class="author flex items-center">
+					<span class="name text-default-text-color text-lg font-semibold">Nathan</span>
+					
+				</div>
+				<div class="meta-info">
+					<div class="article-meta-info">
+    <span class="article-date article-meta-item">
+        <i class="fa-regular fa-pen-fancy"></i>&nbsp;
+        <span class="desktop">2026-03-25 07:00</span>
+        <span class="mobile">2026-03-25 07:00</span>
+        <span class="hover-info">创建</span>
+    </span>
+    
+        <span class="article-date article-meta-item">
+            <i class="fa-regular fa-wrench"></i>&nbsp;
+            <span class="desktop">2026-03-25 07:03:28</span>
+            <span class="mobile">2026-03-25 07:03:28</span>
+            <span class="hover-info">更新</span>
+        </span>
+    
+
+    
+        <span class="article-categories article-meta-item">
+            <i class="fa-regular fa-folders"></i>&nbsp;
+            <ul>
+                
+                
+                    
+                        
+                        <li>
+                            <a href="/categories/%E6%B7%B1%E5%BA%A6%E5%88%86%E6%9E%90/">深度分析</a>&nbsp;
+                        </li>
+                    
+                    
+                
+            </ul>
+        </span>
+    
+    
+        <span class="article-tags article-meta-item">
+            <i class="fa-regular fa-tags"></i>&nbsp;
+            <ul>
+                
+                    <li>
+                        <a href="/tags/AI/">AI</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/Anthropic/">Anthropic</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/OpenAI/">OpenAI</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/Meta/">Meta</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/%E7%A7%91%E6%8A%80%E4%BA%A7%E4%B8%9A/">科技产业</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/Epic-Games/">Epic Games</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/%E5%B0%8F%E7%B1%B3/">小米</a>&nbsp;
+                    </li>
+                
+            </ul>
+        </span>
+    
+
+    
+    
+        <span class="article-wordcount article-meta-item">
+            <i class="fa-regular fa-typewriter"></i>&nbsp;<span>2k 字</span>
+        </span>
+    
+    
+        <span class="article-min2read article-meta-item">
+            <i class="fa-regular fa-clock"></i>&nbsp;<span>6 分钟</span>
+        </span>
+    
+    
+</div>
+
+				</div>
+			</div>
+		</div>
+		
+
+		
+
+
+		<div class="article-content markdown-body px-2 sm:px-6 md:px-8 pb-8">
+			<p>今天的科技世界，三件事同时发出同一个信号：<strong>规则正在被重写。</strong> Meta被新墨西哥州陪审团判赔3.75亿美元，因为它在儿童安全上撒了谎；OpenAI突然关停了仅上线六个月的Sora视频平台，迪士尼同时撤回10亿美元投资；而Anthropic正站在联邦法院里，与五角大楼就AI产业的未来进行一场关键较量。三个方向，同一个主题——科技公司的”快速行动，打破常规”时代，正在被追究代价。</p>
+<hr>
+<h2 id="🔥-一、Meta被判赔3-75亿美元：儿童安全不再是公关话术"><a href="#🔥-一、Meta被判赔3-75亿美元：儿童安全不再是公关话术" class="headerlink" title="🔥 一、Meta被判赔3.75亿美元：儿童安全不再是公关话术"></a>🔥 一、Meta被判赔3.75亿美元：儿童安全不再是公关话术</h2><p><strong>关注等级：⭐⭐⭐⭐⭐</strong></p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/meta-insider-20260325-meta.jpg"
+                      alt="Meta儿童安全诉讼"
+                ></p>
+<p>新墨西哥州陪审团昨日做出历史性裁决：<strong>Meta违反了该州消费者保护法</strong>，在明知其平台被用于儿童性剥削的情况下隐瞒信息，刻意误导用户关于产品安全性的认知。3.75亿美元的赔偿金额虽然对Meta的现金储备来说是小数目，但这个判决的真正杀伤力在别处。</p>
+<p>这是<strong>首个由州级陪审团而非监管机构做出的</strong>针对社交平台儿童安全的有罪裁决。新墨西哥州总检察长Raúl Torrez将其定性为”为每一个因Meta的逐利选择而付出代价的孩子和家庭赢得的历史性胜利”。与此同时，洛杉矶的另一个陪审团仍在审议Meta社交平台是否对儿童具有成瘾性——如果该案也判Meta败诉，将形成从东到西的判例合围。</p>
+<p>更关键的是信号效应。Meta的辩护策略——“我们已经投入数十亿改善安全”——被陪审团彻底否决。这意味着**”投入资源”不等于”尽到责任”**，未来科技公司在用户安全问题上的法律标准将被显著提高。</p>
+<blockquote>
+<p>📈 <strong>投资视角：</strong> Meta股价短期承压有限，但长期来看，监管成本上升将成为整个社交媒体板块的结构性风险。关注TikTok、Snap等平台是否面临类似诉讼——这是一个板块级风险重定价的开始。</p>
+</blockquote>
+<hr>
+<h2 id="🎬-二、OpenAI关停Sora：AI视频梦碎好莱坞"><a href="#🎬-二、OpenAI关停Sora：AI视频梦碎好莱坞" class="headerlink" title="🎬 二、OpenAI关停Sora：AI视频梦碎好莱坞"></a>🎬 二、OpenAI关停Sora：AI视频梦碎好莱坞</h2><p><strong>关注等级：⭐⭐⭐⭐⭐</strong></p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/meta-insider-20260325-sora.jpg"
+                      alt="Sora关停"
+                ></p>
+<p>距离2024年底轰动上线仅六个月，OpenAI昨日宣布<strong>关停Sora视频生成平台</strong>。更具冲击力的是配套消息：<strong>迪士尼同时撤回了10亿美元的投资计划</strong>以及一份三年期授权协议——该协议原本允许Sora生成迪士尼、漫威、皮克斯和星球大战角色的视频内容。</p>
+<p>CEO Sam Altman没有给出关停的具体原因，但背景清晰：好莱坞对AI视频工具的敌意从未消散。版权侵犯的争议、对人类创作者岗位的替代恐惧，加上Sora视频在真实商业环境中的”不够用”——尝鲜期过后，用户留存率远低于预期。</p>
+<p>从商业角度看，这更像是一次<strong>战略止损</strong>。OpenAI正在将计算资源集中到更有盈利前景的方向——企业级API服务和ChatGPT订阅。Sora每月消耗的GPU资源巨大，但营收贡献微薄。在IPO预期日益明确的当下，砍掉”烧钱但不赚钱”的产品线是理性选择。</p>
+<p>但这对整个AI视频赛道的信号是沉重的：<strong>如果连OpenAI都做不下去，谁能？</strong> Runway、Pika、Kling等竞品需要重新审视自己的商业模式。</p>
+<blockquote>
+<p>📈 <strong>投资视角：</strong> AI视频赛道的融资窗口可能急剧收窄。但逆向思考——Sora的退出反而为垂直化、小而美的AI视频工具留出了空间。关注那些专注特定行业（如广告、教育、游戏）而非通用创作的公司。</p>
+</blockquote>
+<hr>
+<h2 id="⚖️-三、Anthropic-vs-五角大楼：AI产业最关键的法律战"><a href="#⚖️-三、Anthropic-vs-五角大楼：AI产业最关键的法律战" class="headerlink" title="⚖️ 三、Anthropic vs 五角大楼：AI产业最关键的法律战"></a>⚖️ 三、Anthropic vs 五角大楼：AI产业最关键的法律战</h2><p><strong>关注等级：⭐⭐⭐⭐</strong></p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/meta-insider-20260325-anthropic.jpg"
+                      alt="Anthropic法律战"
+                ></p>
+<p>联邦法官在Anthropic与五角大楼的诉讼中表态：五角大楼”试图削弱”Anthropic的做法”令人不安”。这场对峙的细节仍在保密中，但核心矛盾已经清晰——<strong>军方希望获得对前沿AI模型的更大控制权，而Anthropic坚持其”负责任AI”的底线。</strong></p>
+<p>与此同时，Anthropic在产品层面继续激进推进。昨日发布的Claude Code更新赋予了AI agent更大的计算机控制权——可以自主打开文件、操作浏览器、运行开发工具，同时设置了”安全围栏”来限制高风险操作。这个”放权但设限”的思路，恰好也是它与五角大楼博弈的隐喻。</p>
+<p>对整个AI产业来说，这场官司的结果将设定一个关键先例：<strong>AI公司是否有权拒绝政府&#x2F;军方的使用需求？</strong> 如果Anthropic败诉，所有AI公司的”可接受使用政策”都将变成一纸空文。</p>
+<blockquote>
+<p>📈 <strong>投资视角：</strong> Anthropic的估值短期可能承压，但”坚持原则”的品牌形象在企业客户中反而是加分项。关注这场官司的判决——它将决定AI公司在政府合同中的议价权。</p>
+</blockquote>
+<hr>
+<h2 id="🎮-四、Epic裁员1000人：《堡垒之夜》的黄昏"><a href="#🎮-四、Epic裁员1000人：《堡垒之夜》的黄昏" class="headerlink" title="🎮 四、Epic裁员1000人：《堡垒之夜》的黄昏"></a>🎮 四、Epic裁员1000人：《堡垒之夜》的黄昏</h2><p><strong>关注等级：⭐⭐⭐⭐</strong></p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/meta-insider-20260325-epic.jpg"
+                      alt="Epic裁员"
+                ></p>
+<p>Tim Sweeney罕见地坦诚：**”堡垒之夜参与度的下滑意味着我们的支出远超收入。”** Epic Games昨日裁员超过1000人，同时宣布削减5亿美元成本。</p>
+<p>这不仅仅是一家公司的困境。堡垒之夜曾是”游戏即平台”理念的最佳范例——虚拟演唱会、品牌联动、UGC内容——但当核心玩家流失，这一切都无法持续。大逃杀品类的整体市场萎缩已是事实，Epic需要找到新的增长引擎。</p>
+<p>Sweeney可能寄希望于Unreal Engine 6和Epic Games Store的长期布局，但短期内，这是一次痛苦的瘦身。</p>
+<blockquote>
+<p>📈 <strong>投资视角：</strong> Epic仍是私有公司，但其估值下调将影响腾讯等持股方的账面价值。游戏行业的”超级周期”正在结束，关注那些成功从单一爆款转型为平台型公司的案例。</p>
+</blockquote>
+<hr>
+<h2 id="📡-五、今日值得追踪的产业动态"><a href="#📡-五、今日值得追踪的产业动态" class="headerlink" title="📡 五、今日值得追踪的产业动态"></a>📡 五、今日值得追踪的产业动态</h2><h3 id="🇺🇸-美国"><a href="#🇺🇸-美国" class="headerlink" title="🇺🇸 美国"></a>🇺🇸 美国</h3><table>
+<thead>
+<tr>
+<th>事件</th>
+<th>要点</th>
+<th>影响</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>🏠 肯塔基女性拒绝2600万美元出售农场给数据中心</td>
+<td>AI基建扩张遭遇”不卖”抵抗</td>
+<td>数据中心选址成本上升</td>
+</tr>
+<tr>
+<td>🔒 开源供应链攻击：自传播恶意软件感染多个OSS项目</td>
+<td>Trivy扫描工具也被攻陷</td>
+<td>软件供应链安全再敲警钟</td>
+</tr>
+<tr>
+<td>🚗 Google Android Automotive从仪表盘扩展到汽车”大脑”</td>
+<td>车载OS战争升级</td>
+<td>与苹果CarPlay和华为HarmonyOS竞争白热化</td>
+</tr>
+<tr>
+<td>🌐 美国禁止使用外国制造路由器</td>
+<td>国家安全考量，影响TP-Link等品牌</td>
+<td>网络设备供应链重构</td>
+</tr>
+</tbody></table>
+<h3 id="🇨🇳-中国"><a href="#🇨🇳-中国" class="headerlink" title="🇨🇳 中国"></a>🇨🇳 中国</h3><table>
+<thead>
+<tr>
+<th>事件</th>
+<th>要点</th>
+<th>影响</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>📱 小米2025年调整后净利润391.7亿元，同比增43.8%</td>
+<td>汽车+IoT双轮驱动</td>
+<td>新SU7上市72小时锁单超3万台</td>
+</tr>
+<tr>
+<td>🚀 太空加油站取得新进展</td>
+<td>在轨加注技术突破</td>
+<td>深空探测商业化关键一步</td>
+</tr>
+<tr>
+<td>🔧 智界R7 896线版发布即交付</td>
+<td>华为智驾技术持续落地</td>
+<td>智能驾驶竞争加剧</td>
+</tr>
+<tr>
+<td>📱 手机全面涨价，供应链压力传导</td>
+<td>芯片和关税双重因素</td>
+<td>消费电子行业利润率受考验</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="📅-本周关键日历"><a href="#📅-本周关键日历" class="headerlink" title="📅 本周关键日历"></a>📅 本周关键日历</h2><table>
+<thead>
+<tr>
+<th>日期</th>
+<th>事件</th>
+<th>关注度</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>3&#x2F;25 周三</td>
+<td>洛杉矶Meta儿童成瘾案陪审团继续审议</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td>3&#x2F;25 周三</td>
+<td>Anthropic vs 五角大楼案后续听证</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td>3&#x2F;26 周四</td>
+<td>小米新SU7交付数据更新</td>
+<td>⭐⭐⭐</td>
+</tr>
+<tr>
+<td>3&#x2F;27 周五</td>
+<td>美国Q4 GDP终值公布</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td>3&#x2F;28 周六</td>
+<td>OpenAI Sora正式下线</td>
+<td>⭐⭐⭐</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>以上内容基于公开信息整理分析，不构成投资建议。</em></p>
+
+		</div>
+
+		
+		<div class="post-copyright-info w-full my-8 px-2 sm:px-6 md:px-8">
+			<div class="article-copyright-info-container">
+    <ul>
+        <li><strong>标题:</strong> 元内参 | Meta被判赔3.75亿美元、OpenAI关停Sora、Anthropic与五角大楼对峙</li>
+        <li><strong>作者:</strong> Nathan</li>
+        <li><strong>创建于
+                :</strong> 2026-03-25 07:00:00</li>
+        
+            <li>
+                <strong>更新于
+                    :</strong> 2026-03-25 07:03:28
+            </li>
+        
+        <li>
+            <strong>链接:</strong> https://hydraxman.github.io/2026/03/25/tech-briefing-2026-03-25/
+        </li>
+        <li>
+            <strong>
+                版权声明:
+            </strong>
+            
+
+            
+                本文章采用 <a class="license" target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0">CC BY-NC-SA 4.0</a> 进行许可。
+            
+        </li>
+    </ul>
+</div>
+
+		</div>
+		
+
+		
+		<ul class="post-tags-box text-lg mt-1.5 flex-wrap justify-center flex md:hidden">
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/AI/">#AI</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/Anthropic/">#Anthropic</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/OpenAI/">#OpenAI</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/Meta/">#Meta</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/%E7%A7%91%E6%8A%80%E4%BA%A7%E4%B8%9A/">#科技产业</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/Epic-Games/">#Epic Games</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/%E5%B0%8F%E7%B1%B3/">#小米</a>&nbsp;
+			</li>
+			
+		</ul>
+		
+
+		
+
+		
+		<div class="article-nav my-8 flex justify-between items-center px-2 sm:px-6 md:px-8">
+			
+			
+			<div class="article-next border-border-color shadow-redefine-flat shadow-shadow-color-2 rounded-medium px-4 py-2 hover:shadow-redefine-flat-hover hover:shadow-shadow-color-2">
+				<a class="next" rel="next" href="/2026/03/24/github-trending/2026-03-24/">
+					<span class="title flex justify-center items-center">
+						<span class="post-nav-title-item truncate max-w-48">GitHub Trending 日报：2026年3月24日最火的 10 个开源项目深度解析</span>
+						<span class="post-nav-item">下一篇</span>
+					</span>
+					<span class="right arrow-icon flex justify-center items-center">
+						<i class="fa-solid fa-chevron-right"></i>
+					</span>
+				</a>
+			</div>
+			
+		</div>
+		
+
+
+		
+	</div>
+
+	
+	<div class="toc-content-container">
+		<div class="post-toc-wrap">
+	<div class="post-toc">
+		<div class="toc-title">目录</div>
+		<div class="page-title">元内参 | Meta被判赔3.75亿美元、OpenAI关停Sora、Anthropic与五角大楼对峙</div>
+		<ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%F0%9F%94%A5-%E4%B8%80%E3%80%81Meta%E8%A2%AB%E5%88%A4%E8%B5%943-75%E4%BA%BF%E7%BE%8E%E5%85%83%EF%BC%9A%E5%84%BF%E7%AB%A5%E5%AE%89%E5%85%A8%E4%B8%8D%E5%86%8D%E6%98%AF%E5%85%AC%E5%85%B3%E8%AF%9D%E6%9C%AF"><span class="nav-text">🔥 一、Meta被判赔3.75亿美元：儿童安全不再是公关话术</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%F0%9F%8E%AC-%E4%BA%8C%E3%80%81OpenAI%E5%85%B3%E5%81%9CSora%EF%BC%9AAI%E8%A7%86%E9%A2%91%E6%A2%A6%E7%A2%8E%E5%A5%BD%E8%8E%B1%E5%9D%9E"><span class="nav-text">🎬 二、OpenAI关停Sora：AI视频梦碎好莱坞</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E2%9A%96%EF%B8%8F-%E4%B8%89%E3%80%81Anthropic-vs-%E4%BA%94%E8%A7%92%E5%A4%A7%E6%A5%BC%EF%BC%9AAI%E4%BA%A7%E4%B8%9A%E6%9C%80%E5%85%B3%E9%94%AE%E7%9A%84%E6%B3%95%E5%BE%8B%E6%88%98"><span class="nav-text">⚖️ 三、Anthropic vs 五角大楼：AI产业最关键的法律战</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%F0%9F%8E%AE-%E5%9B%9B%E3%80%81Epic%E8%A3%81%E5%91%981000%E4%BA%BA%EF%BC%9A%E3%80%8A%E5%A0%A1%E5%9E%92%E4%B9%8B%E5%A4%9C%E3%80%8B%E7%9A%84%E9%BB%84%E6%98%8F"><span class="nav-text">🎮 四、Epic裁员1000人：《堡垒之夜》的黄昏</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%F0%9F%93%A1-%E4%BA%94%E3%80%81%E4%BB%8A%E6%97%A5%E5%80%BC%E5%BE%97%E8%BF%BD%E8%B8%AA%E7%9A%84%E4%BA%A7%E4%B8%9A%E5%8A%A8%E6%80%81"><span class="nav-text">📡 五、今日值得追踪的产业动态</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%F0%9F%87%BA%F0%9F%87%B8-%E7%BE%8E%E5%9B%BD"><span class="nav-text">🇺🇸 美国</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%F0%9F%87%A8%F0%9F%87%B3-%E4%B8%AD%E5%9B%BD"><span class="nav-text">🇨🇳 中国</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%F0%9F%93%85-%E6%9C%AC%E5%91%A8%E5%85%B3%E9%94%AE%E6%97%A5%E5%8E%86"><span class="nav-text">📅 本周关键日历</span></a></li></ol>
+
+	</div>
+</div>
+	</div>
+	
+</div>
+			</div>
+
+			
+		</div>
+
+		<div class="main-content-footer">
+			<footer class="footer mt-5 py-5 h-auto text-base text-third-text-color relative border-t-2 border-t-border-color">
+    <div class="info-container py-3 text-center">
+        
+        <div class="text-center">
+            &copy;
+            
+              <span>2024</span>
+              -
+            
+            2026&nbsp;&nbsp;<i class="fa-solid fa-heart fa-beat" style="--fa-animation-duration: 0.5s; color: #333"></i>&nbsp;&nbsp;<a href="/">Nathan</a>
+            
+                
+                <p class="post-count space-x-0.5">
+                    <span>
+                        共撰写了 148 篇文章
+                    </span>
+                    
+                        <span>
+                            共 315.8k 字
+                        </span>
+                    
+                </p>
+            
+        </div>
+        
+        <div class="relative text-center lg:absolute lg:left-[20px] lg:top-1/2 lg:-translate-y-1/2 lg:text-left">
+            <span class="lg:block text-sm">由 <?xml version="1.0" encoding="utf-8"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg class="relative top-[2px] inline-block align-baseline" version="1.1" id="圖層_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="1rem" height="1rem" viewBox="0 0 512 512" enable-background="new 0 0 512 512" xml:space="preserve"><path fill="#0E83CD" d="M256.4,25.8l-200,115.5L56,371.5l199.6,114.7l200-115.5l0.4-230.2L256.4,25.8z M349,354.6l-18.4,10.7l-18.6-11V275H200v79.6l-18.4,10.7l-18.6-11v-197l18.5-10.6l18.5,10.8V237h112v-79.6l18.5-10.6l18.5,10.8V354.6z"/></svg><a target="_blank" class="text-base" href="https://hexo.io">Hexo</a> 驱动</span>
+            <span class="text-sm lg:block">主题&nbsp;<a class="text-base" target="_blank" href="https://github.com/EvanNotFound/hexo-theme-redefine">Redefine v2.8.5</a></span>
+        </div>
+        
+        
+            <div>
+                博客已运行 <span class="odometer" id="runtime_days" ></span> 天 <span class="odometer" id="runtime_hours"></span> 小时 <span class="odometer" id="runtime_minutes"></span> 分钟 <span class="odometer" id="runtime_seconds"></span> 秒
+            </div>
+        
+        
+            <script data-swup-reload-script>
+                try {
+                    function odometer_init() {
+                    const elements = document.querySelectorAll('.odometer');
+                    elements.forEach(el => {
+                        new Odometer({
+                            el,
+                            format: '( ddd).dd',
+                            duration: 200
+                        });
+                    });
+                    }
+                    odometer_init();
+                } catch (error) {}
+            </script>
+        
+        
+            
+                
+        
+                
+        
+        
+    </div>  
+</footer>
+		</div>
+	</div>
+
+	
+	<div class="post-tools">
+		<div class="post-tools-container">
+	<ul class="article-tools-list">
+		<!-- TOC aside toggle -->
+		
+		<li class="right-bottom-tools page-aside-toggle">
+			<i class="fa-regular fa-outdent"></i>
+		</li>
+		
+
+		<!-- go comment -->
+		
+	</ul>
+</div>
+	</div>
+	
+
+	<div class="right-side-tools-container">
+		<div class="side-tools-container">
+	<ul class="hidden-tools-list">
+		<li class="right-bottom-tools tool-font-adjust-plus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-plus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-font-adjust-minus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-minus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-dark-light-toggle flex justify-center items-center">
+			<i class="fa-regular fa-moon"></i>
+		</li>
+
+		<!-- rss -->
+		
+
+		
+
+		<li class="right-bottom-tools tool-scroll-to-bottom flex justify-center items-center">
+			<i class="fa-regular fa-arrow-down"></i>
+		</li>
+	</ul>
+
+	<ul class="visible-tools-list">
+		<li class="right-bottom-tools toggle-tools-list flex justify-center items-center">
+			<i class="fa-regular fa-cog fa-spin"></i>
+		</li>
+		
+		<li class="right-bottom-tools tool-scroll-to-top flex justify-center items-center">
+			<i class="arrow-up fas fa-arrow-up"></i>
+			<span class="percent"></span>
+		</li>
+		
+		
+	</ul>
+</div>
+	</div>
+
+	<div class="image-viewer-container">
+	<img src="">
+</div>
+
+	
+	<div class="search-pop-overlay">
+	<div class="popup search-popup">
+		<div class="search-header">
+			<span class="search-input-field-pre">
+				<i class="fa-solid fa-keyboard"></i>
+			</span>
+			<div class="search-input-container">
+				<input autocomplete="off" autocorrect="off" autocapitalize="off" placeholder="站内搜索您需要的内容..." spellcheck="false" type="search" class="search-input">
+			</div>
+			<span class="popup-btn-close">
+				<i class="fa-solid fa-times"></i>
+			</span>
+		</div>
+		<div id="search-result">
+			<div id="no-result">
+				<i class="fa-solid fa-spinner fa-spin-pulse fa-5x fa-fw"></i>
+			</div>
+		</div>
+	</div>
+</div>
+	
+
+</main>
+
+
+
+<script src="/js/build/libs/Swup.min.js"></script>
+
+<script src="/js/build/libs/SwupSlideTheme.min.js"></script>
+
+<script src="/js/build/libs/SwupScriptsPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupProgressPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupScrollPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupPreloadPlugin.min.js"></script>
+
+<script>
+    const swup = new Swup({
+        plugins: [
+            new SwupScriptsPlugin({
+                optin: true,
+            }),
+            new SwupProgressPlugin(),
+            new SwupScrollPlugin({
+                offset: 80,
+            }),
+            new SwupSlideTheme({
+                mainElement: ".main-content-body",
+            }),
+            new SwupPreloadPlugin(),
+        ],
+        containers: ["#swup"],
+    });
+</script>
+
+
+
+
+	
+<script src="/js/build/tools/imageViewer.js" type="module"></script>
+
+<script src="/js/build/utils.js" type="module"></script>
+
+<script src="/js/build/main.js" type="module"></script>
+
+<script src="/js/build/layouts/navbarShrink.js" type="module"></script>
+
+<script src="/js/build/tools/scrollTopBottom.js" type="module"></script>
+
+<script src="/js/build/tools/lightDarkSwitch.js" type="module"></script>
+
+<script src="/js/build/layouts/categoryList.js" type="module"></script>
+
+
+
+    
+<script src="/js/build/tools/localSearch.js" type="module"></script>
+
+
+
+
+    
+<script src="/js/build/tools/codeBlock.js" type="module"></script>
+
+
+
+
+    
+<script src="/js/build/layouts/lazyload.js" type="module"></script>
+
+
+
+
+    
+<script src="/js/build/tools/runtime.js"></script>
+
+    
+<script src="/js/build/libs/odometer.min.js"></script>
+
+    
+<link rel="stylesheet" href="/assets/odometer-theme-minimal.css">
+
+
+
+
+  
+<script src="/js/build/libs/Typed.min.js"></script>
+
+  
+<script src="/js/build/plugins/typed.js" type="module"></script>
+
+
+
+
+
+
+
+
+    
+<script src="/js/build/libs/anime.min.js"></script>
+
+
+
+
+
+    
+<script src="/js/build/tools/tocToggle.js" type="module" data-swup-reload-script=""></script>
+
+<script src="/js/build/layouts/toc.js" type="module" data-swup-reload-script=""></script>
+
+<script src="/js/build/plugins/tabs.js" type="module" data-swup-reload-script=""></script>
+
+
+
+
+<script src="/js/build/libs/moment-with-locales.min.js" data-swup-reload-script=""></script>
+
+
+<script src="/js/build/layouts/essays.js" type="module" data-swup-reload-script=""></script>
+
+
+
+
+
+	
+</body>
+
+</html>
