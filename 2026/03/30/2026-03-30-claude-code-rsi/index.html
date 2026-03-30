@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="keywords" content="计算机技术, 生活中的胡思乱想">
+    
+    <meta name="author" content="Nathan">
+    
+    <!-- Completely eliminate flash of wrong theme -->
+    <script>
+        (function() {
+            const THEME_KEY = "REDEFINE-THEME-STATUS";
+            const DARK = "dark", LIGHT = "light";
+            
+            // Get preferred theme
+            function getTheme() {
+                try {
+                    const saved = localStorage.getItem(THEME_KEY);
+                    if (saved) {
+                        const { isDark } = JSON.parse(saved);
+                        return isDark ? DARK : LIGHT;
+                    }
+                } catch (e) {}
+                
+                return matchMedia("(prefers-color-scheme: dark)").matches ? DARK : LIGHT;
+            }
+            
+            // Apply theme to document
+            function applyTheme(theme) {
+                const isDark = theme === DARK;
+                const root = document.documentElement;
+                
+                // Set data attribute for CSS variables
+                root.setAttribute("data-theme", theme);
+                
+                // Set classes for compatibility
+                root.classList.add(theme);
+                root.classList.remove(isDark ? LIGHT : DARK);
+                root.style.colorScheme = theme;
+            }
+            
+            // Initial application
+            const theme = getTheme();
+            applyTheme(theme);
+            
+            // Listen for system preference changes
+            matchMedia("(prefers-color-scheme: dark)").addEventListener("change", ({ matches }) => {
+                // Only update if using system preference (no localStorage entry)
+                if (!localStorage.getItem(THEME_KEY)) {
+                    applyTheme(matches ? DARK : LIGHT);
+                }
+            });
+            
+            // Set body classes once DOM is ready
+            if (document.readyState !== "loading") {
+                document.body.classList.add(theme + "-mode");
+            } else {
+                document.addEventListener("DOMContentLoaded", () => {
+                    document.body.classList.add(theme + "-mode");
+                    document.body.classList.remove((theme === DARK ? LIGHT : DARK) + "-mode");
+                });
+            }
+        })();
+    </script>
+    
+    <!-- Critical CSS to prevent flash -->
+    <style>
+        :root[data-theme="dark"] {
+            --background-color: #202124;
+            --background-color-transparent: rgba(32, 33, 36, 0.6);
+            --second-background-color: #2d2e32;
+            --third-background-color: #34353a;
+            --third-background-color-transparent: rgba(32, 33, 36, 0.6);
+            --primary-color: #0066CC;
+            --first-text-color: #ffffff;
+            --second-text-color: #eeeeee;
+            --third-text-color: #bebec6;
+            --fourth-text-color: #999999;
+            --default-text-color: #bebec6;
+            --invert-text-color: #373D3F;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --selection-color: #0066CC;
+            --shadow-color-1: rgba(255, 255, 255, 0.08);
+            --shadow-color-2: rgba(255, 255, 255, 0.05);
+        }
+        
+        :root[data-theme="light"] {
+            --background-color: #fff;
+            --background-color-transparent: rgba(255, 255, 255, 0.6);
+            --second-background-color: #f8f8f8;
+            --third-background-color: #f2f2f2;
+            --third-background-color-transparent: rgba(241, 241, 241, 0.6);
+            --primary-color: #0066CC;
+            --first-text-color: #16171a;
+            --second-text-color: #2f3037;
+            --third-text-color: #5e5e5e;
+            --fourth-text-color: #eeeeee;
+            --default-text-color: #373D3F;
+            --invert-text-color: #bebec6;
+            --border-color: rgba(0, 0, 0, 0.08);
+            --selection-color: #0066CC;
+            --shadow-color-1: rgba(0, 0, 0, 0.08);
+            --shadow-color-2: rgba(0, 0, 0, 0.05);
+        }
+        
+        body {
+            background-color: var(--background-color);
+            color: var(--default-text-color);
+        }
+        
+        /* Apply body classes as soon as DOM is ready */
+        :root[data-theme="dark"] body {
+            background-color: var(--background-color);
+            color: var(--default-text-color);
+        }
+    </style>
+    
+    <!-- preconnect -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    
+    <!--- Seo Part-->
+    
+    <link rel="canonical" href="https://hydraxman.github.io/2026/03/30/2026-03-30-claude-code-rsi/"/>
+    <meta name="robots" content="index,follow">
+    <meta name="googlebot" content="index,follow">
+    <meta name="revisit-after" content="1 days">
+    
+    
+    
+        
+        <meta name="description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Claude Code正在「自己写自己」：从自动修Bug到自主科研，递归自我进化已成现实">
+<meta property="og:url" content="https://hydraxman.github.io/2026/03/30/2026-03-30-claude-code-rsi/index.html">
+<meta property="og:site_name" content="内森淼文">
+<meta property="og:description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://hydraxman.github.io/images/redefine-og.webp">
+<meta property="article:published_time" content="2026-03-30T03:00:00.000Z">
+<meta property="article:modified_time" content="2026-03-30T03:07:50.074Z">
+<meta property="article:author" content="Nathan">
+<meta property="article:tag" content="AI">
+<meta property="article:tag" content="深度分析">
+<meta property="article:tag" content="Claude">
+<meta property="article:tag" content="AI编程">
+<meta property="article:tag" content="Coding Agent">
+<meta property="article:tag" content="Anthropic">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://hydraxman.github.io/images/redefine-og.webp">
+    
+    
+    <!--- Icon Part-->
+    <link rel="icon" type="image/png" href="/images/favicon.svg" sizes="192x192">
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.svg">
+    <meta name="theme-color" content="#ffffff">
+    <link rel="shortcut icon" href="/images/favicon.svg">
+    <!--- Page Info-->
+    
+    <title>
+        
+            Claude Code正在「自己写自己」：从自动修Bug到自主科研，递归自我进化已成现实 | 内森淼文
+        
+    </title>
+
+    
+<link rel="stylesheet" href="/fonts/Chillax/chillax.css">
+
+
+    <!--- Inject Part-->
+    
+        
+            
+    
+            
+    
+            
+                
+                    <link rel="stylesheet" href="/css/custom.css">
+                
+    
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    
+        
+<link rel="stylesheet" href="/css/build/tailwind.css">
+
+    
+
+    
+<link rel="stylesheet" href="/fonts/GeistMono/geist-mono.css">
+
+    
+<link rel="stylesheet" href="/fonts/Geist/geist.css">
+
+    <!--- Font Part-->
+    
+    
+    
+    
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&display=swap" rel="stylesheet">
+    
+    
+
+    <script id="hexo-configurations">
+    window.config = {"hostname":"hydraxman.github.io","root":"/","language":"zh-CN","path":"search.json"};
+    window.theme = {"articles":{"style":{"font_size":"16px","line_height":1.5,"image_border_radius":"14px","image_alignment":"center","image_caption":false,"link_icon":true,"delete_mask":false,"title_alignment":"left","headings_top_spacing":{"h1":"3.2rem","h2":"2.4rem","h3":"1.9rem","h4":"1.6rem","h5":"1.4rem","h6":"1.3rem"}},"word_count":{"enable":true,"count":true,"min2read":true},"author_label":{"enable":false,"auto":false,"list":[]},"code_block":{"copy":true,"style":"mac","highlight_theme":{"light":"github","dark":"vs2015"},"font":{"enable":false,"family":null,"url":null}},"toc":{"enable":true,"max_depth":3,"number":false,"expand":true,"init_open":true},"copyright":{"enable":true,"default":"cc_by_nc_sa"},"lazyload":true,"pangu_js":false,"recommendation":{"enable":false,"title":"推荐阅读","limit":3,"mobile_limit":2,"placeholder":"/images/wallhaven-wqery6-light.webp","skip_dirs":[]}},"colors":{"primary":"#ffffff","secondary":null,"default_mode":"light"},"global":{"fonts":{"chinese":{"enable":false,"family":null,"url":null},"english":{"enable":true,"family":"Inter","url":"https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"},"title":{"enable":true,"family":"Noto Serif","url":"https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&display=swap"}},"content_max_width":"1000px","sidebar_width":"210px","hover":{"shadow":true,"scale":false},"scroll_progress":{"bar":true,"percentage":true},"website_counter":{"url":"https://cn.vercount.one/js","enable":false,"site_pv":true,"site_uv":true,"post_pv":true},"single_page":true,"preloader":{"enable":false,"custom_message":null},"side_tools":{"gear_rotation":true,"auto_expand":false},"open_graph":{"enable":true,"image":"/images/redefine-og.webp","description":"Hexo Theme Redefine, Redefine Your Hexo Journey."},"google_analytics":{"enable":false,"id":null}},"home_banner":{"enable":true,"style":"fixed","image":{"light":"/images/banner-light.jpg","dark":"/images/banner-dark.jpg"},"title":"内森淼文","subtitle":{"text":["AI · 编程 · 科技见闻","Write Code, Read World"],"hitokoto":{"enable":false,"show_author":false,"api":"https://v1.hitokoto.cn"},"typing_speed":100,"backing_speed":80,"starting_delay":500,"backing_delay":1500,"loop":true,"smart_backspace":true},"text_color":{"light":"#fff","dark":"#d1d1b6"},"text_style":{"title_size":"2.8rem","subtitle_size":"1.5rem","line_height":1.2},"custom_font":{"enable":false,"family":null,"url":null},"social_links":{"enable":true,"style":"default","links":{"github":"https://github.com/hydraxman","instagram":null,"zhihu":null,"twitter":null,"email":null},"qrs":{"weixin":null}}},"plugins":{"feed":{"enable":false},"aplayer":{"enable":false,"type":"fixed","audios":[{"name":null,"artist":null,"url":null,"cover":null,"lrc":null}]},"mermaid":{"enable":false,"version":"11.4.1"}},"version":"2.8.5","navbar":{"auto_hide":false,"color":{"left":"#333333","right":"#555555","transparency":35},"width":{"home":"1200px","pages":"1000px"},"links":{"Home":{"path":"/","icon":"fa-regular fa-house"},"Archives":{"path":"/archives","icon":"fa-regular fa-archive"},"Categories":{"path":"/categories","icon":"fa-regular fa-folder"},"Tags":{"path":"/tags","icon":"fa-regular fa-tags"},"About":{"path":"/about","icon":"fa-regular fa-user"}},"search":{"enable":true,"preload":true}},"page_templates":{"friends_column":2,"tags_style":"blur"},"home":{"sidebar":{"enable":true,"position":"left","first_item":"menu","announcement":"AI · 编程 · 科技","show_on_mobile":true,"links":{"Archives":{"path":"/archives","icon":"fa-regular fa-archive"},"Tags":{"path":"/tags","icon":"fa-regular fa-tags"},"Categories":{"path":"/categories","icon":"fa-regular fa-folder"}}},"article_date_format":"auto","excerpt_length":200,"categories":{"enable":true,"limit":3},"tags":{"enable":true,"limit":3}},"footerStart":"2024/01/01 00:00:00"};
+    window.lang_ago = {"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"};
+    window.data = {"masonry":false};
+  </script>
+    
+    <!--- Fontawesome Part-->
+    
+<link rel="stylesheet" href="/fontawesome/fontawesome.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/brands.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/solid.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/regular.min.css">
+
+    
+    
+    
+    
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+
+<body>
+	<div class="progress-bar-container">
+	
+	<span class="scroll-progress-bar"></span>
+	
+
+	
+	<span class="pjax-progress-bar"></span>
+	<!--        <span class="swup-progress-icon">-->
+	<!--            <i class="fa-solid fa-circle-notch fa-spin"></i>-->
+	<!--        </span>-->
+	
+</div>
+
+<main class="page-container" id="swup">
+
+	
+
+	<div class="main-content-container flex flex-col justify-between min-h-dvh">
+		<div class="main-content-header">
+			<header class="navbar-container px-6 md:px-12">
+    <div class="navbar-content transition-navbar ">
+        <div class="left">
+            
+            <a class="logo-title" href="/">
+                
+                内森淼文
+                
+            </a>
+        </div>
+
+        <div class="right">
+            <!-- PC -->
+            <div class="desktop">
+                <ul class="navbar-list">
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/"
+                                        >
+                                    <i class="fa-regular fa-house fa-fw"></i>
+                                    首页
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/archives"
+                                        >
+                                    <i class="fa-regular fa-archive fa-fw"></i>
+                                    归档
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/categories"
+                                        >
+                                    <i class="fa-regular fa-folder fa-fw"></i>
+                                    分类
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/tags"
+                                        >
+                                    <i class="fa-regular fa-tags fa-fw"></i>
+                                    标签
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/about"
+                                        >
+                                    <i class="fa-regular fa-user fa-fw"></i>
+                                    关于
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                    
+                        <li class="navbar-item search search-popup-trigger">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </li>
+                    
+                </ul>
+            </div>
+            <!-- Mobile -->
+            <div class="mobile">
+                
+                    <div class="icon-item search search-popup-trigger"><i class="fa-solid fa-magnifying-glass"></i>
+                    </div>
+                
+                <div class="icon-item navbar-bar">
+                    <div class="navbar-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile sheet -->
+    <div class="navbar-drawer h-dvh w-full absolute top-0 left-0 bg-background-color flex flex-col justify-between">
+        <ul class="drawer-navbar-list flex flex-col px-4 justify-center items-start">
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/"
+                        >
+                            <span>
+                                首页
+                            </span>
+                            
+                                <i class="fa-regular fa-house fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/archives"
+                        >
+                            <span>
+                                归档
+                            </span>
+                            
+                                <i class="fa-regular fa-archive fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/categories"
+                        >
+                            <span>
+                                分类
+                            </span>
+                            
+                                <i class="fa-regular fa-folder fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/tags"
+                        >
+                            <span>
+                                标签
+                            </span>
+                            
+                                <i class="fa-regular fa-tags fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/about"
+                        >
+                            <span>
+                                关于
+                            </span>
+                            
+                                <i class="fa-regular fa-user fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+
+            
+            
+                
+                    
+                    
+                    
+            
+        </ul>
+
+        <div class="statistics flex justify-around my-2.5">
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/tags">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">258</div>
+        <div class="label text-third-text-color text-sm">标签</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/categories">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">9</div>
+        <div class="label text-third-text-color text-sm">分类</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/archives">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">161</div>
+        <div class="label text-third-text-color text-sm">文章</div>
+    </a>
+</div>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+		</div>
+
+		<div class="main-content-body transition-fade-up">
+			
+
+			<div class="main-content">
+				<div class="post-page-container flex relative justify-between box-border w-full h-full">
+	<div class="article-content-container">
+
+		<div class="article-title relative w-full">
+			
+			
+			
+			<img src="/images/claude-code-rsi/autofix-flow.jpg" alt="Claude Code正在「自己写自己」：从自动修Bug到自主科研，递归自我进化已成现实" class="w-full h-60 sm:h-72 md:h-80 object-cover sm:rounded-t-large dark:brightness-75" />
+			
+			<div class="w-full flex items-center absolute bottom-0 justify-start">
+				<h1 class="article-title-cover text-center mx-6 my-6 text-second-text-color bg-background-color-transparent px-4 py-3 text-3xl sm:text-4xl md:text-5xl font-semibold backdrop-blur-lg rounded-xl border border-border-color ">Claude Code正在「自己写自己」：从自动修Bug到自主科研，递归自我进化已成现实</h1>
+			</div>
+			
+		</div>
+
+		
+		<div class="article-header flex flex-row gap-2 items-center px-2 sm:px-6 md:px-8">
+			<div class="avatar w-[46px] h-[46px] flex-shrink-0 rounded-medium border border-border-color p-[1px]">
+				<img src="/images/avatar.png">
+			</div>
+			<div class="info flex flex-col justify-between">
+				<div class="author flex items-center">
+					<span class="name text-default-text-color text-lg font-semibold">Nathan</span>
+					
+				</div>
+				<div class="meta-info">
+					<div class="article-meta-info">
+    <span class="article-date article-meta-item">
+        <i class="fa-regular fa-pen-fancy"></i>&nbsp;
+        <span class="desktop">2026-03-30 11:00</span>
+        <span class="mobile">2026-03-30 11:00</span>
+        <span class="hover-info">创建</span>
+    </span>
+    
+        <span class="article-date article-meta-item">
+            <i class="fa-regular fa-wrench"></i>&nbsp;
+            <span class="desktop">2026-03-30 11:07:50</span>
+            <span class="mobile">2026-03-30 11:07:50</span>
+            <span class="hover-info">更新</span>
+        </span>
+    
+
+    
+        <span class="article-categories article-meta-item">
+            <i class="fa-regular fa-folders"></i>&nbsp;
+            <ul>
+                
+                
+                    
+                        
+                        <li>
+                            <a href="/categories/%E6%B7%B1%E5%BA%A6%E5%88%86%E6%9E%90/">深度分析</a>&nbsp;
+                        </li>
+                    
+                    
+                
+            </ul>
+        </span>
+    
+    
+        <span class="article-tags article-meta-item">
+            <i class="fa-regular fa-tags"></i>&nbsp;
+            <ul>
+                
+                    <li>
+                        <a href="/tags/AI/">AI</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/%E6%B7%B1%E5%BA%A6%E5%88%86%E6%9E%90/">深度分析</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/Claude/">Claude</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/AI%E7%BC%96%E7%A8%8B/">AI编程</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/Coding-Agent/">Coding Agent</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/Anthropic/">Anthropic</a>&nbsp;
+                    </li>
+                
+            </ul>
+        </span>
+    
+
+    
+    
+        <span class="article-wordcount article-meta-item">
+            <i class="fa-regular fa-typewriter"></i>&nbsp;<span>2k 字</span>
+        </span>
+    
+    
+        <span class="article-min2read article-meta-item">
+            <i class="fa-regular fa-clock"></i>&nbsp;<span>7 分钟</span>
+        </span>
+    
+    
+</div>
+
+				</div>
+			</div>
+		</div>
+		
+
+		
+
+
+		<div class="article-content markdown-body px-2 sm:px-6 md:px-8 pb-8">
+			<p>52天，73个产品。</p>
+<p>这不是哪家创业公司融了十个亿后的疯狂冲刺，而是Anthropic的Claude团队在2026年2月到3月底交出的成绩单。</p>
+<p>更魔幻的是：这些产品中相当一部分，是Claude Code<strong>自己写出来</strong>的。</p>
+<p>Claude Code之父Boris Cherny公开宣称：”我100%的代码都是Claude Code写的。已经好几个月没手动编辑过一行代码了。”他一天提交266个GitHub contribution，而他本人只负责告诉AI”做什么”。</p>
+<p>今天我们来拆解这背后正在发生的事——Claude Code的三个核心能力突破，以及为什么它可能是我们距离”递归自我进化”（RSI）最近的一刻。</p>
+<h2 id="一、云端自动修复：程序员的「摸鱼许可证」"><a href="#一、云端自动修复：程序员的「摸鱼许可证」" class="headerlink" title="一、云端自动修复：程序员的「摸鱼许可证」"></a>一、云端自动修复：程序员的「摸鱼许可证」</h2><p>3月28日，Claude Code上线了一项看起来简单但意义深远的功能：<strong>Cloud Auto-Fix</strong>。</p>
+<p>这是什么概念？以前你提交PR后，CI跑红了，你得：</p>
+<ol>
+<li>打开电脑</li>
+<li>切回分支</li>
+<li>看报错日志</li>
+<li>改代码</li>
+<li>再提交</li>
+<li>等CI重跑</li>
+</ol>
+<p>现在？你提交完PR，关上电脑去喝咖啡。Claude在云端自动监控你的PR，CI一红它就自己分析日志、写修复代码、推到仓库。你回来一看——绿了。</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/claude-code-rsi/autofix-flow.jpg"
+                      alt="Claude Code Auto-Fix 工作流"
+                ></p>
+<p>更关键的是，它不只修CI失败。<strong>Reviewer留的评论意见</strong>，Claude也能自动理解并推送修改。</p>
+<p>有网友精准总结：</p>
+<blockquote>
+<p>“CI从红色变为绿色，全程无人干预。这要么是未来，要么就是恐怖片的开始。”</p>
+</blockquote>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/claude-code-rsi/autofix-announcement.jpg"
+                      alt="Noah Zweben宣布Auto-Fix功能"
+                ></p>
+<h3 id="Auto-Fix不是孤立功能，是一条完整Pipeline"><a href="#Auto-Fix不是孤立功能，是一条完整Pipeline" class="headerlink" title="Auto-Fix不是孤立功能，是一条完整Pipeline"></a>Auto-Fix不是孤立功能，是一条完整Pipeline</h3><p>如果把Claude Code 3月份的更新拼在一起看，你会发现一条从”写代码”到”交付产品”的全自动流水线：</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/claude-code-rsi/timeline.jpg"
+                      alt="Claude Code 3月关键更新时间线"
+                ></p>
+<ul>
+<li><strong>Auto Mode</strong>（3月初）：不再需要逐一审批每个文件写入和命令执行，Claude自动判断安全性</li>
+<li><strong>Computer Use</strong>（3月23日）：Claude可以操控屏幕、点击浏览器和桌面应用，突破纯CLI限制</li>
+<li><strong>Scheduled Tasks</strong>：定时任务，Claude可以在你电脑关机时在云端执行定期工作</li>
+<li><strong>Cloud Auto-Fix</strong>（3月28日）：PR全生命周期自动维护</li>
+</ul>
+<p>把它们串起来：Claude自己写代码 → 自己提PR → 自己跑CI → 自己修Bug → 自己回复Review → 自己合并。</p>
+<p><strong>人类在这条链上的角色，正在从”执行者”变成”审批者”，再变成”旁观者”。</strong></p>
+<h2 id="二、Claudini：AI自主搞科研，56次迭代击败所有基准"><a href="#二、Claudini：AI自主搞科研，56次迭代击败所有基准" class="headerlink" title="二、Claudini：AI自主搞科研，56次迭代击败所有基准"></a>二、Claudini：AI自主搞科研，56次迭代击败所有基准</h2><p>如果说Cloud Auto-Fix是”Claude写代码不需要人”，那Claudini这个项目证明的是——<strong>Claude搞科研也不需要人了</strong>。</p>
+<p>来自ELLIS研究所的科研团队把Claude Code部署在一个自动化科研循环（Autoresearch Loop）中，让它自主寻找新型LLM越狱攻击算法。</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/claude-code-rsi/claudini-paper.jpg"
+                      alt="Claudini论文"
+                ></p>
+<p>这个系统的运作方式极其简洁：</p>
+<ol>
+<li>Claude Code分析现有的GCG类攻击算法</li>
+<li>提出改进假设</li>
+<li>编写实验代码</li>
+<li>运行攻击测试</li>
+<li>分析结果</li>
+<li>迭代改进</li>
+</ol>
+<p>经过约56次迭代，Claudini自主发现了一种新算法，在GPT-OSS-Safeguard的有害查询攻击测试中：</p>
+<ul>
+<li>**验证集攻击成功率(ASR)：40%**，此前所有基准方法最高仅10%</li>
+<li>在Meta-SecAlign-70B上：<strong>100%攻击成功率</strong></li>
+<li><strong>击败了30+种现有GCG类攻击方法</strong></li>
+</ul>
+<p>更值得注意的是Claude在这个过程中表现出的”科研直觉”——它擅长重新组合已有策略、激进调节超参数，并在进展饱和时通过”奖励黑客”（Reward Hacking）方式压榨最后一点性能。</p>
+<p>这不是”AI辅助科研”。这是<strong>AI独立科研</strong>。人类团队的角色退缩到了”搭建框架、启动系统、观察结果”。</p>
+<p>论文作者的结论相当直接：<strong>增量式的安全研究已经可以完全自动化。</strong></p>
+<h2 id="三、数字在尖叫：Claude-Code的RSI飞轮"><a href="#三、数字在尖叫：Claude-Code的RSI飞轮" class="headerlink" title="三、数字在尖叫：Claude Code的RSI飞轮"></a>三、数字在尖叫：Claude Code的RSI飞轮</h2><p>把以上两条线索合在一起，你会看到一个让人既兴奋又不安的闭环：</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/claude-code-rsi/rsi-loop.jpg"
+                      alt="Claude Code 递归自我进化闭环"
+                ></p>
+<p><strong>左半边是产品飞轮</strong>：Claude写代码 → Claude审代码 → Claude修Bug → 发布产品 → 用户反馈 → Claude继续改进。Boris一天266个contribution就是这个飞轮高速运转的证据。</p>
+<p><strong>右半边是安全研究飞轮</strong>：Claude搞攻击研究 → 发现新型越狱方法 → 改进安全防护 → 继续寻找漏洞。Claudini就是这条路径的第一个成果。</p>
+<p>这两个飞轮加在一起，就是教科书上定义的<strong>递归自我进化（Recursive Self-Improvement）</strong>——AI改进AI，改进后的AI再改进自己。</p>
+<p>一些关键数字佐证这个趋势的加速：</p>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>数据</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>52天发布产品数</td>
+<td>73个</td>
+</tr>
+<tr>
+<td>Boris日均提交</td>
+<td>10-30个PR</td>
+</tr>
+<tr>
+<td>Claude Cowork开发时间</td>
+<td>1.5周（全自主）</td>
+</tr>
+<tr>
+<td>Claude Code在GitHub公开提交占比</td>
+<td>4%</td>
+</tr>
+<tr>
+<td>Claude Code年化营收</td>
+<td>逼近$10亿</td>
+</tr>
+<tr>
+<td>Boris手写代码量</td>
+<td>0行（好几个月）</td>
+</tr>
+</tbody></table>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/claude-code-rsi/boris-266-commits.jpg"
+                      alt="Boris一天266个GitHub贡献"
+                ></p>
+<h2 id="四、冷思考：我们该兴奋还是该紧张？"><a href="#四、冷思考：我们该兴奋还是该紧张？" class="headerlink" title="四、冷思考：我们该兴奋还是该紧张？"></a>四、冷思考：我们该兴奋还是该紧张？</h2><h3 id="兴奋的理由"><a href="#兴奋的理由" class="headerlink" title="兴奋的理由"></a>兴奋的理由</h3><p>对开发者来说，Cloud Auto-Fix+Auto Mode的组合确实是”生产力解放”。以我自己用Claude Code的体验——让它写一个功能，提PR，修CI，整个过程如果能全自动化，一个人的产出可以轻松翻5-10倍。</p>
+<p>对科研来说，Claudini证明了AI可以在特定领域完成”从假设到验证”的完整闭环。如果把这个框架推广到药物发现、材料科学、数学证明……可能性是巨大的。</p>
+<h3 id="紧张的理由"><a href="#紧张的理由" class="headerlink" title="紧张的理由"></a>紧张的理由</h3><p><strong>1. 代码质量的黑箱化</strong></p>
+<p>当100%的代码都是AI写的、AI审的、AI修的，谁来保证质量？Anthropic新推出的Code Review功能本身就是为了应对这个问题——Claude Code产出的代码量已经大到造成了review瓶颈。但用AI审AI写的代码……这个循环论证的味道有点重。</p>
+<p><strong>2. Claudini的双刃剑效应</strong></p>
+<p>一个能自动发现越狱漏洞的系统，对防守方是工具，对攻击方也是工具。论文里Claude发现的算法在对抗训练过的模型上达到100%攻击成功率——这意味着当前的安全防线在面对AI级别的攻击者时可能不堪一击。</p>
+<p><strong>3. 商业激励与安全的冲突</strong></p>
+<p>52天73个产品的疯狂节奏，Claude Code年化营收逼近10亿美元——在这种增长压力下，Anthropic有多少空间去放慢脚步、深思安全问题？Claude Code的自主化程度越高、用户依赖越深，”负责任的节制”就越困难。</p>
+<p><strong>4. 程序员角色的根本变化</strong></p>
+<p>Boris说他好几个月没手动编辑一行代码了。当”编程”变成”告诉AI该做什么”，我们训练了20年的工程直觉、Debug本能、代码嗅觉——还有意义吗？</p>
+<p>不是说这些技能会消失。但它们的价值函数正在被重新定义。</p>
+<h2 id="五、关于RSI的终极问题"><a href="#五、关于RSI的终极问题" class="headerlink" title="五、关于RSI的终极问题"></a>五、关于RSI的终极问题</h2><p>2026年3月，可能是AI发展史上的一个微妙拐点。</p>
+<p>Claude Code不是在”辅助”编程了。它在<strong>自己写自己</strong>。它在自己发现漏洞、自己修复漏洞。它在24小时不停地产出代码、产出产品、产出科研成果。</p>
+<p>这还不是真正的AGI或ASI。但”AI改进AI”的飞轮已经转起来了，而且转得越来越快。</p>
+<p>Anthropic的CEO Dario Amodei曾经说，他们的目标是在保证安全的前提下推进AI的边界。但当你的AI产品自己在推进自己的边界时——谁在掌舵？</p>
+<p>面对一个”100%由AI编写”的未来，也许最重要的问题不是技术上能不能做到，而是——<strong>我们准备好了吗？</strong></p>
+<hr>
+<p><strong>参考来源</strong></p>
+<ul>
+<li><a class="link"   target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/bhOht7w17OOYxe7GBCKRkQ" >原文：Claude一夜爆更自修bug，PR自己绿了！<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a>（玩转VS Code &#x2F; 新智元）</li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://www.builder.io/blog/claude-code-updates" >Builder.io: Every Claude Code Update From March 2026<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://www.producthunt.com/products/claude-code-auto-fix-in-the-cloud" >Product Hunt: Claude Code auto-fix<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://arxiv.org/pdf/2603.24511" >Claudini论文: Autoresearch Discovers State-of-the-Art Adversarial Attack Algorithms for LLMs<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+</ul>
+
+		</div>
+
+		
+		<div class="post-copyright-info w-full my-8 px-2 sm:px-6 md:px-8">
+			<div class="article-copyright-info-container">
+    <ul>
+        <li><strong>标题:</strong> Claude Code正在「自己写自己」：从自动修Bug到自主科研，递归自我进化已成现实</li>
+        <li><strong>作者:</strong> Nathan</li>
+        <li><strong>创建于
+                :</strong> 2026-03-30 11:00:00</li>
+        
+            <li>
+                <strong>更新于
+                    :</strong> 2026-03-30 11:07:50
+            </li>
+        
+        <li>
+            <strong>链接:</strong> https://hydraxman.github.io/2026/03/30/2026-03-30-claude-code-rsi/
+        </li>
+        <li>
+            <strong>
+                版权声明:
+            </strong>
+            
+
+            
+                本文章采用 <a class="license" target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0">CC BY-NC-SA 4.0</a> 进行许可。
+            
+        </li>
+    </ul>
+</div>
+
+		</div>
+		
+
+		
+		<ul class="post-tags-box text-lg mt-1.5 flex-wrap justify-center flex md:hidden">
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/AI/">#AI</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/%E6%B7%B1%E5%BA%A6%E5%88%86%E6%9E%90/">#深度分析</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/Claude/">#Claude</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/AI%E7%BC%96%E7%A8%8B/">#AI编程</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/Coding-Agent/">#Coding Agent</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/Anthropic/">#Anthropic</a>&nbsp;
+			</li>
+			
+		</ul>
+		
+
+		
+
+		
+		<div class="article-nav my-8 flex justify-between items-center px-2 sm:px-6 md:px-8">
+			
+			<div class="article-prev border-border-color shadow-redefine-flat shadow-shadow-color-2 rounded-medium px-4 py-2 hover:shadow-redefine-flat-hover hover:shadow-shadow-color-2">
+				<a class="prev" rel="prev" href="/2026/03/30/github-trending/2026-03-30/">
+					<span class="left arrow-icon flex justify-center items-center">
+						<i class="fa-solid fa-chevron-left"></i>
+					</span>
+					<span class="title flex justify-center items-center">
+						<span class="post-nav-title-item truncate max-w-48">GitHub Trending 日报：AI Agent 生态大爆发，今日最火的 10 个开源项目深度解析</span>
+						<span class="post-nav-item">上一篇</span>
+					</span>
+				</a>
+			</div>
+			
+			
+			<div class="article-next border-border-color shadow-redefine-flat shadow-shadow-color-2 rounded-medium px-4 py-2 hover:shadow-redefine-flat-hover hover:shadow-shadow-color-2">
+				<a class="next" rel="next" href="/2026/03/30/2026-03-30-ai-sycophancy-stanford/">
+					<span class="title flex justify-center items-center">
+						<span class="post-nav-title-item truncate max-w-48">AI越讨好你，越害你：Stanford最新研究揭示AI谄媚的真实代价</span>
+						<span class="post-nav-item">下一篇</span>
+					</span>
+					<span class="right arrow-icon flex justify-center items-center">
+						<i class="fa-solid fa-chevron-right"></i>
+					</span>
+				</a>
+			</div>
+			
+		</div>
+		
+
+
+		
+	</div>
+
+	
+	<div class="toc-content-container">
+		<div class="post-toc-wrap">
+	<div class="post-toc">
+		<div class="toc-title">目录</div>
+		<div class="page-title">Claude Code正在「自己写自己」：从自动修Bug到自主科研，递归自我进化已成现实</div>
+		<ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E4%BA%91%E7%AB%AF%E8%87%AA%E5%8A%A8%E4%BF%AE%E5%A4%8D%EF%BC%9A%E7%A8%8B%E5%BA%8F%E5%91%98%E7%9A%84%E3%80%8C%E6%91%B8%E9%B1%BC%E8%AE%B8%E5%8F%AF%E8%AF%81%E3%80%8D"><span class="nav-text">一、云端自动修复：程序员的「摸鱼许可证」</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Auto-Fix%E4%B8%8D%E6%98%AF%E5%AD%A4%E7%AB%8B%E5%8A%9F%E8%83%BD%EF%BC%8C%E6%98%AF%E4%B8%80%E6%9D%A1%E5%AE%8C%E6%95%B4Pipeline"><span class="nav-text">Auto-Fix不是孤立功能，是一条完整Pipeline</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81Claudini%EF%BC%9AAI%E8%87%AA%E4%B8%BB%E6%90%9E%E7%A7%91%E7%A0%94%EF%BC%8C56%E6%AC%A1%E8%BF%AD%E4%BB%A3%E5%87%BB%E8%B4%A5%E6%89%80%E6%9C%89%E5%9F%BA%E5%87%86"><span class="nav-text">二、Claudini：AI自主搞科研，56次迭代击败所有基准</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E6%95%B0%E5%AD%97%E5%9C%A8%E5%B0%96%E5%8F%AB%EF%BC%9AClaude-Code%E7%9A%84RSI%E9%A3%9E%E8%BD%AE"><span class="nav-text">三、数字在尖叫：Claude Code的RSI飞轮</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E5%86%B7%E6%80%9D%E8%80%83%EF%BC%9A%E6%88%91%E4%BB%AC%E8%AF%A5%E5%85%B4%E5%A5%8B%E8%BF%98%E6%98%AF%E8%AF%A5%E7%B4%A7%E5%BC%A0%EF%BC%9F"><span class="nav-text">四、冷思考：我们该兴奋还是该紧张？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B4%E5%A5%8B%E7%9A%84%E7%90%86%E7%94%B1"><span class="nav-text">兴奋的理由</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B4%A7%E5%BC%A0%E7%9A%84%E7%90%86%E7%94%B1"><span class="nav-text">紧张的理由</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%94%E3%80%81%E5%85%B3%E4%BA%8ERSI%E7%9A%84%E7%BB%88%E6%9E%81%E9%97%AE%E9%A2%98"><span class="nav-text">五、关于RSI的终极问题</span></a></li></ol>
+
+	</div>
+</div>
+	</div>
+	
+</div>
+			</div>
+
+			
+		</div>
+
+		<div class="main-content-footer">
+			<footer class="footer mt-5 py-5 h-auto text-base text-third-text-color relative border-t-2 border-t-border-color">
+    <div class="info-container py-3 text-center">
+        
+        <div class="text-center">
+            &copy;
+            
+              <span>2024</span>
+              -
+            
+            2026&nbsp;&nbsp;<i class="fa-solid fa-heart fa-beat" style="--fa-animation-duration: 0.5s; color: #333"></i>&nbsp;&nbsp;<a href="/">Nathan</a>
+            
+                
+                <p class="post-count space-x-0.5">
+                    <span>
+                        共撰写了 161 篇文章
+                    </span>
+                    
+                        <span>
+                            共 337.3k 字
+                        </span>
+                    
+                </p>
+            
+        </div>
+        
+        <div class="relative text-center lg:absolute lg:left-[20px] lg:top-1/2 lg:-translate-y-1/2 lg:text-left">
+            <span class="lg:block text-sm">由 <?xml version="1.0" encoding="utf-8"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg class="relative top-[2px] inline-block align-baseline" version="1.1" id="圖層_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="1rem" height="1rem" viewBox="0 0 512 512" enable-background="new 0 0 512 512" xml:space="preserve"><path fill="#0E83CD" d="M256.4,25.8l-200,115.5L56,371.5l199.6,114.7l200-115.5l0.4-230.2L256.4,25.8z M349,354.6l-18.4,10.7l-18.6-11V275H200v79.6l-18.4,10.7l-18.6-11v-197l18.5-10.6l18.5,10.8V237h112v-79.6l18.5-10.6l18.5,10.8V354.6z"/></svg><a target="_blank" class="text-base" href="https://hexo.io">Hexo</a> 驱动</span>
+            <span class="text-sm lg:block">主题&nbsp;<a class="text-base" target="_blank" href="https://github.com/EvanNotFound/hexo-theme-redefine">Redefine v2.8.5</a></span>
+        </div>
+        
+        
+            <div>
+                博客已运行 <span class="odometer" id="runtime_days" ></span> 天 <span class="odometer" id="runtime_hours"></span> 小时 <span class="odometer" id="runtime_minutes"></span> 分钟 <span class="odometer" id="runtime_seconds"></span> 秒
+            </div>
+        
+        
+            <script data-swup-reload-script>
+                try {
+                    function odometer_init() {
+                    const elements = document.querySelectorAll('.odometer');
+                    elements.forEach(el => {
+                        new Odometer({
+                            el,
+                            format: '( ddd).dd',
+                            duration: 200
+                        });
+                    });
+                    }
+                    odometer_init();
+                } catch (error) {}
+            </script>
+        
+        
+            
+                
+        
+                
+        
+        
+    </div>  
+</footer>
+		</div>
+	</div>
+
+	
+	<div class="post-tools">
+		<div class="post-tools-container">
+	<ul class="article-tools-list">
+		<!-- TOC aside toggle -->
+		
+		<li class="right-bottom-tools page-aside-toggle">
+			<i class="fa-regular fa-outdent"></i>
+		</li>
+		
+
+		<!-- go comment -->
+		
+	</ul>
+</div>
+	</div>
+	
+
+	<div class="right-side-tools-container">
+		<div class="side-tools-container">
+	<ul class="hidden-tools-list">
+		<li class="right-bottom-tools tool-font-adjust-plus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-plus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-font-adjust-minus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-minus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-dark-light-toggle flex justify-center items-center">
+			<i class="fa-regular fa-moon"></i>
+		</li>
+
+		<!-- rss -->
+		
+
+		
+
+		<li class="right-bottom-tools tool-scroll-to-bottom flex justify-center items-center">
+			<i class="fa-regular fa-arrow-down"></i>
+		</li>
+	</ul>
+
+	<ul class="visible-tools-list">
+		<li class="right-bottom-tools toggle-tools-list flex justify-center items-center">
+			<i class="fa-regular fa-cog fa-spin"></i>
+		</li>
+		
+		<li class="right-bottom-tools tool-scroll-to-top flex justify-center items-center">
+			<i class="arrow-up fas fa-arrow-up"></i>
+			<span class="percent"></span>
+		</li>
+		
+		
+	</ul>
+</div>
+	</div>
+
+	<div class="image-viewer-container">
+	<img src="">
+</div>
+
+	
+	<div class="search-pop-overlay">
+	<div class="popup search-popup">
+		<div class="search-header">
+			<span class="search-input-field-pre">
+				<i class="fa-solid fa-keyboard"></i>
+			</span>
+			<div class="search-input-container">
+				<input autocomplete="off" autocorrect="off" autocapitalize="off" placeholder="站内搜索您需要的内容..." spellcheck="false" type="search" class="search-input">
+			</div>
+			<span class="popup-btn-close">
+				<i class="fa-solid fa-times"></i>
+			</span>
+		</div>
+		<div id="search-result">
+			<div id="no-result">
+				<i class="fa-solid fa-spinner fa-spin-pulse fa-5x fa-fw"></i>
+			</div>
+		</div>
+	</div>
+</div>
+	
+
+</main>
+
+
+
+<script src="/js/build/libs/Swup.min.js"></script>
+
+<script src="/js/build/libs/SwupSlideTheme.min.js"></script>
+
+<script src="/js/build/libs/SwupScriptsPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupProgressPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupScrollPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupPreloadPlugin.min.js"></script>
+
+<script>
+    const swup = new Swup({
+        plugins: [
+            new SwupScriptsPlugin({
+                optin: true,
+            }),
+            new SwupProgressPlugin(),
+            new SwupScrollPlugin({
+                offset: 80,
+            }),
+            new SwupSlideTheme({
+                mainElement: ".main-content-body",
+            }),
+            new SwupPreloadPlugin(),
+        ],
+        containers: ["#swup"],
+    });
+</script>
+
+
+
+
+	
+<script src="/js/build/tools/imageViewer.js" type="module"></script>
+
+<script src="/js/build/utils.js" type="module"></script>
+
+<script src="/js/build/main.js" type="module"></script>
+
+<script src="/js/build/layouts/navbarShrink.js" type="module"></script>
+
+<script src="/js/build/tools/scrollTopBottom.js" type="module"></script>
+
+<script src="/js/build/tools/lightDarkSwitch.js" type="module"></script>
+
+<script src="/js/build/layouts/categoryList.js" type="module"></script>
+
+
+
+    
+<script src="/js/build/tools/localSearch.js" type="module"></script>
+
+
+
+
+    
+<script src="/js/build/tools/codeBlock.js" type="module"></script>
+
+
+
+
+    
+<script src="/js/build/layouts/lazyload.js" type="module"></script>
+
+
+
+
+    
+<script src="/js/build/tools/runtime.js"></script>
+
+    
+<script src="/js/build/libs/odometer.min.js"></script>
+
+    
+<link rel="stylesheet" href="/assets/odometer-theme-minimal.css">
+
+
+
+
+  
+<script src="/js/build/libs/Typed.min.js"></script>
+
+  
+<script src="/js/build/plugins/typed.js" type="module"></script>
+
+
+
+
+
+
+
+
+    
+<script src="/js/build/libs/anime.min.js"></script>
+
+
+
+
+
+    
+<script src="/js/build/tools/tocToggle.js" type="module" data-swup-reload-script=""></script>
+
+<script src="/js/build/layouts/toc.js" type="module" data-swup-reload-script=""></script>
+
+<script src="/js/build/plugins/tabs.js" type="module" data-swup-reload-script=""></script>
+
+
+
+
+<script src="/js/build/libs/moment-with-locales.min.js" data-swup-reload-script=""></script>
+
+
+<script src="/js/build/layouts/essays.js" type="module" data-swup-reload-script=""></script>
+
+
+
+
+
+	
+</body>
+
+</html>
