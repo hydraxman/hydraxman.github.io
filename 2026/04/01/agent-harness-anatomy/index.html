@@ -1,0 +1,1214 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="keywords" content="计算机技术, 生活中的胡思乱想">
+    
+    <meta name="author" content="Nathan">
+    
+    <!-- Completely eliminate flash of wrong theme -->
+    <script>
+        (function() {
+            const THEME_KEY = "REDEFINE-THEME-STATUS";
+            const DARK = "dark", LIGHT = "light";
+            
+            // Get preferred theme
+            function getTheme() {
+                try {
+                    const saved = localStorage.getItem(THEME_KEY);
+                    if (saved) {
+                        const { isDark } = JSON.parse(saved);
+                        return isDark ? DARK : LIGHT;
+                    }
+                } catch (e) {}
+                
+                return matchMedia("(prefers-color-scheme: dark)").matches ? DARK : LIGHT;
+            }
+            
+            // Apply theme to document
+            function applyTheme(theme) {
+                const isDark = theme === DARK;
+                const root = document.documentElement;
+                
+                // Set data attribute for CSS variables
+                root.setAttribute("data-theme", theme);
+                
+                // Set classes for compatibility
+                root.classList.add(theme);
+                root.classList.remove(isDark ? LIGHT : DARK);
+                root.style.colorScheme = theme;
+            }
+            
+            // Initial application
+            const theme = getTheme();
+            applyTheme(theme);
+            
+            // Listen for system preference changes
+            matchMedia("(prefers-color-scheme: dark)").addEventListener("change", ({ matches }) => {
+                // Only update if using system preference (no localStorage entry)
+                if (!localStorage.getItem(THEME_KEY)) {
+                    applyTheme(matches ? DARK : LIGHT);
+                }
+            });
+            
+            // Set body classes once DOM is ready
+            if (document.readyState !== "loading") {
+                document.body.classList.add(theme + "-mode");
+            } else {
+                document.addEventListener("DOMContentLoaded", () => {
+                    document.body.classList.add(theme + "-mode");
+                    document.body.classList.remove((theme === DARK ? LIGHT : DARK) + "-mode");
+                });
+            }
+        })();
+    </script>
+    
+    <!-- Critical CSS to prevent flash -->
+    <style>
+        :root[data-theme="dark"] {
+            --background-color: #202124;
+            --background-color-transparent: rgba(32, 33, 36, 0.6);
+            --second-background-color: #2d2e32;
+            --third-background-color: #34353a;
+            --third-background-color-transparent: rgba(32, 33, 36, 0.6);
+            --primary-color: #0066CC;
+            --first-text-color: #ffffff;
+            --second-text-color: #eeeeee;
+            --third-text-color: #bebec6;
+            --fourth-text-color: #999999;
+            --default-text-color: #bebec6;
+            --invert-text-color: #373D3F;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --selection-color: #0066CC;
+            --shadow-color-1: rgba(255, 255, 255, 0.08);
+            --shadow-color-2: rgba(255, 255, 255, 0.05);
+        }
+        
+        :root[data-theme="light"] {
+            --background-color: #fff;
+            --background-color-transparent: rgba(255, 255, 255, 0.6);
+            --second-background-color: #f8f8f8;
+            --third-background-color: #f2f2f2;
+            --third-background-color-transparent: rgba(241, 241, 241, 0.6);
+            --primary-color: #0066CC;
+            --first-text-color: #16171a;
+            --second-text-color: #2f3037;
+            --third-text-color: #5e5e5e;
+            --fourth-text-color: #eeeeee;
+            --default-text-color: #373D3F;
+            --invert-text-color: #bebec6;
+            --border-color: rgba(0, 0, 0, 0.08);
+            --selection-color: #0066CC;
+            --shadow-color-1: rgba(0, 0, 0, 0.08);
+            --shadow-color-2: rgba(0, 0, 0, 0.05);
+        }
+        
+        body {
+            background-color: var(--background-color);
+            color: var(--default-text-color);
+        }
+        
+        /* Apply body classes as soon as DOM is ready */
+        :root[data-theme="dark"] body {
+            background-color: var(--background-color);
+            color: var(--default-text-color);
+        }
+    </style>
+    
+    <!-- preconnect -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    
+    <!--- Seo Part-->
+    
+    <link rel="canonical" href="https://hydraxman.github.io/2026/04/01/agent-harness-anatomy/"/>
+    <meta name="robots" content="index,follow">
+    <meta name="googlebot" content="index,follow">
+    <meta name="revisit-after" content="1 days">
+    
+    
+    
+        
+        <meta name="description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Agent不等于模型：LangChain万字长文拆解「套壳工程」的本质">
+<meta property="og:url" content="https://hydraxman.github.io/2026/04/01/agent-harness-anatomy/index.html">
+<meta property="og:site_name" content="内森淼文">
+<meta property="og:description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://hydraxman.github.io/images/redefine-og.webp">
+<meta property="article:published_time" content="2026-03-31T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-04-01T08:00:36.303Z">
+<meta property="article:author" content="Nathan">
+<meta property="article:tag" content="AI">
+<meta property="article:tag" content="Agent">
+<meta property="article:tag" content="架构设计">
+<meta property="article:tag" content="Claude Code">
+<meta property="article:tag" content="LangChain">
+<meta property="article:tag" content="Harness">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://hydraxman.github.io/images/redefine-og.webp">
+    
+    
+    <!--- Icon Part-->
+    <link rel="icon" type="image/png" href="/images/favicon.svg" sizes="192x192">
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.svg">
+    <meta name="theme-color" content="#ffffff">
+    <link rel="shortcut icon" href="/images/favicon.svg">
+    <!--- Page Info-->
+    
+    <title>
+        
+            Agent不等于模型：LangChain万字长文拆解「套壳工程」的本质 | 内森淼文
+        
+    </title>
+
+    
+<link rel="stylesheet" href="/fonts/Chillax/chillax.css">
+
+
+    <!--- Inject Part-->
+    
+        
+            
+    
+            
+    
+            
+                
+                    <link rel="stylesheet" href="/css/custom.css">
+                
+    
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    
+        
+<link rel="stylesheet" href="/css/build/tailwind.css">
+
+    
+
+    
+<link rel="stylesheet" href="/fonts/GeistMono/geist-mono.css">
+
+    
+<link rel="stylesheet" href="/fonts/Geist/geist.css">
+
+    <!--- Font Part-->
+    
+    
+    
+    
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&display=swap" rel="stylesheet">
+    
+    
+
+    <script id="hexo-configurations">
+    window.config = {"hostname":"hydraxman.github.io","root":"/","language":"zh-CN","path":"search.json"};
+    window.theme = {"articles":{"style":{"font_size":"16px","line_height":1.5,"image_border_radius":"14px","image_alignment":"center","image_caption":false,"link_icon":true,"delete_mask":false,"title_alignment":"left","headings_top_spacing":{"h1":"3.2rem","h2":"2.4rem","h3":"1.9rem","h4":"1.6rem","h5":"1.4rem","h6":"1.3rem"}},"word_count":{"enable":true,"count":true,"min2read":true},"author_label":{"enable":false,"auto":false,"list":[]},"code_block":{"copy":true,"style":"mac","highlight_theme":{"light":"github","dark":"vs2015"},"font":{"enable":false,"family":null,"url":null}},"toc":{"enable":true,"max_depth":3,"number":false,"expand":true,"init_open":true},"copyright":{"enable":true,"default":"cc_by_nc_sa"},"lazyload":true,"pangu_js":false,"recommendation":{"enable":false,"title":"推荐阅读","limit":3,"mobile_limit":2,"placeholder":"/images/wallhaven-wqery6-light.webp","skip_dirs":[]}},"colors":{"primary":"#ffffff","secondary":null,"default_mode":"light"},"global":{"fonts":{"chinese":{"enable":false,"family":null,"url":null},"english":{"enable":true,"family":"Inter","url":"https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"},"title":{"enable":true,"family":"Noto Serif","url":"https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&display=swap"}},"content_max_width":"1000px","sidebar_width":"210px","hover":{"shadow":true,"scale":false},"scroll_progress":{"bar":true,"percentage":true},"website_counter":{"url":"https://cn.vercount.one/js","enable":false,"site_pv":true,"site_uv":true,"post_pv":true},"single_page":true,"preloader":{"enable":false,"custom_message":null},"side_tools":{"gear_rotation":true,"auto_expand":false},"open_graph":{"enable":true,"image":"/images/redefine-og.webp","description":"Hexo Theme Redefine, Redefine Your Hexo Journey."},"google_analytics":{"enable":false,"id":null}},"home_banner":{"enable":true,"style":"fixed","image":{"light":"/images/banner-light.jpg","dark":"/images/banner-dark.jpg"},"title":"内森淼文","subtitle":{"text":["AI · 编程 · 科技见闻","Write Code, Read World"],"hitokoto":{"enable":false,"show_author":false,"api":"https://v1.hitokoto.cn"},"typing_speed":100,"backing_speed":80,"starting_delay":500,"backing_delay":1500,"loop":true,"smart_backspace":true},"text_color":{"light":"#fff","dark":"#d1d1b6"},"text_style":{"title_size":"2.8rem","subtitle_size":"1.5rem","line_height":1.2},"custom_font":{"enable":false,"family":null,"url":null},"social_links":{"enable":true,"style":"default","links":{"github":"https://github.com/hydraxman","instagram":null,"zhihu":null,"twitter":null,"email":null},"qrs":{"weixin":null}}},"plugins":{"feed":{"enable":false},"aplayer":{"enable":false,"type":"fixed","audios":[{"name":null,"artist":null,"url":null,"cover":null,"lrc":null}]},"mermaid":{"enable":false,"version":"11.4.1"}},"version":"2.8.5","navbar":{"auto_hide":false,"color":{"left":"#333333","right":"#555555","transparency":35},"width":{"home":"1200px","pages":"1000px"},"links":{"Home":{"path":"/","icon":"fa-regular fa-house"},"Archives":{"path":"/archives","icon":"fa-regular fa-archive"},"Categories":{"path":"/categories","icon":"fa-regular fa-folder"},"Tags":{"path":"/tags","icon":"fa-regular fa-tags"},"About":{"path":"/about","icon":"fa-regular fa-user"}},"search":{"enable":true,"preload":true}},"page_templates":{"friends_column":2,"tags_style":"blur"},"home":{"sidebar":{"enable":true,"position":"left","first_item":"menu","announcement":"AI · 编程 · 科技","show_on_mobile":true,"links":{"Archives":{"path":"/archives","icon":"fa-regular fa-archive"},"Tags":{"path":"/tags","icon":"fa-regular fa-tags"},"Categories":{"path":"/categories","icon":"fa-regular fa-folder"}}},"article_date_format":"auto","excerpt_length":200,"categories":{"enable":true,"limit":3},"tags":{"enable":true,"limit":3}},"footerStart":"2024/01/01 00:00:00"};
+    window.lang_ago = {"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"};
+    window.data = {"masonry":false};
+  </script>
+    
+    <!--- Fontawesome Part-->
+    
+<link rel="stylesheet" href="/fontawesome/fontawesome.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/brands.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/solid.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/regular.min.css">
+
+    
+    
+    
+    
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+
+<body>
+	<div class="progress-bar-container">
+	
+	<span class="scroll-progress-bar"></span>
+	
+
+	
+	<span class="pjax-progress-bar"></span>
+	<!--        <span class="swup-progress-icon">-->
+	<!--            <i class="fa-solid fa-circle-notch fa-spin"></i>-->
+	<!--        </span>-->
+	
+</div>
+
+<main class="page-container" id="swup">
+
+	
+
+	<div class="main-content-container flex flex-col justify-between min-h-dvh">
+		<div class="main-content-header">
+			<header class="navbar-container px-6 md:px-12">
+    <div class="navbar-content transition-navbar ">
+        <div class="left">
+            
+            <a class="logo-title" href="/">
+                
+                内森淼文
+                
+            </a>
+        </div>
+
+        <div class="right">
+            <!-- PC -->
+            <div class="desktop">
+                <ul class="navbar-list">
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/"
+                                        >
+                                    <i class="fa-regular fa-house fa-fw"></i>
+                                    首页
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/archives"
+                                        >
+                                    <i class="fa-regular fa-archive fa-fw"></i>
+                                    归档
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/categories"
+                                        >
+                                    <i class="fa-regular fa-folder fa-fw"></i>
+                                    分类
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/tags"
+                                        >
+                                    <i class="fa-regular fa-tags fa-fw"></i>
+                                    标签
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/about"
+                                        >
+                                    <i class="fa-regular fa-user fa-fw"></i>
+                                    关于
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                    
+                        <li class="navbar-item search search-popup-trigger">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </li>
+                    
+                </ul>
+            </div>
+            <!-- Mobile -->
+            <div class="mobile">
+                
+                    <div class="icon-item search search-popup-trigger"><i class="fa-solid fa-magnifying-glass"></i>
+                    </div>
+                
+                <div class="icon-item navbar-bar">
+                    <div class="navbar-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile sheet -->
+    <div class="navbar-drawer h-dvh w-full absolute top-0 left-0 bg-background-color flex flex-col justify-between">
+        <ul class="drawer-navbar-list flex flex-col px-4 justify-center items-start">
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/"
+                        >
+                            <span>
+                                首页
+                            </span>
+                            
+                                <i class="fa-regular fa-house fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/archives"
+                        >
+                            <span>
+                                归档
+                            </span>
+                            
+                                <i class="fa-regular fa-archive fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/categories"
+                        >
+                            <span>
+                                分类
+                            </span>
+                            
+                                <i class="fa-regular fa-folder fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/tags"
+                        >
+                            <span>
+                                标签
+                            </span>
+                            
+                                <i class="fa-regular fa-tags fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/about"
+                        >
+                            <span>
+                                关于
+                            </span>
+                            
+                                <i class="fa-regular fa-user fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+
+            
+            
+                
+                    
+                    
+                    
+            
+        </ul>
+
+        <div class="statistics flex justify-around my-2.5">
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/tags">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">263</div>
+        <div class="label text-third-text-color text-sm">标签</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/categories">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">9</div>
+        <div class="label text-third-text-color text-sm">分类</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/archives">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">167</div>
+        <div class="label text-third-text-color text-sm">文章</div>
+    </a>
+</div>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+		</div>
+
+		<div class="main-content-body transition-fade-up">
+			
+
+			<div class="main-content">
+				<div class="post-page-container flex relative justify-between box-border w-full h-full">
+	<div class="article-content-container">
+
+		<div class="article-title relative w-full">
+			
+			
+			
+			<img src="/images/agent-harness-cover.png" alt="Agent不等于模型：LangChain万字长文拆解「套壳工程」的本质" class="w-full h-60 sm:h-72 md:h-80 object-cover sm:rounded-t-large dark:brightness-75" />
+			
+			<div class="w-full flex items-center absolute bottom-0 justify-start">
+				<h1 class="article-title-cover text-center mx-6 my-6 text-second-text-color bg-background-color-transparent px-4 py-3 text-3xl sm:text-4xl md:text-5xl font-semibold backdrop-blur-lg rounded-xl border border-border-color ">Agent不等于模型：LangChain万字长文拆解「套壳工程」的本质</h1>
+			</div>
+			
+		</div>
+
+		
+		<div class="article-header flex flex-row gap-2 items-center px-2 sm:px-6 md:px-8">
+			<div class="avatar w-[46px] h-[46px] flex-shrink-0 rounded-medium border border-border-color p-[1px]">
+				<img src="/images/avatar.png">
+			</div>
+			<div class="info flex flex-col justify-between">
+				<div class="author flex items-center">
+					<span class="name text-default-text-color text-lg font-semibold">Nathan</span>
+					
+				</div>
+				<div class="meta-info">
+					<div class="article-meta-info">
+    <span class="article-date article-meta-item">
+        <i class="fa-regular fa-pen-fancy"></i>&nbsp;
+        <span class="desktop">2026-04-01</span>
+        <span class="mobile">2026-04-01</span>
+        <span class="hover-info">创建</span>
+    </span>
+    
+        <span class="article-date article-meta-item">
+            <i class="fa-regular fa-wrench"></i>&nbsp;
+            <span class="desktop">2026-04-01 16:36</span>
+            <span class="mobile">2026-04-01 16:36</span>
+            <span class="hover-info">更新</span>
+        </span>
+    
+
+    
+        <span class="article-categories article-meta-item">
+            <i class="fa-regular fa-folders"></i>&nbsp;
+            <ul>
+                
+                
+                    
+                        
+                        <li>
+                            <a href="/categories/%E6%B7%B1%E5%BA%A6%E5%88%86%E6%9E%90/">深度分析</a>&nbsp;
+                        </li>
+                    
+                    
+                
+            </ul>
+        </span>
+    
+    
+        <span class="article-tags article-meta-item">
+            <i class="fa-regular fa-tags"></i>&nbsp;
+            <ul>
+                
+                    <li>
+                        <a href="/tags/AI/">AI</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/Agent/">Agent</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1/">架构设计</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/Claude-Code/">Claude Code</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/LangChain/">LangChain</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/Harness/">Harness</a>&nbsp;
+                    </li>
+                
+            </ul>
+        </span>
+    
+
+    
+    
+        <span class="article-wordcount article-meta-item">
+            <i class="fa-regular fa-typewriter"></i>&nbsp;<span>3.3k 字</span>
+        </span>
+    
+    
+        <span class="article-min2read article-meta-item">
+            <i class="fa-regular fa-clock"></i>&nbsp;<span>11 分钟</span>
+        </span>
+    
+    
+</div>
+
+				</div>
+			</div>
+		</div>
+		
+
+		
+
+
+		<div class="article-content markdown-body px-2 sm:px-6 md:px-8 pb-8">
+			<blockquote>
+<p><strong>Agent &#x3D; Model + Harness。</strong> 如果你不是模型本身，那你就是 Harness 的一部分。</p>
+</blockquote>
+<p>这句话出自 LangChain 最新发布的博客 <em>The Anatomy of an Agent Harness</em>。短短一句话，把整个 AI Agent 行业最核心的分工讲透了。</p>
+<p>什么是 Harness？直译是「套具」——马匹身上的挽具、降落伞的吊带。在 AI Agent 语境下，Harness 是<strong>围绕模型搭建的一切工程系统</strong>：系统提示词、工具集、沙箱环境、编排逻辑、记忆管理、上下文压缩……模型提供智能，Harness 让智能变得有用。</p>
+<p>这篇文章不是简单翻译。我会结合 Claude Code 刚泄露的源码（1884个TypeScript文件），用<strong>真实代码</strong>验证 LangChain 提出的每一个 Harness 组件，看看理论和实践之间到底有多大差距。</p>
+<h2 id="一、为什么需要-Harness？"><a href="#一、为什么需要-Harness？" class="headerlink" title="一、为什么需要 Harness？"></a>一、为什么需要 Harness？</h2><p>先回到最基本的问题：<strong>大语言模型能做什么？</strong></p>
+<p>答案很简单——接收文本&#x2F;图片&#x2F;音视频，输出文本。就这样。</p>
+<p>它<strong>不能</strong>：</p>
+<ul>
+<li>跨对话保持记忆</li>
+<li>执行代码</li>
+<li>访问实时信息</li>
+<li>自己搭环境装依赖</li>
+</ul>
+<p>所有这些能力，都需要 Harness 来提供。</p>
+<p>举个最简单的例子：我们日常用的「聊天」功能，本质上就是一个 while 循环——Harness 追踪历史消息，拼接新输入，喂给模型。没有这个循环，模型每次都是失忆的。</p>
+<p>LangChain 的核心观点是：<strong>我们应该从「期望 Agent 做什么」反推「Harness 需要什么功能」</strong>。</p>
+<p>这个思维方式很重要。不是先堆功能再看能干什么，而是先定义行为目标，再设计工程系统。</p>
+<h2 id="二、七大-Harness-组件"><a href="#二、七大-Harness-组件" class="headerlink" title="二、七大 Harness 组件"></a>二、七大 Harness 组件</h2><p>LangChain 将 Harness 分解为七大核心组件。下面逐一拆解，并用 Claude Code 源码做实证。</p>
+<h3 id="1-文件系统：最基础的原语"><a href="#1-文件系统：最基础的原语" class="headerlink" title="1. 文件系统：最基础的原语"></a>1. 文件系统：最基础的原语</h3><p><strong>期望行为：</strong> Agent 需要持久存储，能操作真实数据，跨会话保持工作状态。</p>
+<p><strong>Harness 方案：</strong> 提供文件系统抽象和操作工具。</p>
+<p>LangChain 把文件系统称为「最基础的 Harness 原语」，因为它解锁了几乎所有其他能力：</p>
+<ul>
+<li><strong>工作空间</strong>：Agent 可以读数据、代码、文档</li>
+<li><strong>增量输出</strong>：不用把所有东西塞进上下文，可以写文件慢慢来</li>
+<li><strong>协作表面</strong>：多个 Agent 和人类通过共享文件协调工作</li>
+</ul>
+<p>加上 Git，文件系统就有了版本控制——Agent 可以追踪进度、回滚错误、分支实验。</p>
+<p><strong>Claude Code 验证：</strong> <code>tools/</code> 目录有专门的 <code>FileReadTool</code>、<code>FileWriteTool</code>、<code>FileEditTool</code>，而且 Dream System 的记忆整理完全基于文件系统——<code>MEMORY.md</code> 就是 Agent 的长期记忆文件，每次启动自动注入上下文。</p>
+<h3 id="2-Bash-代码执行：万能工具"><a href="#2-Bash-代码执行：万能工具" class="headerlink" title="2. Bash + 代码执行：万能工具"></a>2. Bash + 代码执行：万能工具</h3><p><strong>期望行为：</strong> Agent 应该能自主解决问题，而不需要人类预先为每种操作设计工具。</p>
+<p><strong>Harness 方案：</strong> 提供 Bash 工具，让模型通过写代码自主解决问题。</p>
+<p>传统的 Agent 执行是 ReAct 循环——推理、调用工具、观察结果、循环。但 Harness 只能执行它预置的工具。与其为每种操作都写一个工具，不如给 Agent 一个<strong>万能工具</strong>——Bash。</p>
+<p>模型可以即时编写代码来创造自己的工具，而不是被限制在预配置的固定工具集里。</p>
+<p><strong>Claude Code 验证：</strong> <code>BashTool</code> 是 Claude Code 使用最频繁的工具，支持交互式命令、超时控制、输出截断。更有趣的是，源码里 Bash 被分为不同权限级别——有些命令（如 <code>rm -rf</code>）需要用户确认，而 <code>ls</code>、<code>cat</code> 等只读命令则自动放行。</p>
+<h3 id="3-沙箱与验证：安全执行环境"><a href="#3-沙箱与验证：安全执行环境" class="headerlink" title="3. 沙箱与验证：安全执行环境"></a>3. 沙箱与验证：安全执行环境</h3><p><strong>期望行为：</strong> Agent 需要安全的环境来执行代码、观察结果、验证工作。</p>
+<p><strong>Harness 方案：</strong> 沙箱隔离 + 预装工具链 + 自验证循环。</p>
+<p>让 Agent 在本地直接跑代码？太危险了。沙箱提供了隔离的执行环境——可以按需创建、并行扇出、用完销毁。</p>
+<p>好的 Harness 还会预装工具链：语言运行时、Git CLI、浏览器、测试框架。这让 Agent 能形成<strong>自验证循环</strong>——写代码 → 跑测试 → 检查日志 → 修 bug → 再跑测试。</p>
+<p><strong>Claude Code 验证：</strong> 这正是 Verification Agent 的工作方式。它的 Prompt 里明确写道：</p>
+<blockquote>
+<p><em>「每个 PASS 必须附带实际执行的命令和输出。没有 Command run 的检查不算 PASS，只算 Skip。」</em></p>
+</blockquote>
+<p>不是看代码猜结论，而是<strong>必须执行</strong>才算验证。Claude Code 的 ULTRAPLAN 模式甚至把沙箱搬到了云端——启动远程容器，运行 Opus 级模型思考 30 分钟。</p>
+<h3 id="4-记忆与搜索：持续学习"><a href="#4-记忆与搜索：持续学习" class="headerlink" title="4. 记忆与搜索：持续学习"></a>4. 记忆与搜索：持续学习</h3><p><strong>期望行为：</strong> Agent 应该记住它见过的东西，并能访问训练截止后的新信息。</p>
+<p><strong>Harness 方案：</strong> 文件系统记忆（AGENTS.md）+ Web 搜索 + MCP 工具。</p>
+<p>模型的知识止步于训练数据截止日期。Harness 通过两种方式补救：</p>
+<p><strong>长期记忆：</strong> 通过 <code>AGENTS.md</code>（或 <code>MEMORY.md</code>）这样的标准文件，Agent 在每次启动时自动加载。Agent 在工作中更新这个文件，Harness 在下次启动时注入更新后的版本。这是一种<strong>持续学习</strong>——跨会话积累知识。</p>
+<p><strong>实时知识：</strong> Web Search 和 MCP 工具让 Agent 能访问训练截止后的新信息——新版本的库文档、最新的 API 变更、当前的数据。</p>
+<p><strong>Claude Code 验证：</strong> Dream System 就是记忆 Harness 的终极形态。它不是被动等 Agent 写记忆，而是<strong>主动整理</strong>——模拟 REM 睡眠，四个阶段（定位 → 采集 → 整合 → 修剪），把零散对话提炼成结构化知识。比 LangChain 描述的 <code>AGENTS.md</code> 方案高级一个量级。</p>
+<h3 id="5-对抗上下文腐烂"><a href="#5-对抗上下文腐烂" class="headerlink" title="5. 对抗上下文腐烂"></a>5. 对抗上下文腐烂</h3><p><strong>期望行为：</strong> Agent 的性能不应该随着工作时间增长而下降。</p>
+<p><strong>Harness 方案：</strong> 上下文压缩 + 工具输出截断 + Skills 渐进式暴露。</p>
+<p><strong>上下文腐烂</strong>（Context Rot）是一个被严重低估的问题——随着上下文窗口填满，模型的推理能力和任务完成能力会<strong>显著下降</strong>。上下文是稀缺资源，Harness 必须精心管理。</p>
+<p>LangChain 提出三种策略：</p>
+<table>
+<thead>
+<tr>
+<th>策略</th>
+<th>方法</th>
+<th>解决什么问题</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Compaction</strong></td>
+<td>智能摘要+卸载旧上下文</td>
+<td>上下文快满了</td>
+</tr>
+<tr>
+<td><strong>工具输出截断</strong></td>
+<td>保留头尾、存文件</td>
+<td>大输出占太多上下文</td>
+</tr>
+<tr>
+<td><strong>Skills 渐进暴露</strong></td>
+<td>只加载元数据，按需展开</td>
+<td>工具太多挤占上下文</td>
+</tr>
+</tbody></table>
+<p>LangChain 说了一句非常精辟的话：</p>
+<blockquote>
+<p><em><strong>今天的 Harness 本质上是优质上下文的投递系统。</strong></em></p>
+</blockquote>
+<p>不是给模型更多信息，而是<strong>在正确的时间给正确的信息</strong>。</p>
+<p><strong>Claude Code 验证：</strong> 源码中 <code>systemPromptManager</code> 管理着 110+ 条碎片化 Prompt 片段，根据当前环境（操作系统、工作模式、任务类型）动态拼接——macOS 上拼 macOS 的路径约定，调试模式加调试指令，Git 操作加安全提示。这就是「按需暴露」的极致实践。</p>
+<h3 id="6-长时间自主执行"><a href="#6-长时间自主执行" class="headerlink" title="6. 长时间自主执行"></a>6. 长时间自主执行</h3><p><strong>期望行为：</strong> Agent 应该能自主完成复杂任务，跨多个上下文窗口持续工作。</p>
+<p><strong>Harness 方案：</strong> 文件系统 + Git + Ralph Loop + 规划 + 自验证。</p>
+<p>这是所有 Harness 组件开始<strong>复合发力</strong>的地方。</p>
+<p><strong>Ralph Loop</strong> 是一个很有意思的 Harness 模式：当模型试图退出时，Harness 通过 Hook 拦截退出信号，在一个干净的上下文窗口里重新注入原始任务目标，强迫 Agent 继续工作。文件系统让这成为可能——每次迭代从头开始，但从上次迭代的文件状态接续。</p>
+<p>配合规划（在文件系统里维护计划文件）和自验证（每一步都跑测试），Agent 就能跨越多个上下文窗口持续推进任务。</p>
+<p><strong>Claude Code 验证：</strong> Coordinator Mode 是 Long Horizon 执行的工业级实现。它不是一个 Agent 硬撑，而是<strong>调度器+多 Worker</strong> 协作：</p>
+<ol>
+<li>并行派出 Research Workers 调查代码库</li>
+<li>Coordinator 综合调研结果，制定方案</li>
+<li>派出 Implementation Workers 改代码</li>
+<li>派出 Verification Workers 验证改动</li>
+</ol>
+<p>每个 Worker 有独立上下文，通过 Scratchpad 共享知识。这比 Ralph Loop 的「单 Agent 循环」高明得多。</p>
+<h3 id="7-模型训练与-Harness-的共同进化"><a href="#7-模型训练与-Harness-的共同进化" class="headerlink" title="7. 模型训练与 Harness 的共同进化"></a>7. 模型训练与 Harness 的共同进化</h3><p>LangChain 提出了一个深刻的观察：<strong>今天的 Agent 产品（Claude Code、Codex）在后训练时就把 Harness 放在了训练循环里</strong>。</p>
+<p>模型不是泛泛地学「如何编程」，而是学「如何在特定 Harness 里编程」——怎么用文件系统、怎么执行 Bash、怎么规划、怎么并行分发子 Agent。</p>
+<p>这创造了一个飞轮：发现有用的 Harness 原语 → 加入 Harness → 用于训练下一代模型 → 模型在这个 Harness 里更强 → 发现新原语……</p>
+<p>但这也带来了一个副作用——<strong>过拟合</strong>。模型对训练时用的 Harness 非常熟悉，换一种 Harness 反而表现下降。LangChain 举了个例子：Codex-5.3 的文件编辑工具 <code>apply_patch</code> 有特定格式，换成其他 patch 方式性能就掉。理论上一个「真正智能」的模型不应该在乎 patch 格式，但训练的耦合导致了这种脆弱性。</p>
+<p>有趣的反例是：<strong>Terminal Bench 2.0 排行榜上，同一个 Opus 4.6 模型，在 Claude Code 原装 Harness 里的得分远低于某些第三方 Harness</strong>。LangChain 自己的 Agent 就通过只改 Harness 从 Top 30 冲到了 Top 5。</p>
+<p>这说明：<strong>Harness 工程的优化空间远比我们想象的大。</strong></p>
+<h2 id="三、LangChain-vs-Claude-Code：理论与实践对照"><a href="#三、LangChain-vs-Claude-Code：理论与实践对照" class="headerlink" title="三、LangChain vs Claude Code：理论与实践对照"></a>三、LangChain vs Claude Code：理论与实践对照</h2><table>
+<thead>
+<tr>
+<th>维度</th>
+<th>LangChain 理论框架</th>
+<th>Claude Code 实际实现</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>文件系统</strong></td>
+<td>最基础的原语</td>
+<td>✅ FileRead&#x2F;Write&#x2F;Edit + MEMORY.md</td>
+</tr>
+<tr>
+<td><strong>Bash 执行</strong></td>
+<td>万能工具</td>
+<td>✅ BashTool + 权限分级</td>
+</tr>
+<tr>
+<td><strong>沙箱</strong></td>
+<td>隔离执行环境</td>
+<td>✅ ULTRAPLAN 远程容器</td>
+</tr>
+<tr>
+<td><strong>记忆</strong></td>
+<td>AGENTS.md + Web Search</td>
+<td>✅✅ Dream System（主动记忆整理）</td>
+</tr>
+<tr>
+<td><strong>上下文管理</strong></td>
+<td>Compaction + 截断 + Skills</td>
+<td>✅✅ 110+ 动态 Prompt 片段</td>
+</tr>
+<tr>
+<td><strong>长时间执行</strong></td>
+<td>Ralph Loop</td>
+<td>✅✅ Coordinator + Multi-Worker</td>
+</tr>
+<tr>
+<td><strong>安全</strong></td>
+<td>命令白名单 + 网络隔离</td>
+<td>✅✅ 四层权限 + YOLO分类器 + 路径遍历防护</td>
+</tr>
+<tr>
+<td><strong>情感连接</strong></td>
+<td>（未提及）</td>
+<td>✅ Buddy 电子宠物系统</td>
+</tr>
+<tr>
+<td><strong>隐身模式</strong></td>
+<td>（未提及）</td>
+<td>✅ Undercover Mode</td>
+</tr>
+</tbody></table>
+<p>Claude Code 在几乎每个维度上都超越了 LangChain 的理论框架。但 LangChain 的贡献在于<strong>系统化地定义了 Harness 的概念和分类法</strong>——这是整个行业第一次有人把「Agent 套壳」上升为一个正式的工程学科。</p>
+<h2 id="四、三个深度洞察"><a href="#四、三个深度洞察" class="headerlink" title="四、三个深度洞察"></a>四、三个深度洞察</h2><h3 id="洞察一：Harness-是新的操作系统"><a href="#洞察一：Harness-是新的操作系统" class="headerlink" title="洞察一：Harness 是新的操作系统"></a>洞察一：Harness 是新的操作系统</h3><p>如果你仔细看 Harness 的组件列表——文件系统、进程管理（Agent调度）、权限控制、内存管理（上下文）、设备驱动（工具&#x2F;MCP）——这不就是<strong>操作系统的抽象层</strong>吗？</p>
+<p>模型是 CPU，Harness 是操作系统。</p>
+<p>历史总是押韵。1960年代，人们发现裸机太难用，于是发明了操作系统。2020年代，人们发现裸模型太难用，于是发明了 Harness。两者面对的核心问题惊人地相似——如何让底层的计算能力变成用户可用的生产力。</p>
+<h3 id="洞察二：Context-Rot-是-Agent-时代的内存泄漏"><a href="#洞察二：Context-Rot-是-Agent-时代的内存泄漏" class="headerlink" title="洞察二：Context Rot 是 Agent 时代的内存泄漏"></a>洞察二：Context Rot 是 Agent 时代的内存泄漏</h3><p>在传统编程中，内存泄漏是程序运行时间越长越慢的根源。在 Agent 时代，上下文腐烂扮演着完全相同的角色——Agent 工作越久，上下文越满，性能越差。</p>
+<p>Compaction 就是垃圾回收。Skills 渐进暴露就是动态加载。工具输出截断就是缓冲区管理。</p>
+<p>所有传统操作系统解决的问题，Harness 都在重新解决一遍。只不过这次管理的不是比特，而是 Token。</p>
+<h3 id="洞察三：Harness-的终局是消失"><a href="#洞察三：Harness-的终局是消失" class="headerlink" title="洞察三：Harness 的终局是消失"></a>洞察三：Harness 的终局是消失</h3><p>LangChain 在文末暗示了一个趋势：随着模型越来越强，Harness 中「弥补模型缺陷」的部分会逐渐被模型本身吸收。模型会原生学会规划、自验证、长时间连贯性。</p>
+<p>但「围绕模型构建工程系统」的部分永远不会消失——就像你的 CPU 再强，也需要操作系统。文件系统、安全隔离、工具集成这些不是模型的缺陷，是<strong>工程架构的必要层</strong>。</p>
+<p>最终，Harness 工程师会变成 AI 时代的系统架构师。</p>
+<h2 id="五、对开发者的启示"><a href="#五、对开发者的启示" class="headerlink" title="五、对开发者的启示"></a>五、对开发者的启示</h2><p>如果你在构建 AI Agent，LangChain 这篇文章的方法论值得借鉴：</p>
+<ol>
+<li><strong>从行为反推设计</strong>：先定义「我希望 Agent 做什么」，再推导需要什么 Harness 组件</li>
+<li><strong>文件系统优先</strong>：文件系统是最被低估的 Harness 原语，几乎所有高级功能都依赖它</li>
+<li><strong>重视上下文管理</strong>：Context Rot 是沉默的性能杀手，Compaction 和渐进暴露是必修课</li>
+<li><strong>不要迷信原装 Harness</strong>：模型在特定 Harness 上训练不代表那是最优 Harness，Terminal Bench 排行榜已经证明了这一点</li>
+<li><strong>安全不是事后补丁</strong>：权限系统、沙箱隔离、路径防护应该从第一天就设计进 Harness</li>
+</ol>
+<hr>
+<p><em>本文基于 LangChain 博客 <a class="link"   target="_blank" rel="noopener" href="https://blog.langchain.com/the-anatomy-of-an-agent-harness/" >The Anatomy of an Agent Harness<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a> 的深度解读，结合 Claude Code 泄露源码进行实证分析。</em></p>
+<p><em>系列文章：<a href="/2026/04/01/claude-code-leaked-analysis/">Claude Code源码泄露全解析：1884个文件背后的AI编程帝国</a></em></p>
+
+		</div>
+
+		
+		<div class="post-copyright-info w-full my-8 px-2 sm:px-6 md:px-8">
+			<div class="article-copyright-info-container">
+    <ul>
+        <li><strong>标题:</strong> Agent不等于模型：LangChain万字长文拆解「套壳工程」的本质</li>
+        <li><strong>作者:</strong> Nathan</li>
+        <li><strong>创建于
+                :</strong> 2026-04-01 00:00:00</li>
+        
+            <li>
+                <strong>更新于
+                    :</strong> 2026-04-01 16:00:36
+            </li>
+        
+        <li>
+            <strong>链接:</strong> https://hydraxman.github.io/2026/04/01/agent-harness-anatomy/
+        </li>
+        <li>
+            <strong>
+                版权声明:
+            </strong>
+            
+
+            
+                本文章采用 <a class="license" target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0">CC BY-NC-SA 4.0</a> 进行许可。
+            
+        </li>
+    </ul>
+</div>
+
+		</div>
+		
+
+		
+		<ul class="post-tags-box text-lg mt-1.5 flex-wrap justify-center flex md:hidden">
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/AI/">#AI</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/Agent/">#Agent</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1/">#架构设计</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/Claude-Code/">#Claude Code</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/LangChain/">#LangChain</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/Harness/">#Harness</a>&nbsp;
+			</li>
+			
+		</ul>
+		
+
+		
+
+		
+		<div class="article-nav my-8 flex justify-between items-center px-2 sm:px-6 md:px-8">
+			
+			<div class="article-prev border-border-color shadow-redefine-flat shadow-shadow-color-2 rounded-medium px-4 py-2 hover:shadow-redefine-flat-hover hover:shadow-shadow-color-2">
+				<a class="prev" rel="prev" href="/2026/04/01/claude-code-leaked-analysis/">
+					<span class="left arrow-icon flex justify-center items-center">
+						<i class="fa-solid fa-chevron-left"></i>
+					</span>
+					<span class="title flex justify-center items-center">
+						<span class="post-nav-title-item truncate max-w-48">Claude Code源码泄露全解析：1884个文件背后的AI编程帝国</span>
+						<span class="post-nav-item">上一篇</span>
+					</span>
+				</a>
+			</div>
+			
+			
+			<div class="article-next border-border-color shadow-redefine-flat shadow-shadow-color-2 rounded-medium px-4 py-2 hover:shadow-redefine-flat-hover hover:shadow-shadow-color-2">
+				<a class="next" rel="next" href="/2026/03/31/openclaw-daily-2026-03-31/">
+					<span class="title flex justify-center items-center">
+						<span class="post-nav-title-item truncate max-w-48">OpenClaw 日报｜3月31日 v2026.3.29 重磅更新：xAI 搜索整合、插件审批钩子、ACP 频道绑定</span>
+						<span class="post-nav-item">下一篇</span>
+					</span>
+					<span class="right arrow-icon flex justify-center items-center">
+						<i class="fa-solid fa-chevron-right"></i>
+					</span>
+				</a>
+			</div>
+			
+		</div>
+		
+
+
+		
+	</div>
+
+	
+	<div class="toc-content-container">
+		<div class="post-toc-wrap">
+	<div class="post-toc">
+		<div class="toc-title">目录</div>
+		<div class="page-title">Agent不等于模型：LangChain万字长文拆解「套壳工程」的本质</div>
+		<ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81-Harness%EF%BC%9F"><span class="nav-text">一、为什么需要 Harness？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E4%B8%83%E5%A4%A7-Harness-%E7%BB%84%E4%BB%B6"><span class="nav-text">二、七大 Harness 组件</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%EF%BC%9A%E6%9C%80%E5%9F%BA%E7%A1%80%E7%9A%84%E5%8E%9F%E8%AF%AD"><span class="nav-text">1. 文件系统：最基础的原语</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Bash-%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C%EF%BC%9A%E4%B8%87%E8%83%BD%E5%B7%A5%E5%85%B7"><span class="nav-text">2. Bash + 代码执行：万能工具</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E6%B2%99%E7%AE%B1%E4%B8%8E%E9%AA%8C%E8%AF%81%EF%BC%9A%E5%AE%89%E5%85%A8%E6%89%A7%E8%A1%8C%E7%8E%AF%E5%A2%83"><span class="nav-text">3. 沙箱与验证：安全执行环境</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E8%AE%B0%E5%BF%86%E4%B8%8E%E6%90%9C%E7%B4%A2%EF%BC%9A%E6%8C%81%E7%BB%AD%E5%AD%A6%E4%B9%A0"><span class="nav-text">4. 记忆与搜索：持续学习</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-%E5%AF%B9%E6%8A%97%E4%B8%8A%E4%B8%8B%E6%96%87%E8%85%90%E7%83%82"><span class="nav-text">5. 对抗上下文腐烂</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-%E9%95%BF%E6%97%B6%E9%97%B4%E8%87%AA%E4%B8%BB%E6%89%A7%E8%A1%8C"><span class="nav-text">6. 长时间自主执行</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-%E6%A8%A1%E5%9E%8B%E8%AE%AD%E7%BB%83%E4%B8%8E-Harness-%E7%9A%84%E5%85%B1%E5%90%8C%E8%BF%9B%E5%8C%96"><span class="nav-text">7. 模型训练与 Harness 的共同进化</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81LangChain-vs-Claude-Code%EF%BC%9A%E7%90%86%E8%AE%BA%E4%B8%8E%E5%AE%9E%E8%B7%B5%E5%AF%B9%E7%85%A7"><span class="nav-text">三、LangChain vs Claude Code：理论与实践对照</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E4%B8%89%E4%B8%AA%E6%B7%B1%E5%BA%A6%E6%B4%9E%E5%AF%9F"><span class="nav-text">四、三个深度洞察</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B4%9E%E5%AF%9F%E4%B8%80%EF%BC%9AHarness-%E6%98%AF%E6%96%B0%E7%9A%84%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F"><span class="nav-text">洞察一：Harness 是新的操作系统</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B4%9E%E5%AF%9F%E4%BA%8C%EF%BC%9AContext-Rot-%E6%98%AF-Agent-%E6%97%B6%E4%BB%A3%E7%9A%84%E5%86%85%E5%AD%98%E6%B3%84%E6%BC%8F"><span class="nav-text">洞察二：Context Rot 是 Agent 时代的内存泄漏</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B4%9E%E5%AF%9F%E4%B8%89%EF%BC%9AHarness-%E7%9A%84%E7%BB%88%E5%B1%80%E6%98%AF%E6%B6%88%E5%A4%B1"><span class="nav-text">洞察三：Harness 的终局是消失</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%94%E3%80%81%E5%AF%B9%E5%BC%80%E5%8F%91%E8%80%85%E7%9A%84%E5%90%AF%E7%A4%BA"><span class="nav-text">五、对开发者的启示</span></a></li></ol>
+
+	</div>
+</div>
+	</div>
+	
+</div>
+			</div>
+
+			
+		</div>
+
+		<div class="main-content-footer">
+			<footer class="footer mt-5 py-5 h-auto text-base text-third-text-color relative border-t-2 border-t-border-color">
+    <div class="info-container py-3 text-center">
+        
+        <div class="text-center">
+            &copy;
+            
+              <span>2024</span>
+              -
+            
+            2026&nbsp;&nbsp;<i class="fa-solid fa-heart fa-beat" style="--fa-animation-duration: 0.5s; color: #333"></i>&nbsp;&nbsp;<a href="/">Nathan</a>
+            
+                
+                <p class="post-count space-x-0.5">
+                    <span>
+                        共撰写了 167 篇文章
+                    </span>
+                    
+                        <span>
+                            共 350.5k 字
+                        </span>
+                    
+                </p>
+            
+        </div>
+        
+        <div class="relative text-center lg:absolute lg:left-[20px] lg:top-1/2 lg:-translate-y-1/2 lg:text-left">
+            <span class="lg:block text-sm">由 <?xml version="1.0" encoding="utf-8"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg class="relative top-[2px] inline-block align-baseline" version="1.1" id="圖層_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="1rem" height="1rem" viewBox="0 0 512 512" enable-background="new 0 0 512 512" xml:space="preserve"><path fill="#0E83CD" d="M256.4,25.8l-200,115.5L56,371.5l199.6,114.7l200-115.5l0.4-230.2L256.4,25.8z M349,354.6l-18.4,10.7l-18.6-11V275H200v79.6l-18.4,10.7l-18.6-11v-197l18.5-10.6l18.5,10.8V237h112v-79.6l18.5-10.6l18.5,10.8V354.6z"/></svg><a target="_blank" class="text-base" href="https://hexo.io">Hexo</a> 驱动</span>
+            <span class="text-sm lg:block">主题&nbsp;<a class="text-base" target="_blank" href="https://github.com/EvanNotFound/hexo-theme-redefine">Redefine v2.8.5</a></span>
+        </div>
+        
+        
+            <div>
+                博客已运行 <span class="odometer" id="runtime_days" ></span> 天 <span class="odometer" id="runtime_hours"></span> 小时 <span class="odometer" id="runtime_minutes"></span> 分钟 <span class="odometer" id="runtime_seconds"></span> 秒
+            </div>
+        
+        
+            <script data-swup-reload-script>
+                try {
+                    function odometer_init() {
+                    const elements = document.querySelectorAll('.odometer');
+                    elements.forEach(el => {
+                        new Odometer({
+                            el,
+                            format: '( ddd).dd',
+                            duration: 200
+                        });
+                    });
+                    }
+                    odometer_init();
+                } catch (error) {}
+            </script>
+        
+        
+            
+                
+        
+                
+        
+        
+    </div>  
+</footer>
+		</div>
+	</div>
+
+	
+	<div class="post-tools">
+		<div class="post-tools-container">
+	<ul class="article-tools-list">
+		<!-- TOC aside toggle -->
+		
+		<li class="right-bottom-tools page-aside-toggle">
+			<i class="fa-regular fa-outdent"></i>
+		</li>
+		
+
+		<!-- go comment -->
+		
+	</ul>
+</div>
+	</div>
+	
+
+	<div class="right-side-tools-container">
+		<div class="side-tools-container">
+	<ul class="hidden-tools-list">
+		<li class="right-bottom-tools tool-font-adjust-plus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-plus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-font-adjust-minus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-minus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-dark-light-toggle flex justify-center items-center">
+			<i class="fa-regular fa-moon"></i>
+		</li>
+
+		<!-- rss -->
+		
+
+		
+
+		<li class="right-bottom-tools tool-scroll-to-bottom flex justify-center items-center">
+			<i class="fa-regular fa-arrow-down"></i>
+		</li>
+	</ul>
+
+	<ul class="visible-tools-list">
+		<li class="right-bottom-tools toggle-tools-list flex justify-center items-center">
+			<i class="fa-regular fa-cog fa-spin"></i>
+		</li>
+		
+		<li class="right-bottom-tools tool-scroll-to-top flex justify-center items-center">
+			<i class="arrow-up fas fa-arrow-up"></i>
+			<span class="percent"></span>
+		</li>
+		
+		
+	</ul>
+</div>
+	</div>
+
+	<div class="image-viewer-container">
+	<img src="">
+</div>
+
+	
+	<div class="search-pop-overlay">
+	<div class="popup search-popup">
+		<div class="search-header">
+			<span class="search-input-field-pre">
+				<i class="fa-solid fa-keyboard"></i>
+			</span>
+			<div class="search-input-container">
+				<input autocomplete="off" autocorrect="off" autocapitalize="off" placeholder="站内搜索您需要的内容..." spellcheck="false" type="search" class="search-input">
+			</div>
+			<span class="popup-btn-close">
+				<i class="fa-solid fa-times"></i>
+			</span>
+		</div>
+		<div id="search-result">
+			<div id="no-result">
+				<i class="fa-solid fa-spinner fa-spin-pulse fa-5x fa-fw"></i>
+			</div>
+		</div>
+	</div>
+</div>
+	
+
+</main>
+
+
+
+<script src="/js/build/libs/Swup.min.js"></script>
+
+<script src="/js/build/libs/SwupSlideTheme.min.js"></script>
+
+<script src="/js/build/libs/SwupScriptsPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupProgressPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupScrollPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupPreloadPlugin.min.js"></script>
+
+<script>
+    const swup = new Swup({
+        plugins: [
+            new SwupScriptsPlugin({
+                optin: true,
+            }),
+            new SwupProgressPlugin(),
+            new SwupScrollPlugin({
+                offset: 80,
+            }),
+            new SwupSlideTheme({
+                mainElement: ".main-content-body",
+            }),
+            new SwupPreloadPlugin(),
+        ],
+        containers: ["#swup"],
+    });
+</script>
+
+
+
+
+	
+<script src="/js/build/tools/imageViewer.js" type="module"></script>
+
+<script src="/js/build/utils.js" type="module"></script>
+
+<script src="/js/build/main.js" type="module"></script>
+
+<script src="/js/build/layouts/navbarShrink.js" type="module"></script>
+
+<script src="/js/build/tools/scrollTopBottom.js" type="module"></script>
+
+<script src="/js/build/tools/lightDarkSwitch.js" type="module"></script>
+
+<script src="/js/build/layouts/categoryList.js" type="module"></script>
+
+
+
+    
+<script src="/js/build/tools/localSearch.js" type="module"></script>
+
+
+
+
+    
+<script src="/js/build/tools/codeBlock.js" type="module"></script>
+
+
+
+
+    
+<script src="/js/build/layouts/lazyload.js" type="module"></script>
+
+
+
+
+    
+<script src="/js/build/tools/runtime.js"></script>
+
+    
+<script src="/js/build/libs/odometer.min.js"></script>
+
+    
+<link rel="stylesheet" href="/assets/odometer-theme-minimal.css">
+
+
+
+
+  
+<script src="/js/build/libs/Typed.min.js"></script>
+
+  
+<script src="/js/build/plugins/typed.js" type="module"></script>
+
+
+
+
+
+
+
+
+    
+<script src="/js/build/libs/anime.min.js"></script>
+
+
+
+
+
+    
+<script src="/js/build/tools/tocToggle.js" type="module" data-swup-reload-script=""></script>
+
+<script src="/js/build/layouts/toc.js" type="module" data-swup-reload-script=""></script>
+
+<script src="/js/build/plugins/tabs.js" type="module" data-swup-reload-script=""></script>
+
+
+
+
+<script src="/js/build/libs/moment-with-locales.min.js" data-swup-reload-script=""></script>
+
+
+<script src="/js/build/layouts/essays.js" type="module" data-swup-reload-script=""></script>
+
+
+
+
+
+	
+</body>
+
+</html>
