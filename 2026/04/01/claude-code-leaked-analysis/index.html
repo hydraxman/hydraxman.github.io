@@ -1,0 +1,1293 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="keywords" content="计算机技术, 生活中的胡思乱想">
+    
+    <meta name="author" content="Nathan">
+    
+    <!-- Completely eliminate flash of wrong theme -->
+    <script>
+        (function() {
+            const THEME_KEY = "REDEFINE-THEME-STATUS";
+            const DARK = "dark", LIGHT = "light";
+            
+            // Get preferred theme
+            function getTheme() {
+                try {
+                    const saved = localStorage.getItem(THEME_KEY);
+                    if (saved) {
+                        const { isDark } = JSON.parse(saved);
+                        return isDark ? DARK : LIGHT;
+                    }
+                } catch (e) {}
+                
+                return matchMedia("(prefers-color-scheme: dark)").matches ? DARK : LIGHT;
+            }
+            
+            // Apply theme to document
+            function applyTheme(theme) {
+                const isDark = theme === DARK;
+                const root = document.documentElement;
+                
+                // Set data attribute for CSS variables
+                root.setAttribute("data-theme", theme);
+                
+                // Set classes for compatibility
+                root.classList.add(theme);
+                root.classList.remove(isDark ? LIGHT : DARK);
+                root.style.colorScheme = theme;
+            }
+            
+            // Initial application
+            const theme = getTheme();
+            applyTheme(theme);
+            
+            // Listen for system preference changes
+            matchMedia("(prefers-color-scheme: dark)").addEventListener("change", ({ matches }) => {
+                // Only update if using system preference (no localStorage entry)
+                if (!localStorage.getItem(THEME_KEY)) {
+                    applyTheme(matches ? DARK : LIGHT);
+                }
+            });
+            
+            // Set body classes once DOM is ready
+            if (document.readyState !== "loading") {
+                document.body.classList.add(theme + "-mode");
+            } else {
+                document.addEventListener("DOMContentLoaded", () => {
+                    document.body.classList.add(theme + "-mode");
+                    document.body.classList.remove((theme === DARK ? LIGHT : DARK) + "-mode");
+                });
+            }
+        })();
+    </script>
+    
+    <!-- Critical CSS to prevent flash -->
+    <style>
+        :root[data-theme="dark"] {
+            --background-color: #202124;
+            --background-color-transparent: rgba(32, 33, 36, 0.6);
+            --second-background-color: #2d2e32;
+            --third-background-color: #34353a;
+            --third-background-color-transparent: rgba(32, 33, 36, 0.6);
+            --primary-color: #0066CC;
+            --first-text-color: #ffffff;
+            --second-text-color: #eeeeee;
+            --third-text-color: #bebec6;
+            --fourth-text-color: #999999;
+            --default-text-color: #bebec6;
+            --invert-text-color: #373D3F;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --selection-color: #0066CC;
+            --shadow-color-1: rgba(255, 255, 255, 0.08);
+            --shadow-color-2: rgba(255, 255, 255, 0.05);
+        }
+        
+        :root[data-theme="light"] {
+            --background-color: #fff;
+            --background-color-transparent: rgba(255, 255, 255, 0.6);
+            --second-background-color: #f8f8f8;
+            --third-background-color: #f2f2f2;
+            --third-background-color-transparent: rgba(241, 241, 241, 0.6);
+            --primary-color: #0066CC;
+            --first-text-color: #16171a;
+            --second-text-color: #2f3037;
+            --third-text-color: #5e5e5e;
+            --fourth-text-color: #eeeeee;
+            --default-text-color: #373D3F;
+            --invert-text-color: #bebec6;
+            --border-color: rgba(0, 0, 0, 0.08);
+            --selection-color: #0066CC;
+            --shadow-color-1: rgba(0, 0, 0, 0.08);
+            --shadow-color-2: rgba(0, 0, 0, 0.05);
+        }
+        
+        body {
+            background-color: var(--background-color);
+            color: var(--default-text-color);
+        }
+        
+        /* Apply body classes as soon as DOM is ready */
+        :root[data-theme="dark"] body {
+            background-color: var(--background-color);
+            color: var(--default-text-color);
+        }
+    </style>
+    
+    <!-- preconnect -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    
+    <!--- Seo Part-->
+    
+    <link rel="canonical" href="https://hydraxman.github.io/2026/04/01/claude-code-leaked-analysis/"/>
+    <meta name="robots" content="index,follow">
+    <meta name="googlebot" content="index,follow">
+    <meta name="revisit-after" content="1 days">
+    
+    
+    
+        
+        <meta name="description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Claude Code源码泄露全解析：1884个文件背后的AI编程帝国">
+<meta property="og:url" content="https://hydraxman.github.io/2026/04/01/claude-code-leaked-analysis/index.html">
+<meta property="og:site_name" content="内森淼文">
+<meta property="og:description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://hydraxman.github.io/images/redefine-og.webp">
+<meta property="article:published_time" content="2026-03-31T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-04-01T00:05:01.581Z">
+<meta property="article:author" content="Nathan">
+<meta property="article:tag" content="AI">
+<meta property="article:tag" content="Agent">
+<meta property="article:tag" content="Claude Code">
+<meta property="article:tag" content="Anthropic">
+<meta property="article:tag" content="源码分析">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://hydraxman.github.io/images/redefine-og.webp">
+    
+    
+    <!--- Icon Part-->
+    <link rel="icon" type="image/png" href="/images/favicon.svg" sizes="192x192">
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.svg">
+    <meta name="theme-color" content="#ffffff">
+    <link rel="shortcut icon" href="/images/favicon.svg">
+    <!--- Page Info-->
+    
+    <title>
+        
+            Claude Code源码泄露全解析：1884个文件背后的AI编程帝国 | 内森淼文
+        
+    </title>
+
+    
+<link rel="stylesheet" href="/fonts/Chillax/chillax.css">
+
+
+    <!--- Inject Part-->
+    
+        
+            
+    
+            
+    
+            
+                
+                    <link rel="stylesheet" href="/css/custom.css">
+                
+    
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    
+        
+<link rel="stylesheet" href="/css/build/tailwind.css">
+
+    
+
+    
+<link rel="stylesheet" href="/fonts/GeistMono/geist-mono.css">
+
+    
+<link rel="stylesheet" href="/fonts/Geist/geist.css">
+
+    <!--- Font Part-->
+    
+    
+    
+    
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&display=swap" rel="stylesheet">
+    
+    
+
+    <script id="hexo-configurations">
+    window.config = {"hostname":"hydraxman.github.io","root":"/","language":"zh-CN","path":"search.json"};
+    window.theme = {"articles":{"style":{"font_size":"16px","line_height":1.5,"image_border_radius":"14px","image_alignment":"center","image_caption":false,"link_icon":true,"delete_mask":false,"title_alignment":"left","headings_top_spacing":{"h1":"3.2rem","h2":"2.4rem","h3":"1.9rem","h4":"1.6rem","h5":"1.4rem","h6":"1.3rem"}},"word_count":{"enable":true,"count":true,"min2read":true},"author_label":{"enable":false,"auto":false,"list":[]},"code_block":{"copy":true,"style":"mac","highlight_theme":{"light":"github","dark":"vs2015"},"font":{"enable":false,"family":null,"url":null}},"toc":{"enable":true,"max_depth":3,"number":false,"expand":true,"init_open":true},"copyright":{"enable":true,"default":"cc_by_nc_sa"},"lazyload":true,"pangu_js":false,"recommendation":{"enable":false,"title":"推荐阅读","limit":3,"mobile_limit":2,"placeholder":"/images/wallhaven-wqery6-light.webp","skip_dirs":[]}},"colors":{"primary":"#ffffff","secondary":null,"default_mode":"light"},"global":{"fonts":{"chinese":{"enable":false,"family":null,"url":null},"english":{"enable":true,"family":"Inter","url":"https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"},"title":{"enable":true,"family":"Noto Serif","url":"https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&display=swap"}},"content_max_width":"1000px","sidebar_width":"210px","hover":{"shadow":true,"scale":false},"scroll_progress":{"bar":true,"percentage":true},"website_counter":{"url":"https://cn.vercount.one/js","enable":false,"site_pv":true,"site_uv":true,"post_pv":true},"single_page":true,"preloader":{"enable":false,"custom_message":null},"side_tools":{"gear_rotation":true,"auto_expand":false},"open_graph":{"enable":true,"image":"/images/redefine-og.webp","description":"Hexo Theme Redefine, Redefine Your Hexo Journey."},"google_analytics":{"enable":false,"id":null}},"home_banner":{"enable":true,"style":"fixed","image":{"light":"/images/banner-light.jpg","dark":"/images/banner-dark.jpg"},"title":"内森淼文","subtitle":{"text":["AI · 编程 · 科技见闻","Write Code, Read World"],"hitokoto":{"enable":false,"show_author":false,"api":"https://v1.hitokoto.cn"},"typing_speed":100,"backing_speed":80,"starting_delay":500,"backing_delay":1500,"loop":true,"smart_backspace":true},"text_color":{"light":"#fff","dark":"#d1d1b6"},"text_style":{"title_size":"2.8rem","subtitle_size":"1.5rem","line_height":1.2},"custom_font":{"enable":false,"family":null,"url":null},"social_links":{"enable":true,"style":"default","links":{"github":"https://github.com/hydraxman","instagram":null,"zhihu":null,"twitter":null,"email":null},"qrs":{"weixin":null}}},"plugins":{"feed":{"enable":false},"aplayer":{"enable":false,"type":"fixed","audios":[{"name":null,"artist":null,"url":null,"cover":null,"lrc":null}]},"mermaid":{"enable":false,"version":"11.4.1"}},"version":"2.8.5","navbar":{"auto_hide":false,"color":{"left":"#333333","right":"#555555","transparency":35},"width":{"home":"1200px","pages":"1000px"},"links":{"Home":{"path":"/","icon":"fa-regular fa-house"},"Archives":{"path":"/archives","icon":"fa-regular fa-archive"},"Categories":{"path":"/categories","icon":"fa-regular fa-folder"},"Tags":{"path":"/tags","icon":"fa-regular fa-tags"},"About":{"path":"/about","icon":"fa-regular fa-user"}},"search":{"enable":true,"preload":true}},"page_templates":{"friends_column":2,"tags_style":"blur"},"home":{"sidebar":{"enable":true,"position":"left","first_item":"menu","announcement":"AI · 编程 · 科技","show_on_mobile":true,"links":{"Archives":{"path":"/archives","icon":"fa-regular fa-archive"},"Tags":{"path":"/tags","icon":"fa-regular fa-tags"},"Categories":{"path":"/categories","icon":"fa-regular fa-folder"}}},"article_date_format":"auto","excerpt_length":200,"categories":{"enable":true,"limit":3},"tags":{"enable":true,"limit":3}},"footerStart":"2024/01/01 00:00:00"};
+    window.lang_ago = {"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"};
+    window.data = {"masonry":false};
+  </script>
+    
+    <!--- Fontawesome Part-->
+    
+<link rel="stylesheet" href="/fontawesome/fontawesome.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/brands.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/solid.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/regular.min.css">
+
+    
+    
+    
+    
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+
+<body>
+	<div class="progress-bar-container">
+	
+	<span class="scroll-progress-bar"></span>
+	
+
+	
+	<span class="pjax-progress-bar"></span>
+	<!--        <span class="swup-progress-icon">-->
+	<!--            <i class="fa-solid fa-circle-notch fa-spin"></i>-->
+	<!--        </span>-->
+	
+</div>
+
+<main class="page-container" id="swup">
+
+	
+
+	<div class="main-content-container flex flex-col justify-between min-h-dvh">
+		<div class="main-content-header">
+			<header class="navbar-container px-6 md:px-12">
+    <div class="navbar-content transition-navbar ">
+        <div class="left">
+            
+            <a class="logo-title" href="/">
+                
+                内森淼文
+                
+            </a>
+        </div>
+
+        <div class="right">
+            <!-- PC -->
+            <div class="desktop">
+                <ul class="navbar-list">
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/"
+                                        >
+                                    <i class="fa-regular fa-house fa-fw"></i>
+                                    首页
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/archives"
+                                        >
+                                    <i class="fa-regular fa-archive fa-fw"></i>
+                                    归档
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/categories"
+                                        >
+                                    <i class="fa-regular fa-folder fa-fw"></i>
+                                    分类
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/tags"
+                                        >
+                                    <i class="fa-regular fa-tags fa-fw"></i>
+                                    标签
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/about"
+                                        >
+                                    <i class="fa-regular fa-user fa-fw"></i>
+                                    关于
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                    
+                        <li class="navbar-item search search-popup-trigger">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </li>
+                    
+                </ul>
+            </div>
+            <!-- Mobile -->
+            <div class="mobile">
+                
+                    <div class="icon-item search search-popup-trigger"><i class="fa-solid fa-magnifying-glass"></i>
+                    </div>
+                
+                <div class="icon-item navbar-bar">
+                    <div class="navbar-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile sheet -->
+    <div class="navbar-drawer h-dvh w-full absolute top-0 left-0 bg-background-color flex flex-col justify-between">
+        <ul class="drawer-navbar-list flex flex-col px-4 justify-center items-start">
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/"
+                        >
+                            <span>
+                                首页
+                            </span>
+                            
+                                <i class="fa-regular fa-house fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/archives"
+                        >
+                            <span>
+                                归档
+                            </span>
+                            
+                                <i class="fa-regular fa-archive fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/categories"
+                        >
+                            <span>
+                                分类
+                            </span>
+                            
+                                <i class="fa-regular fa-folder fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/tags"
+                        >
+                            <span>
+                                标签
+                            </span>
+                            
+                                <i class="fa-regular fa-tags fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/about"
+                        >
+                            <span>
+                                关于
+                            </span>
+                            
+                                <i class="fa-regular fa-user fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+
+            
+            
+                
+                    
+                    
+                    
+            
+        </ul>
+
+        <div class="statistics flex justify-around my-2.5">
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/tags">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">261</div>
+        <div class="label text-third-text-color text-sm">标签</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/categories">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">9</div>
+        <div class="label text-third-text-color text-sm">分类</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/archives">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">165</div>
+        <div class="label text-third-text-color text-sm">文章</div>
+    </a>
+</div>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+		</div>
+
+		<div class="main-content-body transition-fade-up">
+			
+
+			<div class="main-content">
+				<div class="post-page-container flex relative justify-between box-border w-full h-full">
+	<div class="article-content-container">
+
+		<div class="article-title relative w-full">
+			
+			
+			
+			<img src="/images/claude-code-leaked-cover.png" alt="Claude Code源码泄露全解析：1884个文件背后的AI编程帝国" class="w-full h-60 sm:h-72 md:h-80 object-cover sm:rounded-t-large dark:brightness-75" />
+			
+			<div class="w-full flex items-center absolute bottom-0 justify-start">
+				<h1 class="article-title-cover text-center mx-6 my-6 text-second-text-color bg-background-color-transparent px-4 py-3 text-3xl sm:text-4xl md:text-5xl font-semibold backdrop-blur-lg rounded-xl border border-border-color ">Claude Code源码泄露全解析：1884个文件背后的AI编程帝国</h1>
+			</div>
+			
+		</div>
+
+		
+		<div class="article-header flex flex-row gap-2 items-center px-2 sm:px-6 md:px-8">
+			<div class="avatar w-[46px] h-[46px] flex-shrink-0 rounded-medium border border-border-color p-[1px]">
+				<img src="/images/avatar.png">
+			</div>
+			<div class="info flex flex-col justify-between">
+				<div class="author flex items-center">
+					<span class="name text-default-text-color text-lg font-semibold">Nathan</span>
+					
+				</div>
+				<div class="meta-info">
+					<div class="article-meta-info">
+    <span class="article-date article-meta-item">
+        <i class="fa-regular fa-pen-fancy"></i>&nbsp;
+        <span class="desktop">2026-04-01</span>
+        <span class="mobile">2026-04-01</span>
+        <span class="hover-info">创建</span>
+    </span>
+    
+        <span class="article-date article-meta-item">
+            <i class="fa-regular fa-wrench"></i>&nbsp;
+            <span class="desktop">2026-04-01 08:05:01</span>
+            <span class="mobile">2026-04-01 08:05:01</span>
+            <span class="hover-info">更新</span>
+        </span>
+    
+
+    
+        <span class="article-categories article-meta-item">
+            <i class="fa-regular fa-folders"></i>&nbsp;
+            <ul>
+                
+                
+                    
+                        
+                        <li>
+                            <a href="/categories/%E6%B7%B1%E5%BA%A6%E5%88%86%E6%9E%90/">深度分析</a>&nbsp;
+                        </li>
+                    
+                    
+                
+            </ul>
+        </span>
+    
+    
+        <span class="article-tags article-meta-item">
+            <i class="fa-regular fa-tags"></i>&nbsp;
+            <ul>
+                
+                    <li>
+                        <a href="/tags/AI/">AI</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/Agent/">Agent</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/Claude-Code/">Claude Code</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/Anthropic/">Anthropic</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/">源码分析</a>&nbsp;
+                    </li>
+                
+            </ul>
+        </span>
+    
+
+    
+    
+        <span class="article-wordcount article-meta-item">
+            <i class="fa-regular fa-typewriter"></i>&nbsp;<span>2.9k 字</span>
+        </span>
+    
+    
+        <span class="article-min2read article-meta-item">
+            <i class="fa-regular fa-clock"></i>&nbsp;<span>11 分钟</span>
+        </span>
+    
+    
+</div>
+
+				</div>
+			</div>
+		</div>
+		
+
+		
+
+
+		<div class="article-content markdown-body px-2 sm:px-6 md:px-8 pb-8">
+			<blockquote>
+<p>2026年3月31日，安全研究员 Chaofan Shou 在 X 上发了一条推文，炸翻了整个 AI 圈：<strong>Claude Code 的完整源码，通过 npm 的 sourcemap 文件泄露了</strong>。1884个 TypeScript 文件、34MB 代码，Anthropic 最核心的 AI 编程产品，就这么赤裸裸地暴露在所有人面前。</p>
+</blockquote>
+<p>这不是一次简单的代码泄露。这是一次对 <strong>AI 编程工具内部架构</strong> 的全面透视——从多智能体协调系统到「做梦」记忆引擎，从隐身模式到电子宠物，Claude Code 的源码揭示了一个远比公开版本复杂得多的产品蓝图。</p>
+<p>我花了一整天时间，逐文件阅读这份源码。以下是我的发现。</p>
+<h2 id="一、泄露始末：一个-map-文件引发的血案"><a href="#一、泄露始末：一个-map-文件引发的血案" class="headerlink" title="一、泄露始末：一个 .map 文件引发的血案"></a>一、泄露始末：一个 <code>.map</code> 文件引发的血案</h2><p>故事的开始极其讽刺。</p>
+<p>JavaScript&#x2F;TypeScript 项目在构建时，打包工具会生成 <strong>source map</strong>（<code>.map</code>文件），用于将混淆后的线上代码映射回原始源码，方便调试。问题是——source map 的 <code>sourcesContent</code> 字段里，<strong>原封不动地嵌入了所有原始代码</strong>。</p>
+<div class="code-container" data-rel="Json"><figure class="iseeu highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;version&quot;</span><span class="punctuation">:</span> <span class="number">3</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;sources&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="string">&quot;../src/main.tsx&quot;</span><span class="punctuation">,</span> <span class="string">&quot;../src/tools/BashTool.ts&quot;</span><span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;sourcesContent&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="string">&quot;// 完整的原始代码全在这里...&quot;</span><span class="punctuation">]</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure></div>
+
+<p>Claude Code 使用 Bun 打包，Bun <strong>默认生成 source map</strong>。有人忘了在 <code>.npmignore</code> 里排除 <code>.map</code> 文件——于是，任何人运行 <code>npm pack @anthropic-ai/claude-code</code> 就能拿到全部源码。</p>
+<p>最讽刺的是什么？Claude Code 内部有一个专门防信息泄露的子系统叫 <strong>Undercover Mode</strong>，用来阻止 AI 在 commit 信息里泄露内部代号……结果整份源码直接通过 <code>.map</code> 文件外泄了。安全团队的脸大概肿了三圈。</p>
+<h2 id="二、总体架构：一个-4683-行的入口文件"><a href="#二、总体架构：一个-4683-行的入口文件" class="headerlink" title="二、总体架构：一个 4683 行的入口文件"></a>二、总体架构：一个 4683 行的入口文件</h2><p>打开 <code>main.tsx</code>——<strong>4683行，785KB</strong>。这不是一般的入口文件，这是一个巨型状态机。</p>
+<p>整个代码库的核心模块：</p>
+<table>
+<thead>
+<tr>
+<th>模块</th>
+<th>文件数</th>
+<th>职责</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>tools/</code></td>
+<td>43个子目录</td>
+<td>40+工具（Bash、文件读写、Web搜索等）</td>
+</tr>
+<tr>
+<td><code>services/</code></td>
+<td>36个子目录</td>
+<td>核心服务（API调用、MCP、记忆、分析）</td>
+</tr>
+<tr>
+<td><code>coordinator/</code></td>
+<td>协调器模式</td>
+<td>多Agent编排</td>
+</tr>
+<tr>
+<td><code>assistant/</code></td>
+<td>KAIROS模式</td>
+<td>常驻AI助手</td>
+</tr>
+<tr>
+<td><code>buddy/</code></td>
+<td>电子宠物系统</td>
+<td>对，你没看错</td>
+</tr>
+<tr>
+<td><code>memdir/</code></td>
+<td>记忆系统</td>
+<td>长期记忆+自动整理</td>
+</tr>
+<tr>
+<td><code>utils/</code></td>
+<td>各种工具函数</td>
+<td>权限、模型、安全、配置</td>
+</tr>
+</tbody></table>
+<p>架构的核心循环在 <code>QueryEngine.ts</code>：接收用户输入 → 构建 system prompt → 调用 Claude API → 处理工具调用 → 循环直到任务完成。这个循环看起来简单，但每一步都有复杂的门控逻辑。</p>
+<h2 id="三、Dream-System：AI-真的在「做梦」"><a href="#三、Dream-System：AI-真的在「做梦」" class="headerlink" title="三、Dream System：AI 真的在「做梦」"></a>三、Dream System：AI 真的在「做梦」</h2><p>这是源码里最惊艳的设计。</p>
+<p><code>services/autoDream/</code> 实现了一个<strong>记忆整理引擎</strong>——当 Claude Code 不被使用时，它会像人类睡觉做梦一样，自动整理和巩固记忆。</p>
+<h3 id="三重触发门"><a href="#三重触发门" class="headerlink" title="三重触发门"></a>三重触发门</h3><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">时间门：距离上次 Dream ≥ 24小时</span><br><span class="line">会话门：上次 Dream 后至少 5 个会话</span><br><span class="line">锁门：获取 consolidation lock（防并发）</span><br></pre></td></tr></table></figure></div>
+
+<p>三个条件同时满足才会触发 Dream。这个设计很聪明——既防止过度整理浪费资源，也确保有足够新信息值得整理。</p>
+<h3 id="四阶段流程"><a href="#四阶段流程" class="headerlink" title="四阶段流程"></a>四阶段流程</h3><p>从 <code>consolidationPrompt.ts</code> 里提取的完整流程：</p>
+<p><strong>Phase 1 — Orient（定位）</strong></p>
+<blockquote>
+<p><code>ls</code> memory 目录，读 <code>MEMORY.md</code>，浏览已有主题文件。</p>
+</blockquote>
+<p><strong>Phase 2 — Gather（采集）</strong></p>
+<blockquote>
+<p>按优先级寻找新信息：每日日志 → 已过时的记忆 → session 转录搜索。注意 prompt 明确说「不要全文阅读 transcript，只搜索你怀疑有价值的内容」。</p>
+</blockquote>
+<p><strong>Phase 3 — Consolidate（整合）</strong></p>
+<blockquote>
+<p>将相对日期转为绝对日期（”昨天”→”2026-03-30”），删除被推翻的旧事实，合并到已有主题文件而非创建重复文件。</p>
+</blockquote>
+<p><strong>Phase 4 — Prune（修剪）</strong></p>
+<blockquote>
+<p>保持 <code>MEMORY.md</code> 在 200 行 &#x2F; 25KB 以内。删除过时指针，压缩冗长条目。</p>
+</blockquote>
+<p>Dream 子进程只有<strong>只读 Bash 权限</strong>——可以看项目但不能改任何东西。这是纯粹的记忆整理，不是后台偷偷干活。</p>
+<h2 id="四、Coordinator-Mode：真正的多Agent编排"><a href="#四、Coordinator-Mode：真正的多Agent编排" class="headerlink" title="四、Coordinator Mode：真正的多Agent编排"></a>四、Coordinator Mode：真正的多Agent编排</h2><p><code>coordinator/coordinatorMode.ts</code>（369行）展示了一套成熟的<strong>多Agent协作系统</strong>。</p>
+<p>开启 <code>CLAUDE_CODE_COORDINATOR_MODE=1</code> 后，Claude Code 从单Agent变身为<strong>调度器</strong>，可以并行派发多个 Worker Agent：</p>
+<h3 id="四阶段工作流"><a href="#四阶段工作流" class="headerlink" title="四阶段工作流"></a>四阶段工作流</h3><table>
+<thead>
+<tr>
+<th>阶段</th>
+<th>执行者</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Research</td>
+<td>Workers（并行）</td>
+<td>调查代码库、找文件、理解问题</td>
+</tr>
+<tr>
+<td>Synthesis</td>
+<td><strong>Coordinator</strong></td>
+<td>阅读 Worker 汇报，制定方案</td>
+</tr>
+<tr>
+<td>Implementation</td>
+<td>Workers</td>
+<td>按方案改代码、提交</td>
+</tr>
+<tr>
+<td>Verification</td>
+<td>Workers</td>
+<td>验证改动是否正确</td>
+</tr>
+</tbody></table>
+<p>代码里有一段话堪称经典：</p>
+<blockquote>
+<p><strong>Parallelism is your superpower. Workers are async. Launch independent workers concurrently whenever possible — don’t serialize work that can run simultaneously.</strong></p>
+</blockquote>
+<p>更有趣的是，prompt 里明确<strong>禁止偷懒委派</strong>：</p>
+<blockquote>
+<p>Do NOT say “based on your findings” — read the actual findings and specify exactly what to do.</p>
+</blockquote>
+<p>Coordinator 必须自己理解 Worker 的调研结果，然后给出<strong>包含具体文件路径、行号和修改方案</strong>的精确指令。这不是「帮我改一下那个 bug」，而是「修复 <code>src/auth/validate.ts:42</code> 的空指针，<code>Session</code> 对象过期但 token 仍在缓存时 <code>user</code> 字段为 <code>undefined</code>，在访问 <code>user.id</code> 前加 null check，为空返回 401」。</p>
+<h3 id="Scratchpad：跨-Worker-共享知识"><a href="#Scratchpad：跨-Worker-共享知识" class="headerlink" title="Scratchpad：跨 Worker 共享知识"></a>Scratchpad：跨 Worker 共享知识</h3><p>通过 <code>tengu_scratch</code> feature gate 控制的共享目录，Worker 之间可以在这里读写文件，无需权限提示。结构化的跨 Agent 知识传递。</p>
+<h2 id="五、KAIROS：不等你说话就干活的AI"><a href="#五、KAIROS：不等你说话就干活的AI" class="headerlink" title="五、KAIROS：不等你说话就干活的AI"></a>五、KAIROS：不等你说话就干活的AI</h2><p><code>assistant/</code> 目录隐藏着一个完全不同形态的产品——<strong>KAIROS</strong>，一个常驻运行、主动行动的 AI 助手。</p>
+<p>和普通的「你说一句我做一句」不同，KAIROS 通过定时 <code>&lt;tick&gt;</code> 触发主动检查，自己决定要不要做点什么。它有：</p>
+<ul>
+<li><strong>15秒阻塞预算</strong>：任何主动行为如果会阻塞用户超过15秒，自动延迟</li>
+<li><strong>Brief 模式</strong>：极简输出，只在有价值时说话</li>
+<li><strong>专属工具</strong>：<code>SendUserFile</code>（推送文件）、<code>PushNotification</code>（推送通知）、<code>SubscribePR</code>（监控 PR 动态）</li>
+</ul>
+<p>KAIROS 的设计哲学是：<strong>像一个安静但警觉的专业助手，而不是一个唠叨的聊天机器人</strong>。</p>
+<h2 id="六、Undercover-Mode：AI-间谍操作手册"><a href="#六、Undercover-Mode：AI-间谍操作手册" class="headerlink" title="六、Undercover Mode：AI 间谍操作手册"></a>六、Undercover Mode：AI 间谍操作手册</h2><p><code>utils/undercover.ts</code> 揭示了一个惊人事实：<strong>Anthropic 员工正在使用 Claude Code 贡献开源代码</strong>，而且 AI 被要求隐藏自己的身份。</p>
+<p>当 <code>USER_TYPE === &#39;ant&#39;</code>（Anthropic 内部用户）在公开仓库工作时，Undercover Mode 自动激活：</p>
+<div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">NEVER include in commit messages or PR descriptions:</span><br><span class="line">- Internal model codenames (animal names like Capybara, Tengu, etc.)</span><br><span class="line">- Unreleased model version numbers (e.g., opus-4-7, sonnet-4-8)</span><br><span class="line">- Internal repo or project names</span><br><span class="line">- The phrase &quot;Claude Code&quot; or any mention that you are an AI</span><br><span class="line">- Co-Authored-By lines or any other attribution</span><br></pre></td></tr></table></figure></div>
+
+<p>关键设计：<strong>没有强制关闭开关</strong>。如果系统不确定当前仓库是否为内部仓库，一律保持隐身。安全优先。</p>
+<p>这意味着你在 GitHub 上看到的某些 PR，可能就是 Claude Code 写的——但你永远不会从 commit 信息里看出来。</p>
+<h2 id="七、Buddy-System：终端里的电子宠物"><a href="#七、Buddy-System：终端里的电子宠物" class="headerlink" title="七、Buddy System：终端里的电子宠物"></a>七、Buddy System：终端里的电子宠物</h2><p>没在开玩笑。<code>buddy/</code> 目录实现了一个完整的<strong>赛博宠物系统</strong>。</p>
+<h3 id="扭蛋系统"><a href="#扭蛋系统" class="headerlink" title="扭蛋系统"></a>扭蛋系统</h3><p>基于 Mulberry32 伪随机数生成器，用你的 <code>userId</code> 哈希作为种子——<strong>同一个用户永远抽到同一只宠物</strong>。</p>
+<table>
+<thead>
+<tr>
+<th>稀有度</th>
+<th>概率</th>
+<th>物种</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Common</td>
+<td>60%</td>
+<td>Pebblecrab, Dustbunny, Mossfrog, Twigling, Dewdrop, Puddlefish</td>
+</tr>
+<tr>
+<td>Uncommon</td>
+<td>25%</td>
+<td>Cloudferret, Gustowl, Bramblebear, Thornfox</td>
+</tr>
+<tr>
+<td>Rare</td>
+<td>10%</td>
+<td>Crystaldrake, Deepstag, Lavapup</td>
+</tr>
+<tr>
+<td>Epic</td>
+<td>4%</td>
+<td>Stormwyrm, Voidcat, Aetherling</td>
+</tr>
+<tr>
+<td>Legendary</td>
+<td>1%</td>
+<td>Cosmoshale, Nebulynx</td>
+</tr>
+</tbody></table>
+<p>闪光率 1%，独立于稀有度。闪光传说级 Nebulynx 的概率：<strong>万分之一</strong>。</p>
+<p>每只宠物有 5 项属性：<code>DEBUGGING</code>（调试力）、<code>PATIENCE</code>（耐心）、<code>CHAOS</code>（混沌）、<code>WISDOM</code>（智慧）、<code>SNARK</code>（毒舌值），还有眼睛样式和帽子装饰。</p>
+<p>宠物以 <strong>5行高、12字宽的 ASCII 字符画</strong> 渲染在终端里，有待机动画和反应动画。它坐在你的输入框旁边，偶尔在对话气泡里发表评论。而且它有独立的<strong>灵魂描述</strong>——由 Claude 在首次孵化时撰写。</p>
+<p>代码里引用了 2026 年 4 月 1-7 日作为预览窗口，5 月正式上线。看起来 Anthropic 团队确实在认真做这件事。</p>
+<h2 id="八、ULTRAPLAN：30分钟远程规划"><a href="#八、ULTRAPLAN：30分钟远程规划" class="headerlink" title="八、ULTRAPLAN：30分钟远程规划"></a>八、ULTRAPLAN：30分钟远程规划</h2><p><strong>ULTRAPLAN</strong> 模式将复杂规划任务外包到远程云容器（CCR Session），运行 <strong>Opus 4.6</strong> 级别模型，最长思考 <strong>30分钟</strong>。</p>
+<p>流程：</p>
+<ol>
+<li>Claude Code 识别需要深度规划的任务</li>
+<li>启动远程 CCR 会话</li>
+<li>本地终端每 3 秒轮询一次结果</li>
+<li>浏览器端 UI 让你实时观察规划过程</li>
+<li>确认后通过 <code>__ULTRAPLAN_TELEPORT_LOCAL__</code> 哨兵值「传送」回本地终端</li>
+</ol>
+<p>这说明 Anthropic 的野心不止于本地 CLI——他们在构建一个<strong>本地+云端混合的 AI 编程平台</strong>。</p>
+<h2 id="九、Feature-Gate：冰山下面有多大"><a href="#九、Feature-Gate：冰山下面有多大" class="headerlink" title="九、Feature Gate：冰山下面有多大"></a>九、Feature Gate：冰山下面有多大</h2><p>通过 Bun 的编译期 <code>feature()</code> 函数，大量功能在外部构建中被<strong>死代码消除</strong>。这些功能在付费版中都看不到，但代码已经写好了：</p>
+<table>
+<thead>
+<tr>
+<th>Feature Flag</th>
+<th>功能</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>KAIROS</code> &#x2F; <code>PROACTIVE</code></td>
+<td>常驻主动助手</td>
+</tr>
+<tr>
+<td><code>BUDDY</code></td>
+<td>电子宠物</td>
+</tr>
+<tr>
+<td><code>COORDINATOR_MODE</code></td>
+<td>多Agent编排</td>
+</tr>
+<tr>
+<td><code>VOICE_MODE</code></td>
+<td>语音输入</td>
+</tr>
+<tr>
+<td><code>BRIDGE_MODE</code></td>
+<td>与 claude.ai 联动</td>
+</tr>
+<tr>
+<td><code>DAEMON</code></td>
+<td>后台守护进程</td>
+</tr>
+<tr>
+<td><code>WORKFLOW_SCRIPTS</code></td>
+<td>工作流自动化</td>
+</tr>
+<tr>
+<td><code>TRANSCRIPT_CLASSIFIER</code></td>
+<td>AFK 离开模式（ML 自动审批）</td>
+</tr>
+</tbody></table>
+<p>此外，运行时 feature gate 通过 <strong>GrowthBook</strong> 管理，所有标志以 <code>tengu_</code> 为前缀。<code>tengu</code> 几乎可以确认是 Claude Code 的<strong>内部代号</strong>（天狗）。</p>
+<h2 id="十、安全架构：四层权限系统"><a href="#十、安全架构：四层权限系统" class="headerlink" title="十、安全架构：四层权限系统"></a>十、安全架构：四层权限系统</h2><p><code>tools/permissions/</code> 目录展示了精密的安全设计：</p>
+<p><strong>权限模式</strong>：</p>
+<ul>
+<li><code>default</code>：交互式提示（每次问你）</li>
+<li><code>auto</code>：ML 分类器自动审批（AFK 模式）</li>
+<li><code>bypass</code>：跳过检查</li>
+<li><code>yolo</code>：全部拒绝（讽刺的命名）</li>
+</ul>
+<p><strong>风险分级</strong>：每个工具操作被分为 LOW &#x2F; MEDIUM &#x2F; HIGH 三级。有一个叫 <strong>YOLO 分类器</strong> 的 ML 系统自动判断是否允许。</p>
+<p><strong>受保护文件</strong>：<code>.gitconfig</code>、<code>.bashrc</code>、<code>.zshrc</code>、<code>.mcp.json</code>、<code>.claude.json</code> 等被特殊保护，禁止自动修改。</p>
+<p><strong>路径遍历防护</strong>：URL 编码遍历、Unicode 归一化攻击、反斜杠注入、大小写路径操纵——全部处理。</p>
+<p>更有趣的是 <code>constants/cyberRiskInstruction.ts</code> 里的安全策略，顶部有一行大字：</p>
+<blockquote>
+<p><strong>IMPORTANT: DO NOT MODIFY THIS INSTRUCTION WITHOUT SAFEGUARDS TEAM REVIEW</strong><br>This instruction is owned by the Safeguards team (David Forsythe, Kyla Guru)</p>
+</blockquote>
+<p>直接暴露了 Anthropic 安全团队负责人的名字。</p>
+<h2 id="十一、其他发现"><a href="#十一、其他发现" class="headerlink" title="十一、其他发现"></a>十一、其他发现</h2><h3 id="企鹅模式"><a href="#企鹅模式" class="headerlink" title="企鹅模式"></a>企鹅模式</h3><p>Fast Mode（快速模式）内部叫 <strong>Penguin Mode</strong>（企鹅模式）。API 端点是 <code>penguin_mode</code>，配置键是 <code>penguinModeOrgEnabled</code>，关闭开关是 <code>tengu_penguins_off</code>。整个命名链条都是企鹅。</p>
+<h3 id="模型内部代号"><a href="#模型内部代号" class="headerlink" title="模型内部代号"></a>模型内部代号</h3><p>从 <code>migrations/</code> 目录可以看出模型代号历史：</p>
+<ul>
+<li><strong>Fennec</strong>（耳廓狐）→ Opus 的内部代号</li>
+<li><strong>Tengu</strong>（天狗）→ Claude Code 的项目代号</li>
+<li><strong>Chicago</strong> → Computer Use（桌面控制）的代号</li>
+</ul>
+<h3 id="Beta-Headers-泄露"><a href="#Beta-Headers-泄露" class="headerlink" title="Beta Headers 泄露"></a>Beta Headers 泄露</h3><p><code>constants/betas.ts</code> 暴露了所有未发布的 API 能力：</p>
+<div class="code-container" data-rel="Typescript"><figure class="iseeu highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&#x27;redact-thinking-2026-02-12&#x27;</span>     <span class="comment">// 隐藏思考过程</span></span><br><span class="line"><span class="string">&#x27;afk-mode-2026-01-31&#x27;</span>            <span class="comment">// AFK 离开模式  </span></span><br><span class="line"><span class="string">&#x27;advisor-tool-2026-03-01&#x27;</span>        <span class="comment">// 顾问工具</span></span><br><span class="line"><span class="string">&#x27;token-efficient-tools-2026-03-28&#x27;</span> <span class="comment">// Token 高效工具</span></span><br></pre></td></tr></table></figure></div>
+
+<h3 id="上游代理"><a href="#上游代理" class="headerlink" title="上游代理"></a>上游代理</h3><p><code>upstreamproxy/</code> 包含一个容器感知的代理中继，使用 <code>prctl(PR_SET_DUMPABLE, 0)</code> 防止同 UID 进程通过 ptrace 读取堆内存。Anthropic API、GitHub、npmjs.org 和 pypi.org 被显式排除在代理之外。</p>
+<h2 id="十二、总结：Claude-Code-的野心"><a href="#十二、总结：Claude-Code-的野心" class="headerlink" title="十二、总结：Claude Code 的野心"></a>十二、总结：Claude Code 的野心</h2><p>这份源码揭示的不只是一个 CLI 工具的实现细节，而是 Anthropic 对 <strong>AI 编程未来形态</strong> 的完整设想：</p>
+<ol>
+<li><strong>从工具到伙伴</strong>：电子宠物系统说明他们在思考情感连接，不只是功能</li>
+<li><strong>从单Agent到集群</strong>：Coordinator Mode + Agent Swarm &#x3D; 真正的AI团队</li>
+<li><strong>从被动到主动</strong>：KAIROS 让 AI 从「你说我做」进化到「我先做了你看看」</li>
+<li><strong>从本地到混合云</strong>：ULTRAPLAN 的远程规划意味着本地资源不再是瓶颈</li>
+<li><strong>从透明到隐身</strong>：Undercover Mode 暗示 AI 贡献代码正在成为常态</li>
+</ol>
+<p>外部用户看到的 Claude Code，只是冰山一角。源码里已经准备好的功能——至少比公开版本领先 <strong>6-12个月</strong>。</p>
+<p>而这一切，因为一个 <code>.npmignore</code> 的疏忽而公之于众。</p>
+<p>安全确实很难。但 <code>.npmignore</code> 似乎更难。</p>
+
+		</div>
+
+		
+		<div class="post-copyright-info w-full my-8 px-2 sm:px-6 md:px-8">
+			<div class="article-copyright-info-container">
+    <ul>
+        <li><strong>标题:</strong> Claude Code源码泄露全解析：1884个文件背后的AI编程帝国</li>
+        <li><strong>作者:</strong> Nathan</li>
+        <li><strong>创建于
+                :</strong> 2026-04-01 00:00:00</li>
+        
+            <li>
+                <strong>更新于
+                    :</strong> 2026-04-01 08:05:01
+            </li>
+        
+        <li>
+            <strong>链接:</strong> https://hydraxman.github.io/2026/04/01/claude-code-leaked-analysis/
+        </li>
+        <li>
+            <strong>
+                版权声明:
+            </strong>
+            
+
+            
+                本文章采用 <a class="license" target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0">CC BY-NC-SA 4.0</a> 进行许可。
+            
+        </li>
+    </ul>
+</div>
+
+		</div>
+		
+
+		
+		<ul class="post-tags-box text-lg mt-1.5 flex-wrap justify-center flex md:hidden">
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/AI/">#AI</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/Agent/">#Agent</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/Claude-Code/">#Claude Code</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/Anthropic/">#Anthropic</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/">#源码分析</a>&nbsp;
+			</li>
+			
+		</ul>
+		
+
+		
+
+		
+		<div class="article-nav my-8 flex justify-between items-center px-2 sm:px-6 md:px-8">
+			
+			<div class="article-prev border-border-color shadow-redefine-flat shadow-shadow-color-2 rounded-medium px-4 py-2 hover:shadow-redefine-flat-hover hover:shadow-shadow-color-2">
+				<a class="prev" rel="prev" href="/2026/04/01/openclaw-daily-2026-04-01/">
+					<span class="left arrow-icon flex justify-center items-center">
+						<i class="fa-solid fa-chevron-left"></i>
+					</span>
+					<span class="title flex justify-center items-center">
+						<span class="post-nav-title-item truncate max-w-48">OpenClaw 日报｜4月1日 重磅安全加固 + QQ Bot 上线 + 后台任务大改造</span>
+						<span class="post-nav-item">上一篇</span>
+					</span>
+				</a>
+			</div>
+			
+			
+			<div class="article-next border-border-color shadow-redefine-flat shadow-shadow-color-2 rounded-medium px-4 py-2 hover:shadow-redefine-flat-hover hover:shadow-shadow-color-2">
+				<a class="next" rel="next" href="/2026/03/31/openclaw-daily-2026-03-31/">
+					<span class="title flex justify-center items-center">
+						<span class="post-nav-title-item truncate max-w-48">OpenClaw 日报｜3月31日 v2026.3.29 重磅更新：xAI 搜索整合、插件审批钩子、ACP 频道绑定</span>
+						<span class="post-nav-item">下一篇</span>
+					</span>
+					<span class="right arrow-icon flex justify-center items-center">
+						<i class="fa-solid fa-chevron-right"></i>
+					</span>
+				</a>
+			</div>
+			
+		</div>
+		
+
+
+		
+	</div>
+
+	
+	<div class="toc-content-container">
+		<div class="post-toc-wrap">
+	<div class="post-toc">
+		<div class="toc-title">目录</div>
+		<div class="page-title">Claude Code源码泄露全解析：1884个文件背后的AI编程帝国</div>
+		<ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E6%B3%84%E9%9C%B2%E5%A7%8B%E6%9C%AB%EF%BC%9A%E4%B8%80%E4%B8%AA-map-%E6%96%87%E4%BB%B6%E5%BC%95%E5%8F%91%E7%9A%84%E8%A1%80%E6%A1%88"><span class="nav-text">一、泄露始末：一个 .map 文件引发的血案</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E6%80%BB%E4%BD%93%E6%9E%B6%E6%9E%84%EF%BC%9A%E4%B8%80%E4%B8%AA-4683-%E8%A1%8C%E7%9A%84%E5%85%A5%E5%8F%A3%E6%96%87%E4%BB%B6"><span class="nav-text">二、总体架构：一个 4683 行的入口文件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81Dream-System%EF%BC%9AAI-%E7%9C%9F%E7%9A%84%E5%9C%A8%E3%80%8C%E5%81%9A%E6%A2%A6%E3%80%8D"><span class="nav-text">三、Dream System：AI 真的在「做梦」</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%89%E9%87%8D%E8%A7%A6%E5%8F%91%E9%97%A8"><span class="nav-text">三重触发门</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9B%9B%E9%98%B6%E6%AE%B5%E6%B5%81%E7%A8%8B"><span class="nav-text">四阶段流程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81Coordinator-Mode%EF%BC%9A%E7%9C%9F%E6%AD%A3%E7%9A%84%E5%A4%9AAgent%E7%BC%96%E6%8E%92"><span class="nav-text">四、Coordinator Mode：真正的多Agent编排</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9B%9B%E9%98%B6%E6%AE%B5%E5%B7%A5%E4%BD%9C%E6%B5%81"><span class="nav-text">四阶段工作流</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Scratchpad%EF%BC%9A%E8%B7%A8-Worker-%E5%85%B1%E4%BA%AB%E7%9F%A5%E8%AF%86"><span class="nav-text">Scratchpad：跨 Worker 共享知识</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%94%E3%80%81KAIROS%EF%BC%9A%E4%B8%8D%E7%AD%89%E4%BD%A0%E8%AF%B4%E8%AF%9D%E5%B0%B1%E5%B9%B2%E6%B4%BB%E7%9A%84AI"><span class="nav-text">五、KAIROS：不等你说话就干活的AI</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AD%E3%80%81Undercover-Mode%EF%BC%9AAI-%E9%97%B4%E8%B0%8D%E6%93%8D%E4%BD%9C%E6%89%8B%E5%86%8C"><span class="nav-text">六、Undercover Mode：AI 间谍操作手册</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%83%E3%80%81Buddy-System%EF%BC%9A%E7%BB%88%E7%AB%AF%E9%87%8C%E7%9A%84%E7%94%B5%E5%AD%90%E5%AE%A0%E7%89%A9"><span class="nav-text">七、Buddy System：终端里的电子宠物</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%89%AD%E8%9B%8B%E7%B3%BB%E7%BB%9F"><span class="nav-text">扭蛋系统</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AB%E3%80%81ULTRAPLAN%EF%BC%9A30%E5%88%86%E9%92%9F%E8%BF%9C%E7%A8%8B%E8%A7%84%E5%88%92"><span class="nav-text">八、ULTRAPLAN：30分钟远程规划</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B9%9D%E3%80%81Feature-Gate%EF%BC%9A%E5%86%B0%E5%B1%B1%E4%B8%8B%E9%9D%A2%E6%9C%89%E5%A4%9A%E5%A4%A7"><span class="nav-text">九、Feature Gate：冰山下面有多大</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%81%E3%80%81%E5%AE%89%E5%85%A8%E6%9E%B6%E6%9E%84%EF%BC%9A%E5%9B%9B%E5%B1%82%E6%9D%83%E9%99%90%E7%B3%BB%E7%BB%9F"><span class="nav-text">十、安全架构：四层权限系统</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%81%E4%B8%80%E3%80%81%E5%85%B6%E4%BB%96%E5%8F%91%E7%8E%B0"><span class="nav-text">十一、其他发现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BC%81%E9%B9%85%E6%A8%A1%E5%BC%8F"><span class="nav-text">企鹅模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E5%9E%8B%E5%86%85%E9%83%A8%E4%BB%A3%E5%8F%B7"><span class="nav-text">模型内部代号</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Beta-Headers-%E6%B3%84%E9%9C%B2"><span class="nav-text">Beta Headers 泄露</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8A%E6%B8%B8%E4%BB%A3%E7%90%86"><span class="nav-text">上游代理</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%81%E4%BA%8C%E3%80%81%E6%80%BB%E7%BB%93%EF%BC%9AClaude-Code-%E7%9A%84%E9%87%8E%E5%BF%83"><span class="nav-text">十二、总结：Claude Code 的野心</span></a></li></ol>
+
+	</div>
+</div>
+	</div>
+	
+</div>
+			</div>
+
+			
+		</div>
+
+		<div class="main-content-footer">
+			<footer class="footer mt-5 py-5 h-auto text-base text-third-text-color relative border-t-2 border-t-border-color">
+    <div class="info-container py-3 text-center">
+        
+        <div class="text-center">
+            &copy;
+            
+              <span>2024</span>
+              -
+            
+            2026&nbsp;&nbsp;<i class="fa-solid fa-heart fa-beat" style="--fa-animation-duration: 0.5s; color: #333"></i>&nbsp;&nbsp;<a href="/">Nathan</a>
+            
+                
+                <p class="post-count space-x-0.5">
+                    <span>
+                        共撰写了 165 篇文章
+                    </span>
+                    
+                        <span>
+                            共 345.7k 字
+                        </span>
+                    
+                </p>
+            
+        </div>
+        
+        <div class="relative text-center lg:absolute lg:left-[20px] lg:top-1/2 lg:-translate-y-1/2 lg:text-left">
+            <span class="lg:block text-sm">由 <?xml version="1.0" encoding="utf-8"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg class="relative top-[2px] inline-block align-baseline" version="1.1" id="圖層_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="1rem" height="1rem" viewBox="0 0 512 512" enable-background="new 0 0 512 512" xml:space="preserve"><path fill="#0E83CD" d="M256.4,25.8l-200,115.5L56,371.5l199.6,114.7l200-115.5l0.4-230.2L256.4,25.8z M349,354.6l-18.4,10.7l-18.6-11V275H200v79.6l-18.4,10.7l-18.6-11v-197l18.5-10.6l18.5,10.8V237h112v-79.6l18.5-10.6l18.5,10.8V354.6z"/></svg><a target="_blank" class="text-base" href="https://hexo.io">Hexo</a> 驱动</span>
+            <span class="text-sm lg:block">主题&nbsp;<a class="text-base" target="_blank" href="https://github.com/EvanNotFound/hexo-theme-redefine">Redefine v2.8.5</a></span>
+        </div>
+        
+        
+            <div>
+                博客已运行 <span class="odometer" id="runtime_days" ></span> 天 <span class="odometer" id="runtime_hours"></span> 小时 <span class="odometer" id="runtime_minutes"></span> 分钟 <span class="odometer" id="runtime_seconds"></span> 秒
+            </div>
+        
+        
+            <script data-swup-reload-script>
+                try {
+                    function odometer_init() {
+                    const elements = document.querySelectorAll('.odometer');
+                    elements.forEach(el => {
+                        new Odometer({
+                            el,
+                            format: '( ddd).dd',
+                            duration: 200
+                        });
+                    });
+                    }
+                    odometer_init();
+                } catch (error) {}
+            </script>
+        
+        
+            
+                
+        
+                
+        
+        
+    </div>  
+</footer>
+		</div>
+	</div>
+
+	
+	<div class="post-tools">
+		<div class="post-tools-container">
+	<ul class="article-tools-list">
+		<!-- TOC aside toggle -->
+		
+		<li class="right-bottom-tools page-aside-toggle">
+			<i class="fa-regular fa-outdent"></i>
+		</li>
+		
+
+		<!-- go comment -->
+		
+	</ul>
+</div>
+	</div>
+	
+
+	<div class="right-side-tools-container">
+		<div class="side-tools-container">
+	<ul class="hidden-tools-list">
+		<li class="right-bottom-tools tool-font-adjust-plus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-plus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-font-adjust-minus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-minus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-dark-light-toggle flex justify-center items-center">
+			<i class="fa-regular fa-moon"></i>
+		</li>
+
+		<!-- rss -->
+		
+
+		
+
+		<li class="right-bottom-tools tool-scroll-to-bottom flex justify-center items-center">
+			<i class="fa-regular fa-arrow-down"></i>
+		</li>
+	</ul>
+
+	<ul class="visible-tools-list">
+		<li class="right-bottom-tools toggle-tools-list flex justify-center items-center">
+			<i class="fa-regular fa-cog fa-spin"></i>
+		</li>
+		
+		<li class="right-bottom-tools tool-scroll-to-top flex justify-center items-center">
+			<i class="arrow-up fas fa-arrow-up"></i>
+			<span class="percent"></span>
+		</li>
+		
+		
+	</ul>
+</div>
+	</div>
+
+	<div class="image-viewer-container">
+	<img src="">
+</div>
+
+	
+	<div class="search-pop-overlay">
+	<div class="popup search-popup">
+		<div class="search-header">
+			<span class="search-input-field-pre">
+				<i class="fa-solid fa-keyboard"></i>
+			</span>
+			<div class="search-input-container">
+				<input autocomplete="off" autocorrect="off" autocapitalize="off" placeholder="站内搜索您需要的内容..." spellcheck="false" type="search" class="search-input">
+			</div>
+			<span class="popup-btn-close">
+				<i class="fa-solid fa-times"></i>
+			</span>
+		</div>
+		<div id="search-result">
+			<div id="no-result">
+				<i class="fa-solid fa-spinner fa-spin-pulse fa-5x fa-fw"></i>
+			</div>
+		</div>
+	</div>
+</div>
+	
+
+</main>
+
+
+
+<script src="/js/build/libs/Swup.min.js"></script>
+
+<script src="/js/build/libs/SwupSlideTheme.min.js"></script>
+
+<script src="/js/build/libs/SwupScriptsPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupProgressPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupScrollPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupPreloadPlugin.min.js"></script>
+
+<script>
+    const swup = new Swup({
+        plugins: [
+            new SwupScriptsPlugin({
+                optin: true,
+            }),
+            new SwupProgressPlugin(),
+            new SwupScrollPlugin({
+                offset: 80,
+            }),
+            new SwupSlideTheme({
+                mainElement: ".main-content-body",
+            }),
+            new SwupPreloadPlugin(),
+        ],
+        containers: ["#swup"],
+    });
+</script>
+
+
+
+
+	
+<script src="/js/build/tools/imageViewer.js" type="module"></script>
+
+<script src="/js/build/utils.js" type="module"></script>
+
+<script src="/js/build/main.js" type="module"></script>
+
+<script src="/js/build/layouts/navbarShrink.js" type="module"></script>
+
+<script src="/js/build/tools/scrollTopBottom.js" type="module"></script>
+
+<script src="/js/build/tools/lightDarkSwitch.js" type="module"></script>
+
+<script src="/js/build/layouts/categoryList.js" type="module"></script>
+
+
+
+    
+<script src="/js/build/tools/localSearch.js" type="module"></script>
+
+
+
+
+    
+<script src="/js/build/tools/codeBlock.js" type="module"></script>
+
+
+
+
+    
+<script src="/js/build/layouts/lazyload.js" type="module"></script>
+
+
+
+
+    
+<script src="/js/build/tools/runtime.js"></script>
+
+    
+<script src="/js/build/libs/odometer.min.js"></script>
+
+    
+<link rel="stylesheet" href="/assets/odometer-theme-minimal.css">
+
+
+
+
+  
+<script src="/js/build/libs/Typed.min.js"></script>
+
+  
+<script src="/js/build/plugins/typed.js" type="module"></script>
+
+
+
+
+
+
+
+
+    
+<script src="/js/build/libs/anime.min.js"></script>
+
+
+
+
+
+    
+<script src="/js/build/tools/tocToggle.js" type="module" data-swup-reload-script=""></script>
+
+<script src="/js/build/layouts/toc.js" type="module" data-swup-reload-script=""></script>
+
+<script src="/js/build/plugins/tabs.js" type="module" data-swup-reload-script=""></script>
+
+
+
+
+<script src="/js/build/libs/moment-with-locales.min.js" data-swup-reload-script=""></script>
+
+
+<script src="/js/build/layouts/essays.js" type="module" data-swup-reload-script=""></script>
+
+
+
+
+
+	
+</body>
+
+</html>
