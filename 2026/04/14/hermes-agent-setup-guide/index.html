@@ -1,0 +1,1282 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="keywords" content="计算机技术, 生活中的胡思乱想">
+    
+    
+    <meta name="author" content="Nathan">
+    
+    <!-- Completely eliminate flash of wrong theme -->
+    <script>
+        (function() {
+            const THEME_KEY = "REDEFINE-THEME-STATUS";
+            const DARK = "dark", LIGHT = "light";
+            
+            // Get preferred theme
+            function getTheme() {
+                try {
+                    const saved = localStorage.getItem(THEME_KEY);
+                    if (saved) {
+                        const { isDark } = JSON.parse(saved);
+                        return isDark ? DARK : LIGHT;
+                    }
+                } catch (e) {}
+                
+                return matchMedia("(prefers-color-scheme: dark)").matches ? DARK : LIGHT;
+            }
+            
+            // Apply theme to document
+            function applyTheme(theme) {
+                const isDark = theme === DARK;
+                const root = document.documentElement;
+                
+                // Set classes for compatibility
+                root.classList.add(theme);
+                root.classList.remove(isDark ? LIGHT : DARK);
+                root.style.colorScheme = theme;
+            }
+            
+            // Initial application
+            const theme = getTheme();
+            applyTheme(theme);
+            
+            // Listen for system preference changes
+            matchMedia("(prefers-color-scheme: dark)").addEventListener("change", ({ matches }) => {
+                // Only update if using system preference (no localStorage entry)
+                if (!localStorage.getItem(THEME_KEY)) {
+                    applyTheme(matches ? DARK : LIGHT);
+                }
+            });
+            
+            // Set body classes ASAP (before DOMContentLoaded)
+            (function() {
+                const addBodyClass = () => {
+                    const b = document.body;
+                    if (!b) return false;
+                    b.classList.add(theme + "-mode");
+                    return true;
+                };
+
+                // Try immediately
+                if (addBodyClass()) return;
+
+                // Observe until body exists
+                const mo = new MutationObserver(() => {
+                    if (addBodyClass()) mo.disconnect();
+                });
+                mo.observe(document.documentElement, { childList: true, subtree: true });
+            })();
+        })();
+    </script>
+    
+    <!-- preconnect -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    
+    <!--- Seo Part-->
+    
+    <link rel="canonical" href="https://hydraxman.github.io/2026/04/14/hermes-agent-setup-guide/"/>
+    <meta name="robots" content="index,follow">
+    <meta name="googlebot" content="index,follow">
+    <meta name="revisit-after" content="1 days">
+    
+    
+        
+        <meta name="description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Hermes Agent 安装部署完全指南：从零搭建你的全平台 AI Agent">
+<meta property="og:url" content="https://hydraxman.github.io/2026/04/14/hermes-agent-setup-guide/index.html">
+<meta property="og:site_name" content="内森淼文">
+<meta property="og:description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://hydraxman.github.io/images/redefine-og.webp">
+<meta property="article:published_time" content="2026-04-14T02:30:00.000Z">
+<meta property="article:modified_time" content="2026-04-14T02:33:28.124Z">
+<meta property="article:author" content="Nathan">
+<meta property="article:tag" content="AI Agent">
+<meta property="article:tag" content="开源">
+<meta property="article:tag" content="教程">
+<meta property="article:tag" content="Hermes">
+<meta property="article:tag" content="部署">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://hydraxman.github.io/images/redefine-og.webp">
+    
+    
+    <!--- Icon Part-->
+    <link rel="icon" type="image/png" href="/images/favicon.svg" sizes="192x192">
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.svg">
+    <meta name="theme-color" content="#ffffff">
+    <link rel="shortcut icon" href="/images/favicon.svg">
+    <!--- Page Info-->
+    
+    <title>
+        
+            Hermes Agent 安装部署完全指南：从零搭建你的全平台 AI Agent | 内森淼文
+        
+    </title>
+
+    
+<link rel="stylesheet" href="/fonts/Chillax/chillax.css">
+
+
+    <!--- Inject Part-->
+    
+        
+            
+    
+            
+    
+            
+                
+                    <link rel="stylesheet" href="/css/custom.css">
+                
+    
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    
+        
+<link rel="stylesheet" href="/css/build/tailwind.css">
+
+    
+
+    
+<link rel="stylesheet" href="/fonts/GeistMono/geist-mono.css">
+
+    
+<link rel="stylesheet" href="/fonts/Geist/geist.css">
+
+    <!--- Font Part-->
+    
+    
+    
+    
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&display=swap" rel="stylesheet">
+    
+    
+
+    <script id="hexo-configurations">
+    window.config = {"hostname":"hydraxman.github.io","root":"/","language":"zh-CN","path":"search.json"};
+    window.theme = {"articles":{"style":{"font_size":"16px","line_height":1.5,"image_border_radius":"14px","image_alignment":"center","image_caption":false,"link_icon":true,"delete_mask":false,"title_alignment":"left","headings_top_spacing":{"h1":"3.2rem","h2":"2.4rem","h3":"1.9rem","h4":"1.6rem","h5":"1.4rem","h6":"1.3rem"}},"word_count":{"enable":true,"count":true,"min2read":true},"author_label":{"enable":false,"auto":false,"list":[]},"code_block":{"copy":true,"style":"mac","highlight_theme":{"light":"github","dark":"vs2015"},"font":{"enable":false,"family":null,"url":null}},"toc":{"enable":true,"max_depth":3,"number":false,"expand":true,"init_open":true},"copyright":{"enable":true,"default":"cc_by_nc_sa"},"lazyload":true,"pangu_js":false,"recommendation":{"enable":false,"title":"推荐阅读","limit":3,"mobile_limit":2,"placeholder":"/images/wallhaven-wqery6-light.webp","skip_dirs":[]}},"colors":{"primary":"#ffffff","secondary":null,"default_mode":"light"},"global":{"fonts":{"chinese":{"enable":false,"family":null,"url":null},"english":{"enable":true,"family":"Inter","url":"https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"},"title":{"enable":true,"family":"Noto Serif","url":"https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&display=swap"}},"content_max_width":"1000px","sidebar_width":"210px","hover":{"shadow":true,"scale":false},"scroll_progress":{"bar":true,"percentage":true},"website_counter":{"url":"https://cn.vercount.one/js","enable":false,"site_pv":true,"site_uv":true,"post_pv":true},"single_page":true,"preloader":{"enable":false,"custom_message":null},"side_tools":{"gear_rotation":true,"auto_expand":false},"open_graph":{"enable":true,"image":"/images/redefine-og.webp","description":"Hexo Theme Redefine, Redefine Your Hexo Journey."},"google_analytics":{"enable":false,"id":null}},"home_banner":{"enable":true,"style":"fixed","image":{"light":"/images/banner-light.jpg","dark":"/images/banner-dark.jpg"},"title":"内森淼文","subtitle":{"text":["AI · 编程 · 科技见闻","Write Code, Read World"],"hitokoto":{"enable":false,"show_author":false,"api":"https://v1.hitokoto.cn"},"typing_speed":100,"backing_speed":80,"starting_delay":500,"backing_delay":1500,"loop":true,"smart_backspace":true},"text_color":{"light":"#fff","dark":"#d1d1b6"},"text_style":{"title_size":"2.8rem","subtitle_size":"1.5rem","line_height":1.2},"custom_font":{"enable":false,"family":null,"url":null},"social_links":{"enable":true,"style":"default","links":[{"icon":"fa-brands fa-github","url":"https://github.com/hydraxman"}],"qrs":[{"icon":"fa-brands fa-weixin","qr":null},{"icon":"/images/custom-icon.svg","qr":null}]}},"plugins":{"feed":{"enable":false},"aplayer":{"enable":false,"type":"fixed","audios":[{"name":null,"artist":null,"url":null,"cover":null,"lrc":null}]},"mermaid":{"enable":false,"version":"11.4.1","theme":{"light":"default","dark":"dark"}}},"version":"2.9.0","navbar":{"auto_hide":false,"color":{"left":"#333333","right":"#555555","transparency":35},"width":{"home":"1200px","pages":"1000px"},"links":{"Home":{"path":"/","icon":"fa-regular fa-house"},"Archives":{"path":"/archives","icon":"fa-regular fa-archive"},"Categories":{"path":"/categories","icon":"fa-regular fa-folder"},"Tags":{"path":"/tags","icon":"fa-regular fa-tags"},"About":{"path":"/about","icon":"fa-regular fa-user"}},"search":{"enable":true,"preload":true}},"page_templates":{"friends_column":2,"tags_style":"blur","masonry":{"batch_size":12,"initial_batch_size":24}},"home":{"sidebar":{"enable":true,"position":"left","first_item":"menu","announcement":"AI · 编程 · 科技","show_on_mobile":true,"links":{"Archives":{"path":"/archives","icon":"fa-regular fa-archive"},"Tags":{"path":"/tags","icon":"fa-regular fa-tags"},"Categories":{"path":"/categories","icon":"fa-regular fa-folder"}}},"article_date_format":"auto","excerpt_length":200,"categories":{"enable":true,"limit":3},"tags":{"enable":true,"limit":3}},"footer":{"runtime":true,"icon":"<i class=\"fa-solid fa-heart fa-beat\" style=\"--fa-animation-duration: 0.5s; color: #333\"></i>","start":"2024/01/01 00:00:00","statistics":true,"customize":null,"icp":{"enable":false,"number":null,"url":null}},"footerStart":"2024/01/01 00:00:00","mermaid":{"style":{"light":"default","dark":"dark"}}};
+    window.lang_ago = {"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"};
+    window.i18n = {"search":"站内搜索您需要的内容...","toc":"目录","prev":"上一页","next":"下一页","prev_posts":"上一篇","next_posts":"下一篇","page":"第 %d 页","recent_posts":"最新文章","share":"分享","powered_by":"由 %s 驱动","theme":"主题","rss_feed":"RSS Feed","category":"分类","categories":"分类","tag":"标签","tags":"标签","post":"文章","posts":"文章","tagcloud":"标签云","comment":"评论","comments":"评论","top":"置顶","sticky":"置顶","go-back-home":"回到首页","masonry_loading":"照片加载中...","image_viewer":"图片查看器","close":"关闭","exif":{"title":"EXIF","cards":{"camera":"相机","lens":"镜头","exposure":"曝光","other":"其他"},"fields":{"make":"品牌","model":"机型","date_taken":"拍摄时间","lens_model":"镜头","focal_length":"焦距","focus_mode":"对焦模式","shutter":"快门","aperture":"光圈","iso":"感光度","exposure_program":"曝光程序","exposure_compensation":"曝光补偿","metering_mode":"测光模式","flash":"闪光灯","white_balance":"白平衡","latitude":"纬度","longitude":"经度","altitude":"海拔"},"status":{"loading":"加载中...","no_exif":"无 EXIF 信息","library_missing":"EXIF 库未加载","image_source_missing":"图片地址不可用","unavailable":"EXIF 不可用（可能被 CORS 阻止或缺少元数据）","flag_unavailable":"EXIF 不可用"}},"home":"首页","archive":"归档","archives":"归档","about":"关于","links":"链接","link":"链接","friends":"友情链接","friend":"友情链接","timeline":"时间轴","shuoshuo":"说说","bookmarks":"书签","site_uv":"访问人数","site_pv":"总访问量","read_more":"阅读全文","wordcount":"字","min2read":"分钟","changelog":"更新日志","status":"状态","runtime":"博客已运行","days":"天","hours":"小时","minutes":"分钟","seconds":"秒","optimized_by":"并由 Evan 进行优化","rights":"版权所有","site_posts":"共撰写了 %s 篇文章","site_wordcount":"共 %s 字","copyright":{"title":"标题","author":"作者","link":"链接","create_time":"创建于","update_time":"更新于","license_title":"版权声明","license_content":"本文章采用 %s 进行许可。","all_rights_reserved":"版权所有 &#169 %s，禁止转载。","public_domain":"本文为公有领域作品，可自由转载、引用。"},"ago":{"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"},"create_time":"创建","update_time":"更新","expired":"这篇文章最后更新于 %s 天前，内容可能已经过时。"};
+    window.data = {"masonry":false};
+  </script>
+    
+    <!--- Fontawesome Part-->
+    
+<link rel="stylesheet" href="/fontawesome/fontawesome.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/brands.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/solid.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/regular.min.css">
+
+    
+    
+    
+    
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+	<div class="progress-bar-container">
+	
+	<span class="scroll-progress-bar"></span>
+	
+
+	
+	<span class="pjax-progress-bar"></span>
+	<!--        <span class="swup-progress-icon">-->
+	<!--            <i class="fa-solid fa-circle-notch fa-spin"></i>-->
+	<!--        </span>-->
+	
+</div>
+
+<main class="page-container" id="swup">
+
+	
+
+	<div class="main-content-container flex flex-col justify-between min-h-dvh">
+		<div class="main-content-header">
+			<header class="navbar-container px-6 md:px-12">
+    <div class="navbar-content transition-navbar ">
+        <div class="left">
+            
+            <a class="logo-title" href="/">
+                
+                内森淼文
+                
+            </a>
+        </div>
+
+        <div class="right">
+            <!-- PC -->
+            <div class="desktop">
+                <ul class="navbar-list">
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/"
+                                        >
+                                    <i class="fa-regular fa-house fa-fw"></i>
+                                    首页
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/archives"
+                                        >
+                                    <i class="fa-regular fa-archive fa-fw"></i>
+                                    归档
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/categories"
+                                        >
+                                    <i class="fa-regular fa-folder fa-fw"></i>
+                                    分类
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/tags"
+                                        >
+                                    <i class="fa-regular fa-tags fa-fw"></i>
+                                    标签
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/about"
+                                        >
+                                    <i class="fa-regular fa-user fa-fw"></i>
+                                    关于
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                    
+                        <li class="navbar-item search search-popup-trigger">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </li>
+                    
+                </ul>
+            </div>
+            <!-- Mobile -->
+            <div class="mobile">
+                
+                    <div class="icon-item search search-popup-trigger"><i class="fa-solid fa-magnifying-glass"></i>
+                    </div>
+                
+                <div class="icon-item navbar-bar">
+                    <div class="navbar-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile sheet -->
+    <div class="navbar-drawer h-dvh w-full absolute top-0 left-0 bg-background-color flex flex-col justify-between">
+        <ul class="drawer-navbar-list flex flex-col px-4 justify-center items-start">
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/"
+                        >
+                            <span>
+                                首页
+                            </span>
+                            
+                                <i class="fa-regular fa-house fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/archives"
+                        >
+                            <span>
+                                归档
+                            </span>
+                            
+                                <i class="fa-regular fa-archive fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/categories"
+                        >
+                            <span>
+                                分类
+                            </span>
+                            
+                                <i class="fa-regular fa-folder fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/tags"
+                        >
+                            <span>
+                                标签
+                            </span>
+                            
+                                <i class="fa-regular fa-tags fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/about"
+                        >
+                            <span>
+                                关于
+                            </span>
+                            
+                                <i class="fa-regular fa-user fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+
+            
+            
+                
+                    
+                    
+                    
+            
+        </ul>
+
+        <div class="statistics flex justify-around my-2.5">
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/tags">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">269</div>
+        <div class="label text-third-text-color text-sm">标签</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/categories">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">9</div>
+        <div class="label text-third-text-color text-sm">分类</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/archives">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">191</div>
+        <div class="label text-third-text-color text-sm">文章</div>
+    </a>
+</div>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+		</div>
+
+		<div class="main-content-body transition-fade-up">
+			
+
+			<div class="main-content">
+				<div class="post-page-container flex relative justify-between box-border w-full h-full">
+	<div class="article-content-container">
+
+		<div class="article-title relative w-full">
+			
+			
+			
+			<img src="/images/hermes-agent-guide/cover.png" alt="Hermes Agent 安装部署完全指南：从零搭建你的全平台 AI Agent" class="w-full h-60 sm:h-72 md:h-80 object-cover sm:rounded-t-large dark:brightness-75" />
+			
+			<div class="w-full flex items-center absolute bottom-0 justify-start">
+				<h1 class="article-title-cover text-center mx-6 my-6 text-second-text-color bg-background-color-transparent px-4 py-3 text-3xl sm:text-4xl md:text-5xl font-semibold backdrop-blur-lg rounded-xl border border-border-color ">Hermes Agent 安装部署完全指南：从零搭建你的全平台 AI Agent</h1>
+			</div>
+			
+		</div>
+
+		
+		<div class="article-header flex flex-row gap-2 items-center px-2 sm:px-6 md:px-8">
+			<div class="avatar w-[46px] h-[46px] shrink-0 rounded-medium border border-border-color p-px">
+				<img src="/images/avatar.png">
+			</div>
+			<div class="info flex flex-col justify-between">
+				<div class="author flex items-center">
+					<span class="name text-default-text-color text-lg font-semibold">Nathan</span>
+					
+				</div>
+				<div class="meta-info">
+					<div class="article-meta-info">
+    <span class="article-date article-meta-item">
+        <i class="fa-regular fa-pen-fancy"></i>&nbsp;
+        <span class="desktop">2026-04-14 10:30</span>
+        <span class="mobile">2026-04-14 10:30</span>
+        <span class="hover-info">创建</span>
+    </span>
+    
+        <span class="article-date article-meta-item">
+            <i class="fa-regular fa-wrench"></i>&nbsp;
+            <span class="desktop">2026-04-14 10:33:28</span>
+            <span class="mobile">2026-04-14 10:33:28</span>
+            <span class="hover-info">更新</span>
+        </span>
+    
+
+    
+        <span class="article-categories article-meta-item">
+            <i class="fa-regular fa-folders"></i>&nbsp;
+            <ul>
+                
+                
+                    
+                        
+                        <li>
+                            <a href="/categories/%E6%8A%80%E6%9C%AF%E5%AE%9E%E6%88%98/">技术实战</a>&nbsp;
+                        </li>
+                    
+                    
+                
+            </ul>
+        </span>
+    
+    
+        <span class="article-tags article-meta-item">
+            <i class="fa-regular fa-tags"></i>&nbsp;
+            <ul>
+                
+                    <li>
+                        <a href="/tags/AI-Agent/">AI Agent</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/%E5%BC%80%E6%BA%90/">开源</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/%E6%95%99%E7%A8%8B/">教程</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/Hermes/">Hermes</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/%E9%83%A8%E7%BD%B2/">部署</a>&nbsp;
+                    </li>
+                
+            </ul>
+        </span>
+    
+
+    
+    
+        <span class="article-wordcount article-meta-item">
+            <i class="fa-regular fa-typewriter"></i>&nbsp;<span>2.3k 字</span>
+        </span>
+    
+    
+        <span class="article-min2read article-meta-item">
+            <i class="fa-regular fa-clock"></i>&nbsp;<span>9 分钟</span>
+        </span>
+    
+    
+</div>
+
+				</div>
+			</div>
+		</div>
+		
+
+		
+
+
+		<div class="article-content markdown-body px-2 sm:px-6 md:px-8 pb-8">
+			<blockquote>
+<p><strong>一句话概括：</strong> Hermes Agent 是 Nous Research 开源的全平台 AI Agent 框架——终端里能干活，微信&#x2F;Telegram&#x2F;Discord 里能聊天，还能定时执行任务、自我学习。这篇文章手把手教你从零安装到全平台部署。</p>
+</blockquote>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/hermes-agent-guide/cover.png"
+                      alt="封面"
+                ></p>
+<hr>
+<h2 id="📖-Hermes-Agent-是什么？"><a href="#📖-Hermes-Agent-是什么？" class="headerlink" title="📖 Hermes Agent 是什么？"></a>📖 Hermes Agent 是什么？</h2><p>如果你用过 Claude Code、OpenAI Codex CLI 或者 Cursor，那 Hermes Agent 就是同一类东西——但是<strong>开源的、全平台的、可自我进化的</strong>。</p>
+<p>它的核心能力：</p>
+<ul>
+<li>🧠 <strong>持久记忆</strong> —— 跨会话记住你的偏好、项目结构、踩过的坑</li>
+<li>🛠 <strong>工具调用</strong> —— 终端执行命令、读写文件、搜索网页、浏览器自动化、MCP 服务器对接</li>
+<li>💬 <strong>全平台网关</strong> —— 同一个 Agent 同时跑在微信、Telegram、Discord、Slack、WhatsApp、飞书等 10+ 平台</li>
+<li>📚 <strong>技能系统</strong> —— 解决了复杂问题？自动保存为 Skill，下次直接用</li>
+<li>⏰ <strong>定时任务</strong> —— Cron 调度，定时抓新闻、发日报、同步代码……</li>
+<li>🔄 <strong>模型随便换</strong> —— 支持 18+ 模型提供商，OpenRouter、Anthropic、OpenAI、DeepSeek、本地模型统统能用</li>
+</ul>
+<hr>
+<h2 id="🏗-整体架构一览"><a href="#🏗-整体架构一览" class="headerlink" title="🏗 整体架构一览"></a>🏗 整体架构一览</h2><p>先看全局架构图，心里有数再动手：</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/hermes-agent-guide/architecture.png"
+                      alt="Hermes Agent 架构图"
+                ></p>
+<p>核心设计思路是 **”一个 Agent 核心，多种接入方式”**：</p>
+<ul>
+<li><strong>CLI 模式</strong>：终端里直接对话，程序员日常最常用</li>
+<li><strong>Gateway 模式</strong>：作为服务运行，接入各种聊天平台</li>
+<li><strong>Agent Core</strong>：统一的 AIAgent 循环，负责 LLM 调用、工具分发、记忆管理</li>
+</ul>
+<hr>
+<h2 id="⚡-安装：一行命令搞定"><a href="#⚡-安装：一行命令搞定" class="headerlink" title="⚡ 安装：一行命令搞定"></a>⚡ 安装：一行命令搞定</h2><h3 id="前置条件"><a href="#前置条件" class="headerlink" title="前置条件"></a>前置条件</h3><ul>
+<li>macOS &#x2F; Linux &#x2F; WSL（Windows 原生暂不支持）</li>
+<li>Python 3.10+（推荐 3.11）</li>
+<li>一个 LLM API Key（OpenRouter、Anthropic、OpenAI 等任选其一）</li>
+</ul>
+<h3 id="一键安装"><a href="#一键安装" class="headerlink" title="一键安装"></a>一键安装</h3><div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh | bash</span><br></pre></td></tr></table></figure></div>
+
+<p>安装脚本会自动：</p>
+<ol>
+<li>克隆仓库到 <code>~/.hermes/hermes-agent/</code></li>
+<li>创建 Python 虚拟环境</li>
+<li>安装所有依赖</li>
+<li>把 <code>hermes</code> 命令加到你的 PATH</li>
+</ol>
+<h3 id="安装流程"><a href="#安装流程" class="headerlink" title="安装流程"></a>安装流程</h3><p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/hermes-agent-guide/install-flow.png"
+                      alt="安装流程"
+                ></p>
+<p>安装完成后，运行 Setup 向导：</p>
+<div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hermes setup</span><br></pre></td></tr></table></figure></div>
+
+<p>向导会引导你选择：</p>
+<ul>
+<li><strong>模型提供商</strong>（推荐新手用 OpenRouter，一个 Key 可以用所有模型）</li>
+<li><strong>默认模型</strong>（推荐 <code>anthropic/claude-sonnet-4</code> 性价比最高）</li>
+<li><strong>API Key</strong> 配置</li>
+</ul>
+<h3 id="健康检查"><a href="#健康检查" class="headerlink" title="健康检查"></a>健康检查</h3><div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hermes doctor</span><br></pre></td></tr></table></figure></div>
+
+<p>这个命令会检查所有依赖和配置是否就绪，有问题加 <code>--fix</code> 自动修复：</p>
+<div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hermes doctor --fix</span><br></pre></td></tr></table></figure></div>
+
+<hr>
+<h2 id="🚀-基础使用"><a href="#🚀-基础使用" class="headerlink" title="🚀 基础使用"></a>🚀 基础使用</h2><h3 id="交互模式（最常用）"><a href="#交互模式（最常用）" class="headerlink" title="交互模式（最常用）"></a>交互模式（最常用）</h3><div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hermes</span><br></pre></td></tr></table></figure></div>
+
+<p>直接进入对话界面，像聊天一样和 Agent 互动。它可以：</p>
+<div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">你&gt; 帮我写一个 FastAPI 项目，带用户注册登录功能</span><br><span class="line"></span><br><span class="line">Hermes&gt; 好的，我来创建项目结构...</span><br><span class="line">┊ terminal: mkdir -p myapp &amp;&amp; cd myapp</span><br><span class="line">┊ write_file: myapp/main.py (142 lines)</span><br><span class="line">┊ write_file: myapp/models.py (67 lines)</span><br><span class="line">┊ terminal: pip install fastapi uvicorn sqlalchemy</span><br><span class="line">✅ 项目创建完成！结构如下...</span><br></pre></td></tr></table></figure></div>
+
+<h3 id="单次查询"><a href="#单次查询" class="headerlink" title="单次查询"></a>单次查询</h3><p>不想进交互模式？直接问：</p>
+<div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hermes chat -q <span class="string">&quot;把 ~/Downloads/data.csv 的前10行转成 JSON&quot;</span></span><br></pre></td></tr></table></figure></div>
+
+<h3 id="切换模型"><a href="#切换模型" class="headerlink" title="切换模型"></a>切换模型</h3><div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 交互式选择</span></span><br><span class="line">hermes model</span><br><span class="line"></span><br><span class="line"><span class="comment"># 或者直接指定</span></span><br><span class="line">hermes chat -m deepseek/deepseek-chat</span><br></pre></td></tr></table></figure></div>
+
+<h3 id="常用斜杠命令"><a href="#常用斜杠命令" class="headerlink" title="常用斜杠命令"></a>常用斜杠命令</h3><p>在交互会话中输入：</p>
+<table>
+<thead>
+<tr>
+<th>命令</th>
+<th>功能</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>/new</code></td>
+<td>开始新会话</td>
+</tr>
+<tr>
+<td><code>/model</code></td>
+<td>切换模型</td>
+</tr>
+<tr>
+<td><code>/tools</code></td>
+<td>管理可用工具</td>
+</tr>
+<tr>
+<td><code>/skills</code></td>
+<td>搜索&#x2F;安装技能</td>
+</tr>
+<tr>
+<td><code>/cron</code></td>
+<td>管理定时任务</td>
+</tr>
+<tr>
+<td><code>/voice on</code></td>
+<td>开启语音模式</td>
+</tr>
+<tr>
+<td><code>/help</code></td>
+<td>查看所有命令</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="🛠-工具生态"><a href="#🛠-工具生态" class="headerlink" title="🛠 工具生态"></a>🛠 工具生态</h2><p>Hermes 的强大在于它的工具生态——不只是聊天，还能<strong>干活</strong>。</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/hermes-agent-guide/tools-ecosystem.png"
+                      alt="工具生态"
+                ></p>
+<h3 id="内置工具集"><a href="#内置工具集" class="headerlink" title="内置工具集"></a>内置工具集</h3><table>
+<thead>
+<tr>
+<th>工具集</th>
+<th>功能</th>
+<th align="center">是否默认开启</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>terminal</code></td>
+<td>执行 Shell 命令</td>
+<td align="center">✅</td>
+</tr>
+<tr>
+<td><code>file</code></td>
+<td>读写&#x2F;搜索&#x2F;编辑文件</td>
+<td align="center">✅</td>
+</tr>
+<tr>
+<td><code>web</code></td>
+<td>网页搜索和内容抓取</td>
+<td align="center">✅</td>
+</tr>
+<tr>
+<td><code>browser</code></td>
+<td>浏览器自动化</td>
+<td align="center">✅</td>
+</tr>
+<tr>
+<td><code>code_execution</code></td>
+<td>Python 沙箱执行</td>
+<td align="center">✅</td>
+</tr>
+<tr>
+<td><code>vision</code></td>
+<td>图片分析</td>
+<td align="center">✅</td>
+</tr>
+<tr>
+<td><code>delegation</code></td>
+<td>子 Agent 并行任务</td>
+<td align="center">✅</td>
+</tr>
+<tr>
+<td><code>memory</code></td>
+<td>持久记忆</td>
+<td align="center">✅</td>
+</tr>
+<tr>
+<td><code>cronjob</code></td>
+<td>定时任务</td>
+<td align="center">✅</td>
+</tr>
+<tr>
+<td><code>image_gen</code></td>
+<td>AI 图片生成</td>
+<td align="center">❌</td>
+</tr>
+<tr>
+<td><code>tts</code></td>
+<td>文字转语音</td>
+<td align="center">❌</td>
+</tr>
+<tr>
+<td><code>homeassistant</code></td>
+<td>智能家居控制</td>
+<td align="center">❌</td>
+</tr>
+</tbody></table>
+<p>管理工具：</p>
+<div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 交互式 UI（推荐）</span></span><br><span class="line">hermes tools</span><br><span class="line"></span><br><span class="line"><span class="comment"># 命令行</span></span><br><span class="line">hermes tools <span class="built_in">enable</span> image_gen</span><br><span class="line">hermes tools <span class="built_in">disable</span> browser</span><br></pre></td></tr></table></figure></div>
+
+<h3 id="MCP-服务器对接"><a href="#MCP-服务器对接" class="headerlink" title="MCP 服务器对接"></a>MCP 服务器对接</h3><p>Hermes 原生支持 MCP（Model Context Protocol），可以接入任何 MCP 服务器扩展能力：</p>
+<div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 添加 MCP 服务器</span></span><br><span class="line">hermes mcp add github --<span class="built_in">command</span> <span class="string">&quot;npx -y @modelcontextprotocol/server-github&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看已配置的 MCP 服务器</span></span><br><span class="line">hermes mcp list</span><br><span class="line"></span><br><span class="line"><span class="comment"># 测试连接</span></span><br><span class="line">hermes mcp <span class="built_in">test</span> github</span><br></pre></td></tr></table></figure></div>
+
+<p>或者直接在 <code>~/.hermes/config.yaml</code> 里配置：</p>
+<div class="code-container" data-rel="Yaml"><figure class="iseeu highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">mcp:</span></span><br><span class="line">  <span class="attr">servers:</span></span><br><span class="line">    <span class="attr">github:</span></span><br><span class="line">      <span class="attr">command:</span> <span class="string">&quot;npx&quot;</span></span><br><span class="line">      <span class="attr">args:</span> [<span class="string">&quot;-y&quot;</span>, <span class="string">&quot;@modelcontextprotocol/server-github&quot;</span>]</span><br><span class="line">      <span class="attr">env:</span></span><br><span class="line">        <span class="attr">GITHUB_PERSONAL_ACCESS_TOKEN:</span> <span class="string">&quot;ghp_xxx&quot;</span></span><br></pre></td></tr></table></figure></div>
+
+<hr>
+<h2 id="💬-Gateway-部署：全平台接入"><a href="#💬-Gateway-部署：全平台接入" class="headerlink" title="💬 Gateway 部署：全平台接入"></a>💬 Gateway 部署：全平台接入</h2><p>这是 Hermes 最炫的部分——一个 Agent，同时在多个聊天平台上工作。</p>
+<h3 id="支持的平台"><a href="#支持的平台" class="headerlink" title="支持的平台"></a>支持的平台</h3><p>Telegram、Discord、Slack、WhatsApp、Signal、微信、飞书、钉钉、企业微信、Email、Matrix、Mattermost、Home Assistant、SMS……</p>
+<h3 id="部署步骤"><a href="#部署步骤" class="headerlink" title="部署步骤"></a>部署步骤</h3><p><strong>1. 配置平台凭证</strong></p>
+<p>编辑 <code>~/.hermes/.env</code>，添加对应平台的 Token：</p>
+<div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Telegram</span></span><br><span class="line">TELEGRAM_BOT_TOKEN=your_bot_token</span><br><span class="line">TELEGRAM_ALLOWED_USERS=your_user_id</span><br><span class="line"></span><br><span class="line"><span class="comment"># Discord</span></span><br><span class="line">DISCORD_BOT_TOKEN=your_bot_token</span><br><span class="line">DISCORD_ALLOWED_USERS=your_user_id</span><br><span class="line"></span><br><span class="line"><span class="comment"># 微信</span></span><br><span class="line">WEIXIN_APP_ID=your_app_id</span><br><span class="line">WEIXIN_APP_SECRET=your_secret</span><br><span class="line">WEIXIN_ALLOWED_USERS=your_user_id@im.wechat</span><br></pre></td></tr></table></figure></div>
+
+<p><strong>2. 启动 Gateway</strong></p>
+<div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 前台运行（调试用）</span></span><br><span class="line">hermes gateway run</span><br><span class="line"></span><br><span class="line"><span class="comment"># 安装为系统服务（推荐）</span></span><br><span class="line">hermes gateway install</span><br><span class="line">hermes gateway start</span><br></pre></td></tr></table></figure></div>
+
+<p><strong>3. 检查状态</strong></p>
+<div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hermes gateway status</span><br></pre></td></tr></table></figure></div>
+
+<h3 id="安全配置"><a href="#安全配置" class="headerlink" title="安全配置"></a>安全配置</h3><p>⚠️ <strong>重要：</strong> 默认情况下，Gateway 不响应所有用户。你需要在 <code>.env</code> 里配置允许列表：</p>
+<div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 只允许特定用户</span></span><br><span class="line">TELEGRAM_ALLOWED_USERS=123456789,987654321</span><br><span class="line"></span><br><span class="line"><span class="comment"># 或者允许所有人（不推荐用于个人部署）</span></span><br><span class="line">TELEGRAM_ALLOW_ALL_USERS=<span class="literal">true</span></span><br></pre></td></tr></table></figure></div>
+
+<hr>
+<h2 id="🧠-记忆与技能系统"><a href="#🧠-记忆与技能系统" class="headerlink" title="🧠 记忆与技能系统"></a>🧠 记忆与技能系统</h2><h3 id="持久记忆"><a href="#持久记忆" class="headerlink" title="持久记忆"></a>持久记忆</h3><p>Hermes 自动维护两种记忆：</p>
+<ul>
+<li><strong>用户画像（User Profile）</strong> —— 记住你是谁、你的偏好、沟通风格</li>
+<li><strong>工作笔记（Memory）</strong> —— 环境信息、项目约定、踩坑经验</li>
+</ul>
+<p>记忆跨会话持久存在，不需要每次重复告诉 Agent 你的情况。</p>
+<div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看记忆状态</span></span><br><span class="line">hermes memory status</span><br><span class="line"></span><br><span class="line"><span class="comment"># 配置记忆提供商（默认 built-in，还支持 Honcho、Mem0）</span></span><br><span class="line">hermes memory setup</span><br></pre></td></tr></table></figure></div>
+
+<h3 id="技能系统"><a href="#技能系统" class="headerlink" title="技能系统"></a>技能系统</h3><p>Hermes 能从经验中学习。当它解决了复杂问题，会自动提议保存为 Skill：</p>
+<div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Hermes&gt; 这个部署流程比较复杂，要不要保存为技能方便以后复用？</span><br><span class="line">你&gt; 好的，保存</span><br><span class="line"></span><br><span class="line">Hermes&gt; ✅ 已保存技能 &#x27;docker-deploy&#x27;，下次遇到类似场景会自动加载。</span><br></pre></td></tr></table></figure></div>
+
+<p>技能管理：</p>
+<div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">hermes skills list              <span class="comment"># 查看已安装技能</span></span><br><span class="line">hermes skills browse            <span class="comment"># 浏览技能商店</span></span><br><span class="line">hermes skills search <span class="string">&quot;docker&quot;</span>   <span class="comment"># 搜索技能</span></span><br><span class="line">hermes skills install docker-deploy  <span class="comment"># 安装技能</span></span><br></pre></td></tr></table></figure></div>
+
+<hr>
+<h2 id="⏰-定时任务-Cron"><a href="#⏰-定时任务-Cron" class="headerlink" title="⏰ 定时任务 (Cron)"></a>⏰ 定时任务 (Cron)</h2><p>让 Agent 定时干活——发日报、同步代码、监控网站……</p>
+<h3 id="命令行管理"><a href="#命令行管理" class="headerlink" title="命令行管理"></a>命令行管理</h3><div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 创建每天早上 9 点执行的任务</span></span><br><span class="line">hermes cron create <span class="string">&quot;0 9 * * *&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看所有任务</span></span><br><span class="line">hermes cron list</span><br><span class="line"></span><br><span class="line"><span class="comment"># 暂停/恢复</span></span><br><span class="line">hermes cron pause &lt;job_id&gt;</span><br><span class="line">hermes cron resume &lt;job_id&gt;</span><br></pre></td></tr></table></figure></div>
+
+<h3 id="在对话中创建"><a href="#在对话中创建" class="headerlink" title="在对话中创建"></a>在对话中创建</h3><p>直接跟 Agent 说：</p>
+<div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">你&gt; 每天早上 8 点帮我抓取科技新闻，总结后发到微信</span><br><span class="line"></span><br><span class="line">Hermes&gt; 好的，我创建一个定时任务...</span><br><span class="line">┊ cronjob: 创建 &quot;0 8 * * *&quot; → weixin</span><br><span class="line">✅ 定时任务已创建，每天 8:00 执行</span><br></pre></td></tr></table></figure></div>
+
+<h3 id="投递目标"><a href="#投递目标" class="headerlink" title="投递目标"></a>投递目标</h3><p>Cron 任务的结果可以发送到：</p>
+<ul>
+<li><code>origin</code> —— 回到创建任务的聊天</li>
+<li><code>local</code> —— 保存到本地文件</li>
+<li><code>telegram</code> &#x2F; <code>discord</code> &#x2F; <code>weixin</code> &#x2F; <code>feishu</code> —— 指定平台</li>
+</ul>
+<hr>
+<h2 id="👤-多-Profile-支持"><a href="#👤-多-Profile-支持" class="headerlink" title="👤 多 Profile 支持"></a>👤 多 Profile 支持</h2><p>不同场景用不同配置？Profile 帮你隔离：</p>
+<div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 创建新 Profile</span></span><br><span class="line">hermes profile create work --<span class="built_in">clone</span>  <span class="comment"># 克隆当前配置</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 切换 Profile</span></span><br><span class="line">hermes -p work  <span class="comment"># 启动时指定</span></span><br><span class="line">hermes profile use work  <span class="comment"># 设为默认</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看所有 Profile</span></span><br><span class="line">hermes profile list</span><br></pre></td></tr></table></figure></div>
+
+<p>每个 Profile 有独立的配置、记忆、技能、会话历史。比如：</p>
+<ul>
+<li><code>default</code> —— 日常使用，用 Claude</li>
+<li><code>work</code> —— 工作场景，用公司 API Key</li>
+<li><code>coding</code> —— 编程专用，加载编程技能包</li>
+</ul>
+<hr>
+<h2 id="🔧-进阶配置"><a href="#🔧-进阶配置" class="headerlink" title="🔧 进阶配置"></a>🔧 进阶配置</h2><h3 id="配置文件"><a href="#配置文件" class="headerlink" title="配置文件"></a>配置文件</h3><div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hermes config edit  <span class="comment"># 打开编辑器</span></span><br></pre></td></tr></table></figure></div>
+
+<p>核心配置项一览：</p>
+<div class="code-container" data-rel="Yaml"><figure class="iseeu highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 模型</span></span><br><span class="line"><span class="attr">model:</span></span><br><span class="line">  <span class="attr">default:</span> <span class="string">anthropic/claude-sonnet-4</span></span><br><span class="line">  <span class="attr">provider:</span> <span class="string">openrouter</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Agent 行为</span></span><br><span class="line"><span class="attr">agent:</span></span><br><span class="line">  <span class="attr">max_turns:</span> <span class="number">90</span>  <span class="comment"># 单次对话最大工具调用轮数</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 终端后端</span></span><br><span class="line"><span class="attr">terminal:</span></span><br><span class="line">  <span class="attr">backend:</span> <span class="string">local</span>  <span class="comment"># local / docker / ssh / modal</span></span><br><span class="line">  <span class="attr">timeout:</span> <span class="number">180</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 上下文压缩（长对话自动压缩）</span></span><br><span class="line"><span class="attr">compression:</span></span><br><span class="line">  <span class="attr">enabled:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">threshold:</span> <span class="number">0.50</span>  <span class="comment"># 占用 50% 上下文时触发</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 显示</span></span><br><span class="line"><span class="attr">display:</span></span><br><span class="line">  <span class="attr">skin:</span> <span class="string">default</span>  <span class="comment"># 主题：default / ares / mono / slate</span></span><br><span class="line">  <span class="attr">tool_progress:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">show_reasoning:</span> <span class="string">auto</span></span><br><span class="line">  <span class="attr">show_cost:</span> <span class="literal">true</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 语音</span></span><br><span class="line"><span class="attr">stt:</span></span><br><span class="line">  <span class="attr">enabled:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">provider:</span> <span class="string">local</span>  <span class="comment"># local(免费) / groq(免费) / openai</span></span><br><span class="line"><span class="attr">tts:</span></span><br><span class="line">  <span class="attr">provider:</span> <span class="string">edge</span>  <span class="comment"># edge(免费) / elevenlabs / openai / kokoro</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 安全</span></span><br><span class="line"><span class="attr">security:</span></span><br><span class="line">  <span class="attr">tirith_enabled:</span> <span class="literal">true</span>  <span class="comment"># 危险命令确认</span></span><br></pre></td></tr></table></figure></div>
+
+<h3 id="API-Key-配置"><a href="#API-Key-配置" class="headerlink" title="API Key 配置"></a>API Key 配置</h3><p>编辑 <code>~/.hermes/.env</code>：</p>
+<div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># LLM 提供商</span></span><br><span class="line">OPENROUTER_API_KEY=sk-or-xxx</span><br><span class="line">ANTHROPIC_API_KEY=sk-ant-xxx</span><br><span class="line">DEEPSEEK_API_KEY=sk-xxx</span><br><span class="line"></span><br><span class="line"><span class="comment"># 工具增强</span></span><br><span class="line">TAVILY_API_KEY=tvly-xxx          <span class="comment"># 网页搜索</span></span><br><span class="line">BROWSERBASE_API_KEY=xxx          <span class="comment"># 浏览器自动化</span></span><br><span class="line">ELEVENLABS_API_KEY=xxx           <span class="comment"># 语音合成</span></span><br></pre></td></tr></table></figure></div>
+
+<h3 id="凭证池（Credential-Pools）"><a href="#凭证池（Credential-Pools）" class="headerlink" title="凭证池（Credential Pools）"></a>凭证池（Credential Pools）</h3><p>有多个 API Key？Hermes 自动轮换：</p>
+<div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">hermes auth add          <span class="comment"># 交互式添加</span></span><br><span class="line">hermes auth list         <span class="comment"># 查看所有凭证</span></span><br></pre></td></tr></table></figure></div>
+
+<hr>
+<h2 id="🐛-常见问题排查"><a href="#🐛-常见问题排查" class="headerlink" title="🐛 常见问题排查"></a>🐛 常见问题排查</h2><h3 id="安装失败"><a href="#安装失败" class="headerlink" title="安装失败"></a>安装失败</h3><div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 检查 Python 版本</span></span><br><span class="line">python3 --version  <span class="comment"># 需要 3.10+</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 重新安装</span></span><br><span class="line">hermes doctor --fix</span><br></pre></td></tr></table></figure></div>
+
+<h3 id="Gateway-不响应"><a href="#Gateway-不响应" class="headerlink" title="Gateway 不响应"></a>Gateway 不响应</h3><div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 检查进程状态</span></span><br><span class="line">hermes gateway status</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 查看错误日志（不是 gateway.log！）</span></span><br><span class="line"><span class="built_in">tail</span> -50 ~/.hermes/logs/gateway.error.log</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 检查用户白名单</span></span><br><span class="line">grep ALLOWED_USERS ~/.hermes/.env</span><br><span class="line"></span><br><span class="line"><span class="comment"># 4. 重启</span></span><br><span class="line">hermes gateway restart</span><br></pre></td></tr></table></figure></div>
+
+<h3 id="工具不可用"><a href="#工具不可用" class="headerlink" title="工具不可用"></a>工具不可用</h3><div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 检查工具状态</span></span><br><span class="line">hermes tools list</span><br><span class="line"></span><br><span class="line"><span class="comment"># 启用后需要新会话才生效</span></span><br><span class="line"><span class="comment"># 在交互模式中输入 /new</span></span><br></pre></td></tr></table></figure></div>
+
+<h3 id="更新-Hermes"><a href="#更新-Hermes" class="headerlink" title="更新 Hermes"></a>更新 Hermes</h3><div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hermes update</span><br></pre></td></tr></table></figure></div>
+
+<hr>
+<h2 id="📚-资源链接"><a href="#📚-资源链接" class="headerlink" title="📚 资源链接"></a>📚 资源链接</h2><table>
+<thead>
+<tr>
+<th>资源</th>
+<th>链接</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>GitHub 仓库</td>
+<td><a class="link"   target="_blank" rel="noopener" href="https://github.com/NousResearch/hermes-agent" >NousResearch&#x2F;hermes-agent<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></td>
+</tr>
+<tr>
+<td>官方文档</td>
+<td><a class="link"   target="_blank" rel="noopener" href="https://hermes-agent.nousresearch.com/docs/" >hermes-agent.nousresearch.com<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></td>
+</tr>
+<tr>
+<td>配置参考</td>
+<td><a class="link"   target="_blank" rel="noopener" href="https://hermes-agent.nousresearch.com/docs/user-guide/configuration" >Configuration Docs<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></td>
+</tr>
+<tr>
+<td>平台接入指南</td>
+<td><a class="link"   target="_blank" rel="noopener" href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/" >Messaging Docs<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></td>
+</tr>
+<tr>
+<td>提供商列表</td>
+<td><a class="link"   target="_blank" rel="noopener" href="https://hermes-agent.nousresearch.com/docs/integrations/providers" >Providers Guide<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></td>
+</tr>
+<tr>
+<td>技能目录</td>
+<td><a class="link"   target="_blank" rel="noopener" href="https://hermes-agent.nousresearch.com/docs/reference/skills-catalog" >Skills Catalog<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="🎯-总结"><a href="#🎯-总结" class="headerlink" title="🎯 总结"></a>🎯 总结</h2><p>Hermes Agent 是目前开源 AI Agent 框架中<strong>最全面的方案之一</strong>：</p>
+<ol>
+<li><strong>入门简单</strong> —— 一行命令安装，几分钟配置好就能用</li>
+<li><strong>功能强大</strong> —— 终端、文件、网页、浏览器、MCP……工具生态完整</li>
+<li><strong>全平台部署</strong> —— 微信、Telegram、Discord 等 10+ 平台一键接入</li>
+<li><strong>可自我进化</strong> —— 记忆 + 技能系统让 Agent 越用越聪明</li>
+<li><strong>完全可控</strong> —— 开源、本地部署、数据在你手里</li>
+</ol>
+<p>如果你正在找一个能真正”干活”的 AI Agent，而不只是聊天机器人，Hermes Agent 值得一试。</p>
+<hr>
+<p><em>本文作者也在使用 Hermes Agent 完成日常开发、内容创作和自动化任务。如果你有安装部署方面的问题，欢迎留言交流。</em></p>
+
+		</div>
+
+		
+		<div class="post-copyright-info w-full my-8 px-2 sm:px-6 md:px-8">
+			<div class="article-copyright-info-container">
+    <ul>
+        <li><strong>标题:</strong> Hermes Agent 安装部署完全指南：从零搭建你的全平台 AI Agent</li>
+        <li><strong>作者:</strong> Nathan</li>
+        <li><strong>创建于
+                :</strong> 2026-04-14 10:30:00</li>
+        
+            <li>
+                <strong>更新于
+                    :</strong> 2026-04-14 10:33:28
+            </li>
+        
+        <li>
+            <strong>链接:</strong> https://hydraxman.github.io/2026/04/14/hermes-agent-setup-guide/
+        </li>
+        <li>
+            <strong>
+                版权声明:
+            </strong>
+            
+
+            
+                本文章采用 <a class="license" target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0">CC BY-NC-SA 4.0</a> 进行许可。
+            
+        </li>
+    </ul>
+</div>
+
+		</div>
+		
+
+		
+		<ul class="post-tags-box text-lg mt-1.5 flex-wrap justify-center flex md:hidden">
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/AI-Agent/">#AI Agent</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/%E5%BC%80%E6%BA%90/">#开源</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/%E6%95%99%E7%A8%8B/">#教程</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/Hermes/">#Hermes</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/%E9%83%A8%E7%BD%B2/">#部署</a>&nbsp;
+			</li>
+			
+		</ul>
+		
+
+		
+
+		
+		<div class="article-nav my-8 flex justify-between items-center px-2 sm:px-6 md:px-8">
+			
+			
+			<div class="article-next border-border-color shadow-redefine-flat shadow-shadow-color-2 rounded-medium px-4 py-2 hover:shadow-redefine-flat-hover hover:shadow-shadow-color-2">
+				<a class="next" rel="next" href="/2026/04/13/2026-04-13-morning-news/">
+					<span class="title flex justify-center items-center">
+						<span class="post-nav-title-item truncate max-w-48">2026年04月13日早间要闻</span>
+						<span class="post-nav-item">下一篇</span>
+					</span>
+					<span class="right arrow-icon flex justify-center items-center">
+						<i class="fa-solid fa-chevron-right"></i>
+					</span>
+				</a>
+			</div>
+			
+		</div>
+		
+
+
+		
+	</div>
+
+	
+	<div class="toc-content-container">
+		<div class="post-toc-wrap">
+	<div class="post-toc">
+		<div class="toc-title">目录</div>
+		<div class="page-title">Hermes Agent 安装部署完全指南：从零搭建你的全平台 AI Agent</div>
+		<ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%F0%9F%93%96-Hermes-Agent-%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F"><span class="nav-text">📖 Hermes Agent 是什么？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%F0%9F%8F%97-%E6%95%B4%E4%BD%93%E6%9E%B6%E6%9E%84%E4%B8%80%E8%A7%88"><span class="nav-text">🏗 整体架构一览</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E2%9A%A1-%E5%AE%89%E8%A3%85%EF%BC%9A%E4%B8%80%E8%A1%8C%E5%91%BD%E4%BB%A4%E6%90%9E%E5%AE%9A"><span class="nav-text">⚡ 安装：一行命令搞定</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%89%8D%E7%BD%AE%E6%9D%A1%E4%BB%B6"><span class="nav-text">前置条件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%80%E9%94%AE%E5%AE%89%E8%A3%85"><span class="nav-text">一键安装</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E8%A3%85%E6%B5%81%E7%A8%8B"><span class="nav-text">安装流程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%81%A5%E5%BA%B7%E6%A3%80%E6%9F%A5"><span class="nav-text">健康检查</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%F0%9F%9A%80-%E5%9F%BA%E7%A1%80%E4%BD%BF%E7%94%A8"><span class="nav-text">🚀 基础使用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%A4%E4%BA%92%E6%A8%A1%E5%BC%8F%EF%BC%88%E6%9C%80%E5%B8%B8%E7%94%A8%EF%BC%89"><span class="nav-text">交互模式（最常用）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8D%95%E6%AC%A1%E6%9F%A5%E8%AF%A2"><span class="nav-text">单次查询</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%87%E6%8D%A2%E6%A8%A1%E5%9E%8B"><span class="nav-text">切换模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B8%B8%E7%94%A8%E6%96%9C%E6%9D%A0%E5%91%BD%E4%BB%A4"><span class="nav-text">常用斜杠命令</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%F0%9F%9B%A0-%E5%B7%A5%E5%85%B7%E7%94%9F%E6%80%81"><span class="nav-text">🛠 工具生态</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%86%85%E7%BD%AE%E5%B7%A5%E5%85%B7%E9%9B%86"><span class="nav-text">内置工具集</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MCP-%E6%9C%8D%E5%8A%A1%E5%99%A8%E5%AF%B9%E6%8E%A5"><span class="nav-text">MCP 服务器对接</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%F0%9F%92%AC-Gateway-%E9%83%A8%E7%BD%B2%EF%BC%9A%E5%85%A8%E5%B9%B3%E5%8F%B0%E6%8E%A5%E5%85%A5"><span class="nav-text">💬 Gateway 部署：全平台接入</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%94%AF%E6%8C%81%E7%9A%84%E5%B9%B3%E5%8F%B0"><span class="nav-text">支持的平台</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%83%A8%E7%BD%B2%E6%AD%A5%E9%AA%A4"><span class="nav-text">部署步骤</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E5%85%A8%E9%85%8D%E7%BD%AE"><span class="nav-text">安全配置</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%F0%9F%A7%A0-%E8%AE%B0%E5%BF%86%E4%B8%8E%E6%8A%80%E8%83%BD%E7%B3%BB%E7%BB%9F"><span class="nav-text">🧠 记忆与技能系统</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8C%81%E4%B9%85%E8%AE%B0%E5%BF%86"><span class="nav-text">持久记忆</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8A%80%E8%83%BD%E7%B3%BB%E7%BB%9F"><span class="nav-text">技能系统</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E2%8F%B0-%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1-Cron"><span class="nav-text">⏰ 定时任务 (Cron)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%91%BD%E4%BB%A4%E8%A1%8C%E7%AE%A1%E7%90%86"><span class="nav-text">命令行管理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%A8%E5%AF%B9%E8%AF%9D%E4%B8%AD%E5%88%9B%E5%BB%BA"><span class="nav-text">在对话中创建</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8A%95%E9%80%92%E7%9B%AE%E6%A0%87"><span class="nav-text">投递目标</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%F0%9F%91%A4-%E5%A4%9A-Profile-%E6%94%AF%E6%8C%81"><span class="nav-text">👤 多 Profile 支持</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%F0%9F%94%A7-%E8%BF%9B%E9%98%B6%E9%85%8D%E7%BD%AE"><span class="nav-text">🔧 进阶配置</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="nav-text">配置文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#API-Key-%E9%85%8D%E7%BD%AE"><span class="nav-text">API Key 配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%87%AD%E8%AF%81%E6%B1%A0%EF%BC%88Credential-Pools%EF%BC%89"><span class="nav-text">凭证池（Credential Pools）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%F0%9F%90%9B-%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5"><span class="nav-text">🐛 常见问题排查</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E8%A3%85%E5%A4%B1%E8%B4%A5"><span class="nav-text">安装失败</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Gateway-%E4%B8%8D%E5%93%8D%E5%BA%94"><span class="nav-text">Gateway 不响应</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B7%A5%E5%85%B7%E4%B8%8D%E5%8F%AF%E7%94%A8"><span class="nav-text">工具不可用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9B%B4%E6%96%B0-Hermes"><span class="nav-text">更新 Hermes</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%F0%9F%93%9A-%E8%B5%84%E6%BA%90%E9%93%BE%E6%8E%A5"><span class="nav-text">📚 资源链接</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%F0%9F%8E%AF-%E6%80%BB%E7%BB%93"><span class="nav-text">🎯 总结</span></a></li></ol>
+
+	</div>
+</div>
+	</div>
+	
+</div>
+
+			</div>
+
+			
+		</div>
+
+		<div class="main-content-footer">
+			<footer class="footer mt-5 py-5 h-auto text-base text-third-text-color relative border-t-2 border-t-border-color">
+    <div class="info-container py-3 text-center">
+        
+        <div class="text-center">
+            &copy;
+            
+              <span>2024</span>
+              -
+            
+            2026&nbsp;&nbsp;<i class="fa-solid fa-heart fa-beat" style="--fa-animation-duration: 0.5s; color: #333"></i>&nbsp;&nbsp;<a href="/">Nathan</a>
+            
+                
+                <p class="post-count space-x-0.5">
+                    <span>
+                        共撰写了 191 篇文章
+                    </span>
+                    
+                        <span>
+                            共 385.6k 字
+                        </span>
+                    
+                </p>
+            
+        </div>
+        
+        <div class="relative text-center lg:absolute lg:left-[20px] lg:top-1/2 lg:-translate-y-1/2 lg:text-left">
+            <span class="lg:block text-sm">由 <?xml version="1.0" encoding="utf-8"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg class="relative top-[2px] inline-block align-baseline" version="1.1" id="圖層_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="1rem" height="1rem" viewBox="0 0 512 512" enable-background="new 0 0 512 512" xml:space="preserve"><path fill="#0E83CD" d="M256.4,25.8l-200,115.5L56,371.5l199.6,114.7l200-115.5l0.4-230.2L256.4,25.8z M349,354.6l-18.4,10.7l-18.6-11V275H200v79.6l-18.4,10.7l-18.6-11v-197l18.5-10.6l18.5,10.8V237h112v-79.6l18.5-10.6l18.5,10.8V354.6z"/></svg><a target="_blank" class="text-base" href="https://hexo.io">Hexo</a> 驱动</span>
+            <span class="text-sm lg:block">主题&nbsp;<a class="text-base" target="_blank" href="https://github.com/EvanNotFound/hexo-theme-redefine">Redefine v2.9.0</a></span>
+        </div>
+        
+        
+            <div>
+                博客已运行 <span class="odometer" id="runtime_days" ></span> 天 <span class="odometer" id="runtime_hours"></span> 小时 <span class="odometer" id="runtime_minutes"></span> 分钟 <span class="odometer" id="runtime_seconds"></span> 秒
+            </div>
+        
+        
+            <script data-swup-reload-script>
+                try {
+                    function odometer_init() {
+                    const elements = document.querySelectorAll('.odometer');
+                    elements.forEach(el => {
+                        new Odometer({
+                            el,
+                            format: '( ddd).dd',
+                            duration: 200
+                        });
+                    });
+                    }
+                    odometer_init();
+                } catch (error) {}
+            </script>
+        
+        
+            
+                
+        
+                
+        
+        
+    </div>  
+</footer>
+		</div>
+	</div>
+
+	
+	<div class="post-tools">
+		<div class="post-tools-container">
+	<ul class="article-tools-list">
+		<!-- TOC aside toggle -->
+		
+		<li class="right-bottom-tools page-aside-toggle">
+			<i class="fa-regular fa-outdent"></i>
+		</li>
+		
+
+		<!-- go comment -->
+		
+	</ul>
+</div>
+	</div>
+	
+
+	<div class="right-side-tools-container">
+		<div class="side-tools-container">
+	<ul class="hidden-tools-list">
+		<li class="right-bottom-tools tool-font-adjust-plus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-plus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-font-adjust-minus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-minus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-dark-light-toggle flex justify-center items-center">
+			<i class="fa-regular fa-moon"></i>
+		</li>
+
+		<!-- rss -->
+		
+
+		
+
+		<li class="right-bottom-tools tool-scroll-to-bottom flex justify-center items-center">
+			<i class="fa-regular fa-arrow-down"></i>
+		</li>
+	</ul>
+
+	<ul class="visible-tools-list">
+		<li class="right-bottom-tools toggle-tools-list flex justify-center items-center">
+			<i class="fa-regular fa-cog fa-spin"></i>
+		</li>
+		
+		<li class="right-bottom-tools tool-scroll-to-top flex justify-center items-center">
+			<i class="arrow-up fas fa-arrow-up"></i>
+			<span class="percent"></span>
+		</li>
+		
+		
+	</ul>
+</div>
+	</div>
+
+	<div class="image-viewer-container" role="dialog" aria-modal="true" aria-label="图片查看器">
+	<button class="image-viewer-close" type="button" aria-label="关闭">
+		<i class="fa-solid fa-xmark"></i>
+	</button>
+	<button class="image-viewer-prev" type="button" aria-label="上一页">
+		<i class="fa-solid fa-chevron-left"></i>
+	</button>
+	<div class="image-viewer-frame">
+		<img src="" alt="">
+	</div>
+	<div class="image-viewer-exif-panel hidden absolute left-1/2 bottom-20 -translate-x-1/2 w-[min(92vw,420px)] max-h-[60vh] overflow-hidden rounded-2xl bg-background-color-transparent-80 p-4 text-left shadow-redefine-flat backdrop-blur-md" role="dialog" aria-label="EXIF" aria-hidden="true">
+		<div class="flex items-center justify-between mb-3">
+			<span class="text-sm font-semibold text-first-text-color">EXIF</span>
+			<button class="image-viewer-exif-close flex h-8 w-8 items-center justify-center rounded-full bg-background-color-transparent-80 text-first-text-color transition hover:bg-background-color-transparent-40" type="button" aria-label="关闭">
+				<i class="fa-solid fa-xmark text-[0.65rem]"></i>
+			</button>
+		</div>
+		<div class="image-viewer-exif-cards grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[50vh] overflow-y-auto pr-1 scrollbar-hide"></div>
+		<template class="image-viewer-exif-card-template">
+			<div class="rounded-lg bg-background-color-transparent-40 px-3 py-2">
+				<div class="image-viewer-exif-card-header flex items-center gap-2 mb-1">
+					<i class="image-viewer-exif-card-icon fa-solid fa-circle-info text-xs text-third-text-color"></i>
+					<div class="image-viewer-exif-card-title text-xs font-semibold text-first-text-color"></div>
+				</div>
+				<div class="image-viewer-exif-card-items flex flex-col gap-1"></div>
+			</div>
+		</template>
+	</div>
+	<button class="image-viewer-exif-toggle flex items-center gap-2 hidden absolute left-1/2 bottom-6 -translate-x-1/2 rounded-full border border-border-color bg-background-color-transparent-80 px-4 py-2 text-first-text-color backdrop-blur-md transition hover:bg-background-color-transparent-40" type="button" aria-label="EXIF" aria-expanded="false">
+		<i class="fa-solid fa-circle-info text-xs"></i>
+		<span class="text-xs font-semibold uppercase tracking-wider">EXIF</span>
+	</button>
+	<button class="image-viewer-next" type="button" aria-label="下一页">
+		<i class="fa-solid fa-chevron-right"></i>
+	</button>
+</div>
+
+
+	
+	<div class="search-pop-overlay">
+	<div class="popup search-popup">
+		<div class="search-header">
+			<span class="search-input-field-pre">
+				<i class="fa-solid fa-keyboard"></i>
+			</span>
+			<div class="search-input-container">
+				<input autocomplete="off" autocorrect="off" autocapitalize="off" placeholder="站内搜索您需要的内容..." spellcheck="false" type="search" class="search-input">
+			</div>
+			<span class="popup-btn-close">
+				<i class="fa-solid fa-times"></i>
+			</span>
+		</div>
+		<div id="search-result">
+			<div id="no-result">
+				<i class="fa-solid fa-spinner fa-spin-pulse fa-5x fa-fw"></i>
+			</div>
+		</div>
+	</div>
+</div>
+	
+
+</main>
+
+
+
+<script src="/js/build/libs/Swup.min.js"></script>
+
+<script src="/js/build/libs/SwupSlideTheme.min.js"></script>
+
+<script src="/js/build/libs/SwupScriptsPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupProgressPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupScrollPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupPreloadPlugin.min.js"></script>
+
+<script>
+    window.swup = new Swup({
+        plugins: [
+            new SwupScriptsPlugin({
+                optin: true,
+            }),
+            new SwupProgressPlugin(),
+            new SwupScrollPlugin({
+                offset: 80,
+            }),
+            new SwupSlideTheme({
+                mainElement: ".main-content-body",
+            }),
+            new SwupPreloadPlugin(),
+        ],
+        containers: ["#swup"],
+    });
+
+    window.dispatchEvent(
+        new CustomEvent("redefine:swup:ready", {
+            detail: {
+                swup: window.swup,
+            },
+        }),
+    );
+</script>
+
+
+
+
+	
+<script src="/js/build/main.js" type="module"></script>
+
+
+
+    
+<script src="/js/build/libs/odometer.min.js"></script>
+
+    
+<link rel="stylesheet" href="/assets/odometer-theme-minimal.css">
+
+
+
+
+
+
+
+  
+<script src="/js/build/libs/Typed.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+<script src="/js/build/libs/moment-with-locales.min.js" data-swup-reload-script=""></script>
+
+
+
+	
+</body>
+
+</html>
