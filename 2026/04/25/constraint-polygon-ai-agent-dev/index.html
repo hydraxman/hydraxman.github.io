@@ -1,0 +1,1204 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="keywords" content="计算机技术, 生活中的胡思乱想">
+    
+    
+    <meta name="author" content="Nathan">
+    
+    <!-- Completely eliminate flash of wrong theme -->
+    <script>
+        (function() {
+            const THEME_KEY = "REDEFINE-THEME-STATUS";
+            const DARK = "dark", LIGHT = "light";
+            
+            // Get preferred theme
+            function getTheme() {
+                try {
+                    const saved = localStorage.getItem(THEME_KEY);
+                    if (saved) {
+                        const { isDark } = JSON.parse(saved);
+                        return isDark ? DARK : LIGHT;
+                    }
+                } catch (e) {}
+                
+                return matchMedia("(prefers-color-scheme: dark)").matches ? DARK : LIGHT;
+            }
+            
+            // Apply theme to document
+            function applyTheme(theme) {
+                const isDark = theme === DARK;
+                const root = document.documentElement;
+                
+                // Set classes for compatibility
+                root.classList.add(theme);
+                root.classList.remove(isDark ? LIGHT : DARK);
+                root.style.colorScheme = theme;
+            }
+            
+            // Initial application
+            const theme = getTheme();
+            applyTheme(theme);
+            
+            // Listen for system preference changes
+            matchMedia("(prefers-color-scheme: dark)").addEventListener("change", ({ matches }) => {
+                // Only update if using system preference (no localStorage entry)
+                if (!localStorage.getItem(THEME_KEY)) {
+                    applyTheme(matches ? DARK : LIGHT);
+                }
+            });
+            
+            // Set body classes ASAP (before DOMContentLoaded)
+            (function() {
+                const addBodyClass = () => {
+                    const b = document.body;
+                    if (!b) return false;
+                    b.classList.add(theme + "-mode");
+                    return true;
+                };
+
+                // Try immediately
+                if (addBodyClass()) return;
+
+                // Observe until body exists
+                const mo = new MutationObserver(() => {
+                    if (addBodyClass()) mo.disconnect();
+                });
+                mo.observe(document.documentElement, { childList: true, subtree: true });
+            })();
+        })();
+    </script>
+    
+    <!-- preconnect -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    
+    <!--- Seo Part-->
+    
+    <link rel="canonical" href="https://hydraxman.github.io/2026/04/25/constraint-polygon-ai-agent-dev/"/>
+    <meta name="robots" content="index,follow">
+    <meta name="googlebot" content="index,follow">
+    <meta name="revisit-after" content="1 days">
+    
+    
+        
+        <meta name="description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="约束多边形：AI Agent 时代的复杂项目开发方法论">
+<meta property="og:url" content="https://hydraxman.github.io/2026/04/25/constraint-polygon-ai-agent-dev/index.html">
+<meta property="og:site_name" content="内森淼文">
+<meta property="og:description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://hydraxman.github.io/images/redefine-og.webp">
+<meta property="article:published_time" content="2026-04-25T14:32:14.000Z">
+<meta property="article:modified_time" content="2026-04-25T14:34:51.541Z">
+<meta property="article:author" content="Nathan">
+<meta property="article:tag" content="Harness Engineering">
+<meta property="article:tag" content="AI Agent">
+<meta property="article:tag" content="软件工程">
+<meta property="article:tag" content="TDD">
+<meta property="article:tag" content="Spec-Driven Development">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://hydraxman.github.io/images/redefine-og.webp">
+    
+    
+    <!--- Icon Part-->
+    <link rel="icon" type="image/png" href="/images/favicon.svg" sizes="192x192">
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.svg">
+    <meta name="theme-color" content="#ffffff">
+    <link rel="shortcut icon" href="/images/favicon.svg">
+    <!--- Page Info-->
+    
+    <title>
+        
+            约束多边形：AI Agent 时代的复杂项目开发方法论 | 内森淼文
+        
+    </title>
+
+    
+<link rel="stylesheet" href="/fonts/Chillax/chillax.css">
+
+
+    <!--- Inject Part-->
+    
+        
+            
+    
+            
+    
+            
+                
+                    <link rel="stylesheet" href="/css/custom.css">
+                
+    
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    
+        
+<link rel="stylesheet" href="/css/build/tailwind.css">
+
+    
+
+    
+<link rel="stylesheet" href="/fonts/GeistMono/geist-mono.css">
+
+    
+<link rel="stylesheet" href="/fonts/Geist/geist.css">
+
+    <!--- Font Part-->
+    
+    
+    
+    
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&display=swap" rel="stylesheet">
+    
+    
+
+    <script id="hexo-configurations">
+    window.config = {"hostname":"hydraxman.github.io","root":"/","language":"zh-CN","path":"search.json"};
+    window.theme = {"articles":{"style":{"font_size":"16px","line_height":1.5,"image_border_radius":"14px","image_alignment":"center","image_caption":false,"link_icon":true,"delete_mask":false,"title_alignment":"left","headings_top_spacing":{"h1":"3.2rem","h2":"2.4rem","h3":"1.9rem","h4":"1.6rem","h5":"1.4rem","h6":"1.3rem"}},"word_count":{"enable":true,"count":true,"min2read":true},"author_label":{"enable":false,"auto":false,"list":[]},"code_block":{"copy":true,"style":"mac","highlight_theme":{"light":"github","dark":"vs2015"},"font":{"enable":false,"family":null,"url":null}},"toc":{"enable":true,"max_depth":3,"number":false,"expand":true,"init_open":true},"copyright":{"enable":true,"default":"cc_by_nc_sa"},"lazyload":true,"pangu_js":false,"recommendation":{"enable":false,"title":"推荐阅读","limit":3,"mobile_limit":2,"placeholder":"/images/wallhaven-wqery6-light.webp","skip_dirs":[]}},"colors":{"primary":"#ffffff","secondary":null,"default_mode":"light"},"global":{"fonts":{"chinese":{"enable":false,"family":null,"url":null},"english":{"enable":true,"family":"Inter","url":"https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"},"title":{"enable":true,"family":"Noto Serif","url":"https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&display=swap"}},"content_max_width":"1000px","sidebar_width":"210px","hover":{"shadow":true,"scale":false},"scroll_progress":{"bar":true,"percentage":true},"website_counter":{"url":"https://cn.vercount.one/js","enable":false,"site_pv":true,"site_uv":true,"post_pv":true},"single_page":true,"preloader":{"enable":false,"custom_message":null},"side_tools":{"gear_rotation":true,"auto_expand":false},"open_graph":{"enable":true,"image":"/images/redefine-og.webp","description":"Hexo Theme Redefine, Redefine Your Hexo Journey."},"google_analytics":{"enable":false,"id":null}},"home_banner":{"enable":true,"style":"fixed","image":{"light":"/images/banner-light.jpg","dark":"/images/banner-dark.jpg"},"title":"内森淼文","subtitle":{"text":["AI · 编程 · 科技见闻","Write Code, Read World"],"hitokoto":{"enable":false,"show_author":false,"api":"https://v1.hitokoto.cn"},"typing_speed":100,"backing_speed":80,"starting_delay":500,"backing_delay":1500,"loop":true,"smart_backspace":true},"text_color":{"light":"#fff","dark":"#d1d1b6"},"text_style":{"title_size":"2.8rem","subtitle_size":"1.5rem","line_height":1.2},"custom_font":{"enable":false,"family":null,"url":null},"social_links":{"enable":true,"style":"default","links":[{"icon":"fa-brands fa-github","url":"https://github.com/hydraxman"}],"qrs":[{"icon":"fa-brands fa-weixin","qr":null},{"icon":"/images/custom-icon.svg","qr":null}]}},"plugins":{"feed":{"enable":false},"aplayer":{"enable":false,"type":"fixed","audios":[{"name":null,"artist":null,"url":null,"cover":null,"lrc":null}]},"mermaid":{"enable":false,"version":"11.4.1","theme":{"light":"default","dark":"dark"}}},"version":"2.9.0","navbar":{"auto_hide":false,"color":{"left":"#333333","right":"#555555","transparency":35},"width":{"home":"1200px","pages":"1000px"},"links":{"Home":{"path":"/","icon":"fa-regular fa-house"},"Archives":{"path":"/archives","icon":"fa-regular fa-archive"},"Categories":{"path":"/categories","icon":"fa-regular fa-folder"},"Tags":{"path":"/tags","icon":"fa-regular fa-tags"},"About":{"path":"/about","icon":"fa-regular fa-user"}},"search":{"enable":true,"preload":true}},"page_templates":{"friends_column":2,"tags_style":"blur","masonry":{"batch_size":12,"initial_batch_size":24}},"home":{"sidebar":{"enable":true,"position":"left","first_item":"menu","announcement":"AI · 编程 · 科技","show_on_mobile":true,"links":{"Archives":{"path":"/archives","icon":"fa-regular fa-archive"},"Tags":{"path":"/tags","icon":"fa-regular fa-tags"},"Categories":{"path":"/categories","icon":"fa-regular fa-folder"}}},"article_date_format":"auto","excerpt_length":200,"categories":{"enable":true,"limit":3},"tags":{"enable":true,"limit":3}},"footer":{"runtime":true,"icon":"<i class=\"fa-solid fa-heart fa-beat\" style=\"--fa-animation-duration: 0.5s; color: #333\"></i>","start":"2024/01/01 00:00:00","statistics":true,"customize":null,"icp":{"enable":false,"number":null,"url":null}},"footerStart":"2024/01/01 00:00:00","mermaid":{"style":{"light":"default","dark":"dark"}}};
+    window.lang_ago = {"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"};
+    window.i18n = {"search":"站内搜索您需要的内容...","toc":"目录","prev":"上一页","next":"下一页","prev_posts":"上一篇","next_posts":"下一篇","page":"第 %d 页","recent_posts":"最新文章","share":"分享","powered_by":"由 %s 驱动","theme":"主题","rss_feed":"RSS Feed","category":"分类","categories":"分类","tag":"标签","tags":"标签","post":"文章","posts":"文章","tagcloud":"标签云","comment":"评论","comments":"评论","top":"置顶","sticky":"置顶","go-back-home":"回到首页","masonry_loading":"照片加载中...","image_viewer":"图片查看器","close":"关闭","exif":{"title":"EXIF","cards":{"camera":"相机","lens":"镜头","exposure":"曝光","other":"其他"},"fields":{"make":"品牌","model":"机型","date_taken":"拍摄时间","lens_model":"镜头","focal_length":"焦距","focus_mode":"对焦模式","shutter":"快门","aperture":"光圈","iso":"感光度","exposure_program":"曝光程序","exposure_compensation":"曝光补偿","metering_mode":"测光模式","flash":"闪光灯","white_balance":"白平衡","latitude":"纬度","longitude":"经度","altitude":"海拔"},"status":{"loading":"加载中...","no_exif":"无 EXIF 信息","library_missing":"EXIF 库未加载","image_source_missing":"图片地址不可用","unavailable":"EXIF 不可用（可能被 CORS 阻止或缺少元数据）","flag_unavailable":"EXIF 不可用"}},"home":"首页","archive":"归档","archives":"归档","about":"关于","links":"链接","link":"链接","friends":"友情链接","friend":"友情链接","timeline":"时间轴","shuoshuo":"说说","bookmarks":"书签","site_uv":"访问人数","site_pv":"总访问量","read_more":"阅读全文","wordcount":"字","min2read":"分钟","changelog":"更新日志","status":"状态","runtime":"博客已运行","days":"天","hours":"小时","minutes":"分钟","seconds":"秒","optimized_by":"并由 Evan 进行优化","rights":"版权所有","site_posts":"共撰写了 %s 篇文章","site_wordcount":"共 %s 字","copyright":{"title":"标题","author":"作者","link":"链接","create_time":"创建于","update_time":"更新于","license_title":"版权声明","license_content":"本文章采用 %s 进行许可。","all_rights_reserved":"版权所有 &#169 %s，禁止转载。","public_domain":"本文为公有领域作品，可自由转载、引用。"},"ago":{"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"},"create_time":"创建","update_time":"更新","expired":"这篇文章最后更新于 %s 天前，内容可能已经过时。"};
+    window.data = {"masonry":false};
+  </script>
+    
+    <!--- Fontawesome Part-->
+    
+<link rel="stylesheet" href="/fontawesome/fontawesome.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/brands.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/solid.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/regular.min.css">
+
+    
+    
+    
+    
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+	<div class="progress-bar-container">
+	
+	<span class="scroll-progress-bar"></span>
+	
+
+	
+	<span class="pjax-progress-bar"></span>
+	<!--        <span class="swup-progress-icon">-->
+	<!--            <i class="fa-solid fa-circle-notch fa-spin"></i>-->
+	<!--        </span>-->
+	
+</div>
+
+<main class="page-container" id="swup">
+
+	
+
+	<div class="main-content-container flex flex-col justify-between min-h-dvh">
+		<div class="main-content-header">
+			<header class="navbar-container px-6 md:px-12">
+    <div class="navbar-content transition-navbar ">
+        <div class="left">
+            
+            <a class="logo-title" href="/">
+                
+                内森淼文
+                
+            </a>
+        </div>
+
+        <div class="right">
+            <!-- PC -->
+            <div class="desktop">
+                <ul class="navbar-list">
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/"
+                                        >
+                                    <i class="fa-regular fa-house fa-fw"></i>
+                                    首页
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/archives"
+                                        >
+                                    <i class="fa-regular fa-archive fa-fw"></i>
+                                    归档
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/categories"
+                                        >
+                                    <i class="fa-regular fa-folder fa-fw"></i>
+                                    分类
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/tags"
+                                        >
+                                    <i class="fa-regular fa-tags fa-fw"></i>
+                                    标签
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/about"
+                                        >
+                                    <i class="fa-regular fa-user fa-fw"></i>
+                                    关于
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                    
+                        <li class="navbar-item search search-popup-trigger">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </li>
+                    
+                </ul>
+            </div>
+            <!-- Mobile -->
+            <div class="mobile">
+                
+                    <div class="icon-item search search-popup-trigger"><i class="fa-solid fa-magnifying-glass"></i>
+                    </div>
+                
+                <div class="icon-item navbar-bar">
+                    <div class="navbar-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile sheet -->
+    <div class="navbar-drawer h-dvh w-full absolute top-0 left-0 bg-background-color flex flex-col justify-between">
+        <ul class="drawer-navbar-list flex flex-col px-4 justify-center items-start">
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/"
+                        >
+                            <span>
+                                首页
+                            </span>
+                            
+                                <i class="fa-regular fa-house fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/archives"
+                        >
+                            <span>
+                                归档
+                            </span>
+                            
+                                <i class="fa-regular fa-archive fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/categories"
+                        >
+                            <span>
+                                分类
+                            </span>
+                            
+                                <i class="fa-regular fa-folder fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/tags"
+                        >
+                            <span>
+                                标签
+                            </span>
+                            
+                                <i class="fa-regular fa-tags fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/about"
+                        >
+                            <span>
+                                关于
+                            </span>
+                            
+                                <i class="fa-regular fa-user fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+
+            
+            
+                
+                    
+                    
+                    
+            
+        </ul>
+
+        <div class="statistics flex justify-around my-2.5">
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/tags">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">271</div>
+        <div class="label text-third-text-color text-sm">标签</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/categories">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">9</div>
+        <div class="label text-third-text-color text-sm">分类</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/archives">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">204</div>
+        <div class="label text-third-text-color text-sm">文章</div>
+    </a>
+</div>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+		</div>
+
+		<div class="main-content-body transition-fade-up">
+			
+
+			<div class="main-content">
+				<div class="post-page-container flex relative justify-between box-border w-full h-full">
+	<div class="article-content-container">
+
+		<div class="article-title relative w-full">
+			
+			
+			
+			<img src="/images/constraint-polygon-ai-agent-dev/cover.png" alt="约束多边形：AI Agent 时代的复杂项目开发方法论" class="w-full h-60 sm:h-72 md:h-80 object-cover sm:rounded-t-large dark:brightness-75" />
+			
+			<div class="w-full flex items-center absolute bottom-0 justify-start">
+				<h1 class="article-title-cover text-center mx-6 my-6 text-second-text-color bg-background-color-transparent px-4 py-3 text-3xl sm:text-4xl md:text-5xl font-semibold backdrop-blur-lg rounded-xl border border-border-color ">约束多边形：AI Agent 时代的复杂项目开发方法论</h1>
+			</div>
+			
+		</div>
+
+		
+		<div class="article-header flex flex-row gap-2 items-center px-2 sm:px-6 md:px-8">
+			<div class="avatar w-[46px] h-[46px] shrink-0 rounded-medium border border-border-color p-px">
+				<img src="/images/avatar.png">
+			</div>
+			<div class="info flex flex-col justify-between">
+				<div class="author flex items-center">
+					<span class="name text-default-text-color text-lg font-semibold">Nathan</span>
+					
+				</div>
+				<div class="meta-info">
+					<div class="article-meta-info">
+    <span class="article-date article-meta-item">
+        <i class="fa-regular fa-pen-fancy"></i>&nbsp;
+        <span class="desktop">2026-04-25 22:32:14</span>
+        <span class="mobile">2026-04-25 22:32:14</span>
+        <span class="hover-info">创建</span>
+    </span>
+    
+        <span class="article-date article-meta-item">
+            <i class="fa-regular fa-wrench"></i>&nbsp;
+            <span class="desktop">2026-04-25 22:34:51</span>
+            <span class="mobile">2026-04-25 22:34:51</span>
+            <span class="hover-info">更新</span>
+        </span>
+    
+
+    
+        <span class="article-categories article-meta-item">
+            <i class="fa-regular fa-folders"></i>&nbsp;
+            <ul>
+                
+                
+                    
+                        
+                        <li>
+                            <a href="/categories/%E6%B7%B1%E5%BA%A6%E5%88%86%E6%9E%90/">深度分析</a>&nbsp;
+                        </li>
+                    
+                    
+                
+            </ul>
+        </span>
+    
+    
+        <span class="article-tags article-meta-item">
+            <i class="fa-regular fa-tags"></i>&nbsp;
+            <ul>
+                
+                    <li>
+                        <a href="/tags/Harness-Engineering/">Harness Engineering</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/AI-Agent/">AI Agent</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B/">软件工程</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/TDD/">TDD</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/Spec-Driven-Development/">Spec-Driven Development</a>&nbsp;
+                    </li>
+                
+            </ul>
+        </span>
+    
+
+    
+    
+        <span class="article-wordcount article-meta-item">
+            <i class="fa-regular fa-typewriter"></i>&nbsp;<span>3.7k 字</span>
+        </span>
+    
+    
+        <span class="article-min2read article-meta-item">
+            <i class="fa-regular fa-clock"></i>&nbsp;<span>13 分钟</span>
+        </span>
+    
+    
+</div>
+
+				</div>
+			</div>
+		</div>
+		
+
+		
+
+
+		<div class="article-content markdown-body px-2 sm:px-6 md:px-8 pb-8">
+			<blockquote>
+<p>Claude Code 泄露出来的是源码，不是 Anthropic 的开发飞轮。真正值得研究的不是“它写了什么代码”，而是“是什么驱动它以周为单位持续向前”。</p>
+</blockquote>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/constraint-polygon-ai-agent-dev/cover.png"
+                      alt="约束多边形：AI Agent 时代的开发方法论"
+                ></p>
+<h2 id="前言：源码泄露了，但飞轮没有泄露"><a href="#前言：源码泄露了，但飞轮没有泄露" class="headerlink" title="前言：源码泄露了，但飞轮没有泄露"></a>前言：源码泄露了，但飞轮没有泄露</h2><p>前一段时间，Claude Code 的源码因为 npm 包中的 source map 文件泄露到了互联网上。公开报道显示，<code>@anthropic-ai/claude-code</code> 某个版本的 npm 包中包含了 <code>cli.js.map</code>，外界得以重建大量可读的 TypeScript 源码、系统提示词、上下文管理逻辑和 agent orchestration 结构。</p>
+<p>这当然是一件大事。对于正在做 Coding Agent、IDE Agent、软件工程自动化的创业团队来说，这是一次罕见的学习机会：大家终于可以看到一个一线 AI 公司如何把大模型包裹成一个真实可用的开发工具。</p>
+<p>但这件事并不意味着 Anthropic 的优势因此被根本削弱。</p>
+<p>因为源码只是结果，不是动力系统。</p>
+<p>真正没有泄露出来的是：</p>
+<ul>
+<li>Anthropic 如何定义需求？</li>
+<li>如何组织 agentic engineering？</li>
+<li>如何让 Claude Code 以周为单位迭代 feature？</li>
+<li>如何设计评估、反馈、测试、发布、回滚这一整套工程飞轮？</li>
+<li>如何把模型能力转化成持续的软件产品增长？</li>
+</ul>
+<p>换句话说，泄露的是飞机的零件图，不是那套让飞机持续加速、持续迭代、持续升级的 <strong>driving force</strong>。</p>
+<p>这正是 AI 时代软件工程最值得研究的问题：<strong>驱动软件向前的到底是什么？</strong></p>
+<p>过去几十年，软件工程不断提出各种“Driven Development”：TDD（Test-Driven Development）、BDD（Behavior-Driven Development）、DDD（Domain-Driven Design）、FDD（Feature-Driven Development）、ATDD（Acceptance Test-Driven Development）、MDD（Model-Driven Development）、SDD（Specification-Driven Development）……每一种方法论，本质上都在回答同一个问题：</p>
+<blockquote>
+<p>当复杂性超过个人直觉时，软件开发应该由什么来驱动？</p>
+</blockquote>
+<p>到了 AI Agent 时代，这个问题变得更尖锐。</p>
+<p>AI 可以写代码，但它必须被什么东西驱动、约束、校验和牵引。否则，它只是一个高速但无方向的生成器。</p>
+<h2 id="从-XDD-到-Harness-Engineering：开发的驱动力在迁移"><a href="#从-XDD-到-Harness-Engineering：开发的驱动力在迁移" class="headerlink" title="从 XDD 到 Harness Engineering：开发的驱动力在迁移"></a>从 XDD 到 Harness Engineering：开发的驱动力在迁移</h2><p>不同的 XDD 方法论，其实是在把软件开发的“方向盘”交给不同的 artifact。</p>
+<table>
+<thead>
+<tr>
+<th>方法论</th>
+<th>驱动力</th>
+<th>核心 artifact</th>
+<th>对 AI Agent 的意义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>TDD</td>
+<td>测试</td>
+<td>单元测试、集成测试</td>
+<td>给 Agent 一个可自动验证的目标</td>
+</tr>
+<tr>
+<td>BDD</td>
+<td>行为</td>
+<td>Given-When-Then 场景</td>
+<td>把用户行为变成可执行语义</td>
+</tr>
+<tr>
+<td>ATDD</td>
+<td>验收标准</td>
+<td>Acceptance Criteria</td>
+<td>把业务成功定义前置</td>
+</tr>
+<tr>
+<td>FDD</td>
+<td>功能</td>
+<td>Feature List &#x2F; Feature Plan</td>
+<td>按可交付功能切片推进</td>
+</tr>
+<tr>
+<td>DDD</td>
+<td>领域模型</td>
+<td>Ubiquitous Language &#x2F; Domain Model</td>
+<td>降低复杂业务中的语义漂移</td>
+</tr>
+<tr>
+<td>MDD</td>
+<td>模型</td>
+<td>UML &#x2F; DSL &#x2F; Model</td>
+<td>从模型生成或约束实现</td>
+</tr>
+<tr>
+<td>SDD</td>
+<td>规格</td>
+<td>Spec &#x2F; Plan &#x2F; Tasks</td>
+<td>让规格成为代码生成的源头</td>
+</tr>
+<tr>
+<td>PDD &#x2F; Vibe Coding</td>
+<td>Prompt</td>
+<td>自然语言意图</td>
+<td>速度快，但如果缺少约束容易失控</td>
+</tr>
+</tbody></table>
+<p>GitHub 在 Spec Kit 文档中对 SDD 的表述很直接：当 specification 和 implementation plan 能够生成代码时，开发中不再是“文档到实现”的松散翻译，而是从 specification 到 implementation 的结构化转换。它强调通过模板、checklist、test-first thinking、constitutional compliance 等方式约束 LLM，使生成代码更可维护、可测试、架构上更稳定。</p>
+<p>这与 OpenAI 在 2026 年提出的 <strong>Harness Engineering</strong> 很接近。OpenAI 在一篇工程博客里总结了一个极端实验：团队在五个月里用 Codex 构建内部 beta 产品，原则是“0 行人工手写代码”。他们提到：</p>
+<blockquote>
+<p>Humans steer. Agents execute.</p>
+</blockquote>
+<p>这句话非常关键。人类不再主要通过手写代码创造系统，而是通过设计环境、脚手架、约束、文档、反馈回路和控制系统来“驾驶”agent。</p>
+<p>Anthropic 在自己的 harness design 文章里也表达了类似思想：frontier agentic coding 的性能，不只来自更强的模型，也来自更好的 harness 设计。它们用类似 GAN 的结构，把 generator、evaluator、planner 分开，让生成者负责创造，让评估者负责批判，让规划者负责把模糊需求拆成更完整的产品规格。</p>
+<p>这说明：AI 时代的软件工程，正在从“代码驱动”迁移到 <strong>harness 驱动</strong>。</p>
+<p>而 harness 的本质，就是一组能让 AI Agent 安全、高速、可验证地工作的约束系统。</p>
+<h2 id="一个矛盾的现实：Demo-很容易，复杂项目很难"><a href="#一个矛盾的现实：Demo-很容易，复杂项目很难" class="headerlink" title="一个矛盾的现实：Demo 很容易，复杂项目很难"></a>一个矛盾的现实：Demo 很容易，复杂项目很难</h2><p>2025 年以来，AI Coding Agent 已经让开发者的生产力飞跃。Cursor、Claude Code、Codex、Copilot……这些工具在写小程序、构建 Demo 时表现惊艳。几十行、几百行、甚至几千行代码的项目，AI Agent 往往可以一气呵成。</p>
+<p>原因很简单：<strong>当整个项目的代码量没有超过 LLM 的上下文窗口时，AI 对全局了然于胸。</strong></p>
+<p>但真实世界的软件开发远非 Demo 那么简单。</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/constraint-polygon-ai-agent-dev/complexity-curve.png"
+                      alt="AI Agent 开发效能与项目规模的关系"
+                ></p>
+<p>当你在一个拥有几十万行代码的成熟产品上工作时，情况完全不同：</p>
+<ul>
+<li><strong>上下文爆炸</strong>：项目代码量远超 LLM 的上下文窗口</li>
+<li><strong>约束叠加</strong>：产品已有的架构、设计规范、安全要求、兼容性承诺层层堆叠</li>
+<li><strong>增量开发</strong>：你不是从零开始，而是在一个精密运转的系统上做“手术”——增加一个 feature、优化一个体验、调整一个内部架构</li>
+</ul>
+<p>这就像让一位天才建筑师在一张白纸上画出一栋楼很容易，但让他在一座已经住满人的大厦里加盖一层，难度完全不同。</p>
+<p>学术界也在快速研究这个变化。SWE-agent 论文提出 Agent-Computer Interface 的重要性：不是只把 LLM 接到 shell 上，而是要设计适合 agent 操作计算机、观察反馈、修改文件、运行测试的界面。2025 年关于 AI teammates &#x2F; SE 3.0 的研究，则开始把 autonomous coding agents 当作软件工程中的新协作者来观察。还有关于开源项目中 <code>AGENTS.md</code> 等 context engineering 文件的研究，说明社区已经意识到：<strong>给 agent 提供什么上下文，本身就是一种工程设计。</strong></p>
+<h2 id="核心问题：如何让-AI-Agent-开发复杂项目？"><a href="#核心问题：如何让-AI-Agent-开发复杂项目？" class="headerlink" title="核心问题：如何让 AI Agent 开发复杂项目？"></a>核心问题：如何让 AI Agent 开发复杂项目？</h2><p>答案是：<strong>不要让 AI Agent 在无边界的空间里自由发挥，而是用约束构建一个有限的、可验证的开发空间。</strong></p>
+<p>我把这个方法论称为 <strong>“约束多边形”（Constraint Polygon）</strong>。</p>
+<h2 id="什么是约束多边形？"><a href="#什么是约束多边形？" class="headerlink" title="什么是约束多边形？"></a>什么是约束多边形？</h2><p>想象一个多边形。它的每条边代表一种约束：设计文档、UX 原型、测试用例、安全规范、性能基线……这些约束共同围出了一个封闭的空间。</p>
+<p><strong>多边形中间是中空的——那就是 AI Agent 需要填充的代码实现。</strong></p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/constraint-polygon-ai-agent-dev/constraint-polygon.png"
+                      alt="约束多边形概念图"
+                ></p>
+<p>关键洞察是：当约束足够充分时，代码实现本身反而变成了最确定的部分。AI Agent 不再是在茫茫大海中摸索，而是在一个有明确边界的空间里“自然生长”。</p>
+<p>这也解释了为什么 OpenAI 会强调“给 Codex 一张地图，而不是一本一千页的说明书”。对于 agent 来说，无法在运行时进入上下文的信息，就近似于不存在。约束必须可访问、可执行、可反馈，才能真正成为驱动力。</p>
+<h2 id="逐步构建约束"><a href="#逐步构建约束" class="headerlink" title="逐步构建约束"></a>逐步构建约束</h2><p>约束多边形不是一蹴而就的，它是逐步构建的。从最小的三角形开始，根据项目复杂度逐步扩展。</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/constraint-polygon-ai-agent-dev/constraint-evolution.png"
+                      alt="约束多边形的演化过程"
+                ></p>
+<h3 id="第一步：设计文档——奠定底边"><a href="#第一步：设计文档——奠定底边" class="headerlink" title="第一步：设计文档——奠定底边"></a>第一步：设计文档——奠定底边</h3><p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/constraint-polygon-ai-agent-dev/mermaid-1.jpg"
+                      alt="mermaid-1"
+                ></p>
+<p>一切从设计开始。在写任何代码之前，先充分理解现有代码仓库的结构和约束，然后产出一份 <strong>Dev Design Document</strong>。</p>
+<p>这份文档要回答：</p>
+<ul>
+<li>这个 feature 要实现什么？</li>
+<li>它在整个系统中的位置是什么？</li>
+<li>它与哪些现有模块交互？</li>
+<li>接口契约是什么？</li>
+<li>哪些边界绝对不能突破？</li>
+</ul>
+<p><strong>这是多边形的底边——最基础的约束。</strong></p>
+<blockquote>
+<p>所有代码都必须有文档。每一段代码在逻辑链条中实现了什么功能、满足了什么设计约束，都需要在文档中说清楚。这不是奢侈品，这是 AI 时代开发的基础设施。</p>
+</blockquote>
+<h3 id="第二步：UX-原型——构建第二条边"><a href="#第二步：UX-原型——构建第二条边" class="headerlink" title="第二步：UX 原型——构建第二条边"></a>第二步：UX 原型——构建第二条边</h3><p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/constraint-polygon-ai-agent-dev/mermaid-2.jpg"
+                      alt="mermaid-2"
+                ></p>
+<p>在设计文档的基础上，结合 feature 的体验要求，产出 <strong>UX 原型</strong>。这可以是：</p>
+<ul>
+<li>HTML&#x2F;CSS 构建的交互原型</li>
+<li>标注了交互逻辑的原型图</li>
+<li>明确了用户操作流程的 wireframe</li>
+<li>后端功能对应的 API 契约草案</li>
+</ul>
+<p>UX 原型和 Dev Design Doc 共同构成了约束的两条边——<strong>技术方案约束 + 用户体验约束</strong>。</p>
+<h3 id="第三步：测试约束——闭合三角形"><a href="#第三步：测试约束——闭合三角形" class="headerlink" title="第三步：测试约束——闭合三角形"></a>第三步：测试约束——闭合三角形</h3><p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/constraint-polygon-ai-agent-dev/mermaid-3.jpg"
+                      alt="mermaid-3"
+                ></p>
+<p>基于设计文档，定义 <strong>测试约束</strong>：</p>
+<ul>
+<li>在关键节点上，输入什么、输出什么？</li>
+<li>调用某个函数时，返回值应该是什么？</li>
+<li>点击某个按钮后，界面状态应该如何变化？</li>
+<li>什么情况下算成功？什么情况下算失败？</li>
+</ul>
+<p><strong>一旦三角形闭合，AI Agent 就有了最小可行的开发空间。</strong> 它可以用测试来验证自己的实现，从“测试失败”逐步推进到“测试通过”，直到把三角形填满。</p>
+<p>这就是 <strong>测试驱动 + AI Agent</strong> 的天然结合。AI Agent 最大的问题不是不会写，而是经常“不知道自己错了”。测试给它提供了外部评价器。</p>
+<h3 id="第四步：扩展更多约束边"><a href="#第四步：扩展更多约束边" class="headerlink" title="第四步：扩展更多约束边"></a>第四步：扩展更多约束边</h3><p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/constraint-polygon-ai-agent-dev/mermaid-4.jpg"
+                      alt="mermaid-4"
+                ></p>
+<p>当项目更复杂时，三角形不够用。我们可以继续添加约束边：</p>
+<ul>
+<li><strong>安全约束</strong>：权限模型、数据加密、输入校验、依赖扫描</li>
+<li><strong>性能基线</strong>：响应时间、吞吐量、资源消耗上限</li>
+<li><strong>合规要求</strong>：法律法规、行业标准、数据隐私</li>
+<li><strong>DevOps 约束</strong>：CI&#x2F;CD 流水线规则、部署兼容性、回滚策略</li>
+<li><strong>可观测性约束</strong>：日志、trace、metrics、告警规则</li>
+</ul>
+<p>每一条新的约束边，都让 AI Agent 的实现空间更加精确。</p>
+<h2 id="POC-桩点：多边形中间的锚定"><a href="#POC-桩点：多边形中间的锚定" class="headerlink" title="POC 桩点：多边形中间的锚定"></a>POC 桩点：多边形中间的锚定</h2><p>有时候，约束多边形的外围已经定义清楚了，但中间的填充仍然充满不确定性。技术挑战可能包括：</p>
+<ul>
+<li>某个第三方 API 是否真的支持我们的需求？</li>
+<li>新的数据库连接方案能否跑通？</li>
+<li>多端兼容性是否可行？</li>
+<li>浏览器 API 是否覆盖了目标功能？</li>
+<li>现有系统的扩展点是否真的能承载新体验？</li>
+</ul>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/constraint-polygon-ai-agent-dev/mermaid-5.jpg"
+                      alt="mermaid-5"
+                ></p>
+<p>这时候需要 <strong>POC（Proof of Concept）桩点</strong>。</p>
+<p>关键原则是：<strong>不要在巨大的代码仓库中验证技术可行性，而是建立一个最小化的相同架构环境来验证。</strong></p>
+<p>POC 桩点的成果是一些小的、可运行的代码模块。它们不是完整的 App，但它们验证了关键技术路径，并作为“锚点”被植入多边形内部，为 AI Agent 的全面填充提供技术确定性。</p>
+<p>这其实与 Anthropic 的 planner &#x2F; generator &#x2F; evaluator 思路一致：不要让一个 agent 同时承担所有不确定性。规划、验证、生成、评价需要被拆开，分别形成可检查的环节。</p>
+<h2 id="完整开发流程"><a href="#完整开发流程" class="headerlink" title="完整开发流程"></a>完整开发流程</h2><p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/constraint-polygon-ai-agent-dev/mermaid-6.jpg"
+                      alt="mermaid-6"
+                ></p>
+<p>这个流程的本质是：<strong>先构建约束，再让 AI 填充。</strong></p>
+<p>它与传统软件工程的流程高度吻合，但赋予了每个阶段新的意义——不再只是给人类开发者的路标，而是给 AI Agent 的运行边界、评价函数和反馈通道。</p>
+<h2 id="为什么这样做有效？"><a href="#为什么这样做有效？" class="headerlink" title="为什么这样做有效？"></a>为什么这样做有效？</h2><h3 id="1-将大问题分解为有界问题"><a href="#1-将大问题分解为有界问题" class="headerlink" title="1. 将大问题分解为有界问题"></a>1. 将大问题分解为有界问题</h3><p>LLM 的上下文窗口有限，但约束多边形把“在百万行代码中实现一个 feature”变成了“在明确约束内填充实现”——后者的上下文可以被精确控制。</p>
+<h3 id="2-测试驱动让-AI-可以自我推进"><a href="#2-测试驱动让-AI-可以自我推进" class="headerlink" title="2. 测试驱动让 AI 可以自我推进"></a>2. 测试驱动让 AI 可以自我推进</h3><p>AI Agent 最大的问题是“不知道自己错了”。有了测试约束，AI Agent 可以从失败状态向成功状态逐步推进，这是一个有明确梯度的优化过程。</p>
+<h3 id="3-POC-消除了技术不确定性"><a href="#3-POC-消除了技术不确定性" class="headerlink" title="3. POC 消除了技术不确定性"></a>3. POC 消除了技术不确定性</h3><p>在正式实现之前，通过轻量级的 POC 验证关键技术路径，避免 AI Agent 在不可行的方向上浪费大量 token 和时间。</p>
+<h3 id="4-Harness-把个人能力变成组织能力"><a href="#4-Harness-把个人能力变成组织能力" class="headerlink" title="4. Harness 把个人能力变成组织能力"></a>4. Harness 把个人能力变成组织能力</h3><p>如果只是一个高手 prompt 得好，那是个人技巧；如果团队把 design doc、prototype、tests、linters、CI、review bots、observability、rollback 都做成可复用的 harness，那就是组织能力。</p>
+<p>这也是为什么源码泄露不等于飞轮泄露。代码可以被复制，但持续产生高质量代码的组织系统很难被复制。</p>
+<h3 id="5-与现有软件工程实践无缝衔接"><a href="#5-与现有软件工程实践无缝衔接" class="headerlink" title="5. 与现有软件工程实践无缝衔接"></a>5. 与现有软件工程实践无缝衔接</h3><p>这不是一个全新的范式，而是对现有软件工程流程的重新诠释——Design → Prototype → Test → Implement → Review → Observe。每一步都有对应的 AI 时代新意义。</p>
+<h2 id="结语：约束即自由"><a href="#结语：约束即自由" class="headerlink" title="结语：约束即自由"></a>结语：约束即自由</h2><p>AI Agent 不是来替代软件工程的，而是来重新定义软件工程中“人”和“机器”各自的角色。</p>
+<p><strong>人类开发者的新角色：约束的设计者。</strong> 我们的工作从“写代码”转变为“定义代码的边界”——设计文档、UX 原型、测试用例、安全规范、性能基线、POC 桩点、评估器、反馈回路……这些约束越精确，AI Agent 的输出就越可靠。</p>
+<p><strong>AI Agent 的角色：约束内的填充者。</strong> 在人类精心构建的多边形内，AI Agent 可以高效、可验证地完成代码实现。</p>
+<p>这就是 AI Agent 时代的开发方法论：<strong>不是自由创造，而是约束填充。</strong> 不是放手让 AI 自由发挥，而是用工程师的智慧构建精准的约束空间，然后让 AI 在其中自然生长。</p>
+<p>Claude Code 泄露给我们的最大启发，不是“原来它的代码是这样写的”，而是“真正的壁垒可能从来就不在单个代码文件里”。</p>
+<p>真正的壁垒在于：谁能更快、更稳定、更系统地构建驱动 AI Agent 前进的工程飞轮。</p>
+<hr>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ol>
+<li>Anthropic Engineering, <em>Harness design for long-running application development</em>, 2026-03-24.</li>
+<li>OpenAI Engineering, <em>Harness engineering: leveraging Codex in an agent-first world</em>, 2026-02-11.</li>
+<li>Yang et al., <em>SWE-agent: Agent-Computer Interfaces Enable Automated Software Engineering</em>, arXiv:2405.15793, 2024.</li>
+<li><em>The Rise of AI Teammates in Software Engineering (SE) 3.0</em>, arXiv:2507.15003, 2025.</li>
+<li><em>Context Engineering for AI Agents in Open-Source Software</em>, arXiv:2510.21413, 2025.</li>
+<li>GitHub Spec Kit, <em>Specification-Driven Development</em>, 2025.</li>
+<li>Google DORA, <em>2025 State of AI-assisted Software Development Report</em>, 2025.</li>
+<li>InfoQ, <em>Anthropic Accidentally Exposes Claude Code Source via npm Package</em>, 2026.</li>
+</ol>
+
+		</div>
+
+		
+		<div class="post-copyright-info w-full my-8 px-2 sm:px-6 md:px-8">
+			<div class="article-copyright-info-container">
+    <ul>
+        <li><strong>标题:</strong> 约束多边形：AI Agent 时代的复杂项目开发方法论</li>
+        <li><strong>作者:</strong> Nathan</li>
+        <li><strong>创建于
+                :</strong> 2026-04-25 22:32:14</li>
+        
+            <li>
+                <strong>更新于
+                    :</strong> 2026-04-25 22:34:51
+            </li>
+        
+        <li>
+            <strong>链接:</strong> https://hydraxman.github.io/2026/04/25/constraint-polygon-ai-agent-dev/
+        </li>
+        <li>
+            <strong>
+                版权声明:
+            </strong>
+            
+
+            
+                本文章采用 <a class="license" target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0">CC BY-NC-SA 4.0</a> 进行许可。
+            
+        </li>
+    </ul>
+</div>
+
+		</div>
+		
+
+		
+		<ul class="post-tags-box text-lg mt-1.5 flex-wrap justify-center flex md:hidden">
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/Harness-Engineering/">#Harness Engineering</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/AI-Agent/">#AI Agent</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B/">#软件工程</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/TDD/">#TDD</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/Spec-Driven-Development/">#Spec-Driven Development</a>&nbsp;
+			</li>
+			
+		</ul>
+		
+
+		
+
+		
+		<div class="article-nav my-8 flex justify-between items-center px-2 sm:px-6 md:px-8">
+			
+			
+			<div class="article-next border-border-color shadow-redefine-flat shadow-shadow-color-2 rounded-medium px-4 py-2 hover:shadow-redefine-flat-hover hover:shadow-shadow-color-2">
+				<a class="next" rel="next" href="/2026/04/25/2026-04-25-morning-news/">
+					<span class="title flex justify-center items-center">
+						<span class="post-nav-title-item truncate max-w-48">2026年04月25日早间要闻</span>
+						<span class="post-nav-item">下一篇</span>
+					</span>
+					<span class="right arrow-icon flex justify-center items-center">
+						<i class="fa-solid fa-chevron-right"></i>
+					</span>
+				</a>
+			</div>
+			
+		</div>
+		
+
+
+		
+	</div>
+
+	
+	<div class="toc-content-container">
+		<div class="post-toc-wrap">
+	<div class="post-toc">
+		<div class="toc-title">目录</div>
+		<div class="page-title">约束多边形：AI Agent 时代的复杂项目开发方法论</div>
+		<ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80%EF%BC%9A%E6%BA%90%E7%A0%81%E6%B3%84%E9%9C%B2%E4%BA%86%EF%BC%8C%E4%BD%86%E9%A3%9E%E8%BD%AE%E6%B2%A1%E6%9C%89%E6%B3%84%E9%9C%B2"><span class="nav-text">前言：源码泄露了，但飞轮没有泄露</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%8E-XDD-%E5%88%B0-Harness-Engineering%EF%BC%9A%E5%BC%80%E5%8F%91%E7%9A%84%E9%A9%B1%E5%8A%A8%E5%8A%9B%E5%9C%A8%E8%BF%81%E7%A7%BB"><span class="nav-text">从 XDD 到 Harness Engineering：开发的驱动力在迁移</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E4%B8%AA%E7%9F%9B%E7%9B%BE%E7%9A%84%E7%8E%B0%E5%AE%9E%EF%BC%9ADemo-%E5%BE%88%E5%AE%B9%E6%98%93%EF%BC%8C%E5%A4%8D%E6%9D%82%E9%A1%B9%E7%9B%AE%E5%BE%88%E9%9A%BE"><span class="nav-text">一个矛盾的现实：Demo 很容易，复杂项目很难</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E9%97%AE%E9%A2%98%EF%BC%9A%E5%A6%82%E4%BD%95%E8%AE%A9-AI-Agent-%E5%BC%80%E5%8F%91%E5%A4%8D%E6%9D%82%E9%A1%B9%E7%9B%AE%EF%BC%9F"><span class="nav-text">核心问题：如何让 AI Agent 开发复杂项目？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E7%BA%A6%E6%9D%9F%E5%A4%9A%E8%BE%B9%E5%BD%A2%EF%BC%9F"><span class="nav-text">什么是约束多边形？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%80%90%E6%AD%A5%E6%9E%84%E5%BB%BA%E7%BA%A6%E6%9D%9F"><span class="nav-text">逐步构建约束</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E4%B8%80%E6%AD%A5%EF%BC%9A%E8%AE%BE%E8%AE%A1%E6%96%87%E6%A1%A3%E2%80%94%E2%80%94%E5%A5%A0%E5%AE%9A%E5%BA%95%E8%BE%B9"><span class="nav-text">第一步：设计文档——奠定底边</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E4%BA%8C%E6%AD%A5%EF%BC%9AUX-%E5%8E%9F%E5%9E%8B%E2%80%94%E2%80%94%E6%9E%84%E5%BB%BA%E7%AC%AC%E4%BA%8C%E6%9D%A1%E8%BE%B9"><span class="nav-text">第二步：UX 原型——构建第二条边</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E4%B8%89%E6%AD%A5%EF%BC%9A%E6%B5%8B%E8%AF%95%E7%BA%A6%E6%9D%9F%E2%80%94%E2%80%94%E9%97%AD%E5%90%88%E4%B8%89%E8%A7%92%E5%BD%A2"><span class="nav-text">第三步：测试约束——闭合三角形</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E5%9B%9B%E6%AD%A5%EF%BC%9A%E6%89%A9%E5%B1%95%E6%9B%B4%E5%A4%9A%E7%BA%A6%E6%9D%9F%E8%BE%B9"><span class="nav-text">第四步：扩展更多约束边</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#POC-%E6%A1%A9%E7%82%B9%EF%BC%9A%E5%A4%9A%E8%BE%B9%E5%BD%A2%E4%B8%AD%E9%97%B4%E7%9A%84%E9%94%9A%E5%AE%9A"><span class="nav-text">POC 桩点：多边形中间的锚定</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%8C%E6%95%B4%E5%BC%80%E5%8F%91%E6%B5%81%E7%A8%8B"><span class="nav-text">完整开发流程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E8%BF%99%E6%A0%B7%E5%81%9A%E6%9C%89%E6%95%88%EF%BC%9F"><span class="nav-text">为什么这样做有效？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E5%B0%86%E5%A4%A7%E9%97%AE%E9%A2%98%E5%88%86%E8%A7%A3%E4%B8%BA%E6%9C%89%E7%95%8C%E9%97%AE%E9%A2%98"><span class="nav-text">1. 将大问题分解为有界问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E6%B5%8B%E8%AF%95%E9%A9%B1%E5%8A%A8%E8%AE%A9-AI-%E5%8F%AF%E4%BB%A5%E8%87%AA%E6%88%91%E6%8E%A8%E8%BF%9B"><span class="nav-text">2. 测试驱动让 AI 可以自我推进</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-POC-%E6%B6%88%E9%99%A4%E4%BA%86%E6%8A%80%E6%9C%AF%E4%B8%8D%E7%A1%AE%E5%AE%9A%E6%80%A7"><span class="nav-text">3. POC 消除了技术不确定性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-Harness-%E6%8A%8A%E4%B8%AA%E4%BA%BA%E8%83%BD%E5%8A%9B%E5%8F%98%E6%88%90%E7%BB%84%E7%BB%87%E8%83%BD%E5%8A%9B"><span class="nav-text">4. Harness 把个人能力变成组织能力</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-%E4%B8%8E%E7%8E%B0%E6%9C%89%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B%E5%AE%9E%E8%B7%B5%E6%97%A0%E7%BC%9D%E8%A1%94%E6%8E%A5"><span class="nav-text">5. 与现有软件工程实践无缝衔接</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%93%E8%AF%AD%EF%BC%9A%E7%BA%A6%E6%9D%9F%E5%8D%B3%E8%87%AA%E7%94%B1"><span class="nav-text">结语：约束即自由</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="nav-text">参考资料</span></a></li></ol>
+
+	</div>
+</div>
+	</div>
+	
+</div>
+
+			</div>
+
+			
+		</div>
+
+		<div class="main-content-footer">
+			<footer class="footer mt-5 py-5 h-auto text-base text-third-text-color relative border-t-2 border-t-border-color">
+    <div class="info-container py-3 text-center">
+        
+        <div class="text-center">
+            &copy;
+            
+              <span>2024</span>
+              -
+            
+            2026&nbsp;&nbsp;<i class="fa-solid fa-heart fa-beat" style="--fa-animation-duration: 0.5s; color: #333"></i>&nbsp;&nbsp;<a href="/">Nathan</a>
+            
+                
+                <p class="post-count space-x-0.5">
+                    <span>
+                        共撰写了 204 篇文章
+                    </span>
+                    
+                        <span>
+                            共 401.3k 字
+                        </span>
+                    
+                </p>
+            
+        </div>
+        
+        <div class="relative text-center lg:absolute lg:left-[20px] lg:top-1/2 lg:-translate-y-1/2 lg:text-left">
+            <span class="lg:block text-sm">由 <?xml version="1.0" encoding="utf-8"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg class="relative top-[2px] inline-block align-baseline" version="1.1" id="圖層_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="1rem" height="1rem" viewBox="0 0 512 512" enable-background="new 0 0 512 512" xml:space="preserve"><path fill="#0E83CD" d="M256.4,25.8l-200,115.5L56,371.5l199.6,114.7l200-115.5l0.4-230.2L256.4,25.8z M349,354.6l-18.4,10.7l-18.6-11V275H200v79.6l-18.4,10.7l-18.6-11v-197l18.5-10.6l18.5,10.8V237h112v-79.6l18.5-10.6l18.5,10.8V354.6z"/></svg><a target="_blank" class="text-base" href="https://hexo.io">Hexo</a> 驱动</span>
+            <span class="text-sm lg:block">主题&nbsp;<a class="text-base" target="_blank" href="https://github.com/EvanNotFound/hexo-theme-redefine">Redefine v2.9.0</a></span>
+        </div>
+        
+        
+            <div>
+                博客已运行 <span class="odometer" id="runtime_days" ></span> 天 <span class="odometer" id="runtime_hours"></span> 小时 <span class="odometer" id="runtime_minutes"></span> 分钟 <span class="odometer" id="runtime_seconds"></span> 秒
+            </div>
+        
+        
+            <script data-swup-reload-script>
+                try {
+                    function odometer_init() {
+                    const elements = document.querySelectorAll('.odometer');
+                    elements.forEach(el => {
+                        new Odometer({
+                            el,
+                            format: '( ddd).dd',
+                            duration: 200
+                        });
+                    });
+                    }
+                    odometer_init();
+                } catch (error) {}
+            </script>
+        
+        
+            
+                
+        
+                
+        
+        
+    </div>  
+</footer>
+		</div>
+	</div>
+
+	
+	<div class="post-tools">
+		<div class="post-tools-container">
+	<ul class="article-tools-list">
+		<!-- TOC aside toggle -->
+		
+		<li class="right-bottom-tools page-aside-toggle">
+			<i class="fa-regular fa-outdent"></i>
+		</li>
+		
+
+		<!-- go comment -->
+		
+	</ul>
+</div>
+	</div>
+	
+
+	<div class="right-side-tools-container">
+		<div class="side-tools-container">
+	<ul class="hidden-tools-list">
+		<li class="right-bottom-tools tool-font-adjust-plus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-plus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-font-adjust-minus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-minus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-dark-light-toggle flex justify-center items-center">
+			<i class="fa-regular fa-moon"></i>
+		</li>
+
+		<!-- rss -->
+		
+
+		
+
+		<li class="right-bottom-tools tool-scroll-to-bottom flex justify-center items-center">
+			<i class="fa-regular fa-arrow-down"></i>
+		</li>
+	</ul>
+
+	<ul class="visible-tools-list">
+		<li class="right-bottom-tools toggle-tools-list flex justify-center items-center">
+			<i class="fa-regular fa-cog fa-spin"></i>
+		</li>
+		
+		<li class="right-bottom-tools tool-scroll-to-top flex justify-center items-center">
+			<i class="arrow-up fas fa-arrow-up"></i>
+			<span class="percent"></span>
+		</li>
+		
+		
+	</ul>
+</div>
+	</div>
+
+	<div class="image-viewer-container" role="dialog" aria-modal="true" aria-label="图片查看器">
+	<button class="image-viewer-close" type="button" aria-label="关闭">
+		<i class="fa-solid fa-xmark"></i>
+	</button>
+	<button class="image-viewer-prev" type="button" aria-label="上一页">
+		<i class="fa-solid fa-chevron-left"></i>
+	</button>
+	<div class="image-viewer-frame">
+		<img src="" alt="">
+	</div>
+	<div class="image-viewer-exif-panel hidden absolute left-1/2 bottom-20 -translate-x-1/2 w-[min(92vw,420px)] max-h-[60vh] overflow-hidden rounded-2xl bg-background-color-transparent-80 p-4 text-left shadow-redefine-flat backdrop-blur-md" role="dialog" aria-label="EXIF" aria-hidden="true">
+		<div class="flex items-center justify-between mb-3">
+			<span class="text-sm font-semibold text-first-text-color">EXIF</span>
+			<button class="image-viewer-exif-close flex h-8 w-8 items-center justify-center rounded-full bg-background-color-transparent-80 text-first-text-color transition hover:bg-background-color-transparent-40" type="button" aria-label="关闭">
+				<i class="fa-solid fa-xmark text-[0.65rem]"></i>
+			</button>
+		</div>
+		<div class="image-viewer-exif-cards grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[50vh] overflow-y-auto pr-1 scrollbar-hide"></div>
+		<template class="image-viewer-exif-card-template">
+			<div class="rounded-lg bg-background-color-transparent-40 px-3 py-2">
+				<div class="image-viewer-exif-card-header flex items-center gap-2 mb-1">
+					<i class="image-viewer-exif-card-icon fa-solid fa-circle-info text-xs text-third-text-color"></i>
+					<div class="image-viewer-exif-card-title text-xs font-semibold text-first-text-color"></div>
+				</div>
+				<div class="image-viewer-exif-card-items flex flex-col gap-1"></div>
+			</div>
+		</template>
+	</div>
+	<button class="image-viewer-exif-toggle flex items-center gap-2 hidden absolute left-1/2 bottom-6 -translate-x-1/2 rounded-full border border-border-color bg-background-color-transparent-80 px-4 py-2 text-first-text-color backdrop-blur-md transition hover:bg-background-color-transparent-40" type="button" aria-label="EXIF" aria-expanded="false">
+		<i class="fa-solid fa-circle-info text-xs"></i>
+		<span class="text-xs font-semibold uppercase tracking-wider">EXIF</span>
+	</button>
+	<button class="image-viewer-next" type="button" aria-label="下一页">
+		<i class="fa-solid fa-chevron-right"></i>
+	</button>
+</div>
+
+
+	
+	<div class="search-pop-overlay">
+	<div class="popup search-popup">
+		<div class="search-header">
+			<span class="search-input-field-pre">
+				<i class="fa-solid fa-keyboard"></i>
+			</span>
+			<div class="search-input-container">
+				<input autocomplete="off" autocorrect="off" autocapitalize="off" placeholder="站内搜索您需要的内容..." spellcheck="false" type="search" class="search-input">
+			</div>
+			<span class="popup-btn-close">
+				<i class="fa-solid fa-times"></i>
+			</span>
+		</div>
+		<div id="search-result">
+			<div id="no-result">
+				<i class="fa-solid fa-spinner fa-spin-pulse fa-5x fa-fw"></i>
+			</div>
+		</div>
+	</div>
+</div>
+	
+
+</main>
+
+
+
+<script src="/js/build/libs/Swup.min.js"></script>
+
+<script src="/js/build/libs/SwupSlideTheme.min.js"></script>
+
+<script src="/js/build/libs/SwupScriptsPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupProgressPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupScrollPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupPreloadPlugin.min.js"></script>
+
+<script>
+    window.swup = new Swup({
+        plugins: [
+            new SwupScriptsPlugin({
+                optin: true,
+            }),
+            new SwupProgressPlugin(),
+            new SwupScrollPlugin({
+                offset: 80,
+            }),
+            new SwupSlideTheme({
+                mainElement: ".main-content-body",
+            }),
+            new SwupPreloadPlugin(),
+        ],
+        containers: ["#swup"],
+    });
+
+    window.dispatchEvent(
+        new CustomEvent("redefine:swup:ready", {
+            detail: {
+                swup: window.swup,
+            },
+        }),
+    );
+</script>
+
+
+
+
+	
+<script src="/js/build/main.js" type="module"></script>
+
+
+
+    
+<script src="/js/build/libs/odometer.min.js"></script>
+
+    
+<link rel="stylesheet" href="/assets/odometer-theme-minimal.css">
+
+
+
+
+
+
+
+  
+<script src="/js/build/libs/Typed.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+<script src="/js/build/libs/moment-with-locales.min.js" data-swup-reload-script=""></script>
+
+
+
+	
+</body>
+
+</html>
