@@ -1,0 +1,1275 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="keywords" content="计算机技术, 生活中的胡思乱想">
+    
+    
+    <meta name="author" content="Nathan">
+    
+    <!-- Completely eliminate flash of wrong theme -->
+    <script>
+        (function() {
+            const THEME_KEY = "REDEFINE-THEME-STATUS";
+            const DARK = "dark", LIGHT = "light";
+            
+            // Get preferred theme
+            function getTheme() {
+                try {
+                    const saved = localStorage.getItem(THEME_KEY);
+                    if (saved) {
+                        const { isDark } = JSON.parse(saved);
+                        return isDark ? DARK : LIGHT;
+                    }
+                } catch (e) {}
+                
+                return matchMedia("(prefers-color-scheme: dark)").matches ? DARK : LIGHT;
+            }
+            
+            // Apply theme to document
+            function applyTheme(theme) {
+                const isDark = theme === DARK;
+                const root = document.documentElement;
+                
+                // Set classes for compatibility
+                root.classList.add(theme);
+                root.classList.remove(isDark ? LIGHT : DARK);
+                root.style.colorScheme = theme;
+            }
+            
+            // Initial application
+            const theme = getTheme();
+            applyTheme(theme);
+            
+            // Listen for system preference changes
+            matchMedia("(prefers-color-scheme: dark)").addEventListener("change", ({ matches }) => {
+                // Only update if using system preference (no localStorage entry)
+                if (!localStorage.getItem(THEME_KEY)) {
+                    applyTheme(matches ? DARK : LIGHT);
+                }
+            });
+            
+            // Set body classes ASAP (before DOMContentLoaded)
+            (function() {
+                const addBodyClass = () => {
+                    const b = document.body;
+                    if (!b) return false;
+                    b.classList.add(theme + "-mode");
+                    return true;
+                };
+
+                // Try immediately
+                if (addBodyClass()) return;
+
+                // Observe until body exists
+                const mo = new MutationObserver(() => {
+                    if (addBodyClass()) mo.disconnect();
+                });
+                mo.observe(document.documentElement, { childList: true, subtree: true });
+            })();
+        })();
+    </script>
+    
+    <!-- preconnect -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    
+    <!--- Seo Part-->
+    
+    <link rel="canonical" href="https://hydraxman.github.io/2026/04/26/constraint-polygon-ai-agent-dev-en/"/>
+    <meta name="robots" content="index,follow">
+    <meta name="googlebot" content="index,follow">
+    <meta name="revisit-after" content="1 days">
+    
+    
+        
+        <meta name="description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Constraint Polygon: A Software Engineering Methodology for the AI Agent Era">
+<meta property="og:url" content="https://hydraxman.github.io/2026/04/26/constraint-polygon-ai-agent-dev-en/index.html">
+<meta property="og:site_name" content="内森淼文">
+<meta property="og:description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://hydraxman.github.io/images/redefine-og.webp">
+<meta property="article:published_time" content="2026-04-26T09:53:09.000Z">
+<meta property="article:modified_time" content="2026-04-26T09:57:06.047Z">
+<meta property="article:author" content="Nathan">
+<meta property="article:tag" content="Harness Engineering">
+<meta property="article:tag" content="AI Agent">
+<meta property="article:tag" content="TDD">
+<meta property="article:tag" content="Spec-Driven Development">
+<meta property="article:tag" content="Software Engineering">
+<meta property="article:tag" content="Agent Skills">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://hydraxman.github.io/images/redefine-og.webp">
+    
+    
+    <!--- Icon Part-->
+    <link rel="icon" type="image/png" href="/images/favicon.svg" sizes="192x192">
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.svg">
+    <meta name="theme-color" content="#ffffff">
+    <link rel="shortcut icon" href="/images/favicon.svg">
+    <!--- Page Info-->
+    
+    <title>
+        
+            Constraint Polygon: A Software Engineering Methodology for the AI Agent Era | 内森淼文
+        
+    </title>
+
+    
+<link rel="stylesheet" href="/fonts/Chillax/chillax.css">
+
+
+    <!--- Inject Part-->
+    
+        
+            
+    
+            
+    
+            
+                
+                    <link rel="stylesheet" href="/css/custom.css">
+                
+    
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    
+        
+<link rel="stylesheet" href="/css/build/tailwind.css">
+
+    
+
+    
+<link rel="stylesheet" href="/fonts/GeistMono/geist-mono.css">
+
+    
+<link rel="stylesheet" href="/fonts/Geist/geist.css">
+
+    <!--- Font Part-->
+    
+    
+    
+    
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&display=swap" rel="stylesheet">
+    
+    
+
+    <script id="hexo-configurations">
+    window.config = {"hostname":"hydraxman.github.io","root":"/","language":"zh-CN","path":"search.json"};
+    window.theme = {"articles":{"style":{"font_size":"16px","line_height":1.5,"image_border_radius":"14px","image_alignment":"center","image_caption":false,"link_icon":true,"delete_mask":false,"title_alignment":"left","headings_top_spacing":{"h1":"3.2rem","h2":"2.4rem","h3":"1.9rem","h4":"1.6rem","h5":"1.4rem","h6":"1.3rem"}},"word_count":{"enable":true,"count":true,"min2read":true},"author_label":{"enable":false,"auto":false,"list":[]},"code_block":{"copy":true,"style":"mac","highlight_theme":{"light":"github","dark":"vs2015"},"font":{"enable":false,"family":null,"url":null}},"toc":{"enable":true,"max_depth":3,"number":false,"expand":true,"init_open":true},"copyright":{"enable":true,"default":"cc_by_nc_sa"},"lazyload":true,"pangu_js":false,"recommendation":{"enable":false,"title":"推荐阅读","limit":3,"mobile_limit":2,"placeholder":"/images/wallhaven-wqery6-light.webp","skip_dirs":[]}},"colors":{"primary":"#ffffff","secondary":null,"default_mode":"light"},"global":{"fonts":{"chinese":{"enable":false,"family":null,"url":null},"english":{"enable":true,"family":"Inter","url":"https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"},"title":{"enable":true,"family":"Noto Serif","url":"https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&display=swap"}},"content_max_width":"1000px","sidebar_width":"210px","hover":{"shadow":true,"scale":false},"scroll_progress":{"bar":true,"percentage":true},"website_counter":{"url":"https://cn.vercount.one/js","enable":false,"site_pv":true,"site_uv":true,"post_pv":true},"single_page":true,"preloader":{"enable":false,"custom_message":null},"side_tools":{"gear_rotation":true,"auto_expand":false},"open_graph":{"enable":true,"image":"/images/redefine-og.webp","description":"Hexo Theme Redefine, Redefine Your Hexo Journey."},"google_analytics":{"enable":false,"id":null}},"home_banner":{"enable":true,"style":"fixed","image":{"light":"/images/banner-light.jpg","dark":"/images/banner-dark.jpg"},"title":"内森淼文","subtitle":{"text":["AI · 编程 · 科技见闻","Write Code, Read World"],"hitokoto":{"enable":false,"show_author":false,"api":"https://v1.hitokoto.cn"},"typing_speed":100,"backing_speed":80,"starting_delay":500,"backing_delay":1500,"loop":true,"smart_backspace":true},"text_color":{"light":"#fff","dark":"#d1d1b6"},"text_style":{"title_size":"2.8rem","subtitle_size":"1.5rem","line_height":1.2},"custom_font":{"enable":false,"family":null,"url":null},"social_links":{"enable":true,"style":"default","links":[{"icon":"fa-brands fa-github","url":"https://github.com/hydraxman"}],"qrs":[{"icon":"fa-brands fa-weixin","qr":null},{"icon":"/images/custom-icon.svg","qr":null}]}},"plugins":{"feed":{"enable":false},"aplayer":{"enable":false,"type":"fixed","audios":[{"name":null,"artist":null,"url":null,"cover":null,"lrc":null}]},"mermaid":{"enable":false,"version":"11.4.1","theme":{"light":"default","dark":"dark"}}},"version":"2.9.0","navbar":{"auto_hide":false,"color":{"left":"#333333","right":"#555555","transparency":35},"width":{"home":"1200px","pages":"1000px"},"links":{"Home":{"path":"/","icon":"fa-regular fa-house"},"Archives":{"path":"/archives","icon":"fa-regular fa-archive"},"Categories":{"path":"/categories","icon":"fa-regular fa-folder"},"Tags":{"path":"/tags","icon":"fa-regular fa-tags"},"About":{"path":"/about","icon":"fa-regular fa-user"}},"search":{"enable":true,"preload":true}},"page_templates":{"friends_column":2,"tags_style":"blur","masonry":{"batch_size":12,"initial_batch_size":24}},"home":{"sidebar":{"enable":true,"position":"left","first_item":"menu","announcement":"AI · 编程 · 科技","show_on_mobile":true,"links":{"Archives":{"path":"/archives","icon":"fa-regular fa-archive"},"Tags":{"path":"/tags","icon":"fa-regular fa-tags"},"Categories":{"path":"/categories","icon":"fa-regular fa-folder"}}},"article_date_format":"auto","excerpt_length":200,"categories":{"enable":true,"limit":3},"tags":{"enable":true,"limit":3}},"footer":{"runtime":true,"icon":"<i class=\"fa-solid fa-heart fa-beat\" style=\"--fa-animation-duration: 0.5s; color: #333\"></i>","start":"2024/01/01 00:00:00","statistics":true,"customize":null,"icp":{"enable":false,"number":null,"url":null}},"footerStart":"2024/01/01 00:00:00","mermaid":{"style":{"light":"default","dark":"dark"}}};
+    window.lang_ago = {"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"};
+    window.i18n = {"search":"站内搜索您需要的内容...","toc":"目录","prev":"上一页","next":"下一页","prev_posts":"上一篇","next_posts":"下一篇","page":"第 %d 页","recent_posts":"最新文章","share":"分享","powered_by":"由 %s 驱动","theme":"主题","rss_feed":"RSS Feed","category":"分类","categories":"分类","tag":"标签","tags":"标签","post":"文章","posts":"文章","tagcloud":"标签云","comment":"评论","comments":"评论","top":"置顶","sticky":"置顶","go-back-home":"回到首页","masonry_loading":"照片加载中...","image_viewer":"图片查看器","close":"关闭","exif":{"title":"EXIF","cards":{"camera":"相机","lens":"镜头","exposure":"曝光","other":"其他"},"fields":{"make":"品牌","model":"机型","date_taken":"拍摄时间","lens_model":"镜头","focal_length":"焦距","focus_mode":"对焦模式","shutter":"快门","aperture":"光圈","iso":"感光度","exposure_program":"曝光程序","exposure_compensation":"曝光补偿","metering_mode":"测光模式","flash":"闪光灯","white_balance":"白平衡","latitude":"纬度","longitude":"经度","altitude":"海拔"},"status":{"loading":"加载中...","no_exif":"无 EXIF 信息","library_missing":"EXIF 库未加载","image_source_missing":"图片地址不可用","unavailable":"EXIF 不可用（可能被 CORS 阻止或缺少元数据）","flag_unavailable":"EXIF 不可用"}},"home":"首页","archive":"归档","archives":"归档","about":"关于","links":"链接","link":"链接","friends":"友情链接","friend":"友情链接","timeline":"时间轴","shuoshuo":"说说","bookmarks":"书签","site_uv":"访问人数","site_pv":"总访问量","read_more":"阅读全文","wordcount":"字","min2read":"分钟","changelog":"更新日志","status":"状态","runtime":"博客已运行","days":"天","hours":"小时","minutes":"分钟","seconds":"秒","optimized_by":"并由 Evan 进行优化","rights":"版权所有","site_posts":"共撰写了 %s 篇文章","site_wordcount":"共 %s 字","copyright":{"title":"标题","author":"作者","link":"链接","create_time":"创建于","update_time":"更新于","license_title":"版权声明","license_content":"本文章采用 %s 进行许可。","all_rights_reserved":"版权所有 &#169 %s，禁止转载。","public_domain":"本文为公有领域作品，可自由转载、引用。"},"ago":{"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"},"create_time":"创建","update_time":"更新","expired":"这篇文章最后更新于 %s 天前，内容可能已经过时。"};
+    window.data = {"masonry":false};
+  </script>
+    
+    <!--- Fontawesome Part-->
+    
+<link rel="stylesheet" href="/fontawesome/fontawesome.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/brands.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/solid.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/regular.min.css">
+
+    
+    
+    
+    
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+	<div class="progress-bar-container">
+	
+	<span class="scroll-progress-bar"></span>
+	
+
+	
+	<span class="pjax-progress-bar"></span>
+	<!--        <span class="swup-progress-icon">-->
+	<!--            <i class="fa-solid fa-circle-notch fa-spin"></i>-->
+	<!--        </span>-->
+	
+</div>
+
+<main class="page-container" id="swup">
+
+	
+
+	<div class="main-content-container flex flex-col justify-between min-h-dvh">
+		<div class="main-content-header">
+			<header class="navbar-container px-6 md:px-12">
+    <div class="navbar-content transition-navbar ">
+        <div class="left">
+            
+            <a class="logo-title" href="/">
+                
+                内森淼文
+                
+            </a>
+        </div>
+
+        <div class="right">
+            <!-- PC -->
+            <div class="desktop">
+                <ul class="navbar-list">
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/"
+                                        >
+                                    <i class="fa-regular fa-house fa-fw"></i>
+                                    首页
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/archives"
+                                        >
+                                    <i class="fa-regular fa-archive fa-fw"></i>
+                                    归档
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/categories"
+                                        >
+                                    <i class="fa-regular fa-folder fa-fw"></i>
+                                    分类
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/tags"
+                                        >
+                                    <i class="fa-regular fa-tags fa-fw"></i>
+                                    标签
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/about"
+                                        >
+                                    <i class="fa-regular fa-user fa-fw"></i>
+                                    关于
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                    
+                        <li class="navbar-item search search-popup-trigger">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </li>
+                    
+                </ul>
+            </div>
+            <!-- Mobile -->
+            <div class="mobile">
+                
+                    <div class="icon-item search search-popup-trigger"><i class="fa-solid fa-magnifying-glass"></i>
+                    </div>
+                
+                <div class="icon-item navbar-bar">
+                    <div class="navbar-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile sheet -->
+    <div class="navbar-drawer h-dvh w-full absolute top-0 left-0 bg-background-color flex flex-col justify-between">
+        <ul class="drawer-navbar-list flex flex-col px-4 justify-center items-start">
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/"
+                        >
+                            <span>
+                                首页
+                            </span>
+                            
+                                <i class="fa-regular fa-house fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/archives"
+                        >
+                            <span>
+                                归档
+                            </span>
+                            
+                                <i class="fa-regular fa-archive fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/categories"
+                        >
+                            <span>
+                                分类
+                            </span>
+                            
+                                <i class="fa-regular fa-folder fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/tags"
+                        >
+                            <span>
+                                标签
+                            </span>
+                            
+                                <i class="fa-regular fa-tags fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/about"
+                        >
+                            <span>
+                                关于
+                            </span>
+                            
+                                <i class="fa-regular fa-user fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+
+            
+            
+                
+                    
+                    
+                    
+            
+        </ul>
+
+        <div class="statistics flex justify-around my-2.5">
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/tags">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">272</div>
+        <div class="label text-third-text-color text-sm">标签</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/categories">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">9</div>
+        <div class="label text-third-text-color text-sm">分类</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/archives">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">206</div>
+        <div class="label text-third-text-color text-sm">文章</div>
+    </a>
+</div>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+		</div>
+
+		<div class="main-content-body transition-fade-up">
+			
+
+			<div class="main-content">
+				<div class="post-page-container flex relative justify-between box-border w-full h-full">
+	<div class="article-content-container">
+
+		<div class="article-title relative w-full">
+			
+			
+			
+			<img src="/images/constraint-polygon-ai-agent-dev/cover.png" alt="Constraint Polygon: A Software Engineering Methodology for the AI Agent Era" class="w-full h-60 sm:h-72 md:h-80 object-cover sm:rounded-t-large dark:brightness-75" />
+			
+			<div class="w-full flex items-center absolute bottom-0 justify-start">
+				<h1 class="article-title-cover text-center mx-6 my-6 text-second-text-color bg-background-color-transparent px-4 py-3 text-3xl sm:text-4xl md:text-5xl font-semibold backdrop-blur-lg rounded-xl border border-border-color ">Constraint Polygon: A Software Engineering Methodology for the AI Agent Era</h1>
+			</div>
+			
+		</div>
+
+		
+		<div class="article-header flex flex-row gap-2 items-center px-2 sm:px-6 md:px-8">
+			<div class="avatar w-[46px] h-[46px] shrink-0 rounded-medium border border-border-color p-px">
+				<img src="/images/avatar.png">
+			</div>
+			<div class="info flex flex-col justify-between">
+				<div class="author flex items-center">
+					<span class="name text-default-text-color text-lg font-semibold">Nathan</span>
+					
+				</div>
+				<div class="meta-info">
+					<div class="article-meta-info">
+    <span class="article-date article-meta-item">
+        <i class="fa-regular fa-pen-fancy"></i>&nbsp;
+        <span class="desktop">2026-04-26 17:53:09</span>
+        <span class="mobile">2026-04-26 17:53:09</span>
+        <span class="hover-info">创建</span>
+    </span>
+    
+        <span class="article-date article-meta-item">
+            <i class="fa-regular fa-wrench"></i>&nbsp;
+            <span class="desktop">2026-04-26 17:57:06</span>
+            <span class="mobile">2026-04-26 17:57:06</span>
+            <span class="hover-info">更新</span>
+        </span>
+    
+
+    
+        <span class="article-categories article-meta-item">
+            <i class="fa-regular fa-folders"></i>&nbsp;
+            <ul>
+                
+                
+                    
+                        
+                        <li>
+                            <a href="/categories/AI%E5%89%8D%E6%B2%BF/">AI前沿</a>&nbsp;
+                        </li>
+                    
+                    
+                
+            </ul>
+        </span>
+    
+    
+        <span class="article-tags article-meta-item">
+            <i class="fa-regular fa-tags"></i>&nbsp;
+            <ul>
+                
+                    <li>
+                        <a href="/tags/Harness-Engineering/">Harness Engineering</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/AI-Agent/">AI Agent</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/TDD/">TDD</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/Spec-Driven-Development/">Spec-Driven Development</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/Software-Engineering/">Software Engineering</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/Agent-Skills/">Agent Skills</a>&nbsp;
+                    </li>
+                
+            </ul>
+        </span>
+    
+
+    
+    
+        <span class="article-wordcount article-meta-item">
+            <i class="fa-regular fa-typewriter"></i>&nbsp;<span>3.1k 字</span>
+        </span>
+    
+    
+        <span class="article-min2read article-meta-item">
+            <i class="fa-regular fa-clock"></i>&nbsp;<span>19 分钟</span>
+        </span>
+    
+    
+</div>
+
+				</div>
+			</div>
+		</div>
+		
+
+		
+
+
+		<div class="article-content markdown-body px-2 sm:px-6 md:px-8 pb-8">
+			<blockquote>
+<p>Claude Code leaked source code, not Anthropic’s engineering flywheel. The real thing worth studying is not “what code did they write,” but “what system keeps the agent moving forward with quality, week after week?”</p>
+</blockquote>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/constraint-polygon-ai-agent-dev/cover.png"
+                      alt="Constraint Polygon: A Software Engineering Methodology for the AI Agent Era"
+                ></p>
+<h2 id="Preface-Source-Code-Leaked-but-the-Flywheel-Did-Not"><a href="#Preface-Source-Code-Leaked-but-the-Flywheel-Did-Not" class="headerlink" title="Preface: Source Code Leaked, but the Flywheel Did Not"></a>Preface: Source Code Leaked, but the Flywheel Did Not</h2><p>A while ago, Claude Code’s source code was accidentally exposed through a source map file in an npm package. Public reports said that a version of <code>@anthropic-ai/claude-code</code> included <code>cli.js.map</code>, allowing outsiders to reconstruct a large amount of readable TypeScript source code, system prompts, context-management logic, and agent-orchestration structure.</p>
+<p>This was a meaningful event. For anyone building coding agents, IDE agents, or software engineering automation, it offered a rare chance to look at how a frontier AI company wraps a large model into a real developer tool.</p>
+<p>But it did not mean Anthropic’s actual advantage had been copied.</p>
+<p>Source code is an output. It is not the engine.</p>
+<p>The harder questions were not leaked:</p>
+<ul>
+<li>How does Anthropic define product requirements?</li>
+<li>How does it organize agentic engineering?</li>
+<li>How does Claude Code keep shipping features in weekly increments?</li>
+<li>How are evaluation, testing, release, rollback, and product feedback connected?</li>
+<li>How does a team turn model capability into continuous software product momentum?</li>
+</ul>
+<p>In other words, what leaked was a diagram of airplane parts, not the engineering system that keeps the airplane accelerating.</p>
+<p>That is the software engineering question of the AI era: <strong>what should drive software forward when agents can write the code?</strong></p>
+<p>For decades, software engineering has proposed many forms of “Driven Development”: TDD, BDD, DDD, FDD, ATDD, MDD, SDD, and more. Each methodology answers the same deeper question:</p>
+<blockquote>
+<p>When system complexity exceeds individual intuition, what should drive development?</p>
+</blockquote>
+<p>In the AI Agent era, this question becomes sharper.</p>
+<p>AI can generate code. But it still needs to be driven, constrained, evaluated, and pulled forward by something outside itself. Otherwise, it is merely a fast generator without direction.</p>
+<h2 id="From-XDD-to-Harness-Engineering-The-Driver-Is-Moving-Up-the-Stack"><a href="#From-XDD-to-Harness-Engineering-The-Driver-Is-Moving-Up-the-Stack" class="headerlink" title="From XDD to Harness Engineering: The Driver Is Moving Up the Stack"></a>From XDD to Harness Engineering: The Driver Is Moving Up the Stack</h2><p>Different XDD methodologies hand the steering wheel to different artifacts.</p>
+<table>
+<thead>
+<tr>
+<th>Methodology</th>
+<th>Driver</th>
+<th>Core artifact</th>
+<th>Meaning for AI Agents</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>TDD</td>
+<td>Tests</td>
+<td>Unit and integration tests</td>
+<td>Gives the agent an automatically verifiable target</td>
+</tr>
+<tr>
+<td>BDD</td>
+<td>Behavior</td>
+<td>Given-When-Then scenarios</td>
+<td>Turns user behavior into executable semantics</td>
+</tr>
+<tr>
+<td>ATDD</td>
+<td>Acceptance</td>
+<td>Acceptance criteria</td>
+<td>Defines business success before implementation</td>
+</tr>
+<tr>
+<td>FDD</td>
+<td>Features</td>
+<td>Feature list and feature plan</td>
+<td>Moves delivery forward in feature-sized slices</td>
+</tr>
+<tr>
+<td>DDD</td>
+<td>Domain</td>
+<td>Ubiquitous language and domain model</td>
+<td>Reduces semantic drift in complex business systems</td>
+</tr>
+<tr>
+<td>MDD</td>
+<td>Models</td>
+<td>UML, DSL, or formal models</td>
+<td>Uses models to generate or constrain implementation</td>
+</tr>
+<tr>
+<td>SDD</td>
+<td>Specification</td>
+<td>Spec, plan, tasks</td>
+<td>Makes specification the source of implementation</td>
+</tr>
+<tr>
+<td>PDD &#x2F; Vibe Coding</td>
+<td>Prompt</td>
+<td>Natural-language intent</td>
+<td>Fast, but unstable without enough constraints</td>
+</tr>
+</tbody></table>
+<p>GitHub’s Spec Kit documentation captures the shift clearly: when a specification and implementation plan can generate code, development is no longer a loose translation from document to implementation. It becomes a structured conversion from specification to implementation, with templates, checklists, test-first thinking, and constitutional constraints used to keep LLM output maintainable, testable, and architecturally stable.</p>
+<p>OpenAI described a similar shift under the term <strong>Harness Engineering</strong>. In an engineering post, the team described building an internal beta product with Codex over five months under a radical constraint: zero lines of human-written code. The important sentence was not the number itself, but this:</p>
+<blockquote>
+<p>Humans steer. Agents execute.</p>
+</blockquote>
+<p>That is the new division of labor. Humans do not primarily create the system by typing implementation code. Humans create the environment, scaffolding, constraints, documentation, feedback loops, and control systems that make agents productive.</p>
+<p>Anthropic’s writing on harness design points in the same direction. Frontier agentic coding performance does not come only from stronger models. It also depends on better harnesses: separating planners, generators, and evaluators; resetting context at the right time; using structured handoffs; and building external evaluation instead of trusting an agent to grade its own work.</p>
+<p>Now add one more recent signal: Google Gemini engineering leader Addy Osmani open-sourced <strong>Agent Skills</strong>, a project that quickly earned tens of thousands of GitHub stars. Its idea is simple but important: package senior engineering workflows into reusable skills so AI coding tools behave less like impatient juniors and more like disciplined engineering teammates.</p>
+<p>Agent Skills is not trying to make the model smarter. It is trying to make the surrounding engineering discipline more explicit. Its skills cover the lifecycle from definition and planning to building, testing, review, and shipping. In Claude Code, commands like <code>/spec</code>, <code>/plan</code>, <code>/build</code>, <code>/test</code>, <code>/review</code>, and <code>/ship</code> turn an AI coding session into a structured development pipeline. It also includes specialized agents such as code reviewer, test engineer, and security auditor.</p>
+<p>This is exactly the same larger pattern.</p>
+<ul>
+<li>Spec Kit uses documents to define the agent.</li>
+<li>Superpowers uses workflow to guide the agent.</li>
+<li>Agent Skills uses engineering discipline to constrain the agent.</li>
+<li>Harness Engineering uses the entire operating environment to drive the agent.</li>
+</ul>
+<p>So the direction is clear: AI-era software engineering is moving from <strong>code-driven</strong> development toward <strong>harness-driven</strong> development.</p>
+<p>And a harness is, at its core, a system of constraints that lets an AI Agent work safely, quickly, and verifiably.</p>
+<h2 id="The-Reality-Gap-Demos-Are-Easy-Mature-Products-Are-Hard"><a href="#The-Reality-Gap-Demos-Are-Easy-Mature-Products-Are-Hard" class="headerlink" title="The Reality Gap: Demos Are Easy, Mature Products Are Hard"></a>The Reality Gap: Demos Are Easy, Mature Products Are Hard</h2><p>Since 2025, AI coding agents have delivered obvious productivity gains. Cursor, Claude Code, Codex, Copilot, Gemini CLI, and many other tools can create small applications and demos with impressive speed. For projects of dozens, hundreds, or even a few thousand lines, agents often feel almost magical.</p>
+<p>The reason is straightforward: <strong>when the whole project fits inside the model’s context window, the agent can hold the entire system in mind.</strong></p>
+<p>But real software work rarely looks like a demo.</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/constraint-polygon-ai-agent-dev/complexity-curve.png"
+                      alt="The relationship between AI Agent effectiveness and project scale"
+                ></p>
+<p>When you work inside a mature codebase with hundreds of thousands or millions of lines, the situation changes completely:</p>
+<ul>
+<li><strong>Context explodes</strong>: the codebase is far larger than the model’s context window.</li>
+<li><strong>Constraints accumulate</strong>: architecture, design systems, security requirements, compatibility promises, and business rules stack on top of one another.</li>
+<li><strong>Work becomes incremental</strong>: you are not starting from a blank page; you are performing surgery on a living system.</li>
+</ul>
+<p>It is easy for a brilliant architect to design a building on a blank sheet of paper. It is much harder to add a new floor to an occupied skyscraper without breaking the plumbing, elevators, fire exits, and daily operations.</p>
+<p>This is why “agent discipline” projects keep appearing even while models keep improving. The better models become, the more visible their shortcut-taking becomes. Strong agents can move faster in the wrong direction. They need engineering boundaries.</p>
+<p>Academic research is converging on the same insight. SWE-agent emphasized the importance of the Agent-Computer Interface: not merely connecting an LLM to a shell, but designing how the agent observes, edits, tests, and receives feedback. Research on AI teammates and Software Engineering 3.0 treats autonomous coding agents as new collaborators in software engineering. Work on <code>AGENTS.md</code> and context engineering shows that the context we provide to agents is itself a form of engineering.</p>
+<h2 id="The-Core-Question-How-Do-We-Let-AI-Agents-Work-on-Complex-Projects"><a href="#The-Core-Question-How-Do-We-Let-AI-Agents-Work-on-Complex-Projects" class="headerlink" title="The Core Question: How Do We Let AI Agents Work on Complex Projects?"></a>The Core Question: How Do We Let AI Agents Work on Complex Projects?</h2><p>The answer is: <strong>do not let agents roam an unbounded solution space. Build a limited, explicit, verifiable space for them to work inside.</strong></p>
+<p>I call this methodology the <strong>Constraint Polygon</strong>.</p>
+<h2 id="What-Is-a-Constraint-Polygon"><a href="#What-Is-a-Constraint-Polygon" class="headerlink" title="What Is a Constraint Polygon?"></a>What Is a Constraint Polygon?</h2><p>Imagine a polygon. Each side represents a constraint: design documents, UX prototypes, tests, security policies, performance baselines, compliance rules, observability requirements, and so on. Together, these sides enclose a bounded space.</p>
+<p><strong>The center of the polygon is intentionally empty. That is where the AI Agent fills in the implementation.</strong></p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/constraint-polygon-ai-agent-dev/constraint-polygon.png"
+                      alt="Constraint Polygon concept diagram"
+                ></p>
+<p>The key insight is this: when the constraints are rich enough, implementation becomes the most determined part of the process. The agent no longer wanders through an ocean of possible code. It grows code inside a well-defined enclosure.</p>
+<p>This also explains why OpenAI emphasizes giving Codex a map rather than a thousand-page manual. For an agent, information that cannot enter runtime context is almost equivalent to information that does not exist. Constraints must be accessible, executable, and feedback-producing before they can truly drive development.</p>
+<p>Agent Skills makes the same idea practical. A skill is not just advice. It is a reusable boundary around how work should be done: how to define the task, how to plan it, how to build incrementally, how to test, how to review, and how to decide whether something is ready to ship.</p>
+<p>In other words, a skill is a portable side of the polygon.</p>
+<h2 id="Building-the-Polygon-Step-by-Step"><a href="#Building-the-Polygon-Step-by-Step" class="headerlink" title="Building the Polygon Step by Step"></a>Building the Polygon Step by Step</h2><p>A Constraint Polygon is not created all at once. You start with the smallest viable triangle and add more sides as the problem becomes more complex.</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/constraint-polygon-ai-agent-dev/constraint-evolution.png"
+                      alt="Evolution of the Constraint Polygon"
+                ></p>
+<h3 id="Step-1-The-Design-Document-—-The-Base-Side"><a href="#Step-1-The-Design-Document-—-The-Base-Side" class="headerlink" title="Step 1: The Design Document — The Base Side"></a>Step 1: The Design Document — The Base Side</h3><p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/constraint-polygon-ai-agent-dev/mermaid-1.jpg"
+                      alt="Design document as the base constraint"
+                ></p>
+<p>Everything begins with design. Before writing code, the agent and the human must understand the existing codebase, the feature’s purpose, and the boundaries that must not be crossed. This produces a <strong>Dev Design Document</strong>.</p>
+<p>The design document should answer:</p>
+<ul>
+<li>What is this feature supposed to do?</li>
+<li>Where does it fit in the system?</li>
+<li>Which existing modules does it interact with?</li>
+<li>What are the interface contracts?</li>
+<li>Which boundaries are non-negotiable?</li>
+</ul>
+<p>This is the base side of the polygon.</p>
+<p>In the AI Agent era, documentation is not ceremony. It is runtime infrastructure. Every important piece of code should be traceable to the design constraint it satisfies. If the agent cannot see the design, the design does not guide the agent.</p>
+<p>This is also where Agent Skills and Spec Kit become useful. <code>/spec</code> and <code>/plan</code> are not just productivity shortcuts. They create the artifacts that later constrain implementation.</p>
+<h3 id="Step-2-The-UX-or-API-Prototype-—-The-Second-Side"><a href="#Step-2-The-UX-or-API-Prototype-—-The-Second-Side" class="headerlink" title="Step 2: The UX or API Prototype — The Second Side"></a>Step 2: The UX or API Prototype — The Second Side</h3><p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/constraint-polygon-ai-agent-dev/mermaid-2.jpg"
+                      alt="UX prototype as the second constraint"
+                ></p>
+<p>On top of the design document, create an explicit prototype of the user experience or API behavior. This could be:</p>
+<ul>
+<li>an HTML&#x2F;CSS interaction prototype,</li>
+<li>a wireframe with annotated interaction logic,</li>
+<li>a user-flow diagram,</li>
+<li>an API contract draft,</li>
+<li>a CLI command transcript,</li>
+<li>or an example request&#x2F;response pair.</li>
+</ul>
+<p>The design document and prototype together form two sides of the polygon: <strong>technical intent</strong> and <strong>user-facing behavior</strong>.</p>
+<p>This matters because agents often optimize for local instruction completion. If the user experience is vague, they may satisfy the literal prompt while missing the product feel. A prototype makes the expected experience visible.</p>
+<h3 id="Step-3-Test-Constraints-—-Closing-the-Triangle"><a href="#Step-3-Test-Constraints-—-Closing-the-Triangle" class="headerlink" title="Step 3: Test Constraints — Closing the Triangle"></a>Step 3: Test Constraints — Closing the Triangle</h3><p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/constraint-polygon-ai-agent-dev/mermaid-3.jpg"
+                      alt="Tests close the minimum viable polygon"
+                ></p>
+<p>Based on the design and prototype, define tests:</p>
+<ul>
+<li>Given an input, what output should a function return?</li>
+<li>After a button click, what UI state should exist?</li>
+<li>What is success? What is failure?</li>
+<li>What edge cases must not regress?</li>
+<li>What security-sensitive behavior must be rejected?</li>
+</ul>
+<p>Once tests exist, the triangle closes. The agent now has a minimum viable development space. It can move from failing tests to passing tests, using test results as an external evaluator.</p>
+<p>This is where TDD and AI Agents fit together naturally. The agent’s biggest weakness is not that it cannot write. It is that it often does not know when it is wrong. Tests give it an external gradient.</p>
+<p>Agent Skills captures this discipline by making <code>/test</code> and specialized test-engineer agents part of the workflow. The point is not merely to run tests after the fact. The point is to make testability part of the driving system.</p>
+<h3 id="Step-4-Add-More-Constraint-Sides"><a href="#Step-4-Add-More-Constraint-Sides" class="headerlink" title="Step 4: Add More Constraint Sides"></a>Step 4: Add More Constraint Sides</h3><p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/constraint-polygon-ai-agent-dev/mermaid-4.jpg"
+                      alt="Expanding the polygon with more engineering constraints"
+                ></p>
+<p>For more complex systems, a triangle is not enough. Add more sides:</p>
+<ul>
+<li><strong>Security constraints</strong>: permission models, input validation, dependency scanning, data encryption.</li>
+<li><strong>Performance baselines</strong>: response latency, throughput, memory limits, bundle size.</li>
+<li><strong>Compliance requirements</strong>: privacy rules, legal constraints, industry standards.</li>
+<li><strong>DevOps constraints</strong>: CI&#x2F;CD rules, deployment compatibility, rollback strategy.</li>
+<li><strong>Observability constraints</strong>: logging, tracing, metrics, alerts.</li>
+<li><strong>Code-review constraints</strong>: naming rules, architectural boundaries, dependency rules.</li>
+<li><strong>Release constraints</strong>: changelog, migration plan, rollout guardrails.</li>
+</ul>
+<p>Each new side shrinks the agent’s solution space and makes the implementation more precise.</p>
+<p>This is the deeper significance of Agent Skills: it decomposes senior engineering judgment into reusable operational constraints. Code reviewer, test engineer, and security auditor are not just personas. They are additional evaluator sides around the implementation space.</p>
+<h2 id="POC-Anchors-Fixing-Uncertainty-Inside-the-Polygon"><a href="#POC-Anchors-Fixing-Uncertainty-Inside-the-Polygon" class="headerlink" title="POC Anchors: Fixing Uncertainty Inside the Polygon"></a>POC Anchors: Fixing Uncertainty Inside the Polygon</h2><p>Sometimes the outer boundary is clear, but the center is still uncertain. The risky questions might be:</p>
+<ul>
+<li>Does a third-party API really support this use case?</li>
+<li>Can the new database connection strategy work under our constraints?</li>
+<li>Does the browser API cover the required behavior?</li>
+<li>Can the current extension point support the new experience?</li>
+<li>Will a performance-sensitive path remain fast enough?</li>
+</ul>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/constraint-polygon-ai-agent-dev/mermaid-5.jpg"
+                      alt="POC anchors inside the polygon"
+                ></p>
+<p>This is where <strong>POC anchors</strong> matter.</p>
+<p>The principle is simple: do not validate technical feasibility inside a huge production codebase. Build a small, controlled environment with the same architectural conditions and test the risky path there.</p>
+<p>A POC anchor is a small runnable module. It is not the full app, but it proves a critical path and becomes an anchor point inside the polygon. Once the anchor exists, the agent can fill around it with far less uncertainty.</p>
+<p>This aligns with Anthropic’s planner &#x2F; generator &#x2F; evaluator separation. Do not force one agent to carry planning, uncertainty elimination, implementation, and evaluation at the same time. Split them into checkable stages.</p>
+<h2 id="The-Full-Development-Flow"><a href="#The-Full-Development-Flow" class="headerlink" title="The Full Development Flow"></a>The Full Development Flow</h2><p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/constraint-polygon-ai-agent-dev/mermaid-6.jpg"
+                      alt="The full Constraint Polygon development flow"
+                ></p>
+<p>The flow is simple:</p>
+<ol>
+<li>Understand the codebase.</li>
+<li>Write the design document.</li>
+<li>Create the UX&#x2F;API prototype.</li>
+<li>Define tests and acceptance criteria.</li>
+<li>Add security, performance, compliance, DevOps, and observability constraints.</li>
+<li>Build POC anchors for uncertain technical paths.</li>
+<li>Let the AI Agent implement inside the polygon.</li>
+<li>Run tests, review, security audit, and release checks.</li>
+<li>Feed production feedback back into the harness.</li>
+</ol>
+<p>This is not a rejection of traditional software engineering. It is a reinterpretation of it for the agent era.</p>
+<p>Design, prototype, test, implement, review, ship, observe—these steps already existed. What changes is that they no longer only guide human developers. They become the operating boundary, evaluation function, and feedback channel for AI Agents.</p>
+<h2 id="Why-This-Works"><a href="#Why-This-Works" class="headerlink" title="Why This Works"></a>Why This Works</h2><h3 id="1-It-Turns-an-Unbounded-Problem-into-a-Bounded-One"><a href="#1-It-Turns-an-Unbounded-Problem-into-a-Bounded-One" class="headerlink" title="1. It Turns an Unbounded Problem into a Bounded One"></a>1. It Turns an Unbounded Problem into a Bounded One</h3><p>A large codebase may exceed any context window. But the Constraint Polygon converts “implement a feature somewhere in a million lines of code” into “fill this bounded implementation space under explicit constraints.” That bounded space can be represented compactly.</p>
+<h3 id="2-Tests-Let-Agents-Self-Improve-Safely"><a href="#2-Tests-Let-Agents-Self-Improve-Safely" class="headerlink" title="2. Tests Let Agents Self-Improve Safely"></a>2. Tests Let Agents Self-Improve Safely</h3><p>Agents need external feedback. Tests give them a clear path from failure to success. Without tests, they may produce confident but wrong work. With tests, they can iterate.</p>
+<h3 id="3-POC-Anchors-Remove-Technical-Uncertainty"><a href="#3-POC-Anchors-Remove-Technical-Uncertainty" class="headerlink" title="3. POC Anchors Remove Technical Uncertainty"></a>3. POC Anchors Remove Technical Uncertainty</h3><p>Many failures happen because an agent assumes feasibility that has not been proven. POC anchors turn unknowns into knowns before the full implementation begins.</p>
+<h3 id="4-Harnesses-Turn-Individual-Skill-into-Organizational-Capability"><a href="#4-Harnesses-Turn-Individual-Skill-into-Organizational-Capability" class="headerlink" title="4. Harnesses Turn Individual Skill into Organizational Capability"></a>4. Harnesses Turn Individual Skill into Organizational Capability</h3><p>A clever prompt is a personal trick. A repeatable system of design docs, prototypes, tests, linters, CI, review agents, security audits, observability, and rollback policies is organizational capability.</p>
+<p>This is why leaked source code does not equal a leaked flywheel. Code can be copied. A system that continuously produces high-quality code is much harder to copy.</p>
+<h3 id="5-It-Explains-Why-Agent-Skills-Matter"><a href="#5-It-Explains-Why-Agent-Skills-Matter" class="headerlink" title="5. It Explains Why Agent Skills Matter"></a>5. It Explains Why Agent Skills Matter</h3><p>Agent Skills, Spec Kit, Superpowers, and similar projects keep appearing because teams are discovering the same truth: model intelligence is necessary, but not sufficient.</p>
+<p>Production software requires discipline.</p>
+<p>Agent Skills packages discipline into reusable skills. Spec Kit packages intent into structured specifications. Superpowers packages development into a workflow. Harness Engineering packages the entire environment into a control system.</p>
+<p>The Constraint Polygon is a way to understand all of them as parts of the same framework.</p>
+<h2 id="Practical-Example-A-Feature-Request-in-a-Mature-Product"><a href="#Practical-Example-A-Feature-Request-in-a-Mature-Product" class="headerlink" title="Practical Example: A Feature Request in a Mature Product"></a>Practical Example: A Feature Request in a Mature Product</h2><p>Suppose you ask an AI Agent to add “team-level billing alerts” to a mature SaaS product.</p>
+<p>A weak prompt says:</p>
+<blockquote>
+<p>Add billing alerts for teams.</p>
+</blockquote>
+<p>A Constraint Polygon approach creates:</p>
+<ul>
+<li>a design doc explaining team billing ownership, existing billing modules, and notification boundaries;</li>
+<li>an API contract for creating, updating, and testing alert thresholds;</li>
+<li>a UX prototype showing how admins configure alerts;</li>
+<li>unit tests for threshold logic;</li>
+<li>integration tests for notification delivery;</li>
+<li>security constraints around team-admin permissions;</li>
+<li>performance constraints around billing-event ingestion;</li>
+<li>observability requirements for alert delivery failures;</li>
+<li>a POC anchor validating the notification provider’s rate limits.</li>
+</ul>
+<p>Only then does the agent implement.</p>
+<p>The agent is still writing code. But it is no longer inventing the world. It is filling a defined space.</p>
+<h2 id="A-Better-Mental-Model-Constraint-Is-Freedom"><a href="#A-Better-Mental-Model-Constraint-Is-Freedom" class="headerlink" title="A Better Mental Model: Constraint Is Freedom"></a>A Better Mental Model: Constraint Is Freedom</h2><p>It sounds paradoxical, but constraints make agents more useful.</p>
+<p>Without constraints, the agent has too many degrees of freedom. It can satisfy the prompt while damaging architecture, skipping edge cases, or creating future maintenance debt.</p>
+<p>With constraints, the agent can move faster because it no longer has to guess the shape of success.</p>
+<p>This is also how senior engineers work. They do not merely type better code. They know which constraints matter before code exists. They know what must be decided, what must be tested, what can be deferred, and what must never be broken.</p>
+<p>Agent Skills tries to capture that senior-engineer discipline. The Constraint Polygon explains where that discipline fits: every skill adds another side, anchor, or evaluator to the agent’s working space.</p>
+<h2 id="Conclusion-Humans-Design-Constraints-Agents-Fill-Them"><a href="#Conclusion-Humans-Design-Constraints-Agents-Fill-Them" class="headerlink" title="Conclusion: Humans Design Constraints, Agents Fill Them"></a>Conclusion: Humans Design Constraints, Agents Fill Them</h2><p>AI Agents are not replacing software engineering. They are forcing us to make software engineering more explicit.</p>
+<p>The human developer’s role is shifting from “writer of code” to <strong>designer of constraints</strong>. We define design documents, UX prototypes, test cases, security rules, performance baselines, POC anchors, evaluator agents, CI gates, and feedback loops.</p>
+<p>The AI Agent’s role is becoming <strong>the filler inside the constraint space</strong>. Inside a well-designed polygon, it can produce implementation quickly and verifiably.</p>
+<p>That is the development methodology of the AI Agent era:</p>
+<blockquote>
+<p>Do not let AI freely improvise. Build the constraint polygon first, then let AI fill it.</p>
+</blockquote>
+<p>Claude Code’s leaked source code taught us one thing: the moat is probably not in any single file. The moat is in the flywheel that drives agents forward.</p>
+<p>Agent Skills, Spec Kit, Superpowers, Harness Engineering, and the Constraint Polygon all point to the same future:</p>
+<p><strong>The next generation of software engineering will be won by teams that can design better constraints, better context, and better feedback loops for agents.</strong></p>
+<hr>
+<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><ol>
+<li>Anthropic Engineering, <em>Harness design for long-running application development</em>, 2026-03-24.</li>
+<li>OpenAI Engineering, <em>Harness engineering: leveraging Codex in an agent-first world</em>, 2026-02-11.</li>
+<li>Addy Osmani, <em>Agent Skills</em>, GitHub repository.</li>
+<li>GitHub Spec Kit, <em>Specification-Driven Development</em>.</li>
+<li>Yang et al., <em>SWE-agent: Agent-Computer Interfaces Enable Automated Software Engineering</em>, arXiv:2405.15793, 2024.</li>
+<li><em>The Rise of AI Teammates in Software Engineering (SE) 3.0</em>, arXiv:2507.15003, 2025.</li>
+<li><em>Context Engineering for AI Agents in Open-Source Software</em>, arXiv:2510.21413, 2025.</li>
+<li>Google DORA, <em>2025 State of AI-assisted Software Development Report</em>, 2025.</li>
+</ol>
+
+		</div>
+
+		
+		<div class="post-copyright-info w-full my-8 px-2 sm:px-6 md:px-8">
+			<div class="article-copyright-info-container">
+    <ul>
+        <li><strong>标题:</strong> Constraint Polygon: A Software Engineering Methodology for the AI Agent Era</li>
+        <li><strong>作者:</strong> Nathan</li>
+        <li><strong>创建于
+                :</strong> 2026-04-26 17:53:09</li>
+        
+            <li>
+                <strong>更新于
+                    :</strong> 2026-04-26 17:57:06
+            </li>
+        
+        <li>
+            <strong>链接:</strong> https://hydraxman.github.io/2026/04/26/constraint-polygon-ai-agent-dev-en/
+        </li>
+        <li>
+            <strong>
+                版权声明:
+            </strong>
+            
+
+            
+                本文章采用 <a class="license" target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0">CC BY-NC-SA 4.0</a> 进行许可。
+            
+        </li>
+    </ul>
+</div>
+
+		</div>
+		
+
+		
+		<ul class="post-tags-box text-lg mt-1.5 flex-wrap justify-center flex md:hidden">
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/Harness-Engineering/">#Harness Engineering</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/AI-Agent/">#AI Agent</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/TDD/">#TDD</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/Spec-Driven-Development/">#Spec-Driven Development</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/Software-Engineering/">#Software Engineering</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/Agent-Skills/">#Agent Skills</a>&nbsp;
+			</li>
+			
+		</ul>
+		
+
+		
+
+		
+		<div class="article-nav my-8 flex justify-between items-center px-2 sm:px-6 md:px-8">
+			
+			
+			<div class="article-next border-border-color shadow-redefine-flat shadow-shadow-color-2 rounded-medium px-4 py-2 hover:shadow-redefine-flat-hover hover:shadow-shadow-color-2">
+				<a class="next" rel="next" href="/2026/04/26/2026-04-26-morning-news/">
+					<span class="title flex justify-center items-center">
+						<span class="post-nav-title-item truncate max-w-48">2026年04月26日早间要闻</span>
+						<span class="post-nav-item">下一篇</span>
+					</span>
+					<span class="right arrow-icon flex justify-center items-center">
+						<i class="fa-solid fa-chevron-right"></i>
+					</span>
+				</a>
+			</div>
+			
+		</div>
+		
+
+
+		
+	</div>
+
+	
+	<div class="toc-content-container">
+		<div class="post-toc-wrap">
+	<div class="post-toc">
+		<div class="toc-title">目录</div>
+		<div class="page-title">Constraint Polygon: A Software Engineering Methodology for the AI Agent Era</div>
+		<ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Preface-Source-Code-Leaked-but-the-Flywheel-Did-Not"><span class="nav-text">Preface: Source Code Leaked, but the Flywheel Did Not</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#From-XDD-to-Harness-Engineering-The-Driver-Is-Moving-Up-the-Stack"><span class="nav-text">From XDD to Harness Engineering: The Driver Is Moving Up the Stack</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#The-Reality-Gap-Demos-Are-Easy-Mature-Products-Are-Hard"><span class="nav-text">The Reality Gap: Demos Are Easy, Mature Products Are Hard</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#The-Core-Question-How-Do-We-Let-AI-Agents-Work-on-Complex-Projects"><span class="nav-text">The Core Question: How Do We Let AI Agents Work on Complex Projects?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#What-Is-a-Constraint-Polygon"><span class="nav-text">What Is a Constraint Polygon?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Building-the-Polygon-Step-by-Step"><span class="nav-text">Building the Polygon Step by Step</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Step-1-The-Design-Document-%E2%80%94-The-Base-Side"><span class="nav-text">Step 1: The Design Document — The Base Side</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Step-2-The-UX-or-API-Prototype-%E2%80%94-The-Second-Side"><span class="nav-text">Step 2: The UX or API Prototype — The Second Side</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Step-3-Test-Constraints-%E2%80%94-Closing-the-Triangle"><span class="nav-text">Step 3: Test Constraints — Closing the Triangle</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Step-4-Add-More-Constraint-Sides"><span class="nav-text">Step 4: Add More Constraint Sides</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#POC-Anchors-Fixing-Uncertainty-Inside-the-Polygon"><span class="nav-text">POC Anchors: Fixing Uncertainty Inside the Polygon</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#The-Full-Development-Flow"><span class="nav-text">The Full Development Flow</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Why-This-Works"><span class="nav-text">Why This Works</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-It-Turns-an-Unbounded-Problem-into-a-Bounded-One"><span class="nav-text">1. It Turns an Unbounded Problem into a Bounded One</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Tests-Let-Agents-Self-Improve-Safely"><span class="nav-text">2. Tests Let Agents Self-Improve Safely</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-POC-Anchors-Remove-Technical-Uncertainty"><span class="nav-text">3. POC Anchors Remove Technical Uncertainty</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-Harnesses-Turn-Individual-Skill-into-Organizational-Capability"><span class="nav-text">4. Harnesses Turn Individual Skill into Organizational Capability</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-It-Explains-Why-Agent-Skills-Matter"><span class="nav-text">5. It Explains Why Agent Skills Matter</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Practical-Example-A-Feature-Request-in-a-Mature-Product"><span class="nav-text">Practical Example: A Feature Request in a Mature Product</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#A-Better-Mental-Model-Constraint-Is-Freedom"><span class="nav-text">A Better Mental Model: Constraint Is Freedom</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Conclusion-Humans-Design-Constraints-Agents-Fill-Them"><span class="nav-text">Conclusion: Humans Design Constraints, Agents Fill Them</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#References"><span class="nav-text">References</span></a></li></ol>
+
+	</div>
+</div>
+	</div>
+	
+</div>
+
+			</div>
+
+			
+		</div>
+
+		<div class="main-content-footer">
+			<footer class="footer mt-5 py-5 h-auto text-base text-third-text-color relative border-t-2 border-t-border-color">
+    <div class="info-container py-3 text-center">
+        
+        <div class="text-center">
+            &copy;
+            
+              <span>2024</span>
+              -
+            
+            2026&nbsp;&nbsp;<i class="fa-solid fa-heart fa-beat" style="--fa-animation-duration: 0.5s; color: #333"></i>&nbsp;&nbsp;<a href="/">Nathan</a>
+            
+                
+                <p class="post-count space-x-0.5">
+                    <span>
+                        共撰写了 206 篇文章
+                    </span>
+                    
+                        <span>
+                            共 405k 字
+                        </span>
+                    
+                </p>
+            
+        </div>
+        
+        <div class="relative text-center lg:absolute lg:left-[20px] lg:top-1/2 lg:-translate-y-1/2 lg:text-left">
+            <span class="lg:block text-sm">由 <?xml version="1.0" encoding="utf-8"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg class="relative top-[2px] inline-block align-baseline" version="1.1" id="圖層_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="1rem" height="1rem" viewBox="0 0 512 512" enable-background="new 0 0 512 512" xml:space="preserve"><path fill="#0E83CD" d="M256.4,25.8l-200,115.5L56,371.5l199.6,114.7l200-115.5l0.4-230.2L256.4,25.8z M349,354.6l-18.4,10.7l-18.6-11V275H200v79.6l-18.4,10.7l-18.6-11v-197l18.5-10.6l18.5,10.8V237h112v-79.6l18.5-10.6l18.5,10.8V354.6z"/></svg><a target="_blank" class="text-base" href="https://hexo.io">Hexo</a> 驱动</span>
+            <span class="text-sm lg:block">主题&nbsp;<a class="text-base" target="_blank" href="https://github.com/EvanNotFound/hexo-theme-redefine">Redefine v2.9.0</a></span>
+        </div>
+        
+        
+            <div>
+                博客已运行 <span class="odometer" id="runtime_days" ></span> 天 <span class="odometer" id="runtime_hours"></span> 小时 <span class="odometer" id="runtime_minutes"></span> 分钟 <span class="odometer" id="runtime_seconds"></span> 秒
+            </div>
+        
+        
+            <script data-swup-reload-script>
+                try {
+                    function odometer_init() {
+                    const elements = document.querySelectorAll('.odometer');
+                    elements.forEach(el => {
+                        new Odometer({
+                            el,
+                            format: '( ddd).dd',
+                            duration: 200
+                        });
+                    });
+                    }
+                    odometer_init();
+                } catch (error) {}
+            </script>
+        
+        
+            
+                
+        
+                
+        
+        
+    </div>  
+</footer>
+		</div>
+	</div>
+
+	
+	<div class="post-tools">
+		<div class="post-tools-container">
+	<ul class="article-tools-list">
+		<!-- TOC aside toggle -->
+		
+		<li class="right-bottom-tools page-aside-toggle">
+			<i class="fa-regular fa-outdent"></i>
+		</li>
+		
+
+		<!-- go comment -->
+		
+	</ul>
+</div>
+	</div>
+	
+
+	<div class="right-side-tools-container">
+		<div class="side-tools-container">
+	<ul class="hidden-tools-list">
+		<li class="right-bottom-tools tool-font-adjust-plus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-plus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-font-adjust-minus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-minus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-dark-light-toggle flex justify-center items-center">
+			<i class="fa-regular fa-moon"></i>
+		</li>
+
+		<!-- rss -->
+		
+
+		
+
+		<li class="right-bottom-tools tool-scroll-to-bottom flex justify-center items-center">
+			<i class="fa-regular fa-arrow-down"></i>
+		</li>
+	</ul>
+
+	<ul class="visible-tools-list">
+		<li class="right-bottom-tools toggle-tools-list flex justify-center items-center">
+			<i class="fa-regular fa-cog fa-spin"></i>
+		</li>
+		
+		<li class="right-bottom-tools tool-scroll-to-top flex justify-center items-center">
+			<i class="arrow-up fas fa-arrow-up"></i>
+			<span class="percent"></span>
+		</li>
+		
+		
+	</ul>
+</div>
+	</div>
+
+	<div class="image-viewer-container" role="dialog" aria-modal="true" aria-label="图片查看器">
+	<button class="image-viewer-close" type="button" aria-label="关闭">
+		<i class="fa-solid fa-xmark"></i>
+	</button>
+	<button class="image-viewer-prev" type="button" aria-label="上一页">
+		<i class="fa-solid fa-chevron-left"></i>
+	</button>
+	<div class="image-viewer-frame">
+		<img src="" alt="">
+	</div>
+	<div class="image-viewer-exif-panel hidden absolute left-1/2 bottom-20 -translate-x-1/2 w-[min(92vw,420px)] max-h-[60vh] overflow-hidden rounded-2xl bg-background-color-transparent-80 p-4 text-left shadow-redefine-flat backdrop-blur-md" role="dialog" aria-label="EXIF" aria-hidden="true">
+		<div class="flex items-center justify-between mb-3">
+			<span class="text-sm font-semibold text-first-text-color">EXIF</span>
+			<button class="image-viewer-exif-close flex h-8 w-8 items-center justify-center rounded-full bg-background-color-transparent-80 text-first-text-color transition hover:bg-background-color-transparent-40" type="button" aria-label="关闭">
+				<i class="fa-solid fa-xmark text-[0.65rem]"></i>
+			</button>
+		</div>
+		<div class="image-viewer-exif-cards grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[50vh] overflow-y-auto pr-1 scrollbar-hide"></div>
+		<template class="image-viewer-exif-card-template">
+			<div class="rounded-lg bg-background-color-transparent-40 px-3 py-2">
+				<div class="image-viewer-exif-card-header flex items-center gap-2 mb-1">
+					<i class="image-viewer-exif-card-icon fa-solid fa-circle-info text-xs text-third-text-color"></i>
+					<div class="image-viewer-exif-card-title text-xs font-semibold text-first-text-color"></div>
+				</div>
+				<div class="image-viewer-exif-card-items flex flex-col gap-1"></div>
+			</div>
+		</template>
+	</div>
+	<button class="image-viewer-exif-toggle flex items-center gap-2 hidden absolute left-1/2 bottom-6 -translate-x-1/2 rounded-full border border-border-color bg-background-color-transparent-80 px-4 py-2 text-first-text-color backdrop-blur-md transition hover:bg-background-color-transparent-40" type="button" aria-label="EXIF" aria-expanded="false">
+		<i class="fa-solid fa-circle-info text-xs"></i>
+		<span class="text-xs font-semibold uppercase tracking-wider">EXIF</span>
+	</button>
+	<button class="image-viewer-next" type="button" aria-label="下一页">
+		<i class="fa-solid fa-chevron-right"></i>
+	</button>
+</div>
+
+
+	
+	<div class="search-pop-overlay">
+	<div class="popup search-popup">
+		<div class="search-header">
+			<span class="search-input-field-pre">
+				<i class="fa-solid fa-keyboard"></i>
+			</span>
+			<div class="search-input-container">
+				<input autocomplete="off" autocorrect="off" autocapitalize="off" placeholder="站内搜索您需要的内容..." spellcheck="false" type="search" class="search-input">
+			</div>
+			<span class="popup-btn-close">
+				<i class="fa-solid fa-times"></i>
+			</span>
+		</div>
+		<div id="search-result">
+			<div id="no-result">
+				<i class="fa-solid fa-spinner fa-spin-pulse fa-5x fa-fw"></i>
+			</div>
+		</div>
+	</div>
+</div>
+	
+
+</main>
+
+
+
+<script src="/js/build/libs/Swup.min.js"></script>
+
+<script src="/js/build/libs/SwupSlideTheme.min.js"></script>
+
+<script src="/js/build/libs/SwupScriptsPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupProgressPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupScrollPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupPreloadPlugin.min.js"></script>
+
+<script>
+    window.swup = new Swup({
+        plugins: [
+            new SwupScriptsPlugin({
+                optin: true,
+            }),
+            new SwupProgressPlugin(),
+            new SwupScrollPlugin({
+                offset: 80,
+            }),
+            new SwupSlideTheme({
+                mainElement: ".main-content-body",
+            }),
+            new SwupPreloadPlugin(),
+        ],
+        containers: ["#swup"],
+    });
+
+    window.dispatchEvent(
+        new CustomEvent("redefine:swup:ready", {
+            detail: {
+                swup: window.swup,
+            },
+        }),
+    );
+</script>
+
+
+
+
+	
+<script src="/js/build/main.js" type="module"></script>
+
+
+
+    
+<script src="/js/build/libs/odometer.min.js"></script>
+
+    
+<link rel="stylesheet" href="/assets/odometer-theme-minimal.css">
+
+
+
+
+
+
+
+  
+<script src="/js/build/libs/Typed.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+<script src="/js/build/libs/moment-with-locales.min.js" data-swup-reload-script=""></script>
+
+
+
+	
+</body>
+
+</html>
