@@ -1,0 +1,46 @@
+graph LR
+  Title["Warp 源码模块图\n从启动入口到终端、UI、Agent、隐私设置"]
+
+  subgraph App["应用启动层 app"]
+    Entry["bin/oss.rs\nOSS 启动入口"]
+    Lib["lib.rs\nrun / initialize_app / launch"]
+    CLI["warp_cli\n命令行参数与子命令"]
+  end
+
+  subgraph Terminal["终端运行时 terminal"]
+    Pty["local_tty/spawner.rs\nPTY 伪终端管理"]
+    Blocks["model/blocks.rs\nBlockList + shell hooks"]
+    Block["model/block.rs\n单个 Block 执行单元"]
+  end
+
+  subgraph UI["自研 UI 框架 warpui"]
+    View["View / Element\n布局、绘制、事件"]
+    Render["winit / wgpu / Metal\n跨平台 GPU 渲染"]
+  end
+
+  subgraph Agent["AI Agent 与 MCP"]
+    AgentSDK["agent_sdk\nAgent 命令分发"]
+    Harness["driver/harness\nClaude / Codex / Gemini"]
+    MCP["mcp\nCLI / SSE / HTTP 工具"]
+  end
+
+  subgraph Settings["设置、隐私与遥测"]
+    Pref["Public / Private Preferences"]
+    Privacy["privacy.rs\n遥测与云会话开关"]
+    Telemetry["telemetry\n发送前检查隐私快照"]
+  end
+
+  Title --> Entry
+  Entry --> Lib
+  CLI --> Lib
+  Lib --> Pty
+  Pty --> Blocks
+  Blocks --> Block
+  Block --> View
+  View --> Render
+  Lib --> AgentSDK
+  AgentSDK --> Harness
+  AgentSDK --> MCP
+  Lib --> Pref
+  Pref --> Privacy
+  Privacy --> Telemetry
