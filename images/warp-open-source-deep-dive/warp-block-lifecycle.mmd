@@ -1,11 +1,14 @@
-graph LR
-  User["用户输入\n键盘 / Prompt"] --> PTY["PTY 伪终端\n终端 App 与 Shell 的接口"]
-  PTY --> Shell["Shell\nbash / zsh / fish / SSH"]
-  Shell --> Hooks["Shell Hooks\npreexec / precmd / command_finished"]
-  Shell --> Stream["ANSI 字符流\n命令输出、颜色、光标控制"]
-  Hooks --> Parser["Warp ANSI Handler\n解析执行边界"]
-  Stream --> Parser
-  Parser --> Block["Block\n命令 + 输出 + cwd + exit code + 状态"]
-  Block --> UI["WarpUI 展示\n可搜索、选择、分享、折叠"]
-  Block --> Agent["Agent 上下文\n调试、解释、改代码、复盘"]
-  Agent --> Review["人类审查\n确认计划和代码变更"]
+graph TD
+  User["用户输入\n键盘 / Prompt"]
+  PTY["PTY 伪终端\n终端 App 与 Shell 的假终端接口"]
+  Shell["Shell\nbash / zsh / fish / SSH"]
+  Events["两类原始信息\n1. Shell Hooks：preexec / precmd / command_finished\n2. ANSI 字符流：输出、颜色、光标控制"]
+  Handler["Warp ANSI Handler\n解析命令开始、结束和输出边界"]
+  Block["结构化 Block\n命令 + 输出 + cwd + exit code + 状态"]
+  UI["WarpUI 展示\n搜索、选择、分享、折叠"]
+  Agent["Agent 上下文\n调试、解释、改代码、复盘"]
+  Human["人类审查\n确认计划和代码变更"]
+
+  User --> PTY --> Shell --> Events --> Handler --> Block
+  Block --> UI
+  Block --> Agent --> Human
