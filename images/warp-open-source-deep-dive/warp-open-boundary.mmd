@@ -1,29 +1,32 @@
 graph LR
-  Title["Warp 开源边界图\n绿色开源 / 黄色未开源 / 蓝色外部生态"]
+  subgraph Open["开源仓库 warpdotdev/warp"]
+    Client["Warp Client App\nAGPL v3"]
+    UI["warpui / warpui_core\nMIT，可复用 UI 框架"]
+    Tests["Integration Tests\n测试与工程脚本"]
+    Skills["Agent Skills / Specs\n面向贡献流程的上下文"]
+  end
 
-  Client["开源：Warp Client App\nAGPL v3"]
-  UI["开源：warpui / warpui_core\nMIT 许可，可复用 UI 框架"]
-  Tests["开源：Integration Tests\n测试与工程脚本"]
-  Skills["开源：Agent Skills / Specs\n贡献流程使用的技能与规范"]
+  subgraph Closed["未开源 / 托管服务"]
+    Server["Warp Server\n账号、接口、服务端逻辑"]
+    DriveBackend["Warp Drive Backend\n团队知识库与同步后端"]
+    Oz["Oz Orchestration\n云 Agent 编排层"]
+    Auth["Hosted Auth\n托管登录与身份系统"]
+  end
 
-  Server["未开源：Warp Server\n账号、接口、服务端逻辑"]
-  Drive["未开源：Warp Drive Backend\n团队知识库与同步后端"]
-  Oz["未开源：Oz Orchestration\n云端 Agent 编排服务"]
-  Auth["未开源：Hosted Auth\n托管登录与身份系统"]
+  subgraph External["外部生态"]
+    Models["GPT / Claude / Gemini 等模型"]
+    CLI["Claude Code / Codex / Gemini CLI"]
+    MCP["MCP Servers\nGitHub、文件系统、内部工具"]
+  end
 
-  CLI["外部生态：Claude Code / Codex / Gemini CLI\n第三方命令行智能体"]
-  MCP["外部生态：MCP Servers\nGitHub、文件系统、内部工具"]
-  Models["外部生态：GPT / Claude / Gemini 等模型\n第三方大模型服务"]
-
-  Title --> Client
   Client --> UI
   Client --> Tests
   Client --> Skills
-  Client -.登录.-> Auth
-  Client -.API / 账号.-> Server
-  Client -.Drive 同步.-> Drive
+  Client -.需要云功能时.-> Server
+  Client -.Drive 同步.-> DriveBackend
   Client -.云端 Agent.-> Oz
+  Client -.登录.-> Auth
   Client --> CLI
   Client --> MCP
-  CLI --> Models
   Oz --> Models
+  CLI --> Models
