@@ -1,0 +1,1138 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="keywords" content="计算机技术, 生活中的胡思乱想">
+    
+    
+    <meta name="author" content="Nathan">
+    
+    <!-- Completely eliminate flash of wrong theme -->
+    <script>
+        (function() {
+            const THEME_KEY = "REDEFINE-THEME-STATUS";
+            const DARK = "dark", LIGHT = "light";
+            
+            // Get preferred theme
+            function getTheme() {
+                try {
+                    const saved = localStorage.getItem(THEME_KEY);
+                    if (saved) {
+                        const { isDark } = JSON.parse(saved);
+                        return isDark ? DARK : LIGHT;
+                    }
+                } catch (e) {}
+                
+                return matchMedia("(prefers-color-scheme: dark)").matches ? DARK : LIGHT;
+            }
+            
+            // Apply theme to document
+            function applyTheme(theme) {
+                const isDark = theme === DARK;
+                const root = document.documentElement;
+                
+                // Set classes for compatibility
+                root.classList.add(theme);
+                root.classList.remove(isDark ? LIGHT : DARK);
+                root.style.colorScheme = theme;
+            }
+            
+            // Initial application
+            const theme = getTheme();
+            applyTheme(theme);
+            
+            // Listen for system preference changes
+            matchMedia("(prefers-color-scheme: dark)").addEventListener("change", ({ matches }) => {
+                // Only update if using system preference (no localStorage entry)
+                if (!localStorage.getItem(THEME_KEY)) {
+                    applyTheme(matches ? DARK : LIGHT);
+                }
+            });
+            
+            // Set body classes ASAP (before DOMContentLoaded)
+            (function() {
+                const addBodyClass = () => {
+                    const b = document.body;
+                    if (!b) return false;
+                    b.classList.add(theme + "-mode");
+                    return true;
+                };
+
+                // Try immediately
+                if (addBodyClass()) return;
+
+                // Observe until body exists
+                const mo = new MutationObserver(() => {
+                    if (addBodyClass()) mo.disconnect();
+                });
+                mo.observe(document.documentElement, { childList: true, subtree: true });
+            })();
+        })();
+    </script>
+    
+    <!-- preconnect -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    
+    <!--- Seo Part-->
+    
+    <link rel="canonical" href="https://hydraxman.github.io/2026/05/08/codeflow-architecture-map/"/>
+    <meta name="robots" content="index,follow">
+    <meta name="googlebot" content="index,follow">
+    <meta name="revisit-after" content="1 days">
+    
+    
+        
+        <meta name="description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CodeFlow：一个单文件代码架构地图工具，为什么能两千 Star 出头还值得看？">
+<meta property="og:url" content="https://hydraxman.github.io/2026/05/08/codeflow-architecture-map/index.html">
+<meta property="og:site_name" content="内森淼文">
+<meta property="og:description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://hydraxman.github.io/images/redefine-og.webp">
+<meta property="article:published_time" content="2026-05-08T03:55:00.000Z">
+<meta property="article:modified_time" content="2026-05-08T03:55:05.307Z">
+<meta property="article:author" content="Nathan">
+<meta property="article:tag" content="CodeFlow">
+<meta property="article:tag" content="GitHub">
+<meta property="article:tag" content="架构可视化">
+<meta property="article:tag" content="代码分析">
+<meta property="article:tag" content="开源项目">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://hydraxman.github.io/images/redefine-og.webp">
+    
+    
+    <!--- Icon Part-->
+    <link rel="icon" type="image/png" href="/images/favicon.svg" sizes="192x192">
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.svg">
+    <meta name="theme-color" content="#ffffff">
+    <link rel="shortcut icon" href="/images/favicon.svg">
+    <!--- Page Info-->
+    
+    <title>
+        
+            CodeFlow：一个单文件代码架构地图工具，为什么能两千 Star 出头还值得看？ | 内森淼文
+        
+    </title>
+
+    
+<link rel="stylesheet" href="/fonts/Chillax/chillax.css">
+
+
+    <!--- Inject Part-->
+    
+        
+            
+    
+            
+    
+            
+                
+                    <link rel="stylesheet" href="/css/custom.css">
+                
+    
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    
+        
+<link rel="stylesheet" href="/css/build/tailwind.css">
+
+    
+
+    
+<link rel="stylesheet" href="/fonts/GeistMono/geist-mono.css">
+
+    
+<link rel="stylesheet" href="/fonts/Geist/geist.css">
+
+    <!--- Font Part-->
+    
+    
+    
+    
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&display=swap" rel="stylesheet">
+    
+    
+
+    <script id="hexo-configurations">
+    window.config = {"hostname":"hydraxman.github.io","root":"/","language":"zh-CN","path":"search.json"};
+    window.theme = {"articles":{"style":{"font_size":"16px","line_height":1.5,"image_border_radius":"14px","image_alignment":"center","image_caption":false,"link_icon":true,"delete_mask":false,"title_alignment":"left","headings_top_spacing":{"h1":"3.2rem","h2":"2.4rem","h3":"1.9rem","h4":"1.6rem","h5":"1.4rem","h6":"1.3rem"}},"word_count":{"enable":true,"count":true,"min2read":true},"author_label":{"enable":false,"auto":false,"list":[]},"code_block":{"copy":true,"style":"mac","highlight_theme":{"light":"github","dark":"vs2015"},"font":{"enable":false,"family":null,"url":null}},"toc":{"enable":true,"max_depth":3,"number":false,"expand":true,"init_open":true},"copyright":{"enable":true,"default":"cc_by_nc_sa"},"lazyload":true,"pangu_js":false,"recommendation":{"enable":false,"title":"推荐阅读","limit":3,"mobile_limit":2,"placeholder":"/images/wallhaven-wqery6-light.webp","skip_dirs":[]}},"colors":{"primary":"#ffffff","secondary":null,"default_mode":"light"},"global":{"fonts":{"chinese":{"enable":false,"family":null,"url":null},"english":{"enable":true,"family":"Inter","url":"https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"},"title":{"enable":true,"family":"Noto Serif","url":"https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&display=swap"}},"content_max_width":"1000px","sidebar_width":"210px","hover":{"shadow":true,"scale":false},"scroll_progress":{"bar":true,"percentage":true},"website_counter":{"url":"https://cn.vercount.one/js","enable":false,"site_pv":true,"site_uv":true,"post_pv":true},"single_page":true,"preloader":{"enable":false,"custom_message":null},"side_tools":{"gear_rotation":true,"auto_expand":false},"open_graph":{"enable":true,"image":"/images/redefine-og.webp","description":"Hexo Theme Redefine, Redefine Your Hexo Journey."},"google_analytics":{"enable":false,"id":null}},"home_banner":{"enable":true,"style":"fixed","image":{"light":"/images/banner-light.jpg","dark":"/images/banner-dark.jpg"},"title":"内森淼文","subtitle":{"text":["AI · 编程 · 科技见闻","Write Code, Read World"],"hitokoto":{"enable":false,"show_author":false,"api":"https://v1.hitokoto.cn"},"typing_speed":100,"backing_speed":80,"starting_delay":500,"backing_delay":1500,"loop":true,"smart_backspace":true},"text_color":{"light":"#fff","dark":"#d1d1b6"},"text_style":{"title_size":"2.8rem","subtitle_size":"1.5rem","line_height":1.2},"custom_font":{"enable":false,"family":null,"url":null},"social_links":{"enable":true,"style":"default","links":[{"icon":"fa-brands fa-github","url":"https://github.com/hydraxman"}],"qrs":[{"icon":"fa-brands fa-weixin","qr":null},{"icon":"/images/custom-icon.svg","qr":null}]}},"plugins":{"feed":{"enable":false},"aplayer":{"enable":false,"type":"fixed","audios":[{"name":null,"artist":null,"url":null,"cover":null,"lrc":null}]},"mermaid":{"enable":false,"version":"11.4.1","theme":{"light":"default","dark":"dark"}}},"version":"2.9.0","navbar":{"auto_hide":false,"color":{"left":"#333333","right":"#555555","transparency":35},"width":{"home":"1200px","pages":"1000px"},"links":{"Home":{"path":"/","icon":"fa-regular fa-house"},"Archives":{"path":"/archives","icon":"fa-regular fa-archive"},"Categories":{"path":"/categories","icon":"fa-regular fa-folder"},"Tags":{"path":"/tags","icon":"fa-regular fa-tags"},"About":{"path":"/about","icon":"fa-regular fa-user"}},"search":{"enable":true,"preload":true}},"page_templates":{"friends_column":2,"tags_style":"blur","masonry":{"batch_size":12,"initial_batch_size":24}},"home":{"sidebar":{"enable":true,"position":"left","first_item":"menu","announcement":"AI · 编程 · 科技","show_on_mobile":true,"links":{"Archives":{"path":"/archives","icon":"fa-regular fa-archive"},"Tags":{"path":"/tags","icon":"fa-regular fa-tags"},"Categories":{"path":"/categories","icon":"fa-regular fa-folder"}}},"article_date_format":"auto","excerpt_length":200,"categories":{"enable":true,"limit":3},"tags":{"enable":true,"limit":3}},"footer":{"runtime":true,"icon":"<i class=\"fa-solid fa-heart fa-beat\" style=\"--fa-animation-duration: 0.5s; color: #333\"></i>","start":"2024/01/01 00:00:00","statistics":true,"customize":null,"icp":{"enable":false,"number":null,"url":null}},"footerStart":"2024/01/01 00:00:00","mermaid":{"style":{"light":"default","dark":"dark"}}};
+    window.lang_ago = {"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"};
+    window.i18n = {"search":"站内搜索您需要的内容...","toc":"目录","prev":"上一页","next":"下一页","prev_posts":"上一篇","next_posts":"下一篇","page":"第 %d 页","recent_posts":"最新文章","share":"分享","powered_by":"由 %s 驱动","theme":"主题","rss_feed":"RSS Feed","category":"分类","categories":"分类","tag":"标签","tags":"标签","post":"文章","posts":"文章","tagcloud":"标签云","comment":"评论","comments":"评论","top":"置顶","sticky":"置顶","go-back-home":"回到首页","masonry_loading":"照片加载中...","image_viewer":"图片查看器","close":"关闭","exif":{"title":"EXIF","cards":{"camera":"相机","lens":"镜头","exposure":"曝光","other":"其他"},"fields":{"make":"品牌","model":"机型","date_taken":"拍摄时间","lens_model":"镜头","focal_length":"焦距","focus_mode":"对焦模式","shutter":"快门","aperture":"光圈","iso":"感光度","exposure_program":"曝光程序","exposure_compensation":"曝光补偿","metering_mode":"测光模式","flash":"闪光灯","white_balance":"白平衡","latitude":"纬度","longitude":"经度","altitude":"海拔"},"status":{"loading":"加载中...","no_exif":"无 EXIF 信息","library_missing":"EXIF 库未加载","image_source_missing":"图片地址不可用","unavailable":"EXIF 不可用（可能被 CORS 阻止或缺少元数据）","flag_unavailable":"EXIF 不可用"}},"home":"首页","archive":"归档","archives":"归档","about":"关于","links":"链接","link":"链接","friends":"友情链接","friend":"友情链接","timeline":"时间轴","shuoshuo":"说说","bookmarks":"书签","site_uv":"访问人数","site_pv":"总访问量","read_more":"阅读全文","wordcount":"字","min2read":"分钟","changelog":"更新日志","status":"状态","runtime":"博客已运行","days":"天","hours":"小时","minutes":"分钟","seconds":"秒","optimized_by":"并由 Evan 进行优化","rights":"版权所有","site_posts":"共撰写了 %s 篇文章","site_wordcount":"共 %s 字","copyright":{"title":"标题","author":"作者","link":"链接","create_time":"创建于","update_time":"更新于","license_title":"版权声明","license_content":"本文章采用 %s 进行许可。","all_rights_reserved":"版权所有 &#169 %s，禁止转载。","public_domain":"本文为公有领域作品，可自由转载、引用。"},"ago":{"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"},"create_time":"创建","update_time":"更新","expired":"这篇文章最后更新于 %s 天前，内容可能已经过时。"};
+    window.data = {"masonry":false};
+  </script>
+    
+    <!--- Fontawesome Part-->
+    
+<link rel="stylesheet" href="/fontawesome/fontawesome.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/brands.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/solid.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/regular.min.css">
+
+    
+    
+    
+    
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+	<div class="progress-bar-container">
+	
+	<span class="scroll-progress-bar"></span>
+	
+
+	
+	<span class="pjax-progress-bar"></span>
+	<!--        <span class="swup-progress-icon">-->
+	<!--            <i class="fa-solid fa-circle-notch fa-spin"></i>-->
+	<!--        </span>-->
+	
+</div>
+
+<main class="page-container" id="swup">
+
+	
+
+	<div class="main-content-container flex flex-col justify-between min-h-dvh">
+		<div class="main-content-header">
+			<header class="navbar-container px-6 md:px-12">
+    <div class="navbar-content transition-navbar ">
+        <div class="left">
+            
+            <a class="logo-title" href="/">
+                
+                内森淼文
+                
+            </a>
+        </div>
+
+        <div class="right">
+            <!-- PC -->
+            <div class="desktop">
+                <ul class="navbar-list">
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/"
+                                        >
+                                    <i class="fa-regular fa-house fa-fw"></i>
+                                    首页
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/archives"
+                                        >
+                                    <i class="fa-regular fa-archive fa-fw"></i>
+                                    归档
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/categories"
+                                        >
+                                    <i class="fa-regular fa-folder fa-fw"></i>
+                                    分类
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/tags"
+                                        >
+                                    <i class="fa-regular fa-tags fa-fw"></i>
+                                    标签
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/about"
+                                        >
+                                    <i class="fa-regular fa-user fa-fw"></i>
+                                    关于
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                    
+                        <li class="navbar-item search search-popup-trigger">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </li>
+                    
+                </ul>
+            </div>
+            <!-- Mobile -->
+            <div class="mobile">
+                
+                    <div class="icon-item search search-popup-trigger"><i class="fa-solid fa-magnifying-glass"></i>
+                    </div>
+                
+                <div class="icon-item navbar-bar">
+                    <div class="navbar-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile sheet -->
+    <div class="navbar-drawer h-dvh w-full absolute top-0 left-0 bg-background-color flex flex-col justify-between">
+        <ul class="drawer-navbar-list flex flex-col px-4 justify-center items-start">
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/"
+                        >
+                            <span>
+                                首页
+                            </span>
+                            
+                                <i class="fa-regular fa-house fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/archives"
+                        >
+                            <span>
+                                归档
+                            </span>
+                            
+                                <i class="fa-regular fa-archive fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/categories"
+                        >
+                            <span>
+                                分类
+                            </span>
+                            
+                                <i class="fa-regular fa-folder fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/tags"
+                        >
+                            <span>
+                                标签
+                            </span>
+                            
+                                <i class="fa-regular fa-tags fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/about"
+                        >
+                            <span>
+                                关于
+                            </span>
+                            
+                                <i class="fa-regular fa-user fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+
+            
+            
+                
+                    
+                    
+                    
+            
+        </ul>
+
+        <div class="statistics flex justify-around my-2.5">
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/tags">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">279</div>
+        <div class="label text-third-text-color text-sm">标签</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/categories">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">9</div>
+        <div class="label text-third-text-color text-sm">分类</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/archives">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">232</div>
+        <div class="label text-third-text-color text-sm">文章</div>
+    </a>
+</div>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+		</div>
+
+		<div class="main-content-body transition-fade-up">
+			
+
+			<div class="main-content">
+				<div class="post-page-container flex relative justify-between box-border w-full h-full">
+	<div class="article-content-container">
+
+		<div class="article-title relative w-full">
+			
+			
+			
+			<img src="/images/codeflow-architecture-map/cover.png" alt="CodeFlow：一个单文件代码架构地图工具，为什么能两千 Star 出头还值得看？" class="w-full h-60 sm:h-72 md:h-80 object-cover sm:rounded-t-large dark:brightness-75" />
+			
+			<div class="w-full flex items-center absolute bottom-0 justify-start">
+				<h1 class="article-title-cover text-center mx-6 my-6 text-second-text-color bg-background-color-transparent px-4 py-3 text-3xl sm:text-4xl md:text-5xl font-semibold backdrop-blur-lg rounded-xl border border-border-color ">CodeFlow：一个单文件代码架构地图工具，为什么能两千 Star 出头还值得看？</h1>
+			</div>
+			
+		</div>
+
+		
+		<div class="article-header flex flex-row gap-2 items-center px-2 sm:px-6 md:px-8">
+			<div class="avatar w-[46px] h-[46px] shrink-0 rounded-medium border border-border-color p-px">
+				<img src="/images/avatar.png">
+			</div>
+			<div class="info flex flex-col justify-between">
+				<div class="author flex items-center">
+					<span class="name text-default-text-color text-lg font-semibold">Nathan</span>
+					
+				</div>
+				<div class="meta-info">
+					<div class="article-meta-info">
+    <span class="article-date article-meta-item">
+        <i class="fa-regular fa-pen-fancy"></i>&nbsp;
+        <span class="desktop">2026-05-08 11:55</span>
+        <span class="mobile">2026-05-08 11:55</span>
+        <span class="hover-info">创建</span>
+    </span>
+    
+        <span class="article-date article-meta-item">
+            <i class="fa-regular fa-wrench"></i>&nbsp;
+            <span class="desktop">2026-05-08 11:55:05</span>
+            <span class="mobile">2026-05-08 11:55:05</span>
+            <span class="hover-info">更新</span>
+        </span>
+    
+
+    
+        <span class="article-categories article-meta-item">
+            <i class="fa-regular fa-folders"></i>&nbsp;
+            <ul>
+                
+                
+                    
+                        
+                        <li>
+                            <a href="/categories/%E6%8A%80%E6%9C%AF%E5%AE%9E%E6%88%98/">技术实战</a>&nbsp;
+                        </li>
+                    
+                    
+                
+            </ul>
+        </span>
+    
+    
+        <span class="article-tags article-meta-item">
+            <i class="fa-regular fa-tags"></i>&nbsp;
+            <ul>
+                
+                    <li>
+                        <a href="/tags/CodeFlow/">CodeFlow</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/GitHub/">GitHub</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/%E6%9E%B6%E6%9E%84%E5%8F%AF%E8%A7%86%E5%8C%96/">架构可视化</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/%E4%BB%A3%E7%A0%81%E5%88%86%E6%9E%90/">代码分析</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/%E5%BC%80%E6%BA%90%E9%A1%B9%E7%9B%AE/">开源项目</a>&nbsp;
+                    </li>
+                
+            </ul>
+        </span>
+    
+
+    
+    
+        <span class="article-wordcount article-meta-item">
+            <i class="fa-regular fa-typewriter"></i>&nbsp;<span>3.2k 字</span>
+        </span>
+    
+    
+        <span class="article-min2read article-meta-item">
+            <i class="fa-regular fa-clock"></i>&nbsp;<span>11 分钟</span>
+        </span>
+    
+    
+</div>
+
+				</div>
+			</div>
+		</div>
+		
+
+		
+
+
+		<div class="article-content markdown-body px-2 sm:px-6 md:px-8 pb-8">
+			<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/codeflow-architecture-map/cover.png"
+                      alt="CodeFlow 封面"
+                ></p>
+<p>过去几年，代码理解工具大多走向两个方向：要么接入 IDE，依赖语言服务器和本地索引；要么变成云端平台，把仓库接进去后做持续分析。CodeFlow 选了一条很轻的路：<strong>打开网页，粘贴 GitHub URL，或者拖入本地文件夹，就在浏览器里生成一张交互式代码架构地图。</strong></p>
+<p>项目地址：<a class="link"   target="_blank" rel="noopener" href="https://github.com/braedonsaunders/codeflow" >https://github.com/braedonsaunders/codeflow<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a><br>在线体验：<a class="link"   target="_blank" rel="noopener" href="https://codeflow-five.vercel.app/" >https://codeflow-five.vercel.app/<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></p>
+<p>我把仓库克隆下来读了一遍源码，也跑了项目自带测试。它最有意思的地方不是“可视化”本身，而是它把一个代码分析产品压成了一个 <code>index.html</code>，同时又用 GitHub Action 复用了同一套分析器，生成 README 健康卡片。</p>
+<p>截至我核查时（2026-05-08 11:52，GitHub API）：CodeFlow 有 <strong>2,929 stars &#x2F; 461 forks</strong>，默认分支最新提交为 <code>8cb11ee</code>，提交时间是 2026-05-03；GitHub API 的 <code>licenseInfo</code> 返回为空，不过 README 里标注为 MIT，需要以后再看作者是否补充标准 LICENSE 文件。</p>
+<h2 id="它解决的不是“画图”，而是第一次读仓库的迷路感"><a href="#它解决的不是“画图”，而是第一次读仓库的迷路感" class="headerlink" title="它解决的不是“画图”，而是第一次读仓库的迷路感"></a>它解决的不是“画图”，而是第一次读仓库的迷路感</h2><p>CodeFlow 的 README 给它的定位很直接：</p>
+<blockquote>
+<p>Paste any GitHub URL → interactive architecture map.</p>
+</blockquote>
+<p>也就是：把一个 GitHub 仓库或本地代码目录变成一张可以点击、缩放、筛选的依赖图。它试图回答几个工程里很常见的问题：</p>
+<ul>
+<li>这个仓库由哪些文件和模块组成？</li>
+<li>一个文件被哪些文件依赖？改它的影响面有多大？</li>
+<li>哪些文件是热点，哪些区域耦合高？</li>
+<li>有没有硬编码密钥、危险 <code>eval()</code>、SQL 注入风险、调试语句？</li>
+<li>代码里有没有常见模式或反模式，比如 God Object、高耦合？</li>
+<li>如果是 Markdown&#x2F;Obsidian vault，笔记之间怎么连？</li>
+</ul>
+<p>对新加入项目、代码审查、接手遗留仓库来说，这类“先看地图，再钻细节”的工具很有价值。</p>
+<h2 id="一张图看懂-CodeFlow-架构"><a href="#一张图看懂-CodeFlow-架构" class="headerlink" title="一张图看懂 CodeFlow 架构"></a>一张图看懂 CodeFlow 架构</h2><p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/codeflow-architecture-map/pipeline.jpg"
+                      alt="CodeFlow 架构流程"
+                ></p>
+<p>更完整的架构可以拆成七层：</p>
+<ol>
+<li><strong>输入层</strong>：GitHub URL、本地文件夹、ZIP 包、PR URL。</li>
+<li><strong>数据适配层</strong>：GitHub API 或浏览器本地文件 API。</li>
+<li><strong>文件筛选层</strong>：跳过 <code>.git</code>、<code>node_modules</code>、<code>dist</code>、<code>build</code> 等目录，并支持用户自定义 glob 排除规则。</li>
+<li><strong>解析层</strong>：Tree-sitter WASM、Acorn&#x2F;Babel、正则兜底、Markdown 链接解析器组合使用。</li>
+<li><strong>统一分析模型</strong>：把文件、函数、调用、依赖、层级、churn、ownership 等变成统一数据结构。</li>
+<li><strong>风险计算层</strong>：计算 blast radius、安全问题、设计模式&#x2F;反模式、健康分。</li>
+<li><strong>输出层</strong>：D3 交互图、JSON&#x2F;Markdown&#x2F;TXT&#x2F;SVG 导出，以及 GitHub Action 生成 README 卡片。</li>
+</ol>
+<p>它的工程组织也很克制：根目录核心应用只有一个 <code>index.html</code>，约 <strong>6,845 行 &#x2F; 464 KB</strong>；<code>card/</code> 目录是 GitHub Action，约 <strong>2,022 LOC</strong>；测试主要集中在 Markdown 链接、分析稳定性、HTML 内联脚本等场景。</p>
+<h2 id="技术亮点一：单文件应用，但不是玩具-Demo"><a href="#技术亮点一：单文件应用，但不是玩具-Demo" class="headerlink" title="技术亮点一：单文件应用，但不是玩具 Demo"></a>技术亮点一：单文件应用，但不是玩具 Demo</h2><p>CodeFlow 的第一个反直觉点是：它真的把 Web App 放在单个 <code>index.html</code> 里。</p>
+<p>README 里写得很清楚：</p>
+<ul>
+<li>无构建流程；</li>
+<li>无需 <code>npm install</code>；</li>
+<li>直接打开 <code>index.html</code>；</li>
+<li>React 18、D3.js 7、Babel 等从 CDN 加载。</li>
+</ul>
+<p>这听起来像 Hackathon Demo，但源码里不是简单把一堆代码塞进去。<code>index.html</code> 里自己标了五个大区：</p>
+<ol>
+<li>共享常量、排除规则、浏览器让步工具；</li>
+<li>Parser 与静态分析原语；</li>
+<li>GitHub API 适配器与仓库扫描；</li>
+<li>共享分析管线与内联 Web Worker fallback；</li>
+<li>React UI、本地文件&#x2F;ZIP 输入、可视化与弹窗。</li>
+</ol>
+<p>这种形态的优势很明显：</p>
+<ul>
+<li><strong>分发成本极低</strong>：复制一个 HTML 文件就能自托管。</li>
+<li><strong>隐私叙事成立</strong>：本地文件分析可以完全在浏览器内完成。</li>
+<li><strong>贡献门槛低</strong>：不需要理解复杂前端工程链路。</li>
+<li><strong>失败面更小</strong>：没有依赖安装、构建、部署脚本带来的环境差异。</li>
+</ul>
+<p>代价也明显：单文件到 6,000 多行后，可维护性、模块边界、测试覆盖都会变得更难。它目前用注释分区、测试抽取、Action 复用来缓解，但长期看，如果功能继续膨胀，迟早要面对模块化重构。</p>
+<h2 id="技术亮点二：多解析器组合，承认“静态分析不可能全准”"><a href="#技术亮点二：多解析器组合，承认“静态分析不可能全准”" class="headerlink" title="技术亮点二：多解析器组合，承认“静态分析不可能全准”"></a>技术亮点二：多解析器组合，承认“静态分析不可能全准”</h2><p>CodeFlow 支持的语言很多，README 列了 JavaScript、TypeScript、HTML 内联脚本、Python、Java、Go、Ruby、PHP、Rust、C&#x2F;C++、C#、Swift、Kotlin、Scala、Shell、PowerShell、Elixir、Haskell、Lua、R、Julia、Dart 等。</p>
+<p>它不是给每种语言都做完整编译级分析，而是采用多层策略：</p>
+<ul>
+<li>对部分语言尝试加载 <strong>Tree-sitter WASM</strong>；</li>
+<li>JS&#x2F;TS 相关代码使用 <strong>Acorn&#x2F;Babel</strong>；</li>
+<li>HTML&#x2F;Vue&#x2F;Svelte 等容器里抽取 <code>&lt;script&gt;</code> 代码块；</li>
+<li>覆盖不到的语言用 <strong>heuristic regex</strong> 做函数与调用的启发式提取；</li>
+<li>Markdown 单独解析 <code>[[wiki-links]]</code> 和 <code>[text](./relative.md)</code>。</li>
+</ul>
+<p>这个设计的聪明点在于：它没有把自己包装成“100％准确的编译器级分析器”，而是把目标收敛在“帮助人快速理解结构”。对这种产品来说，<strong>覆盖面和响应速度比精确到每一个 AST 边界更重要</strong>。</p>
+<p>源码里还能看到 Tree-sitter 的加载超时保护：远程 WASM 加载失败时，不让整个分析崩掉，而是退回其它解析路径。这是浏览器端工具必须有的现实主义。</p>
+<h2 id="技术亮点三：隐私优先的本地分析路径"><a href="#技术亮点三：隐私优先的本地分析路径" class="headerlink" title="技术亮点三：隐私优先的本地分析路径"></a>技术亮点三：隐私优先的本地分析路径</h2><p>CodeFlow 的核心卖点之一是“代码不离开你的机器”。这句话在实现上主要靠两条路径：</p>
+<ul>
+<li>公共 GitHub 仓库：浏览器直接请求 GitHub API；</li>
+<li>本地项目：通过 File System Access API、拖拽文件夹或 ZIP，在浏览器内读取和分析。</li>
+</ul>
+<p>源码里对本地文件夹分析做了几件比较实际的事：</p>
+<ul>
+<li>递归扫描目录；</li>
+<li>默认忽略 <code>.git</code>、<code>node_modules</code>、<code>dist</code>、<code>build</code>、<code>coverage</code> 等目录；</li>
+<li>支持自定义排除规则；</li>
+<li>每 50 个文件主动 <code>yieldToBrowser()</code>，避免 UI 卡死；</li>
+<li>文件数超过 soft limit 时提醒用户确认；</li>
+<li>ZIP 包会识别单根目录前缀，避免导入后路径多一层无意义根目录。</li>
+</ul>
+<p>这类细节决定了它不像一个“只能跑小样例”的玩具。浏览器不是最适合做大规模静态分析的地方，但如果控制文件规模、做好排除规则，体验可以足够顺滑。</p>
+<h2 id="技术亮点四：把“看图”延伸成工程决策"><a href="#技术亮点四：把“看图”延伸成工程决策" class="headerlink" title="技术亮点四：把“看图”延伸成工程决策"></a>技术亮点四：把“看图”延伸成工程决策</h2><p>CodeFlow 不只是把文件画成节点。它还在图之上加了几类决策辅助：</p>
+<h3 id="1-Blast-Radius"><a href="#1-Blast-Radius" class="headerlink" title="1. Blast Radius"></a>1. Blast Radius</h3><p>Blast Radius 可以理解成“影响半径”：如果改了某个文件，会牵动多少其它文件？</p>
+<p>这对代码评审很有用。一个文件本身只有几百行，但如果它处在很多依赖链中，风险可能远高于一个孤立的大文件。</p>
+<h3 id="2-Health-Score"><a href="#2-Health-Score" class="headerlink" title="2. Health Score"></a>2. Health Score</h3><p>健康评分会综合死代码比例、循环依赖、耦合、安全问题等因素，给出 A-F 等级。分数本身不应该被神化，但它适合作为“哪里值得优先看”的入口。</p>
+<h3 id="3-Security-Scanner"><a href="#3-Security-Scanner" class="headerlink" title="3. Security Scanner"></a>3. Security Scanner</h3><p>安全扫描覆盖硬编码密钥&#x2F;API Key、SQL 注入危险模式、危险 <code>eval()</code>、生产调试语句等。它更像轻量 lint，不是 SAST 平台替代品，但放在架构地图里有一个好处：<strong>你不仅知道有风险，还能看到风险节点处在什么依赖位置。</strong></p>
+<h3 id="4-Pattern-x2F-Anti-pattern-Detection"><a href="#4-Pattern-x2F-Anti-pattern-Detection" class="headerlink" title="4. Pattern &#x2F; Anti-pattern Detection"></a>4. Pattern &#x2F; Anti-pattern Detection</h3><p>它会识别 Singleton、Factory、Observer&#x2F;Event、React custom hooks，也会提示 God Object、高耦合等反模式。这些规则一定会有误报，但对第一次读仓库的人来说，误报也可能是值得检查的线索。</p>
+<h2 id="技术亮点五：CodeFlow-Card-复用同一个分析器"><a href="#技术亮点五：CodeFlow-Card-复用同一个分析器" class="headerlink" title="技术亮点五：CodeFlow Card 复用同一个分析器"></a>技术亮点五：CodeFlow Card 复用同一个分析器</h2><p><code>card/</code> 目录是这个项目里另一个值得看的点。它是一个 GitHub Action，可以在 README 里自动更新一张 SVG 卡片，展示：</p>
+<ul>
+<li>Health grade；</li>
+<li>项目规模；</li>
+<li>Fragility，也就是高 blast radius 文件；</li>
+<li>Hidden costs，比如循环依赖、死代码比例、平均耦合；</li>
+<li>可选 PR receipt，在 PR 合并后评论一张“热敏小票”式摘要。</li>
+</ul>
+<p>最关键的是，README 明确说：<strong>Card 使用和 Web App 相同的 analyzer</strong>。实现方式是 Action 读取 <code>index.html</code>，在 Node <code>vm</code> 里运行分析器片段。这种设计避免了“网页分析逻辑一套，CI 分析逻辑另一套”的版本漂移。</p>
+<p>我本地跑了 <code>card/index.js</code> 的 dry-run，它对 <code>card/</code> 自身分析结果是：</p>
+<ul>
+<li>collected 16 files；</li>
+<li>66 functions；</li>
+<li>2,022 LOC；</li>
+<li>grade A；</li>
+<li>score 95；</li>
+<li>生成 <code>.github/codeflow-card.svg</code> 与 <code>.github/codeflow-card.json</code>。</li>
+</ul>
+<p>这说明它不仅是文档里的概念，Action 路径在本地能跑通。</p>
+<h2 id="我跑了哪些验证"><a href="#我跑了哪些验证" class="headerlink" title="我跑了哪些验证"></a>我跑了哪些验证</h2><p>本地克隆路径：<code>~/Desktop/GitHub/codeflow</code></p>
+<p>我执行了项目自带的几组 Node 测试：</p>
+<ul>
+<li><code>tests/md-extractors.test.mjs</code>：17 个测试通过；</li>
+<li><code>tests/numeric-fn-name.test.mjs</code>：2 个测试通过；</li>
+<li><code>tests/sync-with-html.test.mjs</code>：2 个测试通过；</li>
+<li><code>tests/codeflow-golden.test.mjs</code>：1 个测试通过；</li>
+<li><code>card/index.js</code> dry-run：成功生成 card SVG 和 state JSON。</li>
+</ul>
+<p>代码规模粗略统计如下：</p>
+<table>
+<thead>
+<tr>
+<th>部分</th>
+<th align="right">文件 &#x2F; 行数</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>index.html</code></td>
+<td align="right">1 个文件，约 6,845 行</td>
+</tr>
+<tr>
+<td><code>card/*.js</code></td>
+<td align="right">16 个 JS 文件，约 1,976 行</td>
+</tr>
+<tr>
+<td><code>tests/*.mjs/js</code></td>
+<td align="right">7 个测试脚本，约 849 行</td>
+</tr>
+<tr>
+<td>全仓库文本与资源</td>
+<td align="right">53 个文件，约 2.0 MB</td>
+</tr>
+</tbody></table>
+<p>注意：仓库里有 PNG、SVG 示例图，按“换行数”统计会让图片看起来也有很多行，所以更应该看源码文件分布，而不是全仓库总行数。</p>
+<h2 id="适合谁用？"><a href="#适合谁用？" class="headerlink" title="适合谁用？"></a>适合谁用？</h2><p>我觉得 CodeFlow 最适合四类场景：</p>
+<ol>
+<li><strong>接手陌生仓库</strong>：先用图了解文件组织和依赖中心。</li>
+<li><strong>代码评审前预判风险</strong>：看 PR 改动文件的 blast radius。</li>
+<li><strong>技术负责人做架构巡检</strong>：找高耦合、循环依赖、热点区域。</li>
+<li><strong>私有代码快速自查</strong>：不想把代码传到云端，只在浏览器本地分析。</li>
+</ol>
+<p>它不适合拿来替代 IDE、语言服务器、CodeQL 或专业 SAST。它更像“代码地图 + 风险雷达”，而不是“编译器级真相机器”。</p>
+<h2 id="风险和局限"><a href="#风险和局限" class="headerlink" title="风险和局限"></a>风险和局限</h2><h3 id="1-GitHub-API-限流"><a href="#1-GitHub-API-限流" class="headerlink" title="1. GitHub API 限流"></a>1. GitHub API 限流</h3><p>README 里写明，未带 token 的 GitHub API 限额是 <strong>60 requests&#x2F;hour</strong>，带 Personal Access Token 是 <strong>5,000 requests&#x2F;hour</strong>。大仓库分析时，未登录 token 很容易撞限流。</p>
+<h3 id="2-浏览器内分析有规模上限"><a href="#2-浏览器内分析有规模上限" class="headerlink" title="2. 浏览器内分析有规模上限"></a>2. 浏览器内分析有规模上限</h3><p>源码里有 repo soft&#x2F;max、本地 soft limit 等限制。浏览器内跑静态分析，优点是隐私和免安装，缺点是内存、CPU、网络加载都受限。大仓库最好先排除生成目录、依赖目录、二进制资源。</p>
+<h3 id="3-启发式分析会误判"><a href="#3-启发式分析会误判" class="headerlink" title="3. 启发式分析会误判"></a>3. 启发式分析会误判</h3><p>多语言支持很广，但不等于每种语言都做了完整语义分析。Regex fallback、模式检测、安全扫描都可能误报或漏报。结果应该作为“导航线索”，不要作为最终审计结论。</p>
+<h3 id="4-License-元数据不一致"><a href="#4-License-元数据不一致" class="headerlink" title="4. License 元数据不一致"></a>4. License 元数据不一致</h3><p>README badge 与正文标注 MIT，但 GitHub API 的 <code>licenseInfo</code> 当前返回为空。对企业采用来说，最好等仓库补充标准 <code>LICENSE</code> 文件，或在引入前人工确认授权文本。</p>
+<h2 id="对开发者工具产品的启发"><a href="#对开发者工具产品的启发" class="headerlink" title="对开发者工具产品的启发"></a>对开发者工具产品的启发</h2><p>CodeFlow 的产品取舍很值得借鉴：</p>
+<ul>
+<li><strong>能在浏览器完成的事情，就不要先要求用户安装。</strong></li>
+<li><strong>第一次体验要短</strong>：粘贴 URL，比配置 token、装 CLI、建索引更容易传播。</li>
+<li><strong>分析结果要变成决策语言</strong>：blast radius、health score、fragility 比“节点数量”更接近工程管理问题。</li>
+<li><strong>复用核心分析器</strong>：Web App 和 GitHub Action 共享 analyzer，避免两个产品形态各自漂移。</li>
+<li><strong>承认不完美</strong>：轻量工具不必追求全语言 100％ 精准，关键是把不确定性控制在用户能理解的范围里。</li>
+</ul>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>CodeFlow 不是那种厚重的企业级代码智能平台。它更像一个“浏览器里的代码地图”：打开就能用，能快速把陌生仓库转成可浏览的结构图，再给你一些风险信号。</p>
+<p>它最值得看的技术亮点有三个：</p>
+<ol>
+<li>单文件浏览器应用，把分发和隐私做到极轻；</li>
+<li>多解析器组合，在覆盖面、速度和准确性之间做了现实取舍；</li>
+<li>GitHub Action 复用同一套 analyzer，把一次性分析延伸到 README 与 PR 流程。</li>
+</ol>
+<p>如果你经常接手陌生项目，或者想给团队仓库加一个轻量“健康度&#x2F;脆弱性”入口，CodeFlow 值得试一下。我的建议是：先拿中小型仓库体验，再通过排除规则控制大仓库范围；把它当成架构探索工具，而不是最终审计系统。</p>
+
+		</div>
+
+		
+		<div class="post-copyright-info w-full my-8 px-2 sm:px-6 md:px-8">
+			<div class="article-copyright-info-container">
+    <ul>
+        <li><strong>标题:</strong> CodeFlow：一个单文件代码架构地图工具，为什么能两千 Star 出头还值得看？</li>
+        <li><strong>作者:</strong> Nathan</li>
+        <li><strong>创建于
+                :</strong> 2026-05-08 11:55:00</li>
+        
+            <li>
+                <strong>更新于
+                    :</strong> 2026-05-08 11:55:05
+            </li>
+        
+        <li>
+            <strong>链接:</strong> https://hydraxman.github.io/2026/05/08/codeflow-architecture-map/
+        </li>
+        <li>
+            <strong>
+                版权声明:
+            </strong>
+            
+
+            
+                本文章采用 <a class="license" target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0">CC BY-NC-SA 4.0</a> 进行许可。
+            
+        </li>
+    </ul>
+</div>
+
+		</div>
+		
+
+		
+		<ul class="post-tags-box text-lg mt-1.5 flex-wrap justify-center flex md:hidden">
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/CodeFlow/">#CodeFlow</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/GitHub/">#GitHub</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/%E6%9E%B6%E6%9E%84%E5%8F%AF%E8%A7%86%E5%8C%96/">#架构可视化</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/%E4%BB%A3%E7%A0%81%E5%88%86%E6%9E%90/">#代码分析</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/%E5%BC%80%E6%BA%90%E9%A1%B9%E7%9B%AE/">#开源项目</a>&nbsp;
+			</li>
+			
+		</ul>
+		
+
+		
+
+		
+		<div class="article-nav my-8 flex justify-between items-center px-2 sm:px-6 md:px-8">
+			
+			
+			<div class="article-next border-border-color shadow-redefine-flat shadow-shadow-color-2 rounded-medium px-4 py-2 hover:shadow-redefine-flat-hover hover:shadow-shadow-color-2">
+				<a class="next" rel="next" href="/2026/05/08/2026-05-08-morning-news/">
+					<span class="title flex justify-center items-center">
+						<span class="post-nav-title-item truncate max-w-48">2026年05月08日早间要闻</span>
+						<span class="post-nav-item">下一篇</span>
+					</span>
+					<span class="right arrow-icon flex justify-center items-center">
+						<i class="fa-solid fa-chevron-right"></i>
+					</span>
+				</a>
+			</div>
+			
+		</div>
+		
+
+
+		
+	</div>
+
+	
+	<div class="toc-content-container">
+		<div class="post-toc-wrap">
+	<div class="post-toc">
+		<div class="toc-title">目录</div>
+		<div class="page-title">CodeFlow：一个单文件代码架构地图工具，为什么能两千 Star 出头还值得看？</div>
+		<ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%83%E8%A7%A3%E5%86%B3%E7%9A%84%E4%B8%8D%E6%98%AF%E2%80%9C%E7%94%BB%E5%9B%BE%E2%80%9D%EF%BC%8C%E8%80%8C%E6%98%AF%E7%AC%AC%E4%B8%80%E6%AC%A1%E8%AF%BB%E4%BB%93%E5%BA%93%E7%9A%84%E8%BF%B7%E8%B7%AF%E6%84%9F"><span class="nav-text">它解决的不是“画图”，而是第一次读仓库的迷路感</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E5%BC%A0%E5%9B%BE%E7%9C%8B%E6%87%82-CodeFlow-%E6%9E%B6%E6%9E%84"><span class="nav-text">一张图看懂 CodeFlow 架构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8A%80%E6%9C%AF%E4%BA%AE%E7%82%B9%E4%B8%80%EF%BC%9A%E5%8D%95%E6%96%87%E4%BB%B6%E5%BA%94%E7%94%A8%EF%BC%8C%E4%BD%86%E4%B8%8D%E6%98%AF%E7%8E%A9%E5%85%B7-Demo"><span class="nav-text">技术亮点一：单文件应用，但不是玩具 Demo</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8A%80%E6%9C%AF%E4%BA%AE%E7%82%B9%E4%BA%8C%EF%BC%9A%E5%A4%9A%E8%A7%A3%E6%9E%90%E5%99%A8%E7%BB%84%E5%90%88%EF%BC%8C%E6%89%BF%E8%AE%A4%E2%80%9C%E9%9D%99%E6%80%81%E5%88%86%E6%9E%90%E4%B8%8D%E5%8F%AF%E8%83%BD%E5%85%A8%E5%87%86%E2%80%9D"><span class="nav-text">技术亮点二：多解析器组合，承认“静态分析不可能全准”</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8A%80%E6%9C%AF%E4%BA%AE%E7%82%B9%E4%B8%89%EF%BC%9A%E9%9A%90%E7%A7%81%E4%BC%98%E5%85%88%E7%9A%84%E6%9C%AC%E5%9C%B0%E5%88%86%E6%9E%90%E8%B7%AF%E5%BE%84"><span class="nav-text">技术亮点三：隐私优先的本地分析路径</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8A%80%E6%9C%AF%E4%BA%AE%E7%82%B9%E5%9B%9B%EF%BC%9A%E6%8A%8A%E2%80%9C%E7%9C%8B%E5%9B%BE%E2%80%9D%E5%BB%B6%E4%BC%B8%E6%88%90%E5%B7%A5%E7%A8%8B%E5%86%B3%E7%AD%96"><span class="nav-text">技术亮点四：把“看图”延伸成工程决策</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Blast-Radius"><span class="nav-text">1. Blast Radius</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Health-Score"><span class="nav-text">2. Health Score</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Security-Scanner"><span class="nav-text">3. Security Scanner</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-Pattern-x2F-Anti-pattern-Detection"><span class="nav-text">4. Pattern &#x2F; Anti-pattern Detection</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8A%80%E6%9C%AF%E4%BA%AE%E7%82%B9%E4%BA%94%EF%BC%9ACodeFlow-Card-%E5%A4%8D%E7%94%A8%E5%90%8C%E4%B8%80%E4%B8%AA%E5%88%86%E6%9E%90%E5%99%A8"><span class="nav-text">技术亮点五：CodeFlow Card 复用同一个分析器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%88%91%E8%B7%91%E4%BA%86%E5%93%AA%E4%BA%9B%E9%AA%8C%E8%AF%81"><span class="nav-text">我跑了哪些验证</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%80%82%E5%90%88%E8%B0%81%E7%94%A8%EF%BC%9F"><span class="nav-text">适合谁用？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%A3%8E%E9%99%A9%E5%92%8C%E5%B1%80%E9%99%90"><span class="nav-text">风险和局限</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-GitHub-API-%E9%99%90%E6%B5%81"><span class="nav-text">1. GitHub API 限流</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E6%B5%8F%E8%A7%88%E5%99%A8%E5%86%85%E5%88%86%E6%9E%90%E6%9C%89%E8%A7%84%E6%A8%A1%E4%B8%8A%E9%99%90"><span class="nav-text">2. 浏览器内分析有规模上限</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E5%90%AF%E5%8F%91%E5%BC%8F%E5%88%86%E6%9E%90%E4%BC%9A%E8%AF%AF%E5%88%A4"><span class="nav-text">3. 启发式分析会误判</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-License-%E5%85%83%E6%95%B0%E6%8D%AE%E4%B8%8D%E4%B8%80%E8%87%B4"><span class="nav-text">4. License 元数据不一致</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AF%B9%E5%BC%80%E5%8F%91%E8%80%85%E5%B7%A5%E5%85%B7%E4%BA%A7%E5%93%81%E7%9A%84%E5%90%AF%E5%8F%91"><span class="nav-text">对开发者工具产品的启发</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-text">总结</span></a></li></ol>
+
+	</div>
+</div>
+	</div>
+	
+</div>
+
+			</div>
+
+			
+		</div>
+
+		<div class="main-content-footer">
+			<footer class="footer mt-5 py-5 h-auto text-base text-third-text-color relative border-t-2 border-t-border-color">
+    <div class="info-container py-3 text-center">
+        
+        <div class="text-center">
+            &copy;
+            
+              <span>2024</span>
+              -
+            
+            2026&nbsp;&nbsp;<i class="fa-solid fa-heart fa-beat" style="--fa-animation-duration: 0.5s; color: #333"></i>&nbsp;&nbsp;<a href="/">Nathan</a>
+            
+                
+                <p class="post-count space-x-0.5">
+                    <span>
+                        共撰写了 232 篇文章
+                    </span>
+                    
+                        <span>
+                            共 458.3k 字
+                        </span>
+                    
+                </p>
+            
+        </div>
+        
+        <div class="relative text-center lg:absolute lg:left-[20px] lg:top-1/2 lg:-translate-y-1/2 lg:text-left">
+            <span class="lg:block text-sm">由 <?xml version="1.0" encoding="utf-8"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg class="relative top-[2px] inline-block align-baseline" version="1.1" id="圖層_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="1rem" height="1rem" viewBox="0 0 512 512" enable-background="new 0 0 512 512" xml:space="preserve"><path fill="#0E83CD" d="M256.4,25.8l-200,115.5L56,371.5l199.6,114.7l200-115.5l0.4-230.2L256.4,25.8z M349,354.6l-18.4,10.7l-18.6-11V275H200v79.6l-18.4,10.7l-18.6-11v-197l18.5-10.6l18.5,10.8V237h112v-79.6l18.5-10.6l18.5,10.8V354.6z"/></svg><a target="_blank" class="text-base" href="https://hexo.io">Hexo</a> 驱动</span>
+            <span class="text-sm lg:block">主题&nbsp;<a class="text-base" target="_blank" href="https://github.com/EvanNotFound/hexo-theme-redefine">Redefine v2.9.0</a></span>
+        </div>
+        
+        
+            <div>
+                博客已运行 <span class="odometer" id="runtime_days" ></span> 天 <span class="odometer" id="runtime_hours"></span> 小时 <span class="odometer" id="runtime_minutes"></span> 分钟 <span class="odometer" id="runtime_seconds"></span> 秒
+            </div>
+        
+        
+            <script data-swup-reload-script>
+                try {
+                    function odometer_init() {
+                    const elements = document.querySelectorAll('.odometer');
+                    elements.forEach(el => {
+                        new Odometer({
+                            el,
+                            format: '( ddd).dd',
+                            duration: 200
+                        });
+                    });
+                    }
+                    odometer_init();
+                } catch (error) {}
+            </script>
+        
+        
+            
+                
+        
+                
+        
+        
+    </div>  
+</footer>
+		</div>
+	</div>
+
+	
+	<div class="post-tools">
+		<div class="post-tools-container">
+	<ul class="article-tools-list">
+		<!-- TOC aside toggle -->
+		
+		<li class="right-bottom-tools page-aside-toggle">
+			<i class="fa-regular fa-outdent"></i>
+		</li>
+		
+
+		<!-- go comment -->
+		
+	</ul>
+</div>
+	</div>
+	
+
+	<div class="right-side-tools-container">
+		<div class="side-tools-container">
+	<ul class="hidden-tools-list">
+		<li class="right-bottom-tools tool-font-adjust-plus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-plus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-font-adjust-minus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-minus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-dark-light-toggle flex justify-center items-center">
+			<i class="fa-regular fa-moon"></i>
+		</li>
+
+		<!-- rss -->
+		
+
+		
+
+		<li class="right-bottom-tools tool-scroll-to-bottom flex justify-center items-center">
+			<i class="fa-regular fa-arrow-down"></i>
+		</li>
+	</ul>
+
+	<ul class="visible-tools-list">
+		<li class="right-bottom-tools toggle-tools-list flex justify-center items-center">
+			<i class="fa-regular fa-cog fa-spin"></i>
+		</li>
+		
+		<li class="right-bottom-tools tool-scroll-to-top flex justify-center items-center">
+			<i class="arrow-up fas fa-arrow-up"></i>
+			<span class="percent"></span>
+		</li>
+		
+		
+	</ul>
+</div>
+	</div>
+
+	<div class="image-viewer-container" role="dialog" aria-modal="true" aria-label="图片查看器">
+	<button class="image-viewer-close" type="button" aria-label="关闭">
+		<i class="fa-solid fa-xmark"></i>
+	</button>
+	<button class="image-viewer-prev" type="button" aria-label="上一页">
+		<i class="fa-solid fa-chevron-left"></i>
+	</button>
+	<div class="image-viewer-frame">
+		<img src="" alt="">
+	</div>
+	<div class="image-viewer-exif-panel hidden absolute left-1/2 bottom-20 -translate-x-1/2 w-[min(92vw,420px)] max-h-[60vh] overflow-hidden rounded-2xl bg-background-color-transparent-80 p-4 text-left shadow-redefine-flat backdrop-blur-md" role="dialog" aria-label="EXIF" aria-hidden="true">
+		<div class="flex items-center justify-between mb-3">
+			<span class="text-sm font-semibold text-first-text-color">EXIF</span>
+			<button class="image-viewer-exif-close flex h-8 w-8 items-center justify-center rounded-full bg-background-color-transparent-80 text-first-text-color transition hover:bg-background-color-transparent-40" type="button" aria-label="关闭">
+				<i class="fa-solid fa-xmark text-[0.65rem]"></i>
+			</button>
+		</div>
+		<div class="image-viewer-exif-cards grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[50vh] overflow-y-auto pr-1 scrollbar-hide"></div>
+		<template class="image-viewer-exif-card-template">
+			<div class="rounded-lg bg-background-color-transparent-40 px-3 py-2">
+				<div class="image-viewer-exif-card-header flex items-center gap-2 mb-1">
+					<i class="image-viewer-exif-card-icon fa-solid fa-circle-info text-xs text-third-text-color"></i>
+					<div class="image-viewer-exif-card-title text-xs font-semibold text-first-text-color"></div>
+				</div>
+				<div class="image-viewer-exif-card-items flex flex-col gap-1"></div>
+			</div>
+		</template>
+	</div>
+	<button class="image-viewer-exif-toggle flex items-center gap-2 hidden absolute left-1/2 bottom-6 -translate-x-1/2 rounded-full border border-border-color bg-background-color-transparent-80 px-4 py-2 text-first-text-color backdrop-blur-md transition hover:bg-background-color-transparent-40" type="button" aria-label="EXIF" aria-expanded="false">
+		<i class="fa-solid fa-circle-info text-xs"></i>
+		<span class="text-xs font-semibold uppercase tracking-wider">EXIF</span>
+	</button>
+	<button class="image-viewer-next" type="button" aria-label="下一页">
+		<i class="fa-solid fa-chevron-right"></i>
+	</button>
+</div>
+
+
+	
+	<div class="search-pop-overlay">
+	<div class="popup search-popup">
+		<div class="search-header">
+			<span class="search-input-field-pre">
+				<i class="fa-solid fa-keyboard"></i>
+			</span>
+			<div class="search-input-container">
+				<input autocomplete="off" autocorrect="off" autocapitalize="off" placeholder="站内搜索您需要的内容..." spellcheck="false" type="search" class="search-input">
+			</div>
+			<span class="popup-btn-close">
+				<i class="fa-solid fa-times"></i>
+			</span>
+		</div>
+		<div id="search-result">
+			<div id="no-result">
+				<i class="fa-solid fa-spinner fa-spin-pulse fa-5x fa-fw"></i>
+			</div>
+		</div>
+	</div>
+</div>
+	
+
+</main>
+
+
+
+<script src="/js/build/libs/Swup.min.js"></script>
+
+<script src="/js/build/libs/SwupSlideTheme.min.js"></script>
+
+<script src="/js/build/libs/SwupScriptsPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupProgressPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupScrollPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupPreloadPlugin.min.js"></script>
+
+<script>
+    window.swup = new Swup({
+        plugins: [
+            new SwupScriptsPlugin({
+                optin: true,
+            }),
+            new SwupProgressPlugin(),
+            new SwupScrollPlugin({
+                offset: 80,
+            }),
+            new SwupSlideTheme({
+                mainElement: ".main-content-body",
+            }),
+            new SwupPreloadPlugin(),
+        ],
+        containers: ["#swup"],
+    });
+
+    window.dispatchEvent(
+        new CustomEvent("redefine:swup:ready", {
+            detail: {
+                swup: window.swup,
+            },
+        }),
+    );
+</script>
+
+
+
+
+	
+<script src="/js/build/main.js" type="module"></script>
+
+
+
+    
+<script src="/js/build/libs/odometer.min.js"></script>
+
+    
+<link rel="stylesheet" href="/assets/odometer-theme-minimal.css">
+
+
+
+
+
+
+
+  
+<script src="/js/build/libs/Typed.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+<script src="/js/build/libs/moment-with-locales.min.js" data-swup-reload-script=""></script>
+
+
+
+	
+</body>
+
+</html>
