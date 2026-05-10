@@ -87,14 +87,14 @@
         
         <meta name="description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Foundry Toolbox 深度分析：Agent 工具调用为什么能省 90％ Token？">
+<meta property="og:title" content="Foundry Toolbox 没有魔法：所谓省 90％ Token，本质是别把几百个工具一次性塞给 Agent">
 <meta property="og:url" content="https://hydraxman.github.io/2026/05/10/foundry-toolbox/index.html">
 <meta property="og:site_name" content="内森淼文">
 <meta property="og:description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://hydraxman.github.io/images/redefine-og.webp">
 <meta property="article:published_time" content="2026-05-10T02:40:00.000Z">
-<meta property="article:modified_time" content="2026-05-10T02:50:35.626Z">
+<meta property="article:modified_time" content="2026-05-10T14:54:31.919Z">
 <meta property="article:author" content="Nathan">
 <meta property="article:tag" content="AI Agent">
 <meta property="article:tag" content="MCP">
@@ -114,7 +114,7 @@
     
     <title>
         
-            Foundry Toolbox 深度分析：Agent 工具调用为什么能省 90％ Token？ | 内森淼文
+            Foundry Toolbox 没有魔法：所谓省 90％ Token，本质是别把几百个工具一次性塞给 Agent | 内森淼文
         
     </title>
 
@@ -456,7 +456,7 @@
         <div class="label text-third-text-color text-sm">分类</div>
     </a>
     <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/archives">
-        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">235</div>
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">234</div>
         <div class="label text-third-text-color text-sm">文章</div>
     </a>
 </div>
@@ -480,10 +480,10 @@
 			
 			
 			
-			<img src="/images/foundry-toolbox/cover.png" alt="Foundry Toolbox 深度分析：Agent 工具调用为什么能省 90％ Token？" class="w-full h-60 sm:h-72 md:h-80 object-cover sm:rounded-t-large dark:brightness-75" />
+			<img src="/images/foundry-toolbox/cover.png" alt="Foundry Toolbox 没有魔法：所谓省 90％ Token，本质是别把几百个工具一次性塞给 Agent" class="w-full h-60 sm:h-72 md:h-80 object-cover sm:rounded-t-large dark:brightness-75" />
 			
 			<div class="w-full flex items-center absolute bottom-0 justify-start">
-				<h1 class="article-title-cover text-center mx-6 my-6 text-second-text-color bg-background-color-transparent px-4 py-3 text-3xl sm:text-4xl md:text-5xl font-semibold backdrop-blur-lg rounded-xl border border-border-color ">Foundry Toolbox 深度分析：Agent 工具调用为什么能省 90％ Token？</h1>
+				<h1 class="article-title-cover text-center mx-6 my-6 text-second-text-color bg-background-color-transparent px-4 py-3 text-3xl sm:text-4xl md:text-5xl font-semibold backdrop-blur-lg rounded-xl border border-border-color ">Foundry Toolbox 没有魔法：所谓省 90％ Token，本质是别把几百个工具一次性塞给 Agent</h1>
 			</div>
 			
 		</div>
@@ -509,8 +509,8 @@
     
         <span class="article-date article-meta-item">
             <i class="fa-regular fa-wrench"></i>&nbsp;
-            <span class="desktop">2026-05-10 10:50:35</span>
-            <span class="mobile">2026-05-10 10:50:35</span>
+            <span class="desktop">2026-05-10 22:54:31</span>
+            <span class="mobile">2026-05-10 22:54:31</span>
             <span class="hover-info">更新</span>
         </span>
     
@@ -564,12 +564,12 @@
     
     
         <span class="article-wordcount article-meta-item">
-            <i class="fa-regular fa-typewriter"></i>&nbsp;<span>4.3k 字</span>
+            <i class="fa-regular fa-typewriter"></i>&nbsp;<span>1.7k 字</span>
         </span>
     
     
         <span class="article-min2read article-meta-item">
-            <i class="fa-regular fa-clock"></i>&nbsp;<span>18 分钟</span>
+            <i class="fa-regular fa-clock"></i>&nbsp;<span>6 分钟</span>
         </span>
     
     
@@ -590,476 +590,121 @@
                      data-src="/images/foundry-toolbox/cover.png"
                       alt="Foundry Toolbox 封面"
                 ></p>
-<p>微软 AI Agents Service 负责人 Jeff Hollan 最近展示了一个很有代表性的 demo：在 Microsoft Foundry 的长运行 Agent 场景中，使用 <strong>Foundry Toolbox</strong> 接管工具调用后，输入 token 从 <strong>4676 降到 467</strong>。</p>
-<p>这个数字不是一个模糊宣传口径。按原始数字计算：</p>
-<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">(4676 - 467) / 4676 = 90.0128%</span><br><span class="line">4676 / 467 = 10.01x</span><br></pre></td></tr></table></figure></div>
-
-<p>也就是说，输入 token 减少了约 **90.01%**，工具上下文体积约缩小到原来的 <strong>1&#x2F;10</strong>。</p>
-<p>这背后不只是一次省 token 的小优化，而是一个更大的 Agent 工程问题：</p>
-<blockquote>
-<p>当一个 Agent 拥有几十个、上百个工具时，是否真的应该把所有工具描述一次性塞进上下文？</p>
-</blockquote>
-<p>Foundry Toolbox 给出的答案是：不应该。</p>
-<p>它的核心机制叫 <strong>Progressive Disclosure</strong>，中文可以理解为“渐进式披露”：Agent 不需要一开始吞下全部工具描述，而是先接入一个统一入口，再按任务需要动态发现、加载和调用当前相关的工具。</p>
+<p>微软 AI Agents Service 负责人 Jeff Hollan 最近在 X 上发了一个 demo：在 Microsoft Foundry 里用 Toolbox 接管长运行 Agent 的工具调用后，输入 token 从 4676 降到 467，少了约 90%。</p>
+<p>这个数字很抓眼球，但我不建议把它理解成什么 Agent 技术突破。</p>
+<p>更准确的说法是：原来的做法太浪费了。</p>
+<p>如果一个 Agent 有上百个工具，你每次都把所有工具名称、用途、参数 schema、鉴权说明、返回结构塞进上下文，token 不爆才怪。Foundry Toolbox 做的事情并不玄学：它把这些工具先收进一个由 Foundry 托管的工具箱，再通过一个 MCP-compatible endpoint 暴露给 Agent。Agent 不再一上来看到完整菜单，而是按任务需要逐步发现和取用工具。</p>
+<p>这就是微软说的 progressive disclosure。中文可以叫“渐进式披露”，但说白了就是：<strong>别一次性把所有东西都扔给模型。</strong></p>
 <hr>
-<h2 id="一、Agent-工具调用为什么会爆-Token？"><a href="#一、Agent-工具调用为什么会爆-Token？" class="headerlink" title="一、Agent 工具调用为什么会爆 Token？"></a>一、Agent 工具调用为什么会爆 Token？</h2><p>传统 Agent 工具调用通常是这样的：</p>
-<p><img  
-                     lazyload
-                     src="/images/loading.svg"
-                     data-src="/images/foundry-toolbox/toolbox-before.png"
-                      alt="传统 Agent 工具接入方式"
-                ></p>
-<p>每个 Agent 直接绑定一批工具，例如：</p>
-<ul>
-<li>Web Search</li>
-<li>Code Interpreter</li>
-<li>File Search</li>
-<li>Azure AI Search</li>
-<li>GitHub API</li>
-<li>Azure DevOps</li>
-<li>Teams</li>
-<li>内部业务 API</li>
-<li>各类 MCP Server</li>
-<li>OpenAPI 工具</li>
-<li>Agent-to-Agent 工具</li>
-</ul>
-<p>MCP 是 <strong>Model Context Protocol</strong>，可以理解成一种让模型和外部工具、数据源标准化交互的协议。它解决的是“工具如何被模型发现和调用”的接口问题。</p>
-<p>但无论是 MCP 工具、OpenAPI 工具，还是云厂商内置工具，只要要给模型调用，就通常需要给模型一段工具描述，包括：</p>
-<ul>
-<li>工具名</li>
-<li>工具用途</li>
-<li>输入 schema</li>
-<li>参数说明</li>
-<li>返回结构</li>
-<li>调用限制</li>
-<li>鉴权要求</li>
-<li>审批策略</li>
-</ul>
-<p>5 个工具还好。50 个、100 个工具就会变成一个非常大的上下文负担。</p>
-<p>更麻烦的是：<strong>大多数任务其实只需要其中两三个工具。</strong></p>
-<p>传统方式却常常让模型每次推理都先“看一遍完整工具菜单”。这会带来几个问题：</p>
-<ol>
-<li>输入 token 暴涨；</li>
-<li>推理延迟增加；</li>
-<li>工具选择噪声变大；</li>
-<li>模型更容易误选工具；</li>
-<li>每个 Agent 都重复维护工具配置；</li>
-<li>企业权限、审计、凭据管理分散在各处。</li>
-</ol>
-<p>Jeff Hollan demo 里 4676 → 467 的下降，本质上就是这个问题的缩影。</p>
-<hr>
-<h2 id="二、Foundry-Toolbox-是什么？"><a href="#二、Foundry-Toolbox-是什么？" class="headerlink" title="二、Foundry Toolbox 是什么？"></a>二、Foundry Toolbox 是什么？</h2><p>微软官方对 Toolbox 的定义很直接：</p>
-<blockquote>
-<p>A toolbox is a reusable bundle of tools, managed in Foundry, that agents consume through a single, consistent interface.</p>
-</blockquote>
-<p>翻译成人话：</p>
-<blockquote>
-<p><strong>Toolbox 是 Microsoft Foundry 中集中管理的一组工具集合，通过一个 MCP-compatible endpoint 暴露给 Agent 使用。</strong></p>
-</blockquote>
-<p>以前是：</p>
-<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Agent → Tool A</span><br><span class="line">Agent → Tool B</span><br><span class="line">Agent → Tool C</span><br><span class="line">Agent → Tool D</span><br><span class="line">Agent → Tool E</span><br></pre></td></tr></table></figure></div>
+<h2 id="它到底是什么"><a href="#它到底是什么" class="headerlink" title="它到底是什么"></a>它到底是什么</h2><p>Foundry Toolbox 不是一个新的推理框架，也不是 MCP 的替代品。</p>
+<p>它更像是 MCP 工具层上面的一个企业级网关：</p>
+<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Agent → 一个 MCP endpoint → Foundry Toolbox → 多个工具 / MCP server / OpenAPI / 内置服务</span><br></pre></td></tr></table></figure></div>
 
-<p>现在变成：</p>
-<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Agent → One MCP Endpoint → Toolbox → Many Tools</span><br></pre></td></tr></table></figure></div>
-
-<p>官方架构图如下：</p>
+<p>官方架构图大概就是这个意思：</p>
 <p><img  
                      lazyload
                      src="/images/loading.svg"
                      data-src="/images/foundry-toolbox/toolbox-architecture.png"
                       alt="Foundry Toolbox 架构"
                 ></p>
-<p>更准确地说，Toolbox 是一个由 Foundry 管理、可版本化、可复用、通过 MCP endpoint 消费的工具包。</p>
-<p>当前 public preview 阶段，微软重点开放两个能力：</p>
-<table>
-<thead>
-<tr>
-<th>能力</th>
-<th align="right">状态</th>
-<th>含义</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>Build</td>
-<td align="right">已可用</td>
-<td>在 Foundry 中选择工具、配置鉴权、发布 reusable toolbox</td>
-</tr>
-<tr>
-<td>Consume</td>
-<td align="right">已可用</td>
-<td>通过一个 MCP-compatible endpoint 动态发现和调用工具</td>
-</tr>
-<tr>
-<td>Discover</td>
-<td align="right">Coming soon</td>
-<td>发现组织内已有工具，减少重复建设</td>
-</tr>
-<tr>
-<td>Govern</td>
-<td align="right">Coming soon</td>
-<td>对工具调用统一做审计、策略、观测和治理</td>
-</tr>
-</tbody></table>
-<p>这也是它和普通“工具注册表”的差异：Toolbox 不只是收纳工具，而是把工具变成企业级可复用资产。</p>
+<p>传统方式里，Agent 直接绑定一堆工具。每个工具都要把描述交给模型：这个工具叫什么、能干什么、参数是什么、哪些字段必填、返回什么格式。工具少的时候问题不大，工具多了以后，prompt 里大半都是工具说明。</p>
+<p>Toolbox 换了一种组织方式：工具还是那些工具，但 Agent 只接一个入口。入口背后由 Foundry 管理工具集合、连接、版本和调用方式。</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/foundry-toolbox/toolbox-before.png"
+                      alt="传统 Agent 工具接入方式"
+                ></p>
+<p>所以 4676 到 467 这个 token 下降，并不证明 Toolbox 有什么神奇压缩算法。它证明的是：<strong>把几百个工具 schema 全塞给模型，本来就是一个很差的 baseline。</strong></p>
 <hr>
-<h2 id="三、核心机制：Progressive-Disclosure"><a href="#三、核心机制：Progressive-Disclosure" class="headerlink" title="三、核心机制：Progressive Disclosure"></a>三、核心机制：Progressive Disclosure</h2><p><img  
+<h2 id="90-token-节省，哪里有噱头，哪里有价值"><a href="#90-token-节省，哪里有噱头，哪里有价值" class="headerlink" title="90% token 节省，哪里有噱头，哪里有价值"></a>90% token 节省，哪里有噱头，哪里有价值</h2><p>这件事有噱头成分。</p>
+<p>如果对比对象是“Agent 每次拿到全部工具描述”，那省 90% 很容易成立。你只要别把无关工具放进上下文，token 当然会降。这个思路在软件工程里并不陌生：懒加载、索引、路由、服务目录、API gateway，都是类似思想。</p>
+<p>但它也不是完全没价值。</p>
+<p>关键在于，Agent 工具调用的问题不只是 token。真正麻烦的是这些东西：</p>
+<ul>
+<li>哪些工具允许被哪个 Agent 用？</li>
+<li>GitHub、Azure DevOps、Search、内部 API 的凭据放哪里？</li>
+<li>工具 schema 改了以后，几十个 Agent 怎么升级？</li>
+<li>谁调用了高权限工具，怎么审计？</li>
+<li>某个工具出问题，怎么回滚到旧版本？</li>
+</ul>
+<p>如果只看“省 token”，Foundry Toolbox 确实像包装概念。可如果从企业 Agent 平台角度看，它解决的是工具治理问题。</p>
+<p>这也是我觉得这东西比较准确的定位：</p>
+<blockquote>
+<p>Foundry Toolbox 不是 Agent 的大脑升级，而是 Agent 工具层的平台化。</p>
+</blockquote>
+<p>它的价值不在“模型突然少看 90% token”，而在于工具不再散落在每个 Agent 项目里。工具变成了一个可复用、可版本化、可集中鉴权的资产。</p>
+<p><img  
                      lazyload
                      src="/images/loading.svg"
                      data-src="/images/foundry-toolbox/progressive-disclosure.png"
                       alt="Progressive Disclosure 机制"
                 ></p>
-<p>传统方式是：</p>
-<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">一开始把所有工具描述都塞给模型</span><br></pre></td></tr></table></figure></div>
-
-<p>Progressive Disclosure 是：</p>
-<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">先暴露统一入口；</span><br><span class="line">模型根据任务意图发现当前相关工具；</span><br><span class="line">只把需要的工具 schema 和描述带入当前推理。</span><br></pre></td></tr></table></figure></div>
-
-<p>这有点像去餐厅点菜。</p>
-<p>传统 Agent 工具调用相当于：服务员一上来给你一本 300 页菜单，还要求你把每道菜的配料、做法、过敏原都看完再点菜。</p>
-<p>Progressive Disclosure 相当于：你先说“我想吃辣的牛肉类”，系统只展示相关菜品；你再说“不含花生”，它再进一步过滤。</p>
-<p>对 Agent 来说，好处非常直接：</p>
-<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">少看无关工具</span><br><span class="line">少传无关 schema</span><br><span class="line">少占上下文窗口</span><br><span class="line">少干扰模型决策</span><br></pre></td></tr></table></figure></div>
-
-<p>所以它不仅是成本优化，也是 Agent 决策质量优化。</p>
-<p>工具越多，这个收益越大。</p>
 <hr>
-<h2 id="四、为什么它特别适合长运行-Agent？"><a href="#四、为什么它特别适合长运行-Agent？" class="headerlink" title="四、为什么它特别适合长运行 Agent？"></a>四、为什么它特别适合长运行 Agent？</h2><p>Jeff Hollan 特别强调的是：</p>
-<blockquote>
-<p>durable, long running agents come with Toolbox</p>
-</blockquote>
-<p>长运行 Agent 和普通 Chatbot 最大区别在于：它不是一次问答，而是一个可能持续数分钟、数小时，甚至更久的任务流。</p>
-<p>比如一个“新人入职 Agent”可能要：</p>
-<ol>
-<li>创建 Entra ID 账号；</li>
-<li>给 GitHub repo 加权限；</li>
-<li>创建 Azure 资源；</li>
-<li>在 Azure DevOps 创建 onboarding task；</li>
-<li>给 Teams 发送欢迎消息；</li>
-<li>写入 HR 系统；</li>
-<li>等待审批；</li>
-<li>审批后继续执行后续动作。</li>
-</ol>
-<p>如果每一步都带着完整工具目录运行，token 浪费会非常明显。</p>
-<p>Foundry Toolbox 对长运行 Agent 的价值在于：</p>
-<ul>
-<li>Agent 状态可以持续；</li>
-<li>工具通过统一 MCP endpoint 调用；</li>
-<li>工具鉴权集中处理；</li>
-<li>工具版本集中管理；</li>
-<li>未来可以统一审计和治理；</li>
-<li>Agent 不需要每次都背着完整工具目录运行。</li>
-</ul>
-<p>这对企业级 Agent 非常关键。</p>
-<hr>
-<h2 id="五、Toolbox-能放哪些工具？"><a href="#五、Toolbox-能放哪些工具？" class="headerlink" title="五、Toolbox 能放哪些工具？"></a>五、Toolbox 能放哪些工具？</h2><p>根据 Microsoft Learn 文档，目前 Toolbox 支持的工具类型包括：</p>
-<table>
-<thead>
-<tr>
-<th>工具类型</th>
-<th>说明</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>MCP tool</td>
-<td>接入远程 MCP Server</td>
-</tr>
-<tr>
-<td>Web Search</td>
-<td>联网搜索工具</td>
-</tr>
-<tr>
-<td>Azure AI Search</td>
-<td>企业知识库 &#x2F; 索引搜索</td>
-</tr>
-<tr>
-<td>Code Interpreter</td>
-<td>代码执行与数据处理</td>
-</tr>
-<tr>
-<td>File Search</td>
-<td>文件检索</td>
-</tr>
-<tr>
-<td>OpenAPI tool</td>
-<td>通过 OpenAPI schema 接入 API</td>
-</tr>
-<tr>
-<td>Agent-to-Agent &#x2F; A2A tool</td>
-<td>调用其他 Agent</td>
-</tr>
-</tbody></table>
-<p>一个 Toolbox 可以把多种工具组合在一起：</p>
-<div class="code-container" data-rel="Json"><figure class="iseeu highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;description&quot;</span><span class="punctuation">:</span> <span class="string">&quot;Web search, knowledge base search, and custom MCP server&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;tools&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">    <span class="punctuation">&#123;</span></span><br><span class="line">      <span class="attr">&quot;type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;web_search&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;description&quot;</span><span class="punctuation">:</span> <span class="string">&quot;Search the web for current information&quot;</span></span><br><span class="line">    <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="punctuation">&#123;</span></span><br><span class="line">      <span class="attr">&quot;type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;azure_ai_search&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;product_docs&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;description&quot;</span><span class="punctuation">:</span> <span class="string">&quot;Search internal product documentation&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;azure_ai_search&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;indexes&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">          <span class="punctuation">&#123;</span></span><br><span class="line">            <span class="attr">&quot;index_name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;&lt;INDEX_NAME&gt;&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;project_connection_id&quot;</span><span class="punctuation">:</span> <span class="string">&quot;&lt;CONNECTION_NAME&gt;&quot;</span></span><br><span class="line">          <span class="punctuation">&#125;</span></span><br><span class="line">        <span class="punctuation">]</span></span><br><span class="line">      <span class="punctuation">&#125;</span></span><br><span class="line">    <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="punctuation">&#123;</span></span><br><span class="line">      <span class="attr">&quot;type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;mcp&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;server_label&quot;</span><span class="punctuation">:</span> <span class="string">&quot;internal_tools&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;server_url&quot;</span><span class="punctuation">:</span> <span class="string">&quot;https://your-mcp-server.example.com&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;require_approval&quot;</span><span class="punctuation">:</span> <span class="string">&quot;never&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;project_connection_id&quot;</span><span class="punctuation">:</span> <span class="string">&quot;my-key-auth-connection&quot;</span></span><br><span class="line">    <span class="punctuation">&#125;</span></span><br><span class="line">  <span class="punctuation">]</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure></div>
-
-<p>这里有几个设计点值得注意：</p>
-<ul>
-<li><code>server_label</code> 会成为 MCP 工具名前缀；</li>
-<li><code>project_connection_id</code> 用于集中管理连接和凭据；</li>
-<li><code>require_approval</code> 可以控制是否需要人工审批；</li>
-<li>同一类内置工具如果配置多个实例，通常需要设置唯一 <code>name</code>。</li>
-</ul>
-<p>也就是说，Toolbox 不只是“把工具堆在一起”，还承载了命名、鉴权、审批和连接关系。</p>
-<hr>
-<h2 id="六、Foundry-Toolbox-和-MCP-的关系"><a href="#六、Foundry-Toolbox-和-MCP-的关系" class="headerlink" title="六、Foundry Toolbox 和 MCP 的关系"></a>六、Foundry Toolbox 和 MCP 的关系</h2><p><img  
+<h2 id="和普通-MCP-server-的区别"><a href="#和普通-MCP-server-的区别" class="headerlink" title="和普通 MCP server 的区别"></a>和普通 MCP server 的区别</h2><p>MCP 是 Model Context Protocol，可以理解成模型和外部工具之间的标准接口。普通 MCP server 更像一个工具服务：你自己部署、自己鉴权、自己维护、自己接 Agent。</p>
+<p>Foundry Toolbox 不改变 MCP 的基本思想，它是在 MCP 之上加了一层云厂商托管能力：</p>
+<p><img  
                      lazyload
                      src="/images/loading.svg"
-                     data-src="/images/foundry-toolbox/engineering-value.png"
-                      alt="Foundry Toolbox 工程价值"
+                     data-src="/images/foundry-toolbox/toolbox-endpoints.png"
+                      alt="Toolbox endpoints"
                 ></p>
-<p>Foundry Toolbox 的关键设计是：</p>
-<blockquote>
-<p><strong>Toolbox 自己不是一个封闭 SDK，而是暴露成 MCP-compatible endpoint。</strong></p>
-</blockquote>
-<p>这意味着它可以被很多运行时消费：</p>
-<ul>
-<li>Microsoft Agent Framework</li>
-<li>LangGraph</li>
-<li>GitHub Copilot SDK</li>
-<li>Claude Code</li>
-<li>Microsoft Copilot Studio</li>
-<li>MCP-enabled IDE</li>
-<li>自定义 Agent runtime</li>
-</ul>
-<p>微软没有把 Toolbox 做成“只能 Foundry Agent 用”的私有工具层，而是让它成为一个 MCP endpoint。</p>
-<p>更准确地说：</p>
-<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">MCP 是协议；</span><br><span class="line">Toolbox 是 Foundry 提供的企业级工具编排、版本和治理层。</span><br></pre></td></tr></table></figure></div>
-
-<p>这个定位很重要。</p>
-<p>普通 MCP Server 解决的是“一个工具服务如何被模型调用”。</p>
-<p>Foundry Toolbox 更像是把一组工具服务包装成企业资产：</p>
-<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">创建、组合、鉴权、版本、发布、消费、未来治理</span><br></pre></td></tr></table></figure></div>
-
-<p>这让平台团队可以集中建设工具，业务团队可以直接消费工具。</p>
-<hr>
-<h2 id="七、安装和使用-Foundry-Toolbox"><a href="#七、安装和使用-Foundry-Toolbox" class="headerlink" title="七、安装和使用 Foundry Toolbox"></a>七、安装和使用 Foundry Toolbox</h2><p>严格说，<strong>Foundry Toolbox 不是一个本地安装包</strong>。它是 Microsoft Foundry &#x2F; Azure AI Foundry 中的云端能力。</p>
-<p>你需要安装或准备的是：</p>
+<p>它提供的不是“协议创新”，而是这些工程能力：</p>
 <ol>
-<li>Visual Studio Code + Microsoft Foundry Toolkit；或</li>
-<li>Azure AI Projects Python SDK；或</li>
-<li>Azure Developer CLI &#x2F; REST API；</li>
-<li>一个可用的 Foundry project。</li>
+<li>工具集合集中管理；</li>
+<li>一个 MCP-compatible endpoint 给 Agent 消费；</li>
+<li>connection 和 credential 交给 Foundry 管；</li>
+<li>toolbox 可以版本化；</li>
+<li>不同 Agent runtime 可以复用同一个工具箱。</li>
 </ol>
+<p>这就有点像 API Gateway 之于 HTTP API。HTTP 早就有了，但企业还是需要网关来做鉴权、路由、限流、观测和治理。</p>
+<p>Foundry Toolbox 对 MCP 的意义也是类似的：MCP 解决“怎么接工具”，Toolbox 解决“企业里怎么管一堆工具”。</p>
 <hr>
-<h2 id="八、方式一：通过-VS-Code-Foundry-Toolkit-创建-Toolbox"><a href="#八、方式一：通过-VS-Code-Foundry-Toolkit-创建-Toolbox" class="headerlink" title="八、方式一：通过 VS Code Foundry Toolkit 创建 Toolbox"></a>八、方式一：通过 VS Code Foundry Toolkit 创建 Toolbox</h2><p>先安装：</p>
-<ul>
-<li>Visual Studio Code；</li>
-<li>Microsoft Foundry Toolkit for VS Code。</li>
-</ul>
-<p>进入 Foundry Toolkit 后，展开：</p>
-<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">My Resources → Your project name → Tools</span><br></pre></td></tr></table></figure></div>
-
-<p>然后点击 <strong>Add Toolbox</strong>。</p>
+<h2 id="怎么安装和试用"><a href="#怎么安装和试用" class="headerlink" title="怎么安装和试用"></a>怎么安装和试用</h2><p>当前 Toolbox 还在 Foundry 的 preview 体系里。使用路径有三种：Foundry 门户、VS Code Foundry Toolkit，以及 SDK &#x2F; REST API。</p>
+<p>最直接的是在 Microsoft Foundry 里进入 Tools &#x2F; Toolboxes，创建一个 toolbox，把需要的工具加进去，然后生成 endpoint。</p>
+<p>VS Code 里也可以通过 Foundry Toolkit 创建和查看 toolbox：</p>
 <p><img  
                      lazyload
                      src="/images/loading.svg"
                      data-src="/images/foundry-toolbox/toolbox-vscode-create.png"
-                      alt="通过 Foundry Toolkit 创建 Toolbox"
+                      alt="VS Code 创建 Toolbox"
                 ></p>
-<p>基本流程是：</p>
-<ol>
-<li>登录 Azure &#x2F; Foundry；</li>
-<li>选择 Foundry project；</li>
-<li>进入 Tools；</li>
-<li>点击 Add Toolbox；</li>
-<li>填写 Toolbox name 和 description；</li>
-<li>添加工具；</li>
-<li>配置连接和鉴权；</li>
-<li>Publish。</li>
-</ol>
-<p>发布后会创建第一个 toolbox version，并自动设为默认版本。</p>
-<p>发布完成后，可以在 Foundry Toolkit 中看到 toolbox 列表和 endpoint。</p>
 <p><img  
                      lazyload
                      src="/images/loading.svg"
                      data-src="/images/foundry-toolbox/toolbox-vscode-list.png"
-                      alt="Toolbox 列表与 endpoint"
+                      alt="VS Code 查看 Toolbox"
                 ></p>
-<hr>
-<h2 id="九、方式二：通过-Python-SDK-创建-Toolbox"><a href="#九、方式二：通过-Python-SDK-创建-Toolbox" class="headerlink" title="九、方式二：通过 Python SDK 创建 Toolbox"></a>九、方式二：通过 Python SDK 创建 Toolbox</h2><p>安装依赖：</p>
-<div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip install azure-ai-projects azure-identity</span><br></pre></td></tr></table></figure></div>
-
-<p>示例代码：</p>
-<div class="code-container" data-rel="Python"><figure class="iseeu highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> azure.identity <span class="keyword">import</span> DefaultAzureCredential</span><br><span class="line"><span class="keyword">from</span> azure.ai.projects <span class="keyword">import</span> AIProjectClient</span><br><span class="line"><span class="keyword">from</span> azure.ai.projects.models <span class="keyword">import</span> MCPTool, WebSearchTool</span><br><span class="line"></span><br><span class="line">endpoint = <span class="string">&quot;https://&lt;account&gt;.services.ai.azure.com/api/projects/&lt;project&gt;&quot;</span></span><br><span class="line"></span><br><span class="line">project = AIProjectClient(</span><br><span class="line">    endpoint=endpoint,</span><br><span class="line">    credential=DefaultAzureCredential(),</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">toolbox_version = project.beta.toolboxes.create_toolbox_version(</span><br><span class="line">    toolbox_name=<span class="string">&quot;agent-tools&quot;</span>,</span><br><span class="line">    description=<span class="string">&quot;Toolbox with web search and an MCP server&quot;</span>,</span><br><span class="line">    tools=[</span><br><span class="line">        WebSearchTool(),</span><br><span class="line">        MCPTool(</span><br><span class="line">            server_label=<span class="string">&quot;internal_tools&quot;</span>,</span><br><span class="line">            server_url=<span class="string">&quot;https://your-mcp-server.example.com&quot;</span>,</span><br><span class="line">            require_approval=<span class="string">&quot;never&quot;</span>,</span><br><span class="line">            project_connection_id=<span class="string">&quot;my-key-auth-connection&quot;</span>,</span><br><span class="line">        ),</span><br><span class="line">    ],</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(toolbox_version.name, toolbox_version.version)</span><br></pre></td></tr></table></figure></div>
-
-<p>几个关键点：</p>
-<ul>
-<li><code>toolbox_name</code> 是 Toolbox 名称；</li>
-<li><code>WebSearchTool()</code> 代表内置 Web Search；</li>
-<li><code>MCPTool(...)</code> 代表接入一个远程 MCP Server；</li>
-<li><code>project_connection_id</code> 用于集中管理鉴权；</li>
-<li><code>require_approval</code> 控制工具调用是否需要审批。</li>
-</ul>
-<hr>
-<h2 id="十、方式三：通过-REST-API-创建-Toolbox"><a href="#十、方式三：通过-REST-API-创建-Toolbox" class="headerlink" title="十、方式三：通过 REST API 创建 Toolbox"></a>十、方式三：通过 REST API 创建 Toolbox</h2><p>先获取 Azure token，scope 是：</p>
-<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https://ai.azure.com/.default</span><br></pre></td></tr></table></figure></div>
-
-<p>创建 toolbox version：</p>
-<div class="code-container" data-rel="Http"><figure class="iseeu highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">POST &#123;project_endpoint&#125;/toolboxes/agent-tools/versions?api-version=v1</span><br><span class="line"><span class="attribute">Authorization</span><span class="punctuation">: </span>Bearer &lt;token&gt;</span><br><span class="line"><span class="attribute">Content-Type</span><span class="punctuation">: </span>application/json</span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line">  &quot;description&quot;: &quot;Toolbox with web search and an MCP server&quot;,</span><br><span class="line">  &quot;tools&quot;: [</span><br><span class="line">    &#123;</span><br><span class="line">      &quot;type&quot;: &quot;web_search&quot;,</span><br><span class="line">      &quot;description&quot;: &quot;Search the web for current information&quot;</span><br><span class="line">    &#125;,</span><br><span class="line">    &#123;</span><br><span class="line">      &quot;type&quot;: &quot;mcp&quot;,</span><br><span class="line">      &quot;server_label&quot;: &quot;internal_tools&quot;,</span><br><span class="line">      &quot;server_url&quot;: &quot;https://your-mcp-server.example.com&quot;,</span><br><span class="line">      &quot;require_approval&quot;: &quot;never&quot;,</span><br><span class="line">      &quot;project_connection_id&quot;: &quot;my-key-auth-connection&quot;</span><br><span class="line">    &#125;</span><br><span class="line">  ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></div>
-
-<p>注意不要在代码里硬编码 token、client secret 或 API key。生产环境应使用 Managed Identity、DefaultAzureCredential 或安全的 secret store。</p>
-<hr>
-<h2 id="十一、两个-MCP-Endpoint：测试版和生产版"><a href="#十一、两个-MCP-Endpoint：测试版和生产版" class="headerlink" title="十一、两个 MCP Endpoint：测试版和生产版"></a>十一、两个 MCP Endpoint：测试版和生产版</h2><p><img  
-                     lazyload
-                     src="/images/loading.svg"
-                     data-src="/images/foundry-toolbox/toolbox-endpoints.png"
-                      alt="Toolbox Endpoint 设计"
-                ></p>
-<p>官方文档里有两种 endpoint。</p>
-<h3 id="1-Developer-x2F-version-specific-endpoint"><a href="#1-Developer-x2F-version-specific-endpoint" class="headerlink" title="1. Developer &#x2F; version-specific endpoint"></a>1. Developer &#x2F; version-specific endpoint</h3><p>用于测试指定版本：</p>
-<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;project_endpoint&#125;/toolboxes/&#123;toolbox_name&#125;/versions/&#123;version&#125;/mcp?api-version=v1</span><br></pre></td></tr></table></figure></div>
-
-<p>适合：</p>
-<ul>
-<li>验证新版本工具 schema；</li>
-<li>验证 OAuth；</li>
-<li>验证 tools&#x2F;list；</li>
-<li>验证 tools&#x2F;call；</li>
-<li>在 promote 前做灰度测试。</li>
-</ul>
-<h3 id="2-Consumer-x2F-default-version-endpoint"><a href="#2-Consumer-x2F-default-version-endpoint" class="headerlink" title="2. Consumer &#x2F; default-version endpoint"></a>2. Consumer &#x2F; default-version endpoint</h3><p>用于生产 Agent 消费：</p>
-<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;project_endpoint&#125;/toolboxes/&#123;toolbox_name&#125;/mcp?api-version=v1</span><br></pre></td></tr></table></figure></div>
-
-<p>它指向当前 <code>default_version</code>。</p>
-<p>也就是说，生产 Agent 可以一直连接 consumer endpoint。Toolbox v2 测试通过后，只需要切换 default version，Agent 代码不用改。</p>
-<p>Preview 阶段还有一个关键 header：</p>
+<p>如果用 REST API，当前 preview 需要带这个 header：</p>
 <div class="code-container" data-rel="Http"><figure class="iseeu highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">Foundry-Features</span><span class="punctuation">: </span>Toolboxes=V1Preview</span><br></pre></td></tr></table></figure></div>
 
-<p>调用 Toolbox MCP endpoint 时需要带上它。</p>
-<hr>
-<h2 id="十二、验证-Toolbox-是否可用"><a href="#十二、验证-Toolbox-是否可用" class="headerlink" title="十二、验证 Toolbox 是否可用"></a>十二、验证 Toolbox 是否可用</h2><p>安装 MCP client：</p>
-<div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip install mcp azure-identity</span><br></pre></td></tr></table></figure></div>
+<p>概念上大概是这样：</p>
+<div class="code-container" data-rel="Python"><figure class="iseeu highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 伪代码，只表达使用方式</span></span><br><span class="line">agent = Agent(</span><br><span class="line">    model=<span class="string">&quot;gpt-4.1&quot;</span>,</span><br><span class="line">    tools=[</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="string">&quot;type&quot;</span>: <span class="string">&quot;mcp&quot;</span>,</span><br><span class="line">            <span class="string">&quot;endpoint&quot;</span>: <span class="string">&quot;https://&lt;foundry-project&gt;/toolboxes/&lt;name&gt;/mcp&quot;</span></span><br><span class="line">        &#125;</span><br><span class="line">    ]</span><br><span class="line">)</span><br></pre></td></tr></table></figure></div>
 
-<p>验证代码：</p>
-<div class="code-container" data-rel="Python"><figure class="iseeu highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> asyncio</span><br><span class="line"><span class="keyword">from</span> azure.identity <span class="keyword">import</span> DefaultAzureCredential</span><br><span class="line"><span class="keyword">from</span> mcp.client.streamable_http <span class="keyword">import</span> streamablehttp_client</span><br><span class="line"><span class="keyword">from</span> mcp <span class="keyword">import</span> ClientSession</span><br><span class="line"></span><br><span class="line">url = <span class="string">&quot;https://&lt;account&gt;.services.ai.azure.com/api/projects/&lt;project&gt;/toolboxes/&lt;name&gt;/versions/&lt;version&gt;/mcp?api-version=v1&quot;</span></span><br><span class="line"></span><br><span class="line">token = DefaultAzureCredential().get_token(<span class="string">&quot;https://ai.azure.com/.default&quot;</span>).token</span><br><span class="line"></span><br><span class="line">headers = &#123;</span><br><span class="line">    <span class="string">&quot;Authorization&quot;</span>: <span class="string">f&quot;Bearer <span class="subst">&#123;token&#125;</span>&quot;</span>,</span><br><span class="line">    <span class="string">&quot;Foundry-Features&quot;</span>: <span class="string">&quot;Toolboxes=V1Preview&quot;</span>,</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">async</span> <span class="keyword">def</span> <span class="title function_">verify_toolbox</span>():</span><br><span class="line">    <span class="keyword">async</span> <span class="keyword">with</span> streamablehttp_client(url, headers=headers) <span class="keyword">as</span> (read, write, _):</span><br><span class="line">        <span class="keyword">async</span> <span class="keyword">with</span> ClientSession(read, write) <span class="keyword">as</span> session:</span><br><span class="line">            <span class="keyword">await</span> session.initialize()</span><br><span class="line"></span><br><span class="line">            tools_result = <span class="keyword">await</span> session.list_tools()</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">f&quot;Tools found: <span class="subst">&#123;<span class="built_in">len</span>(tools_result.tools)&#125;</span>&quot;</span>)</span><br><span class="line"></span><br><span class="line">            <span class="keyword">for</span> tool <span class="keyword">in</span> tools_result.tools:</span><br><span class="line">                <span class="built_in">print</span>(<span class="string">f&quot;- <span class="subst">&#123;tool.name&#125;</span>: <span class="subst">&#123;(tool.description <span class="keyword">or</span> <span class="string">&#x27;&#x27;</span>)[:<span class="number">80</span>]&#125;</span>&quot;</span>)</span><br><span class="line"></span><br><span class="line">asyncio.run(verify_toolbox())</span><br></pre></td></tr></table></figure></div>
-
-<p>验证时重点看：</p>
+<p>生产环境里还要考虑三件事：</p>
 <ul>
-<li><code>initialize</code> 是否成功；</li>
-<li><code>tools/list</code> 是否返回工具；</li>
-<li>工具是否有 <code>name</code>、<code>description</code>、<code>inputSchema</code>；</li>
-<li><code>inputSchema</code> 里是否有 <code>properties</code>；</li>
-<li><code>tools/call</code> 是否能正常返回；</li>
-<li>MCP 工具名是否带 <code>server_label</code> 前缀，例如 <code>internal_tools.search_docs</code>。</li>
+<li>不要把高权限工具直接暴露给 Agent；</li>
+<li>删除、发邮件、转账、发布内容这类动作要加人工审批；</li>
+<li>toolbox version 升级要灰度，不要直接改默认版本影响所有 Agent。</li>
 </ul>
-<p>如果遇到 MCP 错误 <code>-32006</code>，通常表示需要 OAuth consent，要根据错误消息里的 URL 完成授权。</p>
 <hr>
-<h2 id="十三、在-Agent-中接入-Toolbox"><a href="#十三、在-Agent-中接入-Toolbox" class="headerlink" title="十三、在 Agent 中接入 Toolbox"></a>十三、在 Agent 中接入 Toolbox</h2><h3 id="LangGraph-接入"><a href="#LangGraph-接入" class="headerlink" title="LangGraph 接入"></a>LangGraph 接入</h3><p>环境变量示例：</p>
-<div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">FOUNDRY_PROJECT_ENDPOINT=https://&lt;account&gt;.services.ai.azure.com/api/projects/&lt;project&gt;</span><br><span class="line">FOUNDRY_AGENT_TOOLBOX_ENDPOINT=https://&lt;account&gt;.services.ai.azure.com/api/projects/&lt;project&gt;/toolboxes/&lt;toolbox-name&gt;/versions/&lt;version&gt;/mcp?api-version=v1</span><br><span class="line">TOOLBOX_NAME=agent-tools</span><br><span class="line">FOUNDRY_AGENT_TOOLBOX_FEATURES=Toolboxes=V1Preview</span><br><span class="line">AZURE_AI_MODEL_DEPLOYMENT_NAME=gpt-4o</span><br></pre></td></tr></table></figure></div>
-
-<p>核心代码：</p>
-<div class="code-container" data-rel="Python"><figure class="iseeu highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> langchain_azure_ai.tools <span class="keyword">import</span> AzureAIProjectToolbox</span><br><span class="line"></span><br><span class="line">toolbox = AzureAIProjectToolbox(toolbox_name=TOOLBOX_NAME)</span><br><span class="line">tools = <span class="keyword">await</span> toolbox.get_tools()</span><br></pre></td></tr></table></figure></div>
-
-<p>官方文档要求：</p>
-<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">langchain-azure-ai[tools] &gt; 1.2.3</span><br></pre></td></tr></table></figure></div>
-
-<h3 id="Microsoft-Agent-Framework-接入"><a href="#Microsoft-Agent-Framework-接入" class="headerlink" title="Microsoft Agent Framework 接入"></a>Microsoft Agent Framework 接入</h3><p>核心模式是使用 <code>MCPStreamableHTTPTool</code> 直接连接 Toolbox MCP endpoint。</p>
-<div class="code-container" data-rel="Python"><figure class="iseeu highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">credential = DefaultAzureCredential()</span><br><span class="line">token_provider = get_bearer_token_provider(</span><br><span class="line">    credential,</span><br><span class="line">    <span class="string">&quot;https://ai.azure.com/.default&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">http_client = httpx.AsyncClient(</span><br><span class="line">    auth=_ToolboxAuth(token_provider),</span><br><span class="line">    headers=&#123;<span class="string">&quot;Foundry-Features&quot;</span>: <span class="string">&quot;Toolboxes=V1Preview&quot;</span>&#125;,</span><br><span class="line">    timeout=<span class="number">120.0</span>,</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">mcp_tool = MCPStreamableHTTPTool(</span><br><span class="line">    name=<span class="string">&quot;toolbox&quot;</span>,</span><br><span class="line">    url=TOOLBOX_ENDPOINT,</span><br><span class="line">    http_client=http_client,</span><br><span class="line">    load_prompts=<span class="literal">False</span>,</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">agent = chat_client.as_agent(</span><br><span class="line">    name=<span class="string">&quot;my-toolbox-agent&quot;</span>,</span><br><span class="line">    instructions=<span class="string">&quot;You are a helpful assistant with access to Foundry toolbox tools.&quot;</span>,</span><br><span class="line">    tools=[mcp_tool],</span><br><span class="line">)</span><br></pre></td></tr></table></figure></div>
-
-<p>这里的关键变化是：Agent 只挂一个 <code>MCPStreamableHTTPTool</code>，而不是挂几十个工具。</p>
-<hr>
-<h2 id="十四、版本管理：Toolbox-的工程化关键"><a href="#十四、版本管理：Toolbox-的工程化关键" class="headerlink" title="十四、版本管理：Toolbox 的工程化关键"></a>十四、版本管理：Toolbox 的工程化关键</h2><p>Toolbox version 是不可变快照。</p>
-<p>父对象 <code>ToolboxObject</code> 有一个关键字段：</p>
-<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">default_version</span><br></pre></td></tr></table></figure></div>
-
-<p>它决定 consumer endpoint 当前服务哪个版本。</p>
-<p>这意味着生产 Agent 可以一直连接：</p>
-<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/toolboxes/agent-tools/mcp?api-version=v1</span><br></pre></td></tr></table></figure></div>
-
-<p>当 v2 测试通过后，只需要 promote default version：</p>
-<div class="code-container" data-rel="Python"><figure class="iseeu highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">project.beta.toolboxes.update(</span><br><span class="line">    toolbox_name=<span class="string">&quot;agent-tools&quot;</span>,</span><br><span class="line">    default_version=<span class="string">&quot;&lt;version_id&gt;&quot;</span>,</span><br><span class="line">)</span><br></pre></td></tr></table></figure></div>
-
-<p>REST API：</p>
-<div class="code-container" data-rel="Http"><figure class="iseeu highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">PATCH &#123;project_endpoint&#125;/toolboxes/agent-tools?api-version=v1</span><br><span class="line"><span class="attribute">Authorization</span><span class="punctuation">: </span>Bearer &lt;token&gt;</span><br><span class="line"><span class="attribute">Content-Type</span><span class="punctuation">: </span>application/json</span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line">  &quot;default_version&quot;: &quot;&lt;version_id&gt;&quot;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></div>
-
-<p>这有三个工程收益：</p>
-<ol>
-<li>Agent 代码不用改；</li>
-<li>工具变更可以先测试再提升；</li>
-<li>出问题时可以回滚 default version。</li>
-</ol>
-<p>对于企业 Agent 来说，这比“直接改工具配置再重启 Agent”安全得多。</p>
-<hr>
-<h2 id="十五、它解决的是工具治理，而不只是工具调用"><a href="#十五、它解决的是工具治理，而不只是工具调用" class="headerlink" title="十五、它解决的是工具治理，而不只是工具调用"></a>十五、它解决的是工具治理，而不只是工具调用</h2><p>如果只把 Foundry Toolbox 理解成“一个 MCP proxy”，其实低估了它。</p>
-<p>它真正要解决的是企业 Agent 落地里的几个硬问题。</p>
-<h3 id="1-工具重复建设"><a href="#1-工具重复建设" class="headerlink" title="1. 工具重复建设"></a>1. 工具重复建设</h3><p>以前每个团队都自己封装一遍 GitHub、Azure DevOps、Search、内部 API。</p>
-<p>Toolbox 让平台团队可以集中封装，业务 Agent 直接复用。</p>
-<h3 id="2-凭据分散"><a href="#2-凭据分散" class="headerlink" title="2. 凭据分散"></a>2. 凭据分散</h3><p>以前 token、API key、OAuth 配置散落在不同 Agent 项目里。</p>
-<p>Toolbox 把鉴权放在 Foundry project connection 里集中管理。</p>
-<h3 id="3-工具变更难"><a href="#3-工具变更难" class="headerlink" title="3. 工具变更难"></a>3. 工具变更难</h3><p>以前工具 schema 改了，每个 Agent 都要改代码。</p>
-<p>现在是更新 Toolbox version，测试后 promote default version。</p>
-<h3 id="4-可见性不足"><a href="#4-可见性不足" class="headerlink" title="4. 可见性不足"></a>4. 可见性不足</h3><p>企业需要知道：</p>
-<ul>
-<li>谁在用哪个工具？</li>
-<li>哪个工具被调用最多？</li>
-<li>哪些 Agent 有高风险权限？</li>
-<li>哪些工具需要审批？</li>
-</ul>
-<p>Toolbox 的长期方向就是把这些纳入 Foundry 治理体系。</p>
-<hr>
-<h2 id="十六、和普通-MCP-Server-有什么区别？"><a href="#十六、和普通-MCP-Server-有什么区别？" class="headerlink" title="十六、和普通 MCP Server 有什么区别？"></a>十六、和普通 MCP Server 有什么区别？</h2><p>普通 MCP Server 更像一个工具服务：</p>
-<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">你自己部署</span><br><span class="line">你自己鉴权</span><br><span class="line">你自己维护</span><br><span class="line">你自己接 Agent</span><br><span class="line">你自己做审计</span><br></pre></td></tr></table></figure></div>
-
-<p>Foundry Toolbox 更像一个企业工具资产层：</p>
-<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Foundry 中央管理</span><br><span class="line">统一 MCP endpoint</span><br><span class="line">集中鉴权</span><br><span class="line">支持版本</span><br><span class="line">可被多种 Agent runtime 消费</span><br><span class="line">未来接入治理、审计、策略</span><br></pre></td></tr></table></figure></div>
-
-<p>简单说：</p>
+<h2 id="我的判断"><a href="#我的判断" class="headerlink" title="我的判断"></a>我的判断</h2><p>Foundry Toolbox 不是革命，至少现在不是。</p>
+<p>它更像是微软把 MCP 工具生态收进 Azure AI Foundry 后，补上的一个企业工具编排层。营销上会强调“90% token reduction”，因为这个数字好传播。但技术本质没那么神秘：少传无关 schema，按需暴露工具，token 就下来了。</p>
+<p>真正值得看的不是这个 90%，而是后面的治理层。</p>
+<p>如果你只是做一个个人 Agent，接三五个工具，Toolbox 意义不大。自己写 MCP server 或者直接绑定工具就够了。引入 Foundry 反而增加平台依赖。</p>
+<p>但如果你在企业里做几十个 Agent，每个 Agent 都要接 GitHub、DevOps、CRM、搜索、内部知识库、审批流、工单系统，那 Toolbox 这类东西迟早会出现。因为工具一多，问题就从“怎么调用”变成“怎么管理”。</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/foundry-toolbox/engineering-value.png"
+                      alt="企业工程价值"
+                ></p>
+<p>所以我会把它定义成：</p>
 <blockquote>
-<p>MCP 是协议，Toolbox 是企业级 MCP 工具编排与治理层。</p>
+<p>一个有营销包装的、但方向正确的 Agent 工具治理层。</p>
 </blockquote>
-<p>这也是微软选择 MCP-compatible endpoint 的意义：它既不丢掉开放生态，又能把企业需要的管理能力加上去。</p>
-<hr>
-<h2 id="十七、当前限制和注意事项"><a href="#十七、当前限制和注意事项" class="headerlink" title="十七、当前限制和注意事项"></a>十七、当前限制和注意事项</h2><p>Foundry Toolbox 仍处于 public preview。使用时要注意：</p>
-<ul>
-<li>Preview 功能没有正式生产 SLA；</li>
-<li>部分能力可能受区域、模型、账号权限影响；</li>
-<li>调用 Toolbox MCP endpoint 当前需要 <code>Foundry-Features: Toolboxes=V1Preview</code>；</li>
-<li>同一类型工具多个实例时要注意唯一命名；</li>
-<li>OpenAPI 和 A2A 在不同工具链里的支持程度不完全一致；</li>
-<li>第三方 MCP server 需要自行评估权限、数据、合规和成本风险。</li>
-</ul>
-<p>尤其是企业内部使用时，不要把高权限工具无审批暴露给 Agent。</p>
-<p>高风险操作建议使用：</p>
-<div class="code-container" data-rel="Json"><figure class="iseeu highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;require_approval&quot;</span><span class="punctuation">:</span> <span class="string">&quot;always&quot;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure></div>
-
-<p>或者至少对删除、转账、发邮件、改权限、发布内容这类操作启用人工审批。</p>
-<hr>
-<h2 id="十八、我的判断：这是-Agent-平台化的关键拼图"><a href="#十八、我的判断：这是-Agent-平台化的关键拼图" class="headerlink" title="十八、我的判断：这是 Agent 平台化的关键拼图"></a>十八、我的判断：这是 Agent 平台化的关键拼图</h2><p>过去一年，大家都在关注：</p>
-<ul>
-<li>更强模型；</li>
-<li>更长上下文；</li>
-<li>更复杂 Agent 框架；</li>
-<li>MCP 生态；</li>
-<li>Agent memory；</li>
-<li>RAG；</li>
-<li>Browser use。</li>
-</ul>
-<p>但企业 Agent 真正上线时，最大问题往往不是模型不够聪明，而是：</p>
-<blockquote>
-<p>工具太多、权限太乱、鉴权太散、审计太弱、上下文太胀。</p>
-</blockquote>
-<p>Foundry Toolbox 对应的正是这个问题。</p>
-<p>它的价值可以概括成一句话：</p>
-<blockquote>
-<p><strong>把工具从“每个 Agent 的私有配置”，升级成“企业级可治理资产”。</strong></p>
-</blockquote>
-<p>这有点像 Kubernetes 之后大家需要 Service Mesh。</p>
-<p>服务越来越多之后，不能靠每个服务自己处理治理、观测、安全策略；Agent 工具越来越多之后，也不能靠每个 Agent 自己管理全部工具、凭据和 schema。</p>
-<p>Toolbox 就是在 Agent 时代补上这一层。</p>
-<hr>
-<h2 id="十九、总结"><a href="#十九、总结" class="headerlink" title="十九、总结"></a>十九、总结</h2><p>Jeff Hollan demo 里的 <strong>4676 → 467 tokens</strong> 很抓眼球，但这只是表层结果。</p>
-<p>真正值得关注的是：</p>
-<ol>
-<li><strong>Progressive Disclosure</strong> 让 Agent 不再一次性吞下全部工具描述；</li>
-<li><strong>单个 MCP endpoint</strong> 让 Agent 工具接入大幅简化；</li>
-<li><strong>Toolbox versioning</strong> 让工具变更可以灰度、测试、提升默认版本；</li>
-<li><strong>集中鉴权</strong> 降低凭据散落风险；</li>
-<li><strong>未来治理能力</strong> 会让企业能真正管理 Agent 工具调用。</li>
-</ol>
-<p>如果说 MCP 解决了“Agent 怎么标准化调用工具”，那 Foundry Toolbox 进一步解决的是：</p>
-<blockquote>
-<p><strong>企业如何规模化、可治理地管理 Agent 工具生态。</strong></p>
-</blockquote>
-<p>它不是小优化，而是 Agent 工程架构从“手工接线”走向“平台化治理”的信号。</p>
+<p>别把它当魔法，也别完全忽略它。</p>
+<p>它没有让 Agent 更聪明。它只是提醒我们：Agent 工程里，很多成本不是模型产生的，而是我们把系统设计得太粗糙。</p>
 <hr>
 <h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
 <li><p>Microsoft Developer Blog: Introducing Toolboxes in Foundry<br><a class="link"   target="_blank" rel="noopener" href="https://devblogs.microsoft.com/foundry/introducing-toolboxes-in-foundry/" >https://devblogs.microsoft.com/foundry/introducing-toolboxes-in-foundry/<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></p>
@@ -1080,14 +725,14 @@
 		<div class="post-copyright-info w-full my-8 px-2 sm:px-6 md:px-8">
 			<div class="article-copyright-info-container">
     <ul>
-        <li><strong>标题:</strong> Foundry Toolbox 深度分析：Agent 工具调用为什么能省 90％ Token？</li>
+        <li><strong>标题:</strong> Foundry Toolbox 没有魔法：所谓省 90％ Token，本质是别把几百个工具一次性塞给 Agent</li>
         <li><strong>作者:</strong> Nathan</li>
         <li><strong>创建于
                 :</strong> 2026-05-10 10:40:00</li>
         
             <li>
                 <strong>更新于
-                    :</strong> 2026-05-10 10:50:35
+                    :</strong> 2026-05-10 22:54:31
             </li>
         
         <li>
@@ -1165,8 +810,8 @@
 		<div class="post-toc-wrap">
 	<div class="post-toc">
 		<div class="toc-title">目录</div>
-		<div class="page-title">Foundry Toolbox 深度分析：Agent 工具调用为什么能省 90％ Token？</div>
-		<ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81Agent-%E5%B7%A5%E5%85%B7%E8%B0%83%E7%94%A8%E4%B8%BA%E4%BB%80%E4%B9%88%E4%BC%9A%E7%88%86-Token%EF%BC%9F"><span class="nav-text">一、Agent 工具调用为什么会爆 Token？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81Foundry-Toolbox-%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F"><span class="nav-text">二、Foundry Toolbox 是什么？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E6%A0%B8%E5%BF%83%E6%9C%BA%E5%88%B6%EF%BC%9AProgressive-Disclosure"><span class="nav-text">三、核心机制：Progressive Disclosure</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E4%B8%BA%E4%BB%80%E4%B9%88%E5%AE%83%E7%89%B9%E5%88%AB%E9%80%82%E5%90%88%E9%95%BF%E8%BF%90%E8%A1%8C-Agent%EF%BC%9F"><span class="nav-text">四、为什么它特别适合长运行 Agent？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%94%E3%80%81Toolbox-%E8%83%BD%E6%94%BE%E5%93%AA%E4%BA%9B%E5%B7%A5%E5%85%B7%EF%BC%9F"><span class="nav-text">五、Toolbox 能放哪些工具？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AD%E3%80%81Foundry-Toolbox-%E5%92%8C-MCP-%E7%9A%84%E5%85%B3%E7%B3%BB"><span class="nav-text">六、Foundry Toolbox 和 MCP 的关系</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%83%E3%80%81%E5%AE%89%E8%A3%85%E5%92%8C%E4%BD%BF%E7%94%A8-Foundry-Toolbox"><span class="nav-text">七、安装和使用 Foundry Toolbox</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AB%E3%80%81%E6%96%B9%E5%BC%8F%E4%B8%80%EF%BC%9A%E9%80%9A%E8%BF%87-VS-Code-Foundry-Toolkit-%E5%88%9B%E5%BB%BA-Toolbox"><span class="nav-text">八、方式一：通过 VS Code Foundry Toolkit 创建 Toolbox</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B9%9D%E3%80%81%E6%96%B9%E5%BC%8F%E4%BA%8C%EF%BC%9A%E9%80%9A%E8%BF%87-Python-SDK-%E5%88%9B%E5%BB%BA-Toolbox"><span class="nav-text">九、方式二：通过 Python SDK 创建 Toolbox</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%81%E3%80%81%E6%96%B9%E5%BC%8F%E4%B8%89%EF%BC%9A%E9%80%9A%E8%BF%87-REST-API-%E5%88%9B%E5%BB%BA-Toolbox"><span class="nav-text">十、方式三：通过 REST API 创建 Toolbox</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%81%E4%B8%80%E3%80%81%E4%B8%A4%E4%B8%AA-MCP-Endpoint%EF%BC%9A%E6%B5%8B%E8%AF%95%E7%89%88%E5%92%8C%E7%94%9F%E4%BA%A7%E7%89%88"><span class="nav-text">十一、两个 MCP Endpoint：测试版和生产版</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Developer-x2F-version-specific-endpoint"><span class="nav-text">1. Developer &#x2F; version-specific endpoint</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Consumer-x2F-default-version-endpoint"><span class="nav-text">2. Consumer &#x2F; default-version endpoint</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%81%E4%BA%8C%E3%80%81%E9%AA%8C%E8%AF%81-Toolbox-%E6%98%AF%E5%90%A6%E5%8F%AF%E7%94%A8"><span class="nav-text">十二、验证 Toolbox 是否可用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%81%E4%B8%89%E3%80%81%E5%9C%A8-Agent-%E4%B8%AD%E6%8E%A5%E5%85%A5-Toolbox"><span class="nav-text">十三、在 Agent 中接入 Toolbox</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#LangGraph-%E6%8E%A5%E5%85%A5"><span class="nav-text">LangGraph 接入</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Microsoft-Agent-Framework-%E6%8E%A5%E5%85%A5"><span class="nav-text">Microsoft Agent Framework 接入</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%81%E5%9B%9B%E3%80%81%E7%89%88%E6%9C%AC%E7%AE%A1%E7%90%86%EF%BC%9AToolbox-%E7%9A%84%E5%B7%A5%E7%A8%8B%E5%8C%96%E5%85%B3%E9%94%AE"><span class="nav-text">十四、版本管理：Toolbox 的工程化关键</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%81%E4%BA%94%E3%80%81%E5%AE%83%E8%A7%A3%E5%86%B3%E7%9A%84%E6%98%AF%E5%B7%A5%E5%85%B7%E6%B2%BB%E7%90%86%EF%BC%8C%E8%80%8C%E4%B8%8D%E5%8F%AA%E6%98%AF%E5%B7%A5%E5%85%B7%E8%B0%83%E7%94%A8"><span class="nav-text">十五、它解决的是工具治理，而不只是工具调用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E5%B7%A5%E5%85%B7%E9%87%8D%E5%A4%8D%E5%BB%BA%E8%AE%BE"><span class="nav-text">1. 工具重复建设</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E5%87%AD%E6%8D%AE%E5%88%86%E6%95%A3"><span class="nav-text">2. 凭据分散</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E5%B7%A5%E5%85%B7%E5%8F%98%E6%9B%B4%E9%9A%BE"><span class="nav-text">3. 工具变更难</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E5%8F%AF%E8%A7%81%E6%80%A7%E4%B8%8D%E8%B6%B3"><span class="nav-text">4. 可见性不足</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%81%E5%85%AD%E3%80%81%E5%92%8C%E6%99%AE%E9%80%9A-MCP-Server-%E6%9C%89%E4%BB%80%E4%B9%88%E5%8C%BA%E5%88%AB%EF%BC%9F"><span class="nav-text">十六、和普通 MCP Server 有什么区别？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%81%E4%B8%83%E3%80%81%E5%BD%93%E5%89%8D%E9%99%90%E5%88%B6%E5%92%8C%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9"><span class="nav-text">十七、当前限制和注意事项</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%81%E5%85%AB%E3%80%81%E6%88%91%E7%9A%84%E5%88%A4%E6%96%AD%EF%BC%9A%E8%BF%99%E6%98%AF-Agent-%E5%B9%B3%E5%8F%B0%E5%8C%96%E7%9A%84%E5%85%B3%E9%94%AE%E6%8B%BC%E5%9B%BE"><span class="nav-text">十八、我的判断：这是 Agent 平台化的关键拼图</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%81%E4%B9%9D%E3%80%81%E6%80%BB%E7%BB%93"><span class="nav-text">十九、总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="nav-text">参考资料</span></a></li></ol>
+		<div class="page-title">Foundry Toolbox 没有魔法：所谓省 90％ Token，本质是别把几百个工具一次性塞给 Agent</div>
+		<ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%83%E5%88%B0%E5%BA%95%E6%98%AF%E4%BB%80%E4%B9%88"><span class="nav-text">它到底是什么</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#90-token-%E8%8A%82%E7%9C%81%EF%BC%8C%E5%93%AA%E9%87%8C%E6%9C%89%E5%99%B1%E5%A4%B4%EF%BC%8C%E5%93%AA%E9%87%8C%E6%9C%89%E4%BB%B7%E5%80%BC"><span class="nav-text">90% token 节省，哪里有噱头，哪里有价值</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%92%8C%E6%99%AE%E9%80%9A-MCP-server-%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="nav-text">和普通 MCP server 的区别</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%8E%E4%B9%88%E5%AE%89%E8%A3%85%E5%92%8C%E8%AF%95%E7%94%A8"><span class="nav-text">怎么安装和试用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%88%91%E7%9A%84%E5%88%A4%E6%96%AD"><span class="nav-text">我的判断</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="nav-text">参考资料</span></a></li></ol>
 
 	</div>
 </div>
@@ -1194,11 +839,11 @@
                 
                 <p class="post-count space-x-0.5">
                     <span>
-                        共撰写了 235 篇文章
+                        共撰写了 234 篇文章
                     </span>
                     
                         <span>
-                            共 468.5k 字
+                            共 465.4k 字
                         </span>
                     
                 </p>
