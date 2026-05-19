@@ -94,7 +94,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://hydraxman.github.io/images/redefine-og.webp">
 <meta property="article:published_time" content="2026-05-19T00:55:00.000Z">
-<meta property="article:modified_time" content="2026-05-19T00:58:04.511Z">
+<meta property="article:modified_time" content="2026-05-19T02:45:57.785Z">
 <meta property="article:author" content="Nathan">
 <meta property="article:tag" content="AI Agent">
 <meta property="article:tag" content="ReAct">
@@ -509,8 +509,8 @@
     
         <span class="article-date article-meta-item">
             <i class="fa-regular fa-wrench"></i>&nbsp;
-            <span class="desktop">2026-05-19 08:58:04</span>
-            <span class="mobile">2026-05-19 08:58:04</span>
+            <span class="desktop">2026-05-19 10:45:57</span>
+            <span class="mobile">2026-05-19 10:45:57</span>
             <span class="hover-info">更新</span>
         </span>
     
@@ -564,12 +564,12 @@
     
     
         <span class="article-wordcount article-meta-item">
-            <i class="fa-regular fa-typewriter"></i>&nbsp;<span>2.8k 字</span>
+            <i class="fa-regular fa-typewriter"></i>&nbsp;<span>4.9k 字</span>
         </span>
     
     
         <span class="article-min2read article-meta-item">
-            <i class="fa-regular fa-clock"></i>&nbsp;<span>10 分钟</span>
+            <i class="fa-regular fa-clock"></i>&nbsp;<span>19 分钟</span>
         </span>
     
     
@@ -641,7 +641,137 @@
 <li>“相关测试通过，CI 通过，diff 只涉及目标模块”才是完成证据。</li>
 </ul>
 <p><strong>过程证据说明 Agent 做过什么，完成证据证明目标已经达成。</strong></p>
-<h2 id="4-Evidence-的强弱排序"><a href="#4-Evidence-的强弱排序" class="headerlink" title="4. Evidence 的强弱排序"></a>4. Evidence 的强弱排序</h2><p>不同证据的可信度不一样。一个实用排序是：</p>
+<h2 id="4-从代码看：7-层-Agent-Loop-怎么长出来"><a href="#4-从代码看：7-层-Agent-Loop-怎么长出来" class="headerlink" title="4. 从代码看：7 层 Agent Loop 怎么长出来"></a>4. 从代码看：7 层 Agent Loop 怎么长出来</h2><p>为了把这个概念讲得更实一点，我做了一个配套的 Python 示例仓库：<a class="link"   target="_blank" rel="noopener" href="https://github.com/hydraxman/agent-loop-evidence-lab" >hydraxman&#x2F;agent-loop-evidence-lab<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a>。它不是一个“又一个 Agent 框架”，而是一个教学用的最小实现：同一个任务循环，从 01 到 07 逐步加能力。每一层代码都尽量短，目的就是看清楚 loop 的骨架怎么长出来。</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/agent-loop-evidence-loop/loop-ladder.png"
+                      alt="7 层 Agent Loop 教程路线"
+                ></p>
+<p>这张图的重点是中间第 4 层：<strong>没有 Evidence Loop，就没有可靠完成</strong>。前三层解决“Agent 怎么行动”，后四层解决“失败后怎么修正、经验怎么沉淀、最终凭什么交付”。</p>
+<p>仓库里的 7 层升级路线如下：</p>
+<table>
+<thead>
+<tr>
+<th>层级</th>
+<th>Loop</th>
+<th>新增能力</th>
+<th>关键问题</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>01</td>
+<td>Basic Function Call</td>
+<td>最小 tool call</td>
+<td>能调用工具，但没有验证</td>
+</tr>
+<tr>
+<td>02</td>
+<td>Typed Tools + Errors</td>
+<td>工具参数、错误处理</td>
+<td>工具成功不代表任务完成</td>
+</tr>
+<tr>
+<td>03</td>
+<td>Plan-and-Execute</td>
+<td>先规划再执行</td>
+<td>计划完成不等于目标完成</td>
+</tr>
+<tr>
+<td>04</td>
+<td>Evidence Loop</td>
+<td>Done Definition + Validator</td>
+<td>由证据决定 done&#x2F;fail</td>
+</tr>
+<tr>
+<td>05</td>
+<td>Reflexion Retry</td>
+<td>失败后反思并重试</td>
+<td>failure 进入下一轮策略</td>
+</tr>
+<tr>
+<td>06</td>
+<td>Memory Agent</td>
+<td>持久化 lesson</td>
+<td>经验跨任务复用，也带来污染风险</td>
+</tr>
+<tr>
+<td>07</td>
+<td>Mini Coding Agent</td>
+<td>workspace + patch + test</td>
+<td>接近真实 coding agent 的最小骨架</td>
+</tr>
+</tbody></table>
+<h3 id="4-1-Loop-01：最小-Function-Call，只是会“动手”"><a href="#4-1-Loop-01：最小-Function-Call，只是会“动手”" class="headerlink" title="4.1 Loop 01：最小 Function Call，只是会“动手”"></a>4.1 Loop 01：最小 Function Call，只是会“动手”</h3><p>第一层只做一件事：模型决定调用哪个函数，工具返回结果，然后输出最终答案。</p>
+<div class="code-container" data-rel="Python"><figure class="iseeu highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">expression = extract_expression(goal)</span><br><span class="line">trace.emit(<span class="string">&quot;think&quot;</span>, tool=<span class="string">&quot;calculator&quot;</span>, expression=expression)</span><br><span class="line">result = tools.call(<span class="string">&quot;calculator&quot;</span>, expression=expression)</span><br><span class="line">trace.emit(<span class="string">&quot;observe&quot;</span>, result=result)</span><br><span class="line"><span class="keyword">return</span> final(<span class="string">f&quot;calculator(<span class="subst">&#123;expression&#125;</span>) = <span class="subst">&#123;result&#125;</span>&quot;</span>)</span><br></pre></td></tr></table></figure></div>
+
+<p>这个 loop 已经有了 ReAct 的影子：<code>think -&gt; act -&gt; observe -&gt; final</code>。但它还不是可靠 Agent，因为停止条件非常弱：只要工具返回了东西，Agent 就说完成。这里没有 done definition，没有 validator，也没有 evidence verdict。</p>
+<h3 id="4-2-Loop-02：Typed-Tool，把失败也变成-Observation"><a href="#4-2-Loop-02：Typed-Tool，把失败也变成-Observation" class="headerlink" title="4.2 Loop 02：Typed Tool，把失败也变成 Observation"></a>4.2 Loop 02：Typed Tool，把失败也变成 Observation</h3><p>第二层加了工具调用的边界：参数结构、异常处理、结构化 observation。</p>
+<div class="code-container" data-rel="Python"><figure class="iseeu highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">try</span>:</span><br><span class="line">    trace.emit(<span class="string">&quot;act&quot;</span>, args=&#123;<span class="string">&quot;expression&quot;</span>: expression&#125;)</span><br><span class="line">    result = safe_calc(expression)</span><br><span class="line">    trace.emit(<span class="string">&quot;observe&quot;</span>, result=result)</span><br><span class="line"><span class="keyword">except</span> Exception <span class="keyword">as</span> exc:</span><br><span class="line">    trace.emit(<span class="string">&quot;observe&quot;</span>, error=<span class="built_in">type</span>(exc).__name__, message=<span class="built_in">str</span>(exc))</span><br></pre></td></tr></table></figure></div>
+
+<p>这一步很小，但工程意义很大：<strong>错误不是中断，而是下一轮决策的输入</strong>。很多 Agent demo 一报错就崩，真正的 loop 要把错误包装成 observation，让模型有机会修正动作。</p>
+<h3 id="4-3-Loop-03：Plan-and-Execute，计划不是证据"><a href="#4-3-Loop-03：Plan-and-Execute，计划不是证据" class="headerlink" title="4.3 Loop 03：Plan-and-Execute，计划不是证据"></a>4.3 Loop 03：Plan-and-Execute，计划不是证据</h3><p>第三层先生成计划，再按步骤执行：</p>
+<div class="code-container" data-rel="Python"><figure class="iseeu highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">plan = [</span><br><span class="line">    <span class="string">&quot;extract arithmetic expression&quot;</span>,</span><br><span class="line">    <span class="string">&quot;call calculator&quot;</span>,</span><br><span class="line">    <span class="string">&quot;summarize observation&quot;</span>,</span><br><span class="line">]</span><br><span class="line"><span class="keyword">for</span> step <span class="keyword">in</span> plan:</span><br><span class="line">    execute(step)</span><br></pre></td></tr></table></figure></div>
+
+<p>Plan-and-Execute 的价值是把“想”和“做”拆开。复杂任务里，planner 可以先拆任务，executor 再逐项调用工具。但这里有一个常见误区：<strong>计划执行完，不代表目标完成。</strong></p>
+<p>比如 Agent 按计划“打开网页、点击提交、返回成功”，这只能证明它走完了流程；如果后台没有订单记录，任务仍然失败。所以从这一层开始，必须引入 Evidence Loop。</p>
+<h3 id="4-4-Loop-04：Evidence-Loop，完成必须被证明"><a href="#4-4-Loop-04：Evidence-Loop，完成必须被证明" class="headerlink" title="4.4 Loop 04：Evidence Loop，完成必须被证明"></a>4.4 Loop 04：Evidence Loop，完成必须被证明</h3><p>第四层是整篇文章的核心。代码里有一个 <code>EvidencePackage</code>：</p>
+<div class="code-container" data-rel="Python"><figure class="iseeu highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">evidence = EvidencePackage(</span><br><span class="line">    goal=goal,</span><br><span class="line">    done_definition=[</span><br><span class="line">        <span class="string">&quot;calculator result exists&quot;</span>,</span><br><span class="line">        <span class="string">&quot;independent validator agrees&quot;</span>,</span><br><span class="line">    ],</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">result = safe_calc(expression)</span><br><span class="line">evidence.artifacts[<span class="string">&quot;candidate&quot;</span>] = result</span><br><span class="line"></span><br><span class="line">expected = independent_eval(expression)</span><br><span class="line">passed = (result == expected)</span><br><span class="line">evidence.validations.append(</span><br><span class="line">    Validation(<span class="string">&quot;independent_arithmetic_validator&quot;</span>, passed, expected, result)</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">verdict = evidence.decide()  <span class="comment"># pass / fail</span></span><br></pre></td></tr></table></figure></div>
+
+<p>这段代码里有三个角色要分清：</p>
+<ul>
+<li><code>artifact</code>：Agent 产出的东西，比如答案、文件、diff、截图、日志。</li>
+<li><code>validation</code>：验证器对 artifact 的检查结果。</li>
+<li><code>verdict</code>：基于验证结果给出的最终判断，<code>pass</code> 才能 done。</li>
+</ul>
+<p>更生动一点，可以把 Evidence Loop 看成一个“任务法庭”：</p>
+<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">用户目标 = 起诉书：你要证明这件事完成了</span><br><span class="line">Done Definition = 判案标准：什么条件算完成</span><br><span class="line">Artifact = 物证：代码 diff、测试日志、截图、API 响应</span><br><span class="line">Validator = 鉴定机构：pytest、schema check、HTTP probe、数据库查询</span><br><span class="line">Verdict = 判决：pass / fail / retry / escalate</span><br></pre></td></tr></table></figure></div>
+
+<p>所以 Agent 不能只说“我做完了”。它必须交出证据包：</p>
+<div class="code-container" data-rel="Yaml"><figure class="iseeu highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">goal:</span> <span class="string">修复</span> <span class="string">add</span> <span class="string">函数</span></span><br><span class="line"><span class="attr">done_definition:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">先复现失败测试</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">修改代码</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">同一个测试重新通过</span></span><br><span class="line"><span class="attr">artifacts:</span></span><br><span class="line">  <span class="attr">initial_test_log:</span> <span class="string">&quot;FAILED test_add: assert -1 == 5&quot;</span></span><br><span class="line">  <span class="attr">patch:</span> <span class="string">&quot;return a - b -&gt; return a + b&quot;</span></span><br><span class="line">  <span class="attr">final_test_log:</span> <span class="string">&quot;1 passed&quot;</span></span><br><span class="line"><span class="attr">validations:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">red_test_reproduced</span></span><br><span class="line">    <span class="attr">passed:</span> <span class="literal">true</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">green_tests</span></span><br><span class="line">    <span class="attr">passed:</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">verdict:</span> <span class="string">pass</span></span><br></pre></td></tr></table></figure></div>
+
+<p>这比“我已经修好了”强得多，因为它可以回放、可以审计、可以被另一个系统复验。</p>
+<h3 id="4-5-Loop-05：Reflexion，失败不是总结，是下一轮约束"><a href="#4-5-Loop-05：Reflexion，失败不是总结，是下一轮约束" class="headerlink" title="4.5 Loop 05：Reflexion，失败不是总结，是下一轮约束"></a>4.5 Loop 05：Reflexion，失败不是总结，是下一轮约束</h3><p>第五层让 Agent 故意第一次算错，然后由 validator 拒绝，再把失败写成 reflection：</p>
+<div class="code-container" data-rel="Python"><figure class="iseeu highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> attempt <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>, <span class="number">4</span>):</span><br><span class="line">    candidate = act(goal, attempt)</span><br><span class="line">    passed = validate(candidate, expected)</span><br><span class="line">    <span class="keyword">if</span> passed:</span><br><span class="line">        <span class="keyword">return</span> done(candidate)</span><br><span class="line"></span><br><span class="line">    reflection = <span class="string">&quot;do not trust guessed arithmetic; call calculator tool&quot;</span></span><br><span class="line">    state.messages.append(reflection)</span><br></pre></td></tr></table></figure></div>
+
+<p>Reflexion 的关键不是“写一段自我批评”，而是把失败变成下一轮策略约束。有效 reflection 必须绑定证据：</p>
+<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">坏 reflection：我下次会更认真。</span><br><span class="line">好 reflection：attempt_1 的 candidate=41，但 validator expected=42；下一轮必须调用 calculator，不允许心算。</span><br></pre></td></tr></table></figure></div>
+
+<p>如果没有 validator，reflection 很容易变成模型自言自语；有了 Evidence Loop，reflection 才有事实锚点。</p>
+<h3 id="4-6-Loop-06：Memory，记住-lesson，但不要记住幻觉"><a href="#4-6-Loop-06：Memory，记住-lesson，但不要记住幻觉" class="headerlink" title="4.6 Loop 06：Memory，记住 lesson，但不要记住幻觉"></a>4.6 Loop 06：Memory，记住 lesson，但不要记住幻觉</h3><p>第六层加入持久化记忆：</p>
+<div class="code-container" data-rel="Python"><figure class="iseeu highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">memory.add(<span class="string">&quot;tool calc is reliable&quot;</span>)</span><br><span class="line">recalls = memory.search(<span class="string">&quot;calc&quot;</span>)</span><br><span class="line">trace.emit(<span class="string">&quot;memory&quot;</span>, recalls=recalls)</span><br></pre></td></tr></table></figure></div>
+
+<p>记忆让 Agent 从“一次性脚本”变成“会积累经验的系统”。但记忆也危险：错误 lesson 一旦写入，后面会反复污染决策。所以生产系统里，memory 写入也应该经过 evidence gate：</p>
+<div class="code-container" data-rel="Python"><figure class="iseeu highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> evidence.verdict == <span class="string">&quot;pass&quot;</span> <span class="keyword">and</span> lesson_is_reusable:</span><br><span class="line">    memory.add(lesson)</span><br></pre></td></tr></table></figure></div>
+
+<p>也就是说，不是每次失败都值得记忆，不是每句总结都能进长期记忆。<strong>记忆本身也需要验收条件。</strong></p>
+<h3 id="4-7-Loop-07：Mini-Coding-Agent，接近代码助手的最小形态"><a href="#4-7-Loop-07：Mini-Coding-Agent，接近代码助手的最小形态" class="headerlink" title="4.7 Loop 07：Mini Coding Agent，接近代码助手的最小形态"></a>4.7 Loop 07：Mini Coding Agent，接近代码助手的最小形态</h3><p>第七层已经接近 coding agent 的基本形态。它不再只是算术，而是在隔离 workspace 里修一个真实 bug：</p>
+<div class="code-container" data-rel="Python"><figure class="iseeu highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">write(<span class="string">&quot;buggy.py&quot;</span>, <span class="string">&quot;def add(a, b): return a - b&quot;</span>)</span><br><span class="line">write(<span class="string">&quot;test_buggy.py&quot;</span>, <span class="string">&quot;assert add(2, 3) == 5&quot;</span>)</span><br><span class="line"></span><br><span class="line">first = shell(<span class="string">&quot;python -m pytest -q&quot;</span>)       <span class="comment"># RED</span></span><br><span class="line">trace.emit(<span class="string">&quot;observe&quot;</span>, initial_test=first)</span><br><span class="line"></span><br><span class="line">patch(<span class="string">&quot;buggy.py&quot;</span>, <span class="string">&quot;return a - b&quot;</span>, <span class="string">&quot;return a + b&quot;</span>)</span><br><span class="line"></span><br><span class="line">second = shell(<span class="string">&quot;python -m pytest -q&quot;</span>)      <span class="comment"># GREEN</span></span><br><span class="line">trace.emit(<span class="string">&quot;observe&quot;</span>, final_test=second)</span><br><span class="line"></span><br><span class="line">validate(first.exit_code != <span class="number">0</span>, <span class="string">&quot;red_test_reproduced&quot;</span>)</span><br><span class="line">validate(second.exit_code == <span class="number">0</span>, <span class="string">&quot;green_tests&quot;</span>)</span><br></pre></td></tr></table></figure></div>
+
+<p>这就是 SWE-agent、OpenHands、Claude Code 这类 coding agent 的最小骨架：</p>
+<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Issue / Goal</span><br><span class="line">  -&gt; inspect files</span><br><span class="line">  -&gt; run tests to reproduce</span><br><span class="line">  -&gt; edit code</span><br><span class="line">  -&gt; run tests again</span><br><span class="line">  -&gt; collect diff + logs</span><br><span class="line">  -&gt; verifier decides done / retry</span><br></pre></td></tr></table></figure></div>
+
+<p>注意这里的“完成”不是 Agent 说“我改好了”，而是两条验证同时成立：</p>
+<ol>
+<li><strong>RED 被复现</strong>：证明测试确实能抓住 bug，不是无效测试。</li>
+<li><strong>GREEN 通过</strong>：证明补丁让目标测试通过。</li>
+</ol>
+<p>这个 RED&#x2F;GREEN 证据对 coding agent 非常重要。没有 RED，可能只是跑了一个无关测试；没有 GREEN，patch 没有完成；没有 diff&#x2F;log，就无法审计它到底改了什么。</p>
+<p>在这个示例里还遇到一个很真实的工程坑：同一秒内修改 Python 文件后马上重跑 pytest，可能复用旧 <code>.pyc</code> 缓存，导致测试仍看到旧代码。所以示例里 patch 后会清理 <code>__pycache__</code>。这类细节说明：Agent Loop 不是写个 while 就完事，它必须理解运行环境、缓存、文件系统和测试工具的反馈。</p>
+<h3 id="4-8-Trace-可视化：让-Loop-变成可审计轨迹"><a href="#4-8-Trace-可视化：让-Loop-变成可审计轨迹" class="headerlink" title="4.8 Trace 可视化：让 Loop 变成可审计轨迹"></a>4.8 Trace 可视化：让 Loop 变成可审计轨迹</h3><p>示例仓库还把每一步写成结构化事件：</p>
+<div class="code-container" data-rel="Json"><figure class="iseeu highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;step&quot;</span><span class="punctuation">:</span> <span class="number">4</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;event&quot;</span><span class="punctuation">:</span> <span class="string">&quot;act&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;message&quot;</span><span class="punctuation">:</span> <span class="string">&quot;apply minimal patch&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;data&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;file&quot;</span><span class="punctuation">:</span> <span class="string">&quot;buggy.py&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;patch&quot;</span><span class="punctuation">:</span> <span class="string">&quot;return a - b -&gt; return a + b&quot;</span></span><br><span class="line">  <span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure></div>
+
+<p>再渲染成 HTML 时间线。这样做的价值不是好看，而是让调试和审计变简单：</p>
+<ul>
+<li>Agent 卡住时，看 trace 能知道卡在 plan、tool、observe 还是 validate。</li>
+<li>任务失败时，可以定位失败证据，而不是读一大段自然语言道歉。</li>
+<li>多 Agent 协作时，verifier 可以只读 evidence package 和 trace，不必相信 executor 的自述。</li>
+</ul>
+<p>运行方式很简单：</p>
+<div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">git <span class="built_in">clone</span> https://github.com/hydraxman/agent-loop-evidence-lab</span><br><span class="line"><span class="built_in">cd</span> agent-loop-evidence-lab</span><br><span class="line">python3 -m venv .venv</span><br><span class="line">. .venv/bin/activate</span><br><span class="line">pip install -e <span class="string">&#x27;.[dev]&#x27;</span></span><br><span class="line">pytest -q</span><br><span class="line">python -m agent_loop_lab.cli 07 <span class="string">&quot;fix the broken add function&quot;</span> --run-dir runs/demo07 --html</span><br><span class="line">open runs/demo07/loop07.trace.html</span><br></pre></td></tr></table></figure></div>
+
+<p>真正生产级系统还会继续加 sandbox、权限控制、预算、human approval、CI 集成、PR 生成和回滚。但骨架已经在这里：<strong>action 改变世界，observation 返回事实，evidence 验证完成，memory 只吸收被验证过的经验。</strong></p>
+<h2 id="5-Evidence-的强弱排序"><a href="#5-Evidence-的强弱排序" class="headerlink" title="5. Evidence 的强弱排序"></a>5. Evidence 的强弱排序</h2><p>不同证据的可信度不一样。一个实用排序是：</p>
 <ol>
 <li><strong>确定性 validator</strong>：测试、schema validation、业务状态检查。</li>
 <li><strong>真实环境状态</strong>：数据库记录、网页 DOM、外部 API 查询、CI 结果。</li>
@@ -651,7 +781,7 @@
 <li><strong>Agent 自评</strong>：最低，只能作为提示。</li>
 </ol>
 <p>SWE-bench 和 SWE-agent 给了软件工程里的强范式：任务来自真实 GitHub issue，Agent 修改代码，最后用测试集验证 patch。WebArena 则给了网页任务里的强范式：Agent 在真实风格网站里操作，最终用 annotated program 检查目标是否完成。它们的共同点是：<strong>评价不看 Agent 说得多漂亮，而看外部环境是否达到目标状态。</strong></p>
-<h2 id="5-主流框架的-Loop-实现差异"><a href="#5-主流框架的-Loop-实现差异" class="headerlink" title="5. 主流框架的 Loop 实现差异"></a>5. 主流框架的 Loop 实现差异</h2><p>不同 Agent 框架的核心差异，不是“有没有大模型”，而是它们怎样管理状态、工具、验证和人类介入。</p>
+<h2 id="6-主流框架的-Loop-实现差异"><a href="#6-主流框架的-Loop-实现差异" class="headerlink" title="6. 主流框架的 Loop 实现差异"></a>6. 主流框架的 Loop 实现差异</h2><p>不同 Agent 框架的核心差异，不是“有没有大模型”，而是它们怎样管理状态、工具、验证和人类介入。</p>
 <p><img  
                      lazyload
                      src="/images/loading.svg"
@@ -664,17 +794,17 @@
 <p><strong>OpenHands</strong> 使用 sandbox runtime，把 action 扔进隔离环境执行，再返回 observation。它的价值在于把真实开发环境容器化，让轨迹、文件修改、命令输出都可追踪。</p>
 <p><strong>OpenClaw</strong> 的公开文档展示的是 session&#x2F;run + event stream + hooks 的架构：assistant、tool、lifecycle 事件贯穿一次运行；<code>before_tool_call</code> &#x2F; <code>after_tool_call</code> &#x2F; <code>tool_result_persist</code> 这类 hook 可以拦截、审计和持久化工具调用。它的重点更像“Agent 运行时与消息网关”，证据链天然落在 event stream 和 tool result 上。</p>
 <p><strong>AutoGPT Platform</strong> 则已经从早期“单智能体自己循环”演进到工作流&#x2F;DAG：Block 是动作节点，graph executor 管节点队列。它更像低代码自动化平台，而不是纯 ReAct agent。</p>
-<h2 id="6-不同路径：单线、规划、搜索、图和多-Agent"><a href="#6-不同路径：单线、规划、搜索、图和多-Agent" class="headerlink" title="6. 不同路径：单线、规划、搜索、图和多 Agent"></a>6. 不同路径：单线、规划、搜索、图和多 Agent</h2><p>Agent Loop 不是只有一种跑法。</p>
+<h2 id="7-不同路径：单线、规划、搜索、图和多-Agent"><a href="#7-不同路径：单线、规划、搜索、图和多-Agent" class="headerlink" title="7. 不同路径：单线、规划、搜索、图和多 Agent"></a>7. 不同路径：单线、规划、搜索、图和多 Agent</h2><p>Agent Loop 不是只有一种跑法。</p>
 <p><strong>单线 ReAct</strong> 最简单：每步观察后决定下一步。优点是灵活；缺点是慢、容易局部贪心、上下文膨胀。</p>
 <p><strong>Plan-and-Execute</strong> 先全局规划，再执行工具。优点是成本低、可并行；缺点是计划一开始错了就会一路错，所以需要 re-planning。</p>
 <p><strong>Tree &#x2F; Graph Search</strong> 同时探索多条路径。适合数学、策略、复杂诊断、研究任务，但成本更高，需要 evaluator。</p>
 <p><strong>Reflexion Loop</strong> 把失败反馈写入记忆，下次尝试少踩坑。适合有多次尝试机会的任务，不适合一次性高风险操作。</p>
 <p><strong>Multi-agent Loop</strong> 把 planner、researcher、executor、critic、verifier 分开。好处是职责清晰；坏处是协调成本和错误传播更高。真正有价值的多 Agent，不是“多几个角色聊天”，而是让验证者与执行者分离。</p>
-<h2 id="7-一个工程化-Agent-的-Evidence-Package-应该长什么样"><a href="#7-一个工程化-Agent-的-Evidence-Package-应该长什么样" class="headerlink" title="7. 一个工程化 Agent 的 Evidence Package 应该长什么样"></a>7. 一个工程化 Agent 的 Evidence Package 应该长什么样</h2><p>可以把每次任务最终交付做成证据包：</p>
+<h2 id="8-一个工程化-Agent-的-Evidence-Package-应该长什么样"><a href="#8-一个工程化-Agent-的-Evidence-Package-应该长什么样" class="headerlink" title="8. 一个工程化 Agent 的 Evidence Package 应该长什么样"></a>8. 一个工程化 Agent 的 Evidence Package 应该长什么样</h2><p>可以把每次任务最终交付做成证据包：</p>
 <div class="code-container" data-rel="Yaml"><figure class="iseeu highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">task_id:</span> <span class="string">run_2026_05_19_xxx</span></span><br><span class="line"><span class="attr">user_goal:</span> <span class="string">修复登录失败问题</span></span><br><span class="line"><span class="attr">done_definition:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">auth</span> <span class="string">regression</span> <span class="string">test</span> <span class="string">passes</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">existing</span> <span class="string">login</span> <span class="string">tests</span> <span class="string">pass</span></span><br><span class="line">  <span class="bullet">-</span> <span class="literal">no</span> <span class="string">unrelated</span> <span class="string">files</span> <span class="string">changed</span> <span class="string">without</span> <span class="string">reason</span></span><br><span class="line"><span class="attr">actions:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">command:</span> <span class="string">pytest</span> <span class="string">tests/test_auth.py</span></span><br><span class="line">    <span class="attr">exit_code:</span> <span class="number">1</span></span><br><span class="line">    <span class="attr">output_ref:</span> <span class="string">logs/step_01_test.log</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">edit:</span> <span class="string">src/auth/session.py</span></span><br><span class="line">    <span class="attr">diff_ref:</span> <span class="string">artifacts/patch.diff</span></span><br><span class="line"><span class="attr">validations:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">auth</span> <span class="string">tests</span></span><br><span class="line">    <span class="attr">command:</span> <span class="string">pytest</span> <span class="string">tests/test_auth.py</span></span><br><span class="line">    <span class="attr">exit_code:</span> <span class="number">0</span></span><br><span class="line">    <span class="attr">passed:</span> <span class="literal">true</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">full</span> <span class="string">smoke</span> <span class="string">test</span></span><br><span class="line">    <span class="attr">command:</span> <span class="string">npm</span> <span class="string">run</span> <span class="string">test:smoke</span></span><br><span class="line">    <span class="attr">exit_code:</span> <span class="number">0</span></span><br><span class="line">    <span class="attr">passed:</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">artifacts:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">patch.diff</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">test.log</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">screenshot.png</span></span><br><span class="line"><span class="attr">final_verdict:</span></span><br><span class="line">  <span class="attr">status:</span> <span class="string">done</span></span><br><span class="line">  <span class="attr">verifier:</span> <span class="string">deterministic_tests</span></span><br><span class="line">  <span class="attr">confidence:</span> <span class="string">high</span></span><br><span class="line"><span class="attr">limitations:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">未运行生产环境压测</span></span><br></pre></td></tr></table></figure></div>
 
 <p>这类结构比“我完成了”强得多，因为它回答了三个问题：<strong>目标是什么、做了什么、凭什么说完成。</strong></p>
-<h2 id="8-结论：Agent-的边界由证据定义"><a href="#8-结论：Agent-的边界由证据定义" class="headerlink" title="8. 结论：Agent 的边界由证据定义"></a>8. 结论：Agent 的边界由证据定义</h2><p>Agent Loop 的本质不是让模型无限循环，而是让模型在外部世界中获得反馈并持续修正。真正难的地方不是写一个 while loop，而是设计：</p>
+<h2 id="9-结论：Agent-的边界由证据定义"><a href="#9-结论：Agent-的边界由证据定义" class="headerlink" title="9. 结论：Agent 的边界由证据定义"></a>9. 结论：Agent 的边界由证据定义</h2><p>Agent Loop 的本质不是让模型无限循环，而是让模型在外部世界中获得反馈并持续修正。真正难的地方不是写一个 while loop，而是设计：</p>
 <ul>
 <li>工具是否足够可控；</li>
 <li>observation 是否足够清晰；</li>
@@ -714,7 +844,7 @@
         
             <li>
                 <strong>更新于
-                    :</strong> 2026-05-19 08:58:04
+                    :</strong> 2026-05-19 10:45:57
             </li>
         
         <li>
@@ -793,7 +923,7 @@
 	<div class="post-toc">
 		<div class="toc-title">目录</div>
 		<div class="page-title">Agent Loop 没有魔法：真正让智能体完成任务的是 Evidence Loop</div>
-		<ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-Agent-Loop-%E7%9A%84%E6%9C%80%E5%B0%8F%E5%BD%A2%E6%80%81%EF%BC%9AThink-%E2%86%92-Act-%E2%86%92-Observe"><span class="nav-text">1. Agent Loop 的最小形态：Think → Act → Observe</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E4%BB%8E%E8%AE%BA%E6%96%87%E8%84%89%E7%BB%9C%E7%9C%8B%EF%BC%9ALoop-%E4%B8%80%E7%9B%B4%E5%9C%A8%E8%A1%A5%E4%B8%89%E4%BB%B6%E4%BA%8B"><span class="nav-text">2. 从论文脉络看：Loop 一直在补三件事</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-Evidence-Loop%EF%BC%9A%E5%AE%8C%E6%88%90%E4%B8%8D%E6%98%AF%E4%B8%80%E5%8F%A5%E8%AF%9D%EF%BC%8C%E8%80%8C%E6%98%AF%E4%B8%80%E7%BB%84%E8%AF%81%E6%8D%AE"><span class="nav-text">3. Evidence Loop：完成不是一句话，而是一组证据</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-Evidence-%E7%9A%84%E5%BC%BA%E5%BC%B1%E6%8E%92%E5%BA%8F"><span class="nav-text">4. Evidence 的强弱排序</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-%E4%B8%BB%E6%B5%81%E6%A1%86%E6%9E%B6%E7%9A%84-Loop-%E5%AE%9E%E7%8E%B0%E5%B7%AE%E5%BC%82"><span class="nav-text">5. 主流框架的 Loop 实现差异</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-%E4%B8%8D%E5%90%8C%E8%B7%AF%E5%BE%84%EF%BC%9A%E5%8D%95%E7%BA%BF%E3%80%81%E8%A7%84%E5%88%92%E3%80%81%E6%90%9C%E7%B4%A2%E3%80%81%E5%9B%BE%E5%92%8C%E5%A4%9A-Agent"><span class="nav-text">6. 不同路径：单线、规划、搜索、图和多 Agent</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7-%E4%B8%80%E4%B8%AA%E5%B7%A5%E7%A8%8B%E5%8C%96-Agent-%E7%9A%84-Evidence-Package-%E5%BA%94%E8%AF%A5%E9%95%BF%E4%BB%80%E4%B9%88%E6%A0%B7"><span class="nav-text">7. 一个工程化 Agent 的 Evidence Package 应该长什么样</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#8-%E7%BB%93%E8%AE%BA%EF%BC%9AAgent-%E7%9A%84%E8%BE%B9%E7%95%8C%E7%94%B1%E8%AF%81%E6%8D%AE%E5%AE%9A%E4%B9%89"><span class="nav-text">8. 结论：Agent 的边界由证据定义</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%9D%A5%E6%BA%90"><span class="nav-text">参考来源</span></a></li></ol>
+		<ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-Agent-Loop-%E7%9A%84%E6%9C%80%E5%B0%8F%E5%BD%A2%E6%80%81%EF%BC%9AThink-%E2%86%92-Act-%E2%86%92-Observe"><span class="nav-text">1. Agent Loop 的最小形态：Think → Act → Observe</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E4%BB%8E%E8%AE%BA%E6%96%87%E8%84%89%E7%BB%9C%E7%9C%8B%EF%BC%9ALoop-%E4%B8%80%E7%9B%B4%E5%9C%A8%E8%A1%A5%E4%B8%89%E4%BB%B6%E4%BA%8B"><span class="nav-text">2. 从论文脉络看：Loop 一直在补三件事</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-Evidence-Loop%EF%BC%9A%E5%AE%8C%E6%88%90%E4%B8%8D%E6%98%AF%E4%B8%80%E5%8F%A5%E8%AF%9D%EF%BC%8C%E8%80%8C%E6%98%AF%E4%B8%80%E7%BB%84%E8%AF%81%E6%8D%AE"><span class="nav-text">3. Evidence Loop：完成不是一句话，而是一组证据</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-%E4%BB%8E%E4%BB%A3%E7%A0%81%E7%9C%8B%EF%BC%9A7-%E5%B1%82-Agent-Loop-%E6%80%8E%E4%B9%88%E9%95%BF%E5%87%BA%E6%9D%A5"><span class="nav-text">4. 从代码看：7 层 Agent Loop 怎么长出来</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#4-1-Loop-01%EF%BC%9A%E6%9C%80%E5%B0%8F-Function-Call%EF%BC%8C%E5%8F%AA%E6%98%AF%E4%BC%9A%E2%80%9C%E5%8A%A8%E6%89%8B%E2%80%9D"><span class="nav-text">4.1 Loop 01：最小 Function Call，只是会“动手”</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-2-Loop-02%EF%BC%9ATyped-Tool%EF%BC%8C%E6%8A%8A%E5%A4%B1%E8%B4%A5%E4%B9%9F%E5%8F%98%E6%88%90-Observation"><span class="nav-text">4.2 Loop 02：Typed Tool，把失败也变成 Observation</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-3-Loop-03%EF%BC%9APlan-and-Execute%EF%BC%8C%E8%AE%A1%E5%88%92%E4%B8%8D%E6%98%AF%E8%AF%81%E6%8D%AE"><span class="nav-text">4.3 Loop 03：Plan-and-Execute，计划不是证据</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-4-Loop-04%EF%BC%9AEvidence-Loop%EF%BC%8C%E5%AE%8C%E6%88%90%E5%BF%85%E9%A1%BB%E8%A2%AB%E8%AF%81%E6%98%8E"><span class="nav-text">4.4 Loop 04：Evidence Loop，完成必须被证明</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-5-Loop-05%EF%BC%9AReflexion%EF%BC%8C%E5%A4%B1%E8%B4%A5%E4%B8%8D%E6%98%AF%E6%80%BB%E7%BB%93%EF%BC%8C%E6%98%AF%E4%B8%8B%E4%B8%80%E8%BD%AE%E7%BA%A6%E6%9D%9F"><span class="nav-text">4.5 Loop 05：Reflexion，失败不是总结，是下一轮约束</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-6-Loop-06%EF%BC%9AMemory%EF%BC%8C%E8%AE%B0%E4%BD%8F-lesson%EF%BC%8C%E4%BD%86%E4%B8%8D%E8%A6%81%E8%AE%B0%E4%BD%8F%E5%B9%BB%E8%A7%89"><span class="nav-text">4.6 Loop 06：Memory，记住 lesson，但不要记住幻觉</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-7-Loop-07%EF%BC%9AMini-Coding-Agent%EF%BC%8C%E6%8E%A5%E8%BF%91%E4%BB%A3%E7%A0%81%E5%8A%A9%E6%89%8B%E7%9A%84%E6%9C%80%E5%B0%8F%E5%BD%A2%E6%80%81"><span class="nav-text">4.7 Loop 07：Mini Coding Agent，接近代码助手的最小形态</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-8-Trace-%E5%8F%AF%E8%A7%86%E5%8C%96%EF%BC%9A%E8%AE%A9-Loop-%E5%8F%98%E6%88%90%E5%8F%AF%E5%AE%A1%E8%AE%A1%E8%BD%A8%E8%BF%B9"><span class="nav-text">4.8 Trace 可视化：让 Loop 变成可审计轨迹</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-Evidence-%E7%9A%84%E5%BC%BA%E5%BC%B1%E6%8E%92%E5%BA%8F"><span class="nav-text">5. Evidence 的强弱排序</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-%E4%B8%BB%E6%B5%81%E6%A1%86%E6%9E%B6%E7%9A%84-Loop-%E5%AE%9E%E7%8E%B0%E5%B7%AE%E5%BC%82"><span class="nav-text">6. 主流框架的 Loop 实现差异</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7-%E4%B8%8D%E5%90%8C%E8%B7%AF%E5%BE%84%EF%BC%9A%E5%8D%95%E7%BA%BF%E3%80%81%E8%A7%84%E5%88%92%E3%80%81%E6%90%9C%E7%B4%A2%E3%80%81%E5%9B%BE%E5%92%8C%E5%A4%9A-Agent"><span class="nav-text">7. 不同路径：单线、规划、搜索、图和多 Agent</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#8-%E4%B8%80%E4%B8%AA%E5%B7%A5%E7%A8%8B%E5%8C%96-Agent-%E7%9A%84-Evidence-Package-%E5%BA%94%E8%AF%A5%E9%95%BF%E4%BB%80%E4%B9%88%E6%A0%B7"><span class="nav-text">8. 一个工程化 Agent 的 Evidence Package 应该长什么样</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#9-%E7%BB%93%E8%AE%BA%EF%BC%9AAgent-%E7%9A%84%E8%BE%B9%E7%95%8C%E7%94%B1%E8%AF%81%E6%8D%AE%E5%AE%9A%E4%B9%89"><span class="nav-text">9. 结论：Agent 的边界由证据定义</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%9D%A5%E6%BA%90"><span class="nav-text">参考来源</span></a></li></ol>
 
 	</div>
 </div>
@@ -825,7 +955,7 @@
                     </span>
                     
                         <span>
-                            共 493.7k 字
+                            共 495.8k 字
                         </span>
                     
                 </p>
