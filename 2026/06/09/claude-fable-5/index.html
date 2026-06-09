@@ -1,0 +1,1175 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="keywords" content="计算机技术, 生活中的胡思乱想">
+    
+    
+    <meta name="author" content="Nathan">
+    
+    <!-- Completely eliminate flash of wrong theme -->
+    <script>
+        (function() {
+            const THEME_KEY = "REDEFINE-THEME-STATUS";
+            const DARK = "dark", LIGHT = "light";
+            
+            // Get preferred theme
+            function getTheme() {
+                try {
+                    const saved = localStorage.getItem(THEME_KEY);
+                    if (saved) {
+                        const { isDark } = JSON.parse(saved);
+                        return isDark ? DARK : LIGHT;
+                    }
+                } catch (e) {}
+                
+                return matchMedia("(prefers-color-scheme: dark)").matches ? DARK : LIGHT;
+            }
+            
+            // Apply theme to document
+            function applyTheme(theme) {
+                const isDark = theme === DARK;
+                const root = document.documentElement;
+                
+                // Set classes for compatibility
+                root.classList.add(theme);
+                root.classList.remove(isDark ? LIGHT : DARK);
+                root.style.colorScheme = theme;
+            }
+            
+            // Initial application
+            const theme = getTheme();
+            applyTheme(theme);
+            
+            // Listen for system preference changes
+            matchMedia("(prefers-color-scheme: dark)").addEventListener("change", ({ matches }) => {
+                // Only update if using system preference (no localStorage entry)
+                if (!localStorage.getItem(THEME_KEY)) {
+                    applyTheme(matches ? DARK : LIGHT);
+                }
+            });
+            
+            // Set body classes ASAP (before DOMContentLoaded)
+            (function() {
+                const addBodyClass = () => {
+                    const b = document.body;
+                    if (!b) return false;
+                    b.classList.add(theme + "-mode");
+                    return true;
+                };
+
+                // Try immediately
+                if (addBodyClass()) return;
+
+                // Observe until body exists
+                const mo = new MutationObserver(() => {
+                    if (addBodyClass()) mo.disconnect();
+                });
+                mo.observe(document.documentElement, { childList: true, subtree: true });
+            })();
+        })();
+    </script>
+    
+    <!-- preconnect -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    
+    <!--- Seo Part-->
+    
+    <link rel="canonical" href="https://hydraxman.github.io/2026/06/09/claude-fable-5/"/>
+    <meta name="robots" content="index,follow">
+    <meta name="googlebot" content="index,follow">
+    <meta name="revisit-after" content="1 days">
+    
+    
+        
+        <meta name="description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Claude Fable 5 开放只是表象：Anthropic 开始把模型能力按风险切开卖">
+<meta property="og:url" content="https://hydraxman.github.io/2026/06/09/claude-fable-5/index.html">
+<meta property="og:site_name" content="内森淼文">
+<meta property="og:description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://hydraxman.github.io/images/redefine-og.webp">
+<meta property="article:published_time" content="2026-06-09T14:30:00.000Z">
+<meta property="article:modified_time" content="2026-06-09T23:10:02.719Z">
+<meta property="article:author" content="Nathan">
+<meta property="article:tag" content="Claude">
+<meta property="article:tag" content="Anthropic">
+<meta property="article:tag" content="AI安全">
+<meta property="article:tag" content="AI模型">
+<meta property="article:tag" content="大模型">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://hydraxman.github.io/images/redefine-og.webp">
+    
+    
+    <!--- Icon Part-->
+    <link rel="icon" type="image/png" href="/images/favicon.svg" sizes="192x192">
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.svg">
+    <meta name="theme-color" content="#ffffff">
+    <link rel="shortcut icon" href="/images/favicon.svg">
+    <!--- Page Info-->
+    
+    <title>
+        
+            Claude Fable 5 开放只是表象：Anthropic 开始把模型能力按风险切开卖 | 内森淼文
+        
+    </title>
+
+    
+<link rel="stylesheet" href="/fonts/Chillax/chillax.css">
+
+
+    <!--- Inject Part-->
+    
+        
+            
+    
+            
+    
+            
+                
+                    <link rel="stylesheet" href="/css/custom.css">
+                
+    
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    
+        
+<link rel="stylesheet" href="/css/build/tailwind.css">
+
+    
+
+    
+<link rel="stylesheet" href="/fonts/GeistMono/geist-mono.css">
+
+    
+<link rel="stylesheet" href="/fonts/Geist/geist.css">
+
+    <!--- Font Part-->
+    
+    
+    
+    
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&display=swap" rel="stylesheet">
+    
+    
+
+    <script id="hexo-configurations">
+    window.config = {"hostname":"hydraxman.github.io","root":"/","language":"zh-CN","path":"search.json"};
+    window.theme = {"articles":{"style":{"font_size":"16px","line_height":1.5,"image_border_radius":"14px","image_alignment":"center","image_caption":false,"link_icon":true,"delete_mask":false,"title_alignment":"left","headings_top_spacing":{"h1":"3.2rem","h2":"2.4rem","h3":"1.9rem","h4":"1.6rem","h5":"1.4rem","h6":"1.3rem"}},"word_count":{"enable":true,"count":true,"min2read":true},"author_label":{"enable":false,"auto":false,"list":[]},"code_block":{"copy":true,"style":"mac","highlight_theme":{"light":"github","dark":"vs2015"},"font":{"enable":false,"family":null,"url":null}},"toc":{"enable":true,"max_depth":3,"number":false,"expand":true,"init_open":true},"copyright":{"enable":true,"default":"cc_by_nc_sa"},"lazyload":true,"pangu_js":false,"recommendation":{"enable":false,"title":"推荐阅读","limit":3,"mobile_limit":2,"placeholder":"/images/wallhaven-wqery6-light.webp","skip_dirs":[]}},"colors":{"primary":"#ffffff","secondary":null,"default_mode":"light"},"global":{"fonts":{"chinese":{"enable":false,"family":null,"url":null},"english":{"enable":true,"family":"Inter","url":"https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"},"title":{"enable":true,"family":"Noto Serif","url":"https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&display=swap"}},"content_max_width":"1000px","sidebar_width":"210px","hover":{"shadow":true,"scale":false},"scroll_progress":{"bar":true,"percentage":true},"website_counter":{"url":"https://cn.vercount.one/js","enable":false,"site_pv":true,"site_uv":true,"post_pv":true},"single_page":true,"preloader":{"enable":false,"custom_message":null},"side_tools":{"gear_rotation":true,"auto_expand":false},"open_graph":{"enable":true,"image":"/images/redefine-og.webp","description":"Hexo Theme Redefine, Redefine Your Hexo Journey."},"google_analytics":{"enable":false,"id":null}},"home_banner":{"enable":true,"style":"fixed","image":{"light":"/images/banner-light.jpg","dark":"/images/banner-dark.jpg"},"title":"内森淼文","subtitle":{"text":["AI · 编程 · 科技见闻","Write Code, Read World"],"hitokoto":{"enable":false,"show_author":false,"api":"https://v1.hitokoto.cn"},"typing_speed":100,"backing_speed":80,"starting_delay":500,"backing_delay":1500,"loop":true,"smart_backspace":true},"text_color":{"light":"#fff","dark":"#d1d1b6"},"text_style":{"title_size":"2.8rem","subtitle_size":"1.5rem","line_height":1.2},"custom_font":{"enable":false,"family":null,"url":null},"social_links":{"enable":true,"style":"default","links":[{"icon":"fa-brands fa-github","url":"https://github.com/hydraxman"}],"qrs":[{"icon":"fa-brands fa-weixin","qr":null},{"icon":"/images/custom-icon.svg","qr":null}]}},"plugins":{"feed":{"enable":false},"aplayer":{"enable":false,"type":"fixed","audios":[{"name":null,"artist":null,"url":null,"cover":null,"lrc":null}]},"mermaid":{"enable":false,"version":"11.4.1","theme":{"light":"default","dark":"dark"}}},"version":"2.9.0","navbar":{"auto_hide":false,"color":{"left":"#333333","right":"#555555","transparency":35},"width":{"home":"1200px","pages":"1000px"},"links":{"Home":{"path":"/","icon":"fa-regular fa-house"},"Archives":{"path":"/archives","icon":"fa-regular fa-archive"},"Categories":{"path":"/categories","icon":"fa-regular fa-folder"},"Tags":{"path":"/tags","icon":"fa-regular fa-tags"},"About":{"path":"/about","icon":"fa-regular fa-user"}},"search":{"enable":true,"preload":true}},"page_templates":{"friends_column":2,"tags_style":"blur","masonry":{"batch_size":12,"initial_batch_size":24}},"home":{"sidebar":{"enable":true,"position":"left","first_item":"menu","announcement":"AI · 编程 · 科技","show_on_mobile":true,"links":{"Archives":{"path":"/archives","icon":"fa-regular fa-archive"},"Tags":{"path":"/tags","icon":"fa-regular fa-tags"},"Categories":{"path":"/categories","icon":"fa-regular fa-folder"}}},"article_date_format":"auto","excerpt_length":200,"categories":{"enable":true,"limit":3},"tags":{"enable":true,"limit":3}},"footer":{"runtime":true,"icon":"<i class=\"fa-solid fa-heart fa-beat\" style=\"--fa-animation-duration: 0.5s; color: #333\"></i>","start":"2024/01/01 00:00:00","statistics":true,"customize":null,"icp":{"enable":false,"number":null,"url":null}},"footerStart":"2024/01/01 00:00:00","mermaid":{"style":{"light":"default","dark":"dark"}}};
+    window.lang_ago = {"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"};
+    window.i18n = {"search":"站内搜索您需要的内容...","toc":"目录","prev":"上一页","next":"下一页","prev_posts":"上一篇","next_posts":"下一篇","page":"第 %d 页","recent_posts":"最新文章","share":"分享","powered_by":"由 %s 驱动","theme":"主题","rss_feed":"RSS Feed","category":"分类","categories":"分类","tag":"标签","tags":"标签","post":"文章","posts":"文章","tagcloud":"标签云","comment":"评论","comments":"评论","top":"置顶","sticky":"置顶","go-back-home":"回到首页","masonry_loading":"照片加载中...","image_viewer":"图片查看器","close":"关闭","exif":{"title":"EXIF","cards":{"camera":"相机","lens":"镜头","exposure":"曝光","other":"其他"},"fields":{"make":"品牌","model":"机型","date_taken":"拍摄时间","lens_model":"镜头","focal_length":"焦距","focus_mode":"对焦模式","shutter":"快门","aperture":"光圈","iso":"感光度","exposure_program":"曝光程序","exposure_compensation":"曝光补偿","metering_mode":"测光模式","flash":"闪光灯","white_balance":"白平衡","latitude":"纬度","longitude":"经度","altitude":"海拔"},"status":{"loading":"加载中...","no_exif":"无 EXIF 信息","library_missing":"EXIF 库未加载","image_source_missing":"图片地址不可用","unavailable":"EXIF 不可用（可能被 CORS 阻止或缺少元数据）","flag_unavailable":"EXIF 不可用"}},"home":"首页","archive":"归档","archives":"归档","about":"关于","links":"链接","link":"链接","friends":"友情链接","friend":"友情链接","timeline":"时间轴","shuoshuo":"说说","bookmarks":"书签","site_uv":"访问人数","site_pv":"总访问量","read_more":"阅读全文","wordcount":"字","min2read":"分钟","changelog":"更新日志","status":"状态","runtime":"博客已运行","days":"天","hours":"小时","minutes":"分钟","seconds":"秒","optimized_by":"并由 Evan 进行优化","rights":"版权所有","site_posts":"共撰写了 %s 篇文章","site_wordcount":"共 %s 字","copyright":{"title":"标题","author":"作者","link":"链接","create_time":"创建于","update_time":"更新于","license_title":"版权声明","license_content":"本文章采用 %s 进行许可。","all_rights_reserved":"版权所有 &#169 %s，禁止转载。","public_domain":"本文为公有领域作品，可自由转载、引用。"},"ago":{"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"},"create_time":"创建","update_time":"更新","expired":"这篇文章最后更新于 %s 天前，内容可能已经过时。"};
+    window.data = {"masonry":false};
+  </script>
+    
+    <!--- Fontawesome Part-->
+    
+<link rel="stylesheet" href="/fontawesome/fontawesome.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/brands.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/solid.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/regular.min.css">
+
+    
+    
+    
+    
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+	<div class="progress-bar-container">
+	
+	<span class="scroll-progress-bar"></span>
+	
+
+	
+	<span class="pjax-progress-bar"></span>
+	<!--        <span class="swup-progress-icon">-->
+	<!--            <i class="fa-solid fa-circle-notch fa-spin"></i>-->
+	<!--        </span>-->
+	
+</div>
+
+<main class="page-container" id="swup">
+
+	
+
+	<div class="main-content-container flex flex-col justify-between min-h-dvh">
+		<div class="main-content-header">
+			<header class="navbar-container px-6 md:px-12">
+    <div class="navbar-content transition-navbar ">
+        <div class="left">
+            
+            <a class="logo-title" href="/">
+                
+                内森淼文
+                
+            </a>
+        </div>
+
+        <div class="right">
+            <!-- PC -->
+            <div class="desktop">
+                <ul class="navbar-list">
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/"
+                                        >
+                                    <i class="fa-regular fa-house fa-fw"></i>
+                                    首页
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/archives"
+                                        >
+                                    <i class="fa-regular fa-archive fa-fw"></i>
+                                    归档
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/categories"
+                                        >
+                                    <i class="fa-regular fa-folder fa-fw"></i>
+                                    分类
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/tags"
+                                        >
+                                    <i class="fa-regular fa-tags fa-fw"></i>
+                                    标签
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/about"
+                                        >
+                                    <i class="fa-regular fa-user fa-fw"></i>
+                                    关于
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                    
+                        <li class="navbar-item search search-popup-trigger">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </li>
+                    
+                </ul>
+            </div>
+            <!-- Mobile -->
+            <div class="mobile">
+                
+                    <div class="icon-item search search-popup-trigger"><i class="fa-solid fa-magnifying-glass"></i>
+                    </div>
+                
+                <div class="icon-item navbar-bar">
+                    <div class="navbar-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile sheet -->
+    <div class="navbar-drawer h-dvh w-full absolute top-0 left-0 bg-background-color flex flex-col justify-between">
+        <ul class="drawer-navbar-list flex flex-col px-4 justify-center items-start">
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/"
+                        >
+                            <span>
+                                首页
+                            </span>
+                            
+                                <i class="fa-regular fa-house fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/archives"
+                        >
+                            <span>
+                                归档
+                            </span>
+                            
+                                <i class="fa-regular fa-archive fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/categories"
+                        >
+                            <span>
+                                分类
+                            </span>
+                            
+                                <i class="fa-regular fa-folder fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/tags"
+                        >
+                            <span>
+                                标签
+                            </span>
+                            
+                                <i class="fa-regular fa-tags fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/about"
+                        >
+                            <span>
+                                关于
+                            </span>
+                            
+                                <i class="fa-regular fa-user fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+
+            
+            
+                
+                    
+                    
+                    
+            
+        </ul>
+
+        <div class="statistics flex justify-around my-2.5">
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/tags">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">325</div>
+        <div class="label text-third-text-color text-sm">标签</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/categories">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">9</div>
+        <div class="label text-third-text-color text-sm">分类</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/archives">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">264</div>
+        <div class="label text-third-text-color text-sm">文章</div>
+    </a>
+</div>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+		</div>
+
+		<div class="main-content-body transition-fade-up">
+			
+
+			<div class="main-content">
+				<div class="post-page-container flex relative justify-between box-border w-full h-full">
+	<div class="article-content-container">
+
+		<div class="article-title relative w-full">
+			
+			
+			
+			<img src="/images/claude-fable-5/cover.png" alt="Claude Fable 5 开放只是表象：Anthropic 开始把模型能力按风险切开卖" class="w-full h-60 sm:h-72 md:h-80 object-cover sm:rounded-t-large dark:brightness-75" />
+			
+			<div class="w-full flex items-center absolute bottom-0 justify-start">
+				<h1 class="article-title-cover text-center mx-6 my-6 text-second-text-color bg-background-color-transparent px-4 py-3 text-3xl sm:text-4xl md:text-5xl font-semibold backdrop-blur-lg rounded-xl border border-border-color ">Claude Fable 5 开放只是表象：Anthropic 开始把模型能力按风险切开卖</h1>
+			</div>
+			
+		</div>
+
+		
+		<div class="article-header flex flex-row gap-2 items-center px-2 sm:px-6 md:px-8">
+			<div class="avatar w-[46px] h-[46px] shrink-0 rounded-medium border border-border-color p-px">
+				<img src="/images/avatar.png">
+			</div>
+			<div class="info flex flex-col justify-between">
+				<div class="author flex items-center">
+					<span class="name text-default-text-color text-lg font-semibold">Nathan</span>
+					
+				</div>
+				<div class="meta-info">
+					<div class="article-meta-info">
+    <span class="article-date article-meta-item">
+        <i class="fa-regular fa-pen-fancy"></i>&nbsp;
+        <span class="desktop">2026-06-09 22:30</span>
+        <span class="mobile">2026-06-09 22:30</span>
+        <span class="hover-info">创建</span>
+    </span>
+    
+        <span class="article-date article-meta-item">
+            <i class="fa-regular fa-wrench"></i>&nbsp;
+            <span class="desktop">2026-06-10 07:10:02</span>
+            <span class="mobile">2026-06-10 07:10:02</span>
+            <span class="hover-info">更新</span>
+        </span>
+    
+
+    
+        <span class="article-categories article-meta-item">
+            <i class="fa-regular fa-folders"></i>&nbsp;
+            <ul>
+                
+                
+                    
+                        
+                        <li>
+                            <a href="/categories/AI%E5%89%8D%E6%B2%BF/">AI前沿</a>&nbsp;
+                        </li>
+                    
+                    
+                
+            </ul>
+        </span>
+    
+    
+        <span class="article-tags article-meta-item">
+            <i class="fa-regular fa-tags"></i>&nbsp;
+            <ul>
+                
+                    <li>
+                        <a href="/tags/Claude/">Claude</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/Anthropic/">Anthropic</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/AI%E5%AE%89%E5%85%A8/">AI安全</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/AI%E6%A8%A1%E5%9E%8B/">AI模型</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/%E5%A4%A7%E6%A8%A1%E5%9E%8B/">大模型</a>&nbsp;
+                    </li>
+                
+            </ul>
+        </span>
+    
+
+    
+    
+        <span class="article-wordcount article-meta-item">
+            <i class="fa-regular fa-typewriter"></i>&nbsp;<span>2.4k 字</span>
+        </span>
+    
+    
+        <span class="article-min2read article-meta-item">
+            <i class="fa-regular fa-clock"></i>&nbsp;<span>8 分钟</span>
+        </span>
+    
+    
+</div>
+
+				</div>
+			</div>
+		</div>
+		
+
+		
+
+
+		<div class="article-content markdown-body px-2 sm:px-6 md:px-8 pb-8">
+			<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/claude-fable-5/cover.png"
+                     
+                ></p>
+<p>Claude Fable 5 终于开放了。</p>
+<p>这句话听起来像一次普通的大模型更新：更强、更贵、更适合长任务。</p>
+<p>但这次真正值得看的，不是 Anthropic 又把 benchmark 往上推了多少，而是它第一次把一个“危险到不敢完全公开”的模型，拆成了两种产品：</p>
+<ul>
+<li><strong>Fable 5</strong>：所有人能用，但装了护栏；</li>
+<li><strong>Mythos 5</strong>：同一底层模型，但部分护栏被移除，只给受信任的安全&#x2F;生物研究伙伴。</li>
+</ul>
+<p><strong>这不是一次单纯的模型发布，而是前沿模型产品形态的一次分叉。</strong></p>
+<p>以后最强模型可能不再是“买不买得起”的问题，而是：你是什么客户、做什么任务、愿不愿意接受数据留存、能不能被信任。</p>
+<h2 id="一、Fable-5-是公开版-Mythos，但不是完整-Mythos"><a href="#一、Fable-5-是公开版-Mythos，但不是完整-Mythos" class="headerlink" title="一、Fable 5 是公开版 Mythos，但不是完整 Mythos"></a>一、Fable 5 是公开版 Mythos，但不是完整 Mythos</h2><p>Anthropic 官方说得很直白：Claude Fable 5 是一个 <strong>Mythos-class model made safe for general use</strong>。</p>
+<p>换成人话：</p>
+<blockquote>
+<p>Fable 5 是 Mythos 级能力的公开版本，但被加了安全护栏。</p>
+</blockquote>
+<p>Mythos 5 和 Fable 5 用的是同一底层模型。差别不是“谁更聪明”，而是“哪些能力被允许释放”。</p>
+<table>
+<thead>
+<tr>
+<th>模型</th>
+<th>开放范围</th>
+<th>安全边界</th>
+<th>定位</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Opus 4.8</strong></td>
+<td>广泛开放</td>
+<td>常规安全策略</td>
+<td>复杂任务默认选择</td>
+</tr>
+<tr>
+<td><strong>Fable 5</strong></td>
+<td>公开开放</td>
+<td>高风险领域加护栏&#x2F;回退</td>
+<td>公开版 Mythos 级模型</td>
+</tr>
+<tr>
+<td><strong>Mythos 5</strong></td>
+<td>受信任伙伴</td>
+<td>部分护栏解除</td>
+<td>网络安全、生物研究等高风险专业场景</td>
+</tr>
+</tbody></table>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/claude-fable-5/comparison.png"
+                     
+                ></p>
+<p>这点很关键。</p>
+<p>过去大模型发布通常是线性的：Haiku、Sonnet、Opus，便宜到贵，快到强。</p>
+<p>Fable &#x2F; Mythos 这一代不是简单线性升级，而是开始变成“同一能力，按风险切片”。</p>
+<p><strong>能力不再只是一个产品，而是一套访问控制系统。</strong></p>
+<h2 id="二、它的“安全”不是拒绝，而是换模型"><a href="#二、它的“安全”不是拒绝，而是换模型" class="headerlink" title="二、它的“安全”不是拒绝，而是换模型"></a>二、它的“安全”不是拒绝，而是换模型</h2><p>Fable 5 最有意思的机制，是高风险请求不会总是由 Fable 5 自己回答。</p>
+<p>根据 Anthropic 官方说明，当请求触及高风险领域时，系统会先由安全分类器判断。如果触发护栏，请求会被路由到 <strong>Claude Opus 4.8</strong>。</p>
+<p>主要高风险领域包括：</p>
+<ul>
+<li>网络安全攻击与漏洞利用；</li>
+<li>生物、化学相关危险能力；</li>
+<li>模型蒸馏；</li>
+<li>部分前沿模型研发辅助能力。</li>
+</ul>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/claude-fable-5/routing.png"
+                     
+                ></p>
+<p>这比“抱歉我不能回答”聪明一点。</p>
+<p>用户仍然会得到一个回答，只是回答者从 Fable 5 变成 Opus 4.8。Anthropic 说，平均来看，超过 <strong>95%</strong> 的 Fable 会话不会触发回退；也就是说，大多数日常任务仍然在 Fable 5 上完成。</p>
+<p>但这里有一个容易被中文报道讲粗的细节：</p>
+<p><strong>Claude App 里的回退和 API 里的回退不是一回事。</strong></p>
+<p>官方文档写得很明确：多数 Claude 应用里，高风险请求会自动路由到 Opus 4.8；但 <strong>API 客户需要配置新的 Fallback API</strong>。如果开发者没有接好，体验未必就是“自动丝滑降级”。</p>
+<p>这不是小问题。</p>
+<p>因为 Fable 5 的真正用户，很可能不是普通聊天用户，而是企业、Agent 平台、代码迁移系统、自动化研究工具。对这些人来说，模型回退不是一句提示那么简单，它意味着：</p>
+<ul>
+<li>输出质量可能变化；</li>
+<li>成本计算可能变化；</li>
+<li>任务日志要标记哪一段由哪个模型完成；</li>
+<li>合规审计要能解释为什么某个请求被降级。</li>
+</ul>
+<p><strong>安全路由一旦进入生产系统，就不只是安全机制，而是工程接口。</strong></p>
+<h2 id="三、为什么-Anthropic-这么谨慎？因为-Mythos-真的是双刃剑"><a href="#三、为什么-Anthropic-这么谨慎？因为-Mythos-真的是双刃剑" class="headerlink" title="三、为什么 Anthropic 这么谨慎？因为 Mythos 真的是双刃剑"></a>三、为什么 Anthropic 这么谨慎？因为 Mythos 真的是双刃剑</h2><p>Anthropic 不是突然变保守。</p>
+<p>今年 4 月，Anthropic 启动 <strong>Project Glasswing</strong>，把 Mythos Preview 交给约 50 家网络安全和关键基础设施伙伴。5 月底，官方披露：这些伙伴已经找到了 <strong>超过 10,000 个 high 或 critical 级别漏洞</strong>。</p>
+<p>随后项目扩展到 <strong>15 个以上国家、约 150 家新增机构</strong>。</p>
+<p>这个数字很吓人，但真正吓人的不是“找到了一万个漏洞”。</p>
+<p>真正的问题是：如果防守方能用它这么快找到漏洞，攻击方拿到同级能力后，也会用它这么快找到漏洞。</p>
+<p>Anthropic 在 Glasswing 文章里说得很清楚：网络安全的瓶颈正在从“发现漏洞”转向“验证、披露、修补和部署”。</p>
+<p>这句话比发布会上的模型分数重要得多。</p>
+<p>因为它意味着前沿模型正在改变安全行业的节奏：过去专家稀缺，漏洞发现慢；现在发现可以被模型加速，真正跟不上的反而是人类组织流程。</p>
+<p><strong>Fable 5 的护栏，本质上是在给这种速度差打补丁。</strong></p>
+<h2 id="四、能力很强，但强得最明显的地方不是聊天"><a href="#四、能力很强，但强得最明显的地方不是聊天" class="headerlink" title="四、能力很强，但强得最明显的地方不是聊天"></a>四、能力很强，但强得最明显的地方不是聊天</h2><p>Fable 5 的卖点不是“更会聊天”。</p>
+<p>Anthropic 的定位很明确：它是给长时间、复杂、多阶段任务准备的。</p>
+<p>官方列出的方向包括：</p>
+<ul>
+<li>大型代码迁移；</li>
+<li>多天级 autonomous coding；</li>
+<li>复杂知识工作；</li>
+<li>图表、表格、PDF、文件里的视觉理解；</li>
+<li>科研与分析任务；</li>
+<li>自己写测试、自己检查结果。</li>
+</ul>
+<p>最抓眼球的案例来自 Stripe：Fable 5 在一个 <strong>5000 万行 Ruby 代码库</strong>里做全库迁移，<strong>一天完成</strong>，而原本估计需要一个团队手工干 <strong>两个多月</strong>。</p>
+<p>这类案例不要当成“所有公司都能复制”的承诺。大厂案例往往有专门数据、专门工程环境、专门评估流程。</p>
+<p>但它说明了一个方向：</p>
+<p><strong>Fable 5 不是为了把一句话回答得更漂亮，而是为了把一整段工作流吃下来。</strong></p>
+<p>这也是为什么它比 Opus 4.8 贵一倍。</p>
+<p>官方价格：</p>
+<table>
+<thead>
+<tr>
+<th>模型</th>
+<th align="right">输入 &#x2F; 百万 token</th>
+<th align="right">输出 &#x2F; 百万 token</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Opus 4.8</td>
+<td align="right">$5</td>
+<td align="right">$25</td>
+</tr>
+<tr>
+<td>Fable 5</td>
+<td align="right">$10</td>
+<td align="right">$50</td>
+</tr>
+<tr>
+<td>Mythos 5</td>
+<td align="right">$10</td>
+<td align="right">$50</td>
+</tr>
+</tbody></table>
+<p>Fable 5 还有 1M context window、128k max output，adaptive thinking always on，但没有 extended thinking。也就是说，Anthropic 把它包装成一个“高自治、高吞吐、长任务”的工作模型，而不是一个普通聊天升级包。</p>
+<h2 id="五、真正的代价：不只是贵，还有-30-天数据留存"><a href="#五、真正的代价：不只是贵，还有-30-天数据留存" class="headerlink" title="五、真正的代价：不只是贵，还有 30 天数据留存"></a>五、真正的代价：不只是贵，还有 30 天数据留存</h2><p>Fable 5 这次最容易被忽略的变化，是数据政策。</p>
+<p>使用 Fable 5 &#x2F; Mythos 5，需要接受 <strong>30 天数据留存</strong>，用于安全监控。Anthropic 表示这些数据不会用于训练模型，主要用于识别新型越狱、复杂攻击、误报等安全问题。</p>
+<p>但对企业来说，这句话不能轻轻放过。</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/claude-fable-5/retention.png"
+                     
+                ></p>
+<p>尤其在 AWS 上，Fable 5 虽然进入 Amazon Bedrock 和 Claude Platform on AWS，但 AWS 官方博客明确写到：如果通过 Bedrock 使用 Fable 5，需要先通过 Data Retention API 选择 provider data sharing。</p>
+<p>更直白一点：</p>
+<blockquote>
+<p>一旦选择数据留存，你的数据会离开 AWS 自己的数据与安全边界，进入模型供应商要求的保留流程。</p>
+</blockquote>
+<p>这对冲着“零数据留存”选择 Anthropic 的企业，是个真实变化。</p>
+<p>它不一定不可接受，但必须重新评估：</p>
+<ul>
+<li>哪些任务能用 Fable 5？</li>
+<li>哪些数据不能进 Fable 5？</li>
+<li>留存期间是否可能被人工查看？</li>
+<li>内部合规文档怎么写？</li>
+<li>发生模型回退时日志如何记录？</li>
+</ul>
+<p><strong>最强模型的价格，开始包含一份隐私和合规账单。</strong></p>
+<h2 id="六、中文稿里有一个判断是对的，但还可以再往前推一步"><a href="#六、中文稿里有一个判断是对的，但还可以再往前推一步" class="headerlink" title="六、中文稿里有一个判断是对的，但还可以再往前推一步"></a>六、中文稿里有一个判断是对的，但还可以再往前推一步</h2><p>很多报道会把这事总结成：</p>
+<blockquote>
+<p>Fable 5 是“带护栏的 Mythos”。</p>
+</blockquote>
+<p>这个说法没错，但还不够。</p>
+<p>更准确的判断应该是：</p>
+<blockquote>
+<p>Anthropic 正在把前沿模型能力做成“风险分层产品”。</p>
+</blockquote>
+<p>第一层是 Opus：强，但仍是常规公共模型。</p>
+<p>第二层是 Fable：同一代最强能力可以公开，但高风险能力被分类器和回退机制切掉。</p>
+<p>第三层是 Mythos：给经过审查的安全&#x2F;生物研究伙伴，在部分高风险能力上解除限制。</p>
+<p>这套结构以后很可能成为行业常态。</p>
+<p>OpenAI、Google、Anthropic 迟早都会遇到同一个问题：当前沿模型在网络安全、生物研究、自动化研发上越来越强，完全公开会出事，完全不公开又浪费商业价值。</p>
+<p>于是中间方案出现了：</p>
+<ul>
+<li>能力按风险分层；</li>
+<li>客户按信任分层；</li>
+<li>请求按分类器分层；</li>
+<li>数据按监控要求分层。</li>
+</ul>
+<p><strong>模型发布会从“谁最强”，变成“谁有资格用完整能力”。</strong></p>
+<h2 id="写在最后"><a href="#写在最后" class="headerlink" title="写在最后"></a>写在最后</h2><p>Claude Fable 5 的意义，不是 Anthropic 又发了一个更强 Claude。</p>
+<p>真正的变化是：前沿模型公司开始承认，最强能力不能再像普通 SaaS 功能一样无差别开放。</p>
+<p>它必须被切开、被路由、被审计、被留存、被分配给不同等级的用户。</p>
+<p>这听起来不酷，甚至有点扫兴。</p>
+<p>但这可能就是大模型走向基础设施之后的真实形态：</p>
+<p><strong>能力越强，产品越不像“一个模型”，越像一套治理系统。</strong></p>
+<p>Claude Fable 5 是公开版 Mythos，也是一次预演。</p>
+<p>它预演的是：当 AI 足够强，模型公司会怎样把“危险能力”卖给全世界。</p>
+<hr>
+<p>参考资料：</p>
+<ul>
+<li><a class="link"   target="_blank" rel="noopener" href="https://www.anthropic.com/news/claude-fable-5-mythos-5" >Anthropic: Claude Fable 5 and Claude Mythos 5<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://www.anthropic.com/claude/fable" >Anthropic: Claude Fable 5<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://www.anthropic.com/claude/mythos" >Anthropic: Claude Mythos 5<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://www.anthropic.com/claude-fable-5-mythos-5-system-card" >Anthropic: Claude Fable 5 &amp; Mythos 5 System Card<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://platform.claude.com/docs/en/about-claude/models/overview" >Claude API Docs: Models overview<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://aws.amazon.com/blogs/aws/anthropic-claude-fable-5-on-aws-mythos-class-capabilities-with-built-in-safeguards-now-available" >AWS News Blog: Claude Fable 5 on AWS<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://techcrunch.com/2026/06/09/anthropic-released-claude-fable-5-its-most-powerful-model-publicly-days-after-warning-ai-is-getting-too-dangerous/" >TechCrunch: Claude Fable 5 is a version of Mythos the public can access today<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+</ul>
+
+		</div>
+
+		
+		<div class="post-copyright-info w-full my-8 px-2 sm:px-6 md:px-8">
+			<div class="article-copyright-info-container">
+    <ul>
+        <li><strong>标题:</strong> Claude Fable 5 开放只是表象：Anthropic 开始把模型能力按风险切开卖</li>
+        <li><strong>作者:</strong> Nathan</li>
+        <li><strong>创建于
+                :</strong> 2026-06-09 22:30:00</li>
+        
+            <li>
+                <strong>更新于
+                    :</strong> 2026-06-10 07:10:02
+            </li>
+        
+        <li>
+            <strong>链接:</strong> https://hydraxman.github.io/2026/06/09/claude-fable-5/
+        </li>
+        <li>
+            <strong>
+                版权声明:
+            </strong>
+            
+
+            
+                本文章采用 <a class="license" target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0">CC BY-NC-SA 4.0</a> 进行许可。
+            
+        </li>
+    </ul>
+</div>
+
+		</div>
+		
+
+		
+		<ul class="post-tags-box text-lg mt-1.5 flex-wrap justify-center flex md:hidden">
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/Claude/">#Claude</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/Anthropic/">#Anthropic</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/AI%E5%AE%89%E5%85%A8/">#AI安全</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/AI%E6%A8%A1%E5%9E%8B/">#AI模型</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/%E5%A4%A7%E6%A8%A1%E5%9E%8B/">#大模型</a>&nbsp;
+			</li>
+			
+		</ul>
+		
+
+		
+
+		
+		<div class="article-nav my-8 flex justify-between items-center px-2 sm:px-6 md:px-8">
+			
+			<div class="article-prev border-border-color shadow-redefine-flat shadow-shadow-color-2 rounded-medium px-4 py-2 hover:shadow-redefine-flat-hover hover:shadow-shadow-color-2">
+				<a class="prev" rel="prev" href="/2026/06/10/github-trending/github-trending-2026-06-10/">
+					<span class="left arrow-icon flex justify-center items-center">
+						<i class="fa-solid fa-chevron-left"></i>
+					</span>
+					<span class="title flex justify-center items-center">
+						<span class="post-nav-title-item truncate max-w-48">GitHub Trending 日报：2026-06-10 最热 10 个开源项目</span>
+						<span class="post-nav-item">上一篇</span>
+					</span>
+				</a>
+			</div>
+			
+			
+			<div class="article-next border-border-color shadow-redefine-flat shadow-shadow-color-2 rounded-medium px-4 py-2 hover:shadow-redefine-flat-hover hover:shadow-shadow-color-2">
+				<a class="next" rel="next" href="/2026/06/09/github-trending/github-trending-2026-06-09/">
+					<span class="title flex justify-center items-center">
+						<span class="post-nav-title-item truncate max-w-48">GitHub Trending 日报：2026-06-09 最热 10 个开源项目</span>
+						<span class="post-nav-item">下一篇</span>
+					</span>
+					<span class="right arrow-icon flex justify-center items-center">
+						<i class="fa-solid fa-chevron-right"></i>
+					</span>
+				</a>
+			</div>
+			
+		</div>
+		
+
+
+		
+	</div>
+
+	
+	<div class="toc-content-container">
+		<div class="post-toc-wrap">
+	<div class="post-toc">
+		<div class="toc-title">目录</div>
+		<div class="page-title">Claude Fable 5 开放只是表象：Anthropic 开始把模型能力按风险切开卖</div>
+		<ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81Fable-5-%E6%98%AF%E5%85%AC%E5%BC%80%E7%89%88-Mythos%EF%BC%8C%E4%BD%86%E4%B8%8D%E6%98%AF%E5%AE%8C%E6%95%B4-Mythos"><span class="nav-text">一、Fable 5 是公开版 Mythos，但不是完整 Mythos</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E5%AE%83%E7%9A%84%E2%80%9C%E5%AE%89%E5%85%A8%E2%80%9D%E4%B8%8D%E6%98%AF%E6%8B%92%E7%BB%9D%EF%BC%8C%E8%80%8C%E6%98%AF%E6%8D%A2%E6%A8%A1%E5%9E%8B"><span class="nav-text">二、它的“安全”不是拒绝，而是换模型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E4%B8%BA%E4%BB%80%E4%B9%88-Anthropic-%E8%BF%99%E4%B9%88%E8%B0%A8%E6%85%8E%EF%BC%9F%E5%9B%A0%E4%B8%BA-Mythos-%E7%9C%9F%E7%9A%84%E6%98%AF%E5%8F%8C%E5%88%83%E5%89%91"><span class="nav-text">三、为什么 Anthropic 这么谨慎？因为 Mythos 真的是双刃剑</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E8%83%BD%E5%8A%9B%E5%BE%88%E5%BC%BA%EF%BC%8C%E4%BD%86%E5%BC%BA%E5%BE%97%E6%9C%80%E6%98%8E%E6%98%BE%E7%9A%84%E5%9C%B0%E6%96%B9%E4%B8%8D%E6%98%AF%E8%81%8A%E5%A4%A9"><span class="nav-text">四、能力很强，但强得最明显的地方不是聊天</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%94%E3%80%81%E7%9C%9F%E6%AD%A3%E7%9A%84%E4%BB%A3%E4%BB%B7%EF%BC%9A%E4%B8%8D%E5%8F%AA%E6%98%AF%E8%B4%B5%EF%BC%8C%E8%BF%98%E6%9C%89-30-%E5%A4%A9%E6%95%B0%E6%8D%AE%E7%95%99%E5%AD%98"><span class="nav-text">五、真正的代价：不只是贵，还有 30 天数据留存</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AD%E3%80%81%E4%B8%AD%E6%96%87%E7%A8%BF%E9%87%8C%E6%9C%89%E4%B8%80%E4%B8%AA%E5%88%A4%E6%96%AD%E6%98%AF%E5%AF%B9%E7%9A%84%EF%BC%8C%E4%BD%86%E8%BF%98%E5%8F%AF%E4%BB%A5%E5%86%8D%E5%BE%80%E5%89%8D%E6%8E%A8%E4%B8%80%E6%AD%A5"><span class="nav-text">六、中文稿里有一个判断是对的，但还可以再往前推一步</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%86%99%E5%9C%A8%E6%9C%80%E5%90%8E"><span class="nav-text">写在最后</span></a></li></ol>
+
+	</div>
+</div>
+	</div>
+	
+</div>
+
+			</div>
+
+			
+		</div>
+
+		<div class="main-content-footer">
+			<footer class="footer mt-5 py-5 h-auto text-base text-third-text-color relative border-t-2 border-t-border-color">
+    <div class="info-container py-3 text-center">
+        
+        <div class="text-center">
+            &copy;
+            
+              <span>2024</span>
+              -
+            
+            2026&nbsp;&nbsp;<i class="fa-solid fa-heart fa-beat" style="--fa-animation-duration: 0.5s; color: #333"></i>&nbsp;&nbsp;<a href="/">Nathan</a>
+            
+                
+                <p class="post-count space-x-0.5">
+                    <span>
+                        共撰写了 264 篇文章
+                    </span>
+                    
+                        <span>
+                            共 544.9k 字
+                        </span>
+                    
+                </p>
+            
+        </div>
+        
+        <div class="relative text-center lg:absolute lg:left-[20px] lg:top-1/2 lg:-translate-y-1/2 lg:text-left">
+            <span class="lg:block text-sm">由 <?xml version="1.0" encoding="utf-8"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg class="relative top-[2px] inline-block align-baseline" version="1.1" id="圖層_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="1rem" height="1rem" viewBox="0 0 512 512" enable-background="new 0 0 512 512" xml:space="preserve"><path fill="#0E83CD" d="M256.4,25.8l-200,115.5L56,371.5l199.6,114.7l200-115.5l0.4-230.2L256.4,25.8z M349,354.6l-18.4,10.7l-18.6-11V275H200v79.6l-18.4,10.7l-18.6-11v-197l18.5-10.6l18.5,10.8V237h112v-79.6l18.5-10.6l18.5,10.8V354.6z"/></svg><a target="_blank" class="text-base" href="https://hexo.io">Hexo</a> 驱动</span>
+            <span class="text-sm lg:block">主题&nbsp;<a class="text-base" target="_blank" href="https://github.com/EvanNotFound/hexo-theme-redefine">Redefine v2.9.0</a></span>
+        </div>
+        
+        
+            <div>
+                博客已运行 <span class="odometer" id="runtime_days" ></span> 天 <span class="odometer" id="runtime_hours"></span> 小时 <span class="odometer" id="runtime_minutes"></span> 分钟 <span class="odometer" id="runtime_seconds"></span> 秒
+            </div>
+        
+        
+            <script data-swup-reload-script>
+                try {
+                    function odometer_init() {
+                    const elements = document.querySelectorAll('.odometer');
+                    elements.forEach(el => {
+                        new Odometer({
+                            el,
+                            format: '( ddd).dd',
+                            duration: 200
+                        });
+                    });
+                    }
+                    odometer_init();
+                } catch (error) {}
+            </script>
+        
+        
+            
+                
+        
+                
+        
+        
+    </div>  
+</footer>
+		</div>
+	</div>
+
+	
+	<div class="post-tools">
+		<div class="post-tools-container">
+	<ul class="article-tools-list">
+		<!-- TOC aside toggle -->
+		
+		<li class="right-bottom-tools page-aside-toggle">
+			<i class="fa-regular fa-outdent"></i>
+		</li>
+		
+
+		<!-- go comment -->
+		
+	</ul>
+</div>
+	</div>
+	
+
+	<div class="right-side-tools-container">
+		<div class="side-tools-container">
+	<ul class="hidden-tools-list">
+		<li class="right-bottom-tools tool-font-adjust-plus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-plus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-font-adjust-minus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-minus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-dark-light-toggle flex justify-center items-center">
+			<i class="fa-regular fa-moon"></i>
+		</li>
+
+		<!-- rss -->
+		
+
+		
+
+		<li class="right-bottom-tools tool-scroll-to-bottom flex justify-center items-center">
+			<i class="fa-regular fa-arrow-down"></i>
+		</li>
+	</ul>
+
+	<ul class="visible-tools-list">
+		<li class="right-bottom-tools toggle-tools-list flex justify-center items-center">
+			<i class="fa-regular fa-cog fa-spin"></i>
+		</li>
+		
+		<li class="right-bottom-tools tool-scroll-to-top flex justify-center items-center">
+			<i class="arrow-up fas fa-arrow-up"></i>
+			<span class="percent"></span>
+		</li>
+		
+		
+	</ul>
+</div>
+	</div>
+
+	<div class="image-viewer-container" role="dialog" aria-modal="true" aria-label="图片查看器">
+	<button class="image-viewer-close" type="button" aria-label="关闭">
+		<i class="fa-solid fa-xmark"></i>
+	</button>
+	<button class="image-viewer-prev" type="button" aria-label="上一页">
+		<i class="fa-solid fa-chevron-left"></i>
+	</button>
+	<div class="image-viewer-frame">
+		<img src="" alt="">
+	</div>
+	<div class="image-viewer-exif-panel hidden absolute left-1/2 bottom-20 -translate-x-1/2 w-[min(92vw,420px)] max-h-[60vh] overflow-hidden rounded-2xl bg-background-color-transparent-80 p-4 text-left shadow-redefine-flat backdrop-blur-md" role="dialog" aria-label="EXIF" aria-hidden="true">
+		<div class="flex items-center justify-between mb-3">
+			<span class="text-sm font-semibold text-first-text-color">EXIF</span>
+			<button class="image-viewer-exif-close flex h-8 w-8 items-center justify-center rounded-full bg-background-color-transparent-80 text-first-text-color transition hover:bg-background-color-transparent-40" type="button" aria-label="关闭">
+				<i class="fa-solid fa-xmark text-[0.65rem]"></i>
+			</button>
+		</div>
+		<div class="image-viewer-exif-cards grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[50vh] overflow-y-auto pr-1 scrollbar-hide"></div>
+		<template class="image-viewer-exif-card-template">
+			<div class="rounded-lg bg-background-color-transparent-40 px-3 py-2">
+				<div class="image-viewer-exif-card-header flex items-center gap-2 mb-1">
+					<i class="image-viewer-exif-card-icon fa-solid fa-circle-info text-xs text-third-text-color"></i>
+					<div class="image-viewer-exif-card-title text-xs font-semibold text-first-text-color"></div>
+				</div>
+				<div class="image-viewer-exif-card-items flex flex-col gap-1"></div>
+			</div>
+		</template>
+	</div>
+	<button class="image-viewer-exif-toggle flex items-center gap-2 hidden absolute left-1/2 bottom-6 -translate-x-1/2 rounded-full border border-border-color bg-background-color-transparent-80 px-4 py-2 text-first-text-color backdrop-blur-md transition hover:bg-background-color-transparent-40" type="button" aria-label="EXIF" aria-expanded="false">
+		<i class="fa-solid fa-circle-info text-xs"></i>
+		<span class="text-xs font-semibold uppercase tracking-wider">EXIF</span>
+	</button>
+	<button class="image-viewer-next" type="button" aria-label="下一页">
+		<i class="fa-solid fa-chevron-right"></i>
+	</button>
+</div>
+
+
+	
+	<div class="search-pop-overlay">
+	<div class="popup search-popup">
+		<div class="search-header">
+			<span class="search-input-field-pre">
+				<i class="fa-solid fa-keyboard"></i>
+			</span>
+			<div class="search-input-container">
+				<input autocomplete="off" autocorrect="off" autocapitalize="off" placeholder="站内搜索您需要的内容..." spellcheck="false" type="search" class="search-input">
+			</div>
+			<span class="popup-btn-close">
+				<i class="fa-solid fa-times"></i>
+			</span>
+		</div>
+		<div id="search-result">
+			<div id="no-result">
+				<i class="fa-solid fa-spinner fa-spin-pulse fa-5x fa-fw"></i>
+			</div>
+		</div>
+	</div>
+</div>
+	
+
+</main>
+
+
+
+<script src="/js/build/libs/Swup.min.js"></script>
+
+<script src="/js/build/libs/SwupSlideTheme.min.js"></script>
+
+<script src="/js/build/libs/SwupScriptsPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupProgressPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupScrollPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupPreloadPlugin.min.js"></script>
+
+<script>
+    window.swup = new Swup({
+        plugins: [
+            new SwupScriptsPlugin({
+                optin: true,
+            }),
+            new SwupProgressPlugin(),
+            new SwupScrollPlugin({
+                offset: 80,
+            }),
+            new SwupSlideTheme({
+                mainElement: ".main-content-body",
+            }),
+            new SwupPreloadPlugin(),
+        ],
+        containers: ["#swup"],
+    });
+
+    window.dispatchEvent(
+        new CustomEvent("redefine:swup:ready", {
+            detail: {
+                swup: window.swup,
+            },
+        }),
+    );
+</script>
+
+
+
+
+	
+<script src="/js/build/main.js" type="module"></script>
+
+
+
+    
+<script src="/js/build/libs/odometer.min.js"></script>
+
+    
+<link rel="stylesheet" href="/assets/odometer-theme-minimal.css">
+
+
+
+
+
+
+
+  
+<script src="/js/build/libs/Typed.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+<script src="/js/build/libs/moment-with-locales.min.js" data-swup-reload-script=""></script>
+
+
+
+	
+</body>
+
+</html>
