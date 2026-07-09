@@ -1,0 +1,1426 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="keywords" content="计算机技术, 生活中的胡思乱想">
+    
+    
+    <meta name="author" content="Nathan">
+    
+    <!-- Completely eliminate flash of wrong theme -->
+    <script>
+        (function() {
+            const THEME_KEY = "REDEFINE-THEME-STATUS";
+            const DARK = "dark", LIGHT = "light";
+            
+            // Get preferred theme
+            function getTheme() {
+                try {
+                    const saved = localStorage.getItem(THEME_KEY);
+                    if (saved) {
+                        const { isDark } = JSON.parse(saved);
+                        return isDark ? DARK : LIGHT;
+                    }
+                } catch (e) {}
+                
+                return matchMedia("(prefers-color-scheme: dark)").matches ? DARK : LIGHT;
+            }
+            
+            // Apply theme to document
+            function applyTheme(theme) {
+                const isDark = theme === DARK;
+                const root = document.documentElement;
+                
+                // Set classes for compatibility
+                root.classList.add(theme);
+                root.classList.remove(isDark ? LIGHT : DARK);
+                root.style.colorScheme = theme;
+            }
+            
+            // Initial application
+            const theme = getTheme();
+            applyTheme(theme);
+            
+            // Listen for system preference changes
+            matchMedia("(prefers-color-scheme: dark)").addEventListener("change", ({ matches }) => {
+                // Only update if using system preference (no localStorage entry)
+                if (!localStorage.getItem(THEME_KEY)) {
+                    applyTheme(matches ? DARK : LIGHT);
+                }
+            });
+            
+            // Set body classes ASAP (before DOMContentLoaded)
+            (function() {
+                const addBodyClass = () => {
+                    const b = document.body;
+                    if (!b) return false;
+                    b.classList.add(theme + "-mode");
+                    return true;
+                };
+
+                // Try immediately
+                if (addBodyClass()) return;
+
+                // Observe until body exists
+                const mo = new MutationObserver(() => {
+                    if (addBodyClass()) mo.disconnect();
+                });
+                mo.observe(document.documentElement, { childList: true, subtree: true });
+            })();
+        })();
+    </script>
+    
+    <!-- preconnect -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    
+    <!--- Seo Part-->
+    
+    <link rel="canonical" href="https://hydraxman.github.io/2026/07/09/ai-investing-skills-source-map/"/>
+    <meta name="robots" content="index,follow">
+    <meta name="googlebot" content="index,follow">
+    <meta name="revisit-after" content="1 days">
+    
+    
+        
+        <meta name="description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="别急着让 AI 炒股：这 16 个开源项目，真正值钱的是三层底座">
+<meta property="og:url" content="https://hydraxman.github.io/2026/07/09/ai-investing-skills-source-map/index.html">
+<meta property="og:site_name" content="内森淼文">
+<meta property="og:description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://hydraxman.github.io/images/redefine-og.webp">
+<meta property="article:published_time" content="2026-07-09T02:45:00.000Z">
+<meta property="article:modified_time" content="2026-07-09T02:31:08.795Z">
+<meta property="article:author" content="Nathan">
+<meta property="article:tag" content="Agent">
+<meta property="article:tag" content="量化交易">
+<meta property="article:tag" content="开源项目">
+<meta property="article:tag" content="AI投资">
+<meta property="article:tag" content="金融AI">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://hydraxman.github.io/images/redefine-og.webp">
+    
+    
+    <!--- Icon Part-->
+    <link rel="icon" type="image/png" href="/images/favicon.svg" sizes="192x192">
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.svg">
+    <meta name="theme-color" content="#ffffff">
+    <link rel="shortcut icon" href="/images/favicon.svg">
+    <!--- Page Info-->
+    
+    <title>
+        
+            别急着让 AI 炒股：这 16 个开源项目，真正值钱的是三层底座 | 内森淼文
+        
+    </title>
+
+    
+<link rel="stylesheet" href="/fonts/Chillax/chillax.css">
+
+
+    <!--- Inject Part-->
+    
+        
+            
+    
+            
+    
+            
+                
+                    <link rel="stylesheet" href="/css/custom.css">
+                
+    
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    
+        
+<link rel="stylesheet" href="/css/build/tailwind.css">
+
+    
+
+    
+<link rel="stylesheet" href="/fonts/GeistMono/geist-mono.css">
+
+    
+<link rel="stylesheet" href="/fonts/Geist/geist.css">
+
+    <!--- Font Part-->
+    
+    
+    
+    
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&display=swap" rel="stylesheet">
+    
+    
+
+    <script id="hexo-configurations">
+    window.config = {"hostname":"hydraxman.github.io","root":"/","language":"zh-CN","path":"search.json"};
+    window.theme = {"articles":{"style":{"font_size":"16px","line_height":1.5,"image_border_radius":"14px","image_alignment":"center","image_caption":false,"link_icon":true,"delete_mask":false,"title_alignment":"left","headings_top_spacing":{"h1":"3.2rem","h2":"2.4rem","h3":"1.9rem","h4":"1.6rem","h5":"1.4rem","h6":"1.3rem"}},"word_count":{"enable":true,"count":true,"min2read":true},"author_label":{"enable":false,"auto":false,"list":[]},"code_block":{"copy":true,"style":"mac","highlight_theme":{"light":"github","dark":"vs2015"},"font":{"enable":false,"family":null,"url":null}},"toc":{"enable":true,"max_depth":3,"number":false,"expand":true,"init_open":true},"copyright":{"enable":true,"default":"cc_by_nc_sa"},"lazyload":true,"pangu_js":false,"recommendation":{"enable":false,"title":"推荐阅读","limit":3,"mobile_limit":2,"placeholder":"/images/wallhaven-wqery6-light.webp","skip_dirs":[]}},"colors":{"primary":"#ffffff","secondary":null,"default_mode":"light"},"global":{"fonts":{"chinese":{"enable":false,"family":null,"url":null},"english":{"enable":true,"family":"Inter","url":"https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"},"title":{"enable":true,"family":"Noto Serif","url":"https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&display=swap"}},"content_max_width":"1000px","sidebar_width":"210px","hover":{"shadow":true,"scale":false},"scroll_progress":{"bar":true,"percentage":true},"website_counter":{"url":"https://cn.vercount.one/js","enable":false,"site_pv":true,"site_uv":true,"post_pv":true},"single_page":true,"preloader":{"enable":false,"custom_message":null},"side_tools":{"gear_rotation":true,"auto_expand":false},"open_graph":{"enable":true,"image":"/images/redefine-og.webp","description":"Hexo Theme Redefine, Redefine Your Hexo Journey."},"google_analytics":{"enable":false,"id":null}},"home_banner":{"enable":true,"style":"fixed","image":{"light":"/images/banner-light.jpg","dark":"/images/banner-dark.jpg"},"title":"内森淼文","subtitle":{"text":["AI · 编程 · 科技见闻","Write Code, Read World"],"hitokoto":{"enable":false,"show_author":false,"api":"https://v1.hitokoto.cn"},"typing_speed":100,"backing_speed":80,"starting_delay":500,"backing_delay":1500,"loop":true,"smart_backspace":true},"text_color":{"light":"#fff","dark":"#d1d1b6"},"text_style":{"title_size":"2.8rem","subtitle_size":"1.5rem","line_height":1.2},"custom_font":{"enable":false,"family":null,"url":null},"social_links":{"enable":true,"style":"default","links":[{"icon":"fa-brands fa-github","url":"https://github.com/hydraxman"}],"qrs":[{"icon":"fa-brands fa-weixin","qr":null},{"icon":"/images/custom-icon.svg","qr":null}]}},"plugins":{"feed":{"enable":false},"aplayer":{"enable":false,"type":"fixed","audios":[{"name":null,"artist":null,"url":null,"cover":null,"lrc":null}]},"mermaid":{"enable":false,"version":"11.4.1","theme":{"light":"default","dark":"dark"}}},"version":"2.9.0","navbar":{"auto_hide":false,"color":{"left":"#333333","right":"#555555","transparency":35},"width":{"home":"1200px","pages":"1000px"},"links":{"Home":{"path":"/","icon":"fa-regular fa-house"},"Archives":{"path":"/archives","icon":"fa-regular fa-archive"},"Categories":{"path":"/categories","icon":"fa-regular fa-folder"},"Tags":{"path":"/tags","icon":"fa-regular fa-tags"},"About":{"path":"/about","icon":"fa-regular fa-user"}},"search":{"enable":true,"preload":true}},"page_templates":{"friends_column":2,"tags_style":"blur","masonry":{"batch_size":12,"initial_batch_size":24}},"home":{"sidebar":{"enable":true,"position":"left","first_item":"menu","announcement":"AI · 编程 · 科技","show_on_mobile":true,"links":{"Archives":{"path":"/archives","icon":"fa-regular fa-archive"},"Tags":{"path":"/tags","icon":"fa-regular fa-tags"},"Categories":{"path":"/categories","icon":"fa-regular fa-folder"}}},"article_date_format":"auto","excerpt_length":200,"categories":{"enable":true,"limit":3},"tags":{"enable":true,"limit":3}},"footer":{"runtime":true,"icon":"<i class=\"fa-solid fa-heart fa-beat\" style=\"--fa-animation-duration: 0.5s; color: #333\"></i>","start":"2024/01/01 00:00:00","statistics":true,"customize":null,"icp":{"enable":false,"number":null,"url":null}},"footerStart":"2024/01/01 00:00:00","mermaid":{"style":{"light":"default","dark":"dark"}}};
+    window.lang_ago = {"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"};
+    window.i18n = {"search":"站内搜索您需要的内容...","toc":"目录","prev":"上一页","next":"下一页","prev_posts":"上一篇","next_posts":"下一篇","page":"第 %d 页","recent_posts":"最新文章","share":"分享","powered_by":"由 %s 驱动","theme":"主题","rss_feed":"RSS Feed","category":"分类","categories":"分类","tag":"标签","tags":"标签","post":"文章","posts":"文章","tagcloud":"标签云","comment":"评论","comments":"评论","top":"置顶","sticky":"置顶","go-back-home":"回到首页","masonry_loading":"照片加载中...","image_viewer":"图片查看器","close":"关闭","exif":{"title":"EXIF","cards":{"camera":"相机","lens":"镜头","exposure":"曝光","other":"其他"},"fields":{"make":"品牌","model":"机型","date_taken":"拍摄时间","lens_model":"镜头","focal_length":"焦距","focus_mode":"对焦模式","shutter":"快门","aperture":"光圈","iso":"感光度","exposure_program":"曝光程序","exposure_compensation":"曝光补偿","metering_mode":"测光模式","flash":"闪光灯","white_balance":"白平衡","latitude":"纬度","longitude":"经度","altitude":"海拔"},"status":{"loading":"加载中...","no_exif":"无 EXIF 信息","library_missing":"EXIF 库未加载","image_source_missing":"图片地址不可用","unavailable":"EXIF 不可用（可能被 CORS 阻止或缺少元数据）","flag_unavailable":"EXIF 不可用"}},"home":"首页","archive":"归档","archives":"归档","about":"关于","links":"链接","link":"链接","friends":"友情链接","friend":"友情链接","timeline":"时间轴","shuoshuo":"说说","bookmarks":"书签","site_uv":"访问人数","site_pv":"总访问量","read_more":"阅读全文","wordcount":"字","min2read":"分钟","changelog":"更新日志","status":"状态","runtime":"博客已运行","days":"天","hours":"小时","minutes":"分钟","seconds":"秒","optimized_by":"并由 Evan 进行优化","rights":"版权所有","site_posts":"共撰写了 %s 篇文章","site_wordcount":"共 %s 字","copyright":{"title":"标题","author":"作者","link":"链接","create_time":"创建于","update_time":"更新于","license_title":"版权声明","license_content":"本文章采用 %s 进行许可。","all_rights_reserved":"版权所有 &#169 %s，禁止转载。","public_domain":"本文为公有领域作品，可自由转载、引用。"},"ago":{"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"},"create_time":"创建","update_time":"更新","expired":"这篇文章最后更新于 %s 天前，内容可能已经过时。"};
+    window.data = {"masonry":false};
+  </script>
+    
+    <!--- Fontawesome Part-->
+    
+<link rel="stylesheet" href="/fontawesome/fontawesome.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/brands.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/solid.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/regular.min.css">
+
+    
+    
+    
+    
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+	<div class="progress-bar-container">
+	
+	<span class="scroll-progress-bar"></span>
+	
+
+	
+	<span class="pjax-progress-bar"></span>
+	<!--        <span class="swup-progress-icon">-->
+	<!--            <i class="fa-solid fa-circle-notch fa-spin"></i>-->
+	<!--        </span>-->
+	
+</div>
+
+<main class="page-container" id="swup">
+
+	
+
+	<div class="main-content-container flex flex-col justify-between min-h-dvh">
+		<div class="main-content-header">
+			<header class="navbar-container px-6 md:px-12">
+    <div class="navbar-content transition-navbar ">
+        <div class="left">
+            
+            <a class="logo-title" href="/">
+                
+                内森淼文
+                
+            </a>
+        </div>
+
+        <div class="right">
+            <!-- PC -->
+            <div class="desktop">
+                <ul class="navbar-list">
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/"
+                                        >
+                                    <i class="fa-regular fa-house fa-fw"></i>
+                                    首页
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/archives"
+                                        >
+                                    <i class="fa-regular fa-archive fa-fw"></i>
+                                    归档
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/categories"
+                                        >
+                                    <i class="fa-regular fa-folder fa-fw"></i>
+                                    分类
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/tags"
+                                        >
+                                    <i class="fa-regular fa-tags fa-fw"></i>
+                                    标签
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/about"
+                                        >
+                                    <i class="fa-regular fa-user fa-fw"></i>
+                                    关于
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                    
+                        <li class="navbar-item search search-popup-trigger">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </li>
+                    
+                </ul>
+            </div>
+            <!-- Mobile -->
+            <div class="mobile">
+                
+                    <div class="icon-item search search-popup-trigger"><i class="fa-solid fa-magnifying-glass"></i>
+                    </div>
+                
+                <div class="icon-item navbar-bar">
+                    <div class="navbar-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile sheet -->
+    <div class="navbar-drawer h-dvh w-full absolute top-0 left-0 bg-background-color flex flex-col justify-between">
+        <ul class="drawer-navbar-list flex flex-col px-4 justify-center items-start">
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/"
+                        >
+                            <span>
+                                首页
+                            </span>
+                            
+                                <i class="fa-regular fa-house fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/archives"
+                        >
+                            <span>
+                                归档
+                            </span>
+                            
+                                <i class="fa-regular fa-archive fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/categories"
+                        >
+                            <span>
+                                分类
+                            </span>
+                            
+                                <i class="fa-regular fa-folder fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/tags"
+                        >
+                            <span>
+                                标签
+                            </span>
+                            
+                                <i class="fa-regular fa-tags fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/about"
+                        >
+                            <span>
+                                关于
+                            </span>
+                            
+                                <i class="fa-regular fa-user fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+
+            
+            
+                
+                    
+                    
+                    
+            
+        </ul>
+
+        <div class="statistics flex justify-around my-2.5">
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/tags">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">341</div>
+        <div class="label text-third-text-color text-sm">标签</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/categories">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">9</div>
+        <div class="label text-third-text-color text-sm">分类</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/archives">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">290</div>
+        <div class="label text-third-text-color text-sm">文章</div>
+    </a>
+</div>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+		</div>
+
+		<div class="main-content-body transition-fade-up">
+			
+
+			<div class="main-content">
+				<div class="post-page-container flex relative justify-between box-border w-full h-full">
+	<div class="article-content-container">
+
+		<div class="article-title relative w-full">
+			
+			
+			
+			<img src="/images/ai-investing-skills-source-map/cover.png" alt="别急着让 AI 炒股：这 16 个开源项目，真正值钱的是三层底座" class="w-full h-60 sm:h-72 md:h-80 object-cover sm:rounded-t-large dark:brightness-75" />
+			
+			<div class="w-full flex items-center absolute bottom-0 justify-start">
+				<h1 class="article-title-cover text-center mx-6 my-6 text-second-text-color bg-background-color-transparent px-4 py-3 text-3xl sm:text-4xl md:text-5xl font-semibold backdrop-blur-lg rounded-xl border border-border-color ">别急着让 AI 炒股：这 16 个开源项目，真正值钱的是三层底座</h1>
+			</div>
+			
+		</div>
+
+		
+		<div class="article-header flex flex-row gap-2 items-center px-2 sm:px-6 md:px-8">
+			<div class="avatar w-[46px] h-[46px] shrink-0 rounded-medium border border-border-color p-px">
+				<img src="/images/avatar.png">
+			</div>
+			<div class="info flex flex-col justify-between">
+				<div class="author flex items-center">
+					<span class="name text-default-text-color text-lg font-semibold">Nathan</span>
+					
+				</div>
+				<div class="meta-info">
+					<div class="article-meta-info">
+    <span class="article-date article-meta-item">
+        <i class="fa-regular fa-pen-fancy"></i>&nbsp;
+        <span class="desktop">2026-07-09 10:45</span>
+        <span class="mobile">2026-07-09 10:45</span>
+        <span class="hover-info">创建</span>
+    </span>
+    
+        <span class="article-date article-meta-item">
+            <i class="fa-regular fa-wrench"></i>&nbsp;
+            <span class="desktop">2026-07-09 10:31:08</span>
+            <span class="mobile">2026-07-09 10:31:08</span>
+            <span class="hover-info">更新</span>
+        </span>
+    
+
+    
+        <span class="article-categories article-meta-item">
+            <i class="fa-regular fa-folders"></i>&nbsp;
+            <ul>
+                
+                
+                    
+                        
+                        <li>
+                            <a href="/categories/%E6%B7%B1%E5%BA%A6%E5%88%86%E6%9E%90/">深度分析</a>&nbsp;
+                        </li>
+                    
+                    
+                
+            </ul>
+        </span>
+    
+    
+        <span class="article-tags article-meta-item">
+            <i class="fa-regular fa-tags"></i>&nbsp;
+            <ul>
+                
+                    <li>
+                        <a href="/tags/Agent/">Agent</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/%E9%87%8F%E5%8C%96%E4%BA%A4%E6%98%93/">量化交易</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/%E5%BC%80%E6%BA%90%E9%A1%B9%E7%9B%AE/">开源项目</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/AI%E6%8A%95%E8%B5%84/">AI投资</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/%E9%87%91%E8%9E%8DAI/">金融AI</a>&nbsp;
+                    </li>
+                
+            </ul>
+        </span>
+    
+
+    
+    
+        <span class="article-wordcount article-meta-item">
+            <i class="fa-regular fa-typewriter"></i>&nbsp;<span>4.7k 字</span>
+        </span>
+    
+    
+        <span class="article-min2read article-meta-item">
+            <i class="fa-regular fa-clock"></i>&nbsp;<span>18 分钟</span>
+        </span>
+    
+    
+</div>
+
+				</div>
+			</div>
+		</div>
+		
+
+		
+
+
+		<div class="article-content markdown-body px-2 sm:px-6 md:px-8 pb-8">
+			<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/ai-investing-skills-source-map/cover.png"
+                      alt="AI 投资开源项目地图"
+                ></p>
+<p>这张「AI 投资 Skills 大全」看起来像一份工具清单，但如果只按 star 排名去装项目，大概率会走偏。</p>
+<p>真正值得看的，不是「哪个项目最像 AI 炒股神器」，而是它们背后正在分化出的三层基础设施：<strong>数据底座、研究&#x2F;回测引擎、Agent 决策层</strong>。</p>
+<p>换句话说，AI 金融开源圈已经不是简单地「把 ChatGPT 接到股票数据上」。一部分项目在补金融数据的管道，一部分在补量化研究和交易执行的工程底座，还有一部分在尝试让多个 Agent 像投研团队一样辩论、归因、风控、下结论。</p>
+<p><strong>但这里也有一个必须先说清楚的判断：越接近“自动交易”的项目，越不能只看 demo，必须看风控、数据契约、回测边界和免责声明。</strong></p>
+<p>本文把图里的 16 个项目逐一找到了源码出处，并 clone 了其中 8 个更重要、更有代表性的仓库做源码级拆解。结论先放前面：</p>
+<ul>
+<li><strong>最值得做底座研究</strong>：OpenBB、Qlib、Lean、vn.py、MarS；</li>
+<li><strong>最值得看 Agent 架构</strong>：TradingAgents、ai-hedge-fund、FinRobot；</li>
+<li><strong>最适合个人自动化提醒&#x2F;盯盘</strong>：daily_stock_analysis、go-stock；</li>
+<li><strong>最需要警惕营销味和实盘误用</strong>：所有强调自动执行、模型交易、收益展示的项目。</li>
+</ul>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/ai-investing-skills-source-map/architecture.png"
+                      alt="三层结构图"
+                ></p>
+<h2 id="一、先把源码出处核一遍"><a href="#一、先把源码出处核一遍" class="headerlink" title="一、先把源码出处核一遍"></a>一、先把源码出处核一遍</h2><p>下面的 star、语言、license 来自 GitHub API &#x2F; 项目页，核查时间为 <strong>2026-07-09 10:22（GMT+8）</strong>。star 会持续变化，以下用于判断量级，不作为实时排名。</p>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>源码仓库</th>
+<th align="right">Stars</th>
+<th>主语言</th>
+<th>License</th>
+<th>最近 push</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><a class="link"   target="_blank" rel="noopener" href="https://github.com/TauricResearch/TradingAgents" >TradingAgents<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></td>
+<td><code>TauricResearch/TradingAgents</code></td>
+<td align="right">91,890</td>
+<td>Python</td>
+<td>Apache-2.0</td>
+<td>2026-07-05</td>
+</tr>
+<tr>
+<td><a class="link"   target="_blank" rel="noopener" href="https://github.com/OpenBB-finance/OpenBB" >OpenBB<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></td>
+<td><code>OpenBB-finance/OpenBB</code></td>
+<td align="right">70,338</td>
+<td>Python</td>
+<td>NOASSERTION</td>
+<td>2026-07-08</td>
+</tr>
+<tr>
+<td><a class="link"   target="_blank" rel="noopener" href="https://github.com/virattt/ai-hedge-fund" >ai-hedge-fund<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></td>
+<td><code>virattt/ai-hedge-fund</code></td>
+<td align="right">60,955</td>
+<td>Python</td>
+<td>MIT</td>
+<td>2026-07-03</td>
+</tr>
+<tr>
+<td><a class="link"   target="_blank" rel="noopener" href="https://github.com/ZhuLinsen/daily_stock_analysis" >daily_stock_analysis<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></td>
+<td><code>ZhuLinsen/daily_stock_analysis</code></td>
+<td align="right">55,923</td>
+<td>Python</td>
+<td>MIT</td>
+<td>2026-07-08</td>
+</tr>
+<tr>
+<td><a class="link"   target="_blank" rel="noopener" href="https://github.com/microsoft/qlib" >Qlib<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></td>
+<td><code>microsoft/qlib</code></td>
+<td align="right">45,981</td>
+<td>Python</td>
+<td>MIT</td>
+<td>2026-04-22</td>
+</tr>
+<tr>
+<td><a class="link"   target="_blank" rel="noopener" href="https://github.com/vnpy/vnpy" >vnpy<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></td>
+<td><code>vnpy/vnpy</code></td>
+<td align="right">42,785</td>
+<td>Python</td>
+<td>MIT</td>
+<td>2026-05-17</td>
+</tr>
+<tr>
+<td><a class="link"   target="_blank" rel="noopener" href="https://github.com/Fincept-Corporation/FinceptTerminal" >FinceptTerminal<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></td>
+<td><code>Fincept-Corporation/FinceptTerminal</code></td>
+<td align="right">28,106</td>
+<td>C++</td>
+<td>NOASSERTION</td>
+<td>2026-07-07</td>
+</tr>
+<tr>
+<td><a class="link"   target="_blank" rel="noopener" href="https://github.com/mementum/backtrader" >backtrader<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></td>
+<td><code>mementum/backtrader</code></td>
+<td align="right">22,379</td>
+<td>Python</td>
+<td>GPL-3.0</td>
+<td>2024-08-19</td>
+</tr>
+<tr>
+<td><a class="link"   target="_blank" rel="noopener" href="https://github.com/QuantConnect/Lean" >Lean<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></td>
+<td><code>QuantConnect/Lean</code></td>
+<td align="right">20,430</td>
+<td>C#</td>
+<td>Apache-2.0</td>
+<td>2026-07-08</td>
+</tr>
+<tr>
+<td><a class="link"   target="_blank" rel="noopener" href="https://github.com/HKUDS/Vibe-Trading" >Vibe-Trading<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></td>
+<td><code>HKUDS/Vibe-Trading</code></td>
+<td align="right">18,737</td>
+<td>Python</td>
+<td>MIT</td>
+<td>2026-07-08</td>
+</tr>
+<tr>
+<td><a class="link"   target="_blank" rel="noopener" href="https://github.com/AI4Finance-Foundation/FinGPT" >FinGPT<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></td>
+<td><code>AI4Finance-Foundation/FinGPT</code></td>
+<td align="right">20,821</td>
+<td>Jupyter Notebook</td>
+<td>MIT</td>
+<td>2026-06-01</td>
+</tr>
+<tr>
+<td><a class="link"   target="_blank" rel="noopener" href="https://github.com/NoFxAiOS/nofx" >nofx<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></td>
+<td><code>NoFxAiOS/nofx</code></td>
+<td align="right">12,514</td>
+<td>Go</td>
+<td>AGPL-3.0</td>
+<td>2026-07-07</td>
+</tr>
+<tr>
+<td><a class="link"   target="_blank" rel="noopener" href="https://github.com/xbtlin/ai-berkshire" >ai-berkshire<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></td>
+<td><code>xbtlin/ai-berkshire</code></td>
+<td align="right">12,062</td>
+<td>Python</td>
+<td>MIT</td>
+<td>2026-07-08</td>
+</tr>
+<tr>
+<td><a class="link"   target="_blank" rel="noopener" href="https://github.com/AI4Finance-Foundation/FinRobot" >FinRobot<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></td>
+<td><code>AI4Finance-Foundation/FinRobot</code></td>
+<td align="right">7,505</td>
+<td>Jupyter Notebook</td>
+<td>Apache-2.0</td>
+<td>2026-07-07</td>
+</tr>
+<tr>
+<td><a class="link"   target="_blank" rel="noopener" href="https://github.com/ArvinLovegood/go-stock" >go-stock<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></td>
+<td><code>ArvinLovegood/go-stock</code></td>
+<td align="right">6,797</td>
+<td>Go</td>
+<td>GPL-3.0</td>
+<td>2026-07-09</td>
+</tr>
+<tr>
+<td><a class="link"   target="_blank" rel="noopener" href="https://github.com/microsoft/MarS" >MarS<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></td>
+<td><code>microsoft/MarS</code></td>
+<td align="right">1,764</td>
+<td>Python</td>
+<td>MIT</td>
+<td>2026-06-11</td>
+</tr>
+</tbody></table>
+<p>这张表里有几个细节值得注意。</p>
+<p>第一，原图里的热度并不总是最新。例如 <strong>TradingAgents</strong> 已经冲到 9 万 star 以上，明显超过原图里写的 9.3K；<strong>MarS</strong> 也不再是约 1K，而是 1.7K+。这类图适合做线索，不适合当最终事实源。</p>
+<p>第二，OpenBB 的 GitHub API license 字段显示为 <code>NOASSERTION</code>，但项目页和 README 摘要显示为 AGPLv3；FinceptTerminal 也类似，README 徽章显示 AGPL-3.0。也就是说，<strong>license 不能只信 GitHub API 一个字段，真正要商用集成必须回到仓库 LICENSE 文件。</strong></p>
+<p>第三，很多项目把「AI 投资」写得很热闹，但真正工程含量分布并不均匀：有的是完整交易引擎，有的是数据连接器，有的是 notebooks，有的是 prompt&#x2F;skill 框架。</p>
+<h2 id="二、8-个源码深挖项目：为什么选它们"><a href="#二、8-个源码深挖项目：为什么选它们" class="headerlink" title="二、8 个源码深挖项目：为什么选它们"></a>二、8 个源码深挖项目：为什么选它们</h2><p>我没有把 16 个项目平均拆开，因为那样只会变成 README 摘要。更合理的做法，是挑 8 个有代表性的源码下钻：</p>
+<table>
+<thead>
+<tr>
+<th>深挖项目</th>
+<th>为什么值得 clone</th>
+<th align="right">本地源码规模（粗略，不含依赖）</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>TradingAgents</td>
+<td>多 Agent 投研&#x2F;交易决策框架，当前热度最高</td>
+<td align="right">Python 约 1.6 万行</td>
+</tr>
+<tr>
+<td>OpenBB</td>
+<td>金融数据平台，AI Agent 的数据入口层</td>
+<td align="right">Python 约 25 万行，另有大量 provider 配置</td>
+</tr>
+<tr>
+<td>Qlib</td>
+<td>微软量化平台，研究、数据、模型、回测链路完整</td>
+<td align="right">Python 约 5.5 万行</td>
+</tr>
+<tr>
+<td>ai-hedge-fund</td>
+<td>LangGraph 风格投研团队 PoC，Agent 人设清晰</td>
+<td align="right">Python 约 2.2 万行，前端约 1.4 万行</td>
+</tr>
+<tr>
+<td>daily_stock_analysis</td>
+<td>中文圈增长很快的自动分析&#x2F;推送系统</td>
+<td align="right">Python 约 24 万行，前端约 7 万行</td>
+</tr>
+<tr>
+<td>FinGPT</td>
+<td>金融 LLM &#x2F; 数据集 &#x2F; 微调方向的代表</td>
+<td align="right">Python 约 3 万行</td>
+</tr>
+<tr>
+<td>FinRobot</td>
+<td>AutoGen 金融 Agent 平台，偏研报生成和工具链</td>
+<td align="right">Python 约 2.3 万行</td>
+</tr>
+<tr>
+<td>MarS</td>
+<td>微软市场仿真引擎，概念最硬核但 release 仍有限</td>
+<td align="right">Python 约 4.5 千行</td>
+</tr>
+</tbody></table>
+<p>源码都放在本地临时目录：</p>
+<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">~/.openclaw/workspace/tmp/ai-investing-src/</span><br></pre></td></tr></table></figure></div>
+
+<p>下面进入重点。</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/ai-investing-skills-source-map/source-reading-map.png"
+                      alt="源码阅读路线图"
+                ></p>
+<h2 id="三、TradingAgents：最像“投研公司组织结构”的多-Agent-框架"><a href="#三、TradingAgents：最像“投研公司组织结构”的多-Agent-框架" class="headerlink" title="三、TradingAgents：最像“投研公司组织结构”的多 Agent 框架"></a>三、TradingAgents：最像“投研公司组织结构”的多 Agent 框架</h2><p>源码位置：<code>TauricResearch/TradingAgents</code></p>
+<p>TradingAgents 的核心不在「调用一个 LLM 给买卖建议」，而在它把投资决策拆成了一个比较完整的组织结构：</p>
+<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">Market / Sentiment / News / Fundamentals analysts</span><br><span class="line">        ↓</span><br><span class="line">Bull Researcher ↔ Bear Researcher</span><br><span class="line">        ↓</span><br><span class="line">Research Manager</span><br><span class="line">        ↓</span><br><span class="line">Trader</span><br><span class="line">        ↓</span><br><span class="line">Aggressive / Conservative / Neutral risk analysts</span><br><span class="line">        ↓</span><br><span class="line">Portfolio Manager</span><br></pre></td></tr></table></figure></div>
+
+<p>源码里最关键的是 <code>tradingagents/graph/setup.py</code>。它用 LangGraph 的 <code>StateGraph</code> 把上述角色接成有条件跳转的工作流：</p>
+<ul>
+<li>分析师节点先调用工具拿数据；</li>
+<li>工具节点返回后回到分析师；</li>
+<li>清理消息后进入下一个分析师；</li>
+<li>多个分析师完成后，进入牛&#x2F;熊研究员辩论；</li>
+<li><code>Research Manager</code> 汇总投资计划；</li>
+<li><code>Trader</code> 生成交易计划；</li>
+<li>最后进入三类风险分析师和 <code>Portfolio Manager</code>。</li>
+</ul>
+<p>有意思的是，项目还专门处理了一个多 Agent 系统的真实工程问题：<strong>图路由漂移</strong>。</p>
+<p>在 <code>setup.py</code> 里，<code>DEBATE_PATH_MAP</code> 和 <code>RISK_ANALYSIS_PATH_MAP</code> 把所有可能路由目标都列出来，避免 prompt&#x2F;i18n&#x2F;标签改动后，LangGraph 因为找不到 path map 中的节点而中途崩掉。这不是花哨功能，而是多 Agent 编排真正会遇到的稳定性问题。</p>
+<p>另一个值得看的文件是 <code>tradingagents/graph/trading_graph.py</code>。这里做了几件比较工程化的事：</p>
+<ul>
+<li>把 <code>deep_thinking_llm</code> 和 <code>quick_thinking_llm</code> 分开；</li>
+<li>根据 provider 适配 Google thinking level、OpenAI reasoning effort、Anthropic effort；</li>
+<li>用 <code>ToolNode</code> 统一市场、新闻、fundamental、prediction markets 等工具；</li>
+<li>引入 checkpoint &#x2F; resume；</li>
+<li>用 <code>TradingMemoryLog</code> 做结果记录和后续反思。</li>
+</ul>
+<p><strong>我的判断：TradingAgents 的价值不在它能不能今天帮你赚钱，而在它展示了金融 Agent 系统如何从“单 prompt”变成“可编排组织”。</strong></p>
+<p>但它也有明显边界：Agent 越多，幻觉、数据延迟、工具失败和成本都会被放大。项目虽然做了 verified market snapshot、checkpoint、vendor fallback 等增强，但实际用于交易仍然必须有独立风控和回测验证。</p>
+<h2 id="四、OpenBB：AI-金融应用最缺的不是模型，而是数据入口"><a href="#四、OpenBB：AI-金融应用最缺的不是模型，而是数据入口" class="headerlink" title="四、OpenBB：AI 金融应用最缺的不是模型，而是数据入口"></a>四、OpenBB：AI 金融应用最缺的不是模型，而是数据入口</h2><p>源码位置：<code>OpenBB-finance/OpenBB</code></p>
+<p>OpenBB 是这批项目里最像「基础设施」的一个。</p>
+<p>README 对它的定位是 Open Data Platform：连接一次，多处消费。Python、REST API、Workspace、Excel、MCP server、AI copilot 都可以从这个数据层取数据。</p>
+<p>源码里值得看的不是某个指标函数，而是它的抽象边界。</p>
+<p><code>openbb_platform/core/openbb_core/app/router.py</code> 定义了 OpenBB 自己的 <code>Router</code>：它把一个普通函数包装成 API route，同时塞入：</p>
+<ul>
+<li>response model；</li>
+<li>provider examples；</li>
+<li><code>openapi_extra</code>；</li>
+<li><code>mcp_config</code>；</li>
+<li>widget config。</li>
+</ul>
+<p>这意味着 OpenBB 不是简单封装一堆金融 API，而是在把金融数据函数同时暴露给 API、UI、Agent&#x2F;MCP 等多个消费端。</p>
+<p>另一个关键抽象在 <code>provider/abstract/fetcher.py</code>：</p>
+<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">transform_query → extract_data / aextract_data → transform_data</span><br></pre></td></tr></table></figure></div>
+
+<p>这是非常经典也非常稳的 TET 结构：</p>
+<ol>
+<li>先把标准参数转成 provider-specific query；</li>
+<li>再去具体数据源抓取；</li>
+<li>最后转换成统一的 OpenBB 数据模型。</li>
+</ol>
+<p><strong>这层价值很大：如果没有统一数据模型，Agent 调 10 个金融数据源只会得到 10 种字段、10 种异常、10 种时间口径。</strong></p>
+<p>所以 OpenBB 更像「金融 Agent 的数据插座」。你可以不用它的 Workspace，但它的数据抽象和 provider 插件系统值得研究。</p>
+<p>风险也很清楚：金融数据源的许可、延迟、字段口径、商业使用权都很复杂。OpenBB 能统一入口，不等于替你解决数据合规。</p>
+<h2 id="五、Qlib：量化研究真正需要的是“从数据到回测”的闭环"><a href="#五、Qlib：量化研究真正需要的是“从数据到回测”的闭环" class="headerlink" title="五、Qlib：量化研究真正需要的是“从数据到回测”的闭环"></a>五、Qlib：量化研究真正需要的是“从数据到回测”的闭环</h2><p>源码位置：<code>microsoft/qlib</code></p>
+<p>Qlib 是微软开源的 AI-oriented quantitative investment platform，覆盖数据处理、模型训练、回测、组合优化、执行和在线服务。</p>
+<p>源码结构很清晰：</p>
+<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">qlib/data       数据层</span><br><span class="line">qlib/model      模型层</span><br><span class="line">qlib/strategy   策略层</span><br><span class="line">qlib/backtest   回测/交易执行层</span><br><span class="line">qlib/workflow   实验记录与流水线</span><br><span class="line">qlib/rl         强化学习相关模块</span><br></pre></td></tr></table></figure></div>
+
+<p>我重点看了 <code>qlib/backtest/executor.py</code>。它的 <code>BaseExecutor</code> 不是简单地「把订单按价格成交」，而是维护了一套交易执行所需的公共基础设施：</p>
+<ul>
+<li><code>trade_calendar</code>：交易日历和步进；</li>
+<li><code>trade_account</code>：账户与持仓；</li>
+<li><code>trade_exchange</code>：市场&#x2F;交易所抽象；</li>
+<li><code>indicator_config</code>：成交质量指标，如 price advantage、fulfill rate；</li>
+<li><code>track_data</code>：为 RL agent 收集执行轨迹。</li>
+</ul>
+<p>里面有一段注释很说明问题：<code>collect_data</code> 被设计成 generator，因为它既要推进交易，又要为嵌套 executor &#x2F; RL 训练收集中间状态。</p>
+<p>这就是 Qlib 和很多「LLM 给建议」项目的差别：<strong>Qlib 关心的是投资研究如何被复现、回测、记录和生产化，而不是今天模型说买还是卖。</strong></p>
+<p>Qlib 的另一个新信号是它正在和 RD-Agent 结合，把自动因子挖掘、模型优化接到量化研发流程中。这比单纯让 LLM 读新闻更接近专业投研里的“研发自动化”。</p>
+<h2 id="六、ai-hedge-fund：概念很直观，但它自己也强调不是实盘系统"><a href="#六、ai-hedge-fund：概念很直观，但它自己也强调不是实盘系统" class="headerlink" title="六、ai-hedge-fund：概念很直观，但它自己也强调不是实盘系统"></a>六、ai-hedge-fund：概念很直观，但它自己也强调不是实盘系统</h2><p>源码位置：<code>virattt/ai-hedge-fund</code></p>
+<p>这个项目很好理解：把一群著名投资人&#x2F;投资风格做成 Agent，比如 Graham、Buffett、Munger、Peter Lynch、Damodaran、Burry、Cathie Wood 等，让它们分别分析，再由 risk manager 和 portfolio manager 做最终决策。</p>
+<p><code>src/main.py</code> 里核心工作流很短：</p>
+<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">start</span><br><span class="line">  ├─ selected analyst agents</span><br><span class="line">  ↓</span><br><span class="line">risk_management_agent</span><br><span class="line">  ↓</span><br><span class="line">portfolio_manager</span><br><span class="line">  ↓</span><br><span class="line">END</span><br></pre></td></tr></table></figure></div>
+
+<p>它用 LangGraph 的 <code>StateGraph</code> 串起来。和 TradingAgents 相比，ai-hedge-fund 的图更直接、更适合教学和 PoC。</p>
+<p>真正值得看的是两个约束模块。</p>
+<p><code>src/agents/risk_manager.py</code> 不让 LLM 直接拍脑袋定仓位，而是先用确定性代码算：</p>
+<ul>
+<li>当前价格；</li>
+<li>日波动率、年化波动率；</li>
+<li>波动率分位数；</li>
+<li>多标的相关性；</li>
+<li>组合总价值；</li>
+<li>剩余仓位上限。</li>
+</ul>
+<p><code>src/agents/portfolio_manager.py</code> 又进一步把允许动作算出来：</p>
+<ul>
+<li><code>buy</code> 最多可以买多少；</li>
+<li><code>sell</code> 最多能卖已有多头；</li>
+<li><code>short</code> 受保证金和仓位限制；</li>
+<li><code>cover</code> 只能覆盖已有空头；</li>
+<li>没有合法交易时直接预填 <code>hold</code>，不发给 LLM。</li>
+</ul>
+<p>这是非常重要的工程原则：<strong>让 LLM 做判断，但不要让 LLM 越过确定性风控边界。</strong></p>
+<p>不过项目 README 也写得很明确：这是 proof of concept，教育和研究用途，不是实盘交易或投资建议。这句话不能忽略。</p>
+<h2 id="七、daily-stock-analysis：个人盯盘-x2F-推送系统，工程量比想象中大"><a href="#七、daily-stock-analysis：个人盯盘-x2F-推送系统，工程量比想象中大" class="headerlink" title="七、daily_stock_analysis：个人盯盘&#x2F;推送系统，工程量比想象中大"></a>七、daily_stock_analysis：个人盯盘&#x2F;推送系统，工程量比想象中大</h2><p>源码位置：<code>ZhuLinsen/daily_stock_analysis</code></p>
+<p>这个项目在中文圈很容易火，因为它击中了一个具体需求：每天对自选股做 AI 分析，然后自动推送。</p>
+<p>但源码不是一个小脚本，而是一个完整应用：</p>
+<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">main.py / server.py        CLI 与服务入口</span><br><span class="line">src/core/pipeline.py       主分析流水线</span><br><span class="line">data_provider/            AkShare、Tushare、YFinance、Longbridge 等数据源</span><br><span class="line">src/analyzer.py            LLM 分析</span><br><span class="line">src/agent/                 多 Agent 编排</span><br><span class="line">src/reports/               报告生成</span><br><span class="line">bot/                       飞书、钉钉、Discord 等机器人入口</span><br><span class="line">apps/dsa-web/              Web 前端</span><br></pre></td></tr></table></figure></div>
+
+<p><code>src/core/pipeline.py</code> 非常长，超过 3000 行，职责包括：</p>
+<ul>
+<li>数据抓取；</li>
+<li>技术分析；</li>
+<li>新闻搜索；</li>
+<li>LLM 分析；</li>
+<li>诊断记录；</li>
+<li>决策信号提取；</li>
+<li>通知发送；</li>
+<li>交易时段判断；</li>
+<li>多市场代码标准化。</li>
+</ul>
+<p>它的优点是功能非常完整，适合真实个人使用场景；缺点也来自这里：主 pipeline 过重，长期维护容易变成“所有东西都往一个调度器里塞”。</p>
+<p>更有意思的是 <code>src/agent/orchestrator.py</code>。项目把 Agent 模式分成：</p>
+<ul>
+<li><code>quick</code>：Technical → Decision；</li>
+<li><code>standard</code>：Technical → Intel → Decision；</li>
+<li><code>full</code>：Technical → Intel → Risk → Decision；</li>
+<li><code>specialist</code>：Technical → Intel → Risk → Specialist → Decision。</li>
+</ul>
+<p>它还处理了全局 timeout、子 Agent timeout、预算不足自动降级、dashboard partial 标记等细节。</p>
+<p><strong>这类项目最适合“人监督的自动化盯盘”，不适合直接理解成“AI 自动炒股”。</strong></p>
+<h2 id="八、FinGPT-与-FinRobot：一个偏模型，一个偏-Agent-工作流"><a href="#八、FinGPT-与-FinRobot：一个偏模型，一个偏-Agent-工作流" class="headerlink" title="八、FinGPT 与 FinRobot：一个偏模型，一个偏 Agent 工作流"></a>八、FinGPT 与 FinRobot：一个偏模型，一个偏 Agent 工作流</h2><p>源码位置：<code>AI4Finance-Foundation/FinGPT</code>、<code>AI4Finance-Foundation/FinRobot</code></p>
+<p>FinGPT 是金融大模型方向的代表。源码里有 FinGPT Forecaster、Benchmark、RAG、Sentiment Analysis 等目录。</p>
+<p>例如 <code>fingpt/FinGPT_Forecaster/data_pipeline.py</code> 的流程是：</p>
+<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">选择指数成分股 → 获取数据 → 生成 prompt → 查询 GPT-4 → 转训练数据集 → save_to_disk</span><br></pre></td></tr></table></figure></div>
+
+<p>它更像「金融 LLM 数据与微调实验室」，重点不是交易执行，而是金融文本、新闻、基本面如何进入 LLM 训练&#x2F;推理流程。</p>
+<p>FinRobot 则更偏 Agent 平台。<code>finrobot/agents/workflow.py</code> 基于 AutoGen，定义了 <code>FinRobot(AssistantAgent)</code>，再往上封装：</p>
+<ul>
+<li>SingleAssistant；</li>
+<li>SingleAssistantRAG；</li>
+<li>Shadow Agent；</li>
+<li>GroupChat &#x2F; GroupChatManager。</li>
+</ul>
+<p>它把 agent profile、toolkits、proxy、RAG function 组合起来，更适合自动生成研报、跑工具链、做多角色分析。</p>
+<p>一句话区分：<strong>FinGPT 解决“金融模型和数据集怎么来”，FinRobot 解决“金融分析任务怎么被 Agent 执行”。</strong></p>
+<h2 id="九、MarS：最硬核，但当前不要误读成完整可复现产品"><a href="#九、MarS：最硬核，但当前不要误读成完整可复现产品" class="headerlink" title="九、MarS：最硬核，但当前不要误读成完整可复现产品"></a>九、MarS：最硬核，但当前不要误读成完整可复现产品</h2><p>源码位置：<code>microsoft/MarS</code></p>
+<p>MarS 的方向和前面项目完全不同。它不是让 LLM 读新闻，也不是做股票仪表盘，而是要做金融市场的 generative foundation model。</p>
+<p>项目论文叫 <em>MarS: a Financial Market Simulation Engine Powered by Generative Foundation Model</em>，核心是 Large Market Model：在订单事件级别生成市场行为。</p>
+<p>源码里有两层：</p>
+<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mlib/core/                 事件驱动撮合/订单簿/交易环境</span><br><span class="line">market_simulation/models/  OrderModel 等生成模型</span><br></pre></td></tr></table></figure></div>
+
+<p><code>mlib/core/engine.py</code> 是事件驱动模拟器，用 heap queue 管理事件：</p>
+<ul>
+<li>MarketOpenEvent；</li>
+<li>AgentStatesUpdateAndWakeup；</li>
+<li>ExchangeReceiveOrdersEvent；</li>
+<li>AgentReceiveTradingResultEvent；</li>
+<li>MarketCloseEvent。</li>
+</ul>
+<p>它的核心循环就是不断 pop event，然后按事件类型更新 agent、exchange、order owner、transaction。</p>
+<p><code>market_simulation/models/order_model.py</code> 更有意思。它定义 <code>OrderTokenizer</code>，把订单事件离散化为 token，包括：</p>
+<ul>
+<li>order type；</li>
+<li>price level；</li>
+<li>predicted order volume；</li>
+<li>order interval；</li>
+<li>change to open；</li>
+<li>time to open；</li>
+<li>LOB snapshot。</li>
+</ul>
+<p>然后用 <code>LlamaForCausalLM</code> 作为 decoder 来预测下一个订单 token。</p>
+<p><strong>这是一个非常硬核的方向：把金融市场当成一个可生成的“世界模型”。</strong></p>
+<p>但当前仓库也有明显限制：README 写明核心代码和工具已发布，关联 Hugging Face 模型还在 final review，部分 demo 完整功能依赖模型发布。因此它更适合研究“金融世界模型怎么建”，不适合马上拿来做完整仿真产品。</p>
+<h2 id="十、剩下-8-个项目怎么定位"><a href="#十、剩下-8-个项目怎么定位" class="headerlink" title="十、剩下 8 个项目怎么定位"></a>十、剩下 8 个项目怎么定位</h2><p>不是没价值，只是优先级不同。</p>
+<ul>
+<li><strong>vn.py</strong>：国内量化交易框架老牌项目，交易接口、CTA、回测、实盘生态成熟。它不靠 AI 噱头，价值在交易工程经验。</li>
+<li><strong>FinceptTerminal</strong>：定位个人 Bloomberg 替代品，C++&#x2F;Qt 终端形态很有野心；但 README 已提示 2026 年 6 月后公开版改为月更、私有版优先，维护节奏要注意。</li>
+<li><strong>backtrader</strong>：轻量回测框架经典项目，适合教学和策略原型；但主仓库更新频率较低，现代化程度不如新项目。</li>
+<li><strong>Lean</strong>：QuantConnect 的专业级算法交易引擎，C# &#x2F; Python、回测&#x2F;实盘&#x2F;另类数据生态强，是工程成熟度很高的交易底座。</li>
+<li><strong>Vibe-Trading</strong>：偏个人 trading agent 平台，结合 FastAPI、React、MCP、多 Agent；很新，适合观察“零代码交易 Agent”叙事。</li>
+<li><strong>nofx</strong>：Go + React 的 AI trading terminal，强调 US stocks、commodities、forex、crypto 和交易执行；AGPL-3.0，接近实盘链路，风险边界要看得更严。</li>
+<li><strong>ai-berkshire</strong>：价值投资 skill&#x2F;框架，中文语境很强，适合研究“方法论结构化”；但投资收益展示类内容必须谨慎看待，不能当作未来收益证明。</li>
+<li><strong>go-stock</strong>：本地隐私导向的 AI 股票分析工具，支持多模型、本地数据保留，适合普通用户盯盘。</li>
+</ul>
+<h2 id="十一、如果你真的要学习源码，推荐顺序是这样"><a href="#十一、如果你真的要学习源码，推荐顺序是这样" class="headerlink" title="十一、如果你真的要学习源码，推荐顺序是这样"></a>十一、如果你真的要学习源码，推荐顺序是这样</h2><p>不要按 star 读，按工程层级读。</p>
+<p><strong>第一层：数据与接口</strong></p>
+<p>先看 OpenBB、vn.py、Lean。理解真实金融系统里最麻烦的问题：数据源、字段口径、交易日历、行情延迟、broker&#x2F;exchange adapter。</p>
+<p><strong>第二层：研究与回测</strong></p>
+<p>再看 Qlib、backtrader、Lean。重点看 dataset、model、strategy、executor、account、exchange、position，而不是急着接 LLM。</p>
+<p><strong>第三层：Agent 决策</strong></p>
+<p>最后看 TradingAgents、ai-hedge-fund、FinRobot、daily_stock_analysis。重点看：</p>
+<ul>
+<li>Agent graph 怎么编排；</li>
+<li>工具调用失败怎么降级；</li>
+<li>LLM 输出如何结构化；</li>
+<li>哪些约束由代码确定，哪些交给模型判断；</li>
+<li>有没有 checkpoint、memory、risk guardrail。</li>
+</ul>
+<p><strong>第四层：市场仿真 &#x2F; 世界模型</strong></p>
+<p>有余力再读 MarS。它不是最容易用的，但概念最深：订单事件级市场模拟，比“预测明天涨跌”更接近金融系统建模本质。</p>
+<h2 id="十二、最后的判断：AI-投资项目的分水岭来了"><a href="#十二、最后的判断：AI-投资项目的分水岭来了" class="headerlink" title="十二、最后的判断：AI 投资项目的分水岭来了"></a>十二、最后的判断：AI 投资项目的分水岭来了</h2><p>这 16 个项目可以分成两类。</p>
+<p>一类在认真补底座：数据、回测、撮合、风控、模拟、实验记录。这类项目短期不一定性感，但长期价值更稳。</p>
+<p>另一类在包装体验：多 Agent、自动研报、自然语言下单、聊天式策略生成。这类项目传播快，但真正能不能用，要看它是否把模型关在确定性边界里。</p>
+<p><strong>判断一个 AI 投资项目，不要问它“能不能预测上涨”。要问四个问题：</strong></p>
+<ol>
+<li>数据从哪里来，字段和时间口径是否可信？</li>
+<li>回测有没有防 look-ahead bias？</li>
+<li>风控是否由确定性代码约束，而不是让 LLM 自己承诺？</li>
+<li>输出是否能被记录、复现、审计和复盘？</li>
+</ol>
+<p>能回答这四个问题的项目，才值得深读源码。</p>
+<p>否则 star 再高，也只是把金融市场包装成了一个更漂亮的聊天窗口。</p>
+<hr>
+<h2 id="源码与资料来源"><a href="#源码与资料来源" class="headerlink" title="源码与资料来源"></a>源码与资料来源</h2><ul>
+<li>OpenBB：<a class="link"   target="_blank" rel="noopener" href="https://github.com/OpenBB-finance/OpenBB" >https://github.com/OpenBB-finance/OpenBB<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li>daily_stock_analysis：<a class="link"   target="_blank" rel="noopener" href="https://github.com/ZhuLinsen/daily_stock_analysis" >https://github.com/ZhuLinsen/daily_stock_analysis<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li>ai-hedge-fund：<a class="link"   target="_blank" rel="noopener" href="https://github.com/virattt/ai-hedge-fund" >https://github.com/virattt/ai-hedge-fund<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li>Qlib：<a class="link"   target="_blank" rel="noopener" href="https://github.com/microsoft/qlib" >https://github.com/microsoft/qlib<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li>vn.py：<a class="link"   target="_blank" rel="noopener" href="https://github.com/vnpy/vnpy" >https://github.com/vnpy/vnpy<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li>FinceptTerminal：<a class="link"   target="_blank" rel="noopener" href="https://github.com/Fincept-Corporation/FinceptTerminal" >https://github.com/Fincept-Corporation/FinceptTerminal<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li>backtrader：<a class="link"   target="_blank" rel="noopener" href="https://github.com/mementum/backtrader" >https://github.com/mementum/backtrader<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li>Lean：<a class="link"   target="_blank" rel="noopener" href="https://github.com/QuantConnect/Lean" >https://github.com/QuantConnect/Lean<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li>Vibe-Trading：<a class="link"   target="_blank" rel="noopener" href="https://github.com/HKUDS/Vibe-Trading" >https://github.com/HKUDS/Vibe-Trading<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li>FinGPT：<a class="link"   target="_blank" rel="noopener" href="https://github.com/AI4Finance-Foundation/FinGPT" >https://github.com/AI4Finance-Foundation/FinGPT<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li>nofx：<a class="link"   target="_blank" rel="noopener" href="https://github.com/NoFxAiOS/nofx" >https://github.com/NoFxAiOS/nofx<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li>ai-berkshire：<a class="link"   target="_blank" rel="noopener" href="https://github.com/xbtlin/ai-berkshire" >https://github.com/xbtlin/ai-berkshire<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li>TradingAgents：<a class="link"   target="_blank" rel="noopener" href="https://github.com/TauricResearch/TradingAgents" >https://github.com/TauricResearch/TradingAgents<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li>FinRobot：<a class="link"   target="_blank" rel="noopener" href="https://github.com/AI4Finance-Foundation/FinRobot" >https://github.com/AI4Finance-Foundation/FinRobot<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li>go-stock：<a class="link"   target="_blank" rel="noopener" href="https://github.com/ArvinLovegood/go-stock" >https://github.com/ArvinLovegood/go-stock<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li>MarS：<a class="link"   target="_blank" rel="noopener" href="https://github.com/microsoft/MarS" >https://github.com/microsoft/MarS<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li>MarS 论文：<a class="link"   target="_blank" rel="noopener" href="https://arxiv.org/abs/2409.07486" >https://arxiv.org/abs/2409.07486<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li>Qlib 论文：<a class="link"   target="_blank" rel="noopener" href="https://arxiv.org/abs/2009.11189" >https://arxiv.org/abs/2009.11189<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li>TradingAgents 论文入口：<a class="link"   target="_blank" rel="noopener" href="https://arxiv.org/abs/2412.20138" >https://arxiv.org/abs/2412.20138<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+</ul>
+<blockquote>
+<p>本文不构成任何投资建议，也不推荐把任何开源项目直接用于实盘交易。开源源码适合研究工程结构、数据接口、回测方法和 Agent 编排；真实交易需要独立风控、合规审查和长期验证。</p>
+</blockquote>
+
+		</div>
+
+		
+		<div class="post-copyright-info w-full my-8 px-2 sm:px-6 md:px-8">
+			<div class="article-copyright-info-container">
+    <ul>
+        <li><strong>标题:</strong> 别急着让 AI 炒股：这 16 个开源项目，真正值钱的是三层底座</li>
+        <li><strong>作者:</strong> Nathan</li>
+        <li><strong>创建于
+                :</strong> 2026-07-09 10:45:00</li>
+        
+            <li>
+                <strong>更新于
+                    :</strong> 2026-07-09 10:31:08
+            </li>
+        
+        <li>
+            <strong>链接:</strong> https://hydraxman.github.io/2026/07/09/ai-investing-skills-source-map/
+        </li>
+        <li>
+            <strong>
+                版权声明:
+            </strong>
+            
+
+            
+                本文章采用 <a class="license" target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0">CC BY-NC-SA 4.0</a> 进行许可。
+            
+        </li>
+    </ul>
+</div>
+
+		</div>
+		
+
+		
+		<ul class="post-tags-box text-lg mt-1.5 flex-wrap justify-center flex md:hidden">
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/Agent/">#Agent</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/%E9%87%8F%E5%8C%96%E4%BA%A4%E6%98%93/">#量化交易</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/%E5%BC%80%E6%BA%90%E9%A1%B9%E7%9B%AE/">#开源项目</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/AI%E6%8A%95%E8%B5%84/">#AI投资</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/%E9%87%91%E8%9E%8DAI/">#金融AI</a>&nbsp;
+			</li>
+			
+		</ul>
+		
+
+		
+
+		
+		<div class="article-nav my-8 flex justify-between items-center px-2 sm:px-6 md:px-8">
+			
+			<div class="article-prev border-border-color shadow-redefine-flat shadow-shadow-color-2 rounded-medium px-4 py-2 hover:shadow-redefine-flat-hover hover:shadow-shadow-color-2">
+				<a class="prev" rel="prev" href="/2026/07/10/github-trending/github-trending-2026-07-10/">
+					<span class="left arrow-icon flex justify-center items-center">
+						<i class="fa-solid fa-chevron-left"></i>
+					</span>
+					<span class="title flex justify-center items-center">
+						<span class="post-nav-title-item truncate max-w-48">今天的 GitHub 榜单，开始从 AI 会不会写，转向 AI 能不能真干活</span>
+						<span class="post-nav-item">上一篇</span>
+					</span>
+				</a>
+			</div>
+			
+			
+			<div class="article-next border-border-color shadow-redefine-flat shadow-shadow-color-2 rounded-medium px-4 py-2 hover:shadow-redefine-flat-hover hover:shadow-shadow-color-2">
+				<a class="next" rel="next" href="/2026/07/09/github-trending/github-trending-2026-07-09/">
+					<span class="title flex justify-center items-center">
+						<span class="post-nav-title-item truncate max-w-48">GitHub 热榜开始卷“工作流”：2026-07-09 最值得看的 10 个项目</span>
+						<span class="post-nav-item">下一篇</span>
+					</span>
+					<span class="right arrow-icon flex justify-center items-center">
+						<i class="fa-solid fa-chevron-right"></i>
+					</span>
+				</a>
+			</div>
+			
+		</div>
+		
+
+
+		
+	</div>
+
+	
+	<div class="toc-content-container">
+		<div class="post-toc-wrap">
+	<div class="post-toc">
+		<div class="toc-title">目录</div>
+		<div class="page-title">别急着让 AI 炒股：这 16 个开源项目，真正值钱的是三层底座</div>
+		<ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E5%85%88%E6%8A%8A%E6%BA%90%E7%A0%81%E5%87%BA%E5%A4%84%E6%A0%B8%E4%B8%80%E9%81%8D"><span class="nav-text">一、先把源码出处核一遍</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%818-%E4%B8%AA%E6%BA%90%E7%A0%81%E6%B7%B1%E6%8C%96%E9%A1%B9%E7%9B%AE%EF%BC%9A%E4%B8%BA%E4%BB%80%E4%B9%88%E9%80%89%E5%AE%83%E4%BB%AC"><span class="nav-text">二、8 个源码深挖项目：为什么选它们</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81TradingAgents%EF%BC%9A%E6%9C%80%E5%83%8F%E2%80%9C%E6%8A%95%E7%A0%94%E5%85%AC%E5%8F%B8%E7%BB%84%E7%BB%87%E7%BB%93%E6%9E%84%E2%80%9D%E7%9A%84%E5%A4%9A-Agent-%E6%A1%86%E6%9E%B6"><span class="nav-text">三、TradingAgents：最像“投研公司组织结构”的多 Agent 框架</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81OpenBB%EF%BC%9AAI-%E9%87%91%E8%9E%8D%E5%BA%94%E7%94%A8%E6%9C%80%E7%BC%BA%E7%9A%84%E4%B8%8D%E6%98%AF%E6%A8%A1%E5%9E%8B%EF%BC%8C%E8%80%8C%E6%98%AF%E6%95%B0%E6%8D%AE%E5%85%A5%E5%8F%A3"><span class="nav-text">四、OpenBB：AI 金融应用最缺的不是模型，而是数据入口</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%94%E3%80%81Qlib%EF%BC%9A%E9%87%8F%E5%8C%96%E7%A0%94%E7%A9%B6%E7%9C%9F%E6%AD%A3%E9%9C%80%E8%A6%81%E7%9A%84%E6%98%AF%E2%80%9C%E4%BB%8E%E6%95%B0%E6%8D%AE%E5%88%B0%E5%9B%9E%E6%B5%8B%E2%80%9D%E7%9A%84%E9%97%AD%E7%8E%AF"><span class="nav-text">五、Qlib：量化研究真正需要的是“从数据到回测”的闭环</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AD%E3%80%81ai-hedge-fund%EF%BC%9A%E6%A6%82%E5%BF%B5%E5%BE%88%E7%9B%B4%E8%A7%82%EF%BC%8C%E4%BD%86%E5%AE%83%E8%87%AA%E5%B7%B1%E4%B9%9F%E5%BC%BA%E8%B0%83%E4%B8%8D%E6%98%AF%E5%AE%9E%E7%9B%98%E7%B3%BB%E7%BB%9F"><span class="nav-text">六、ai-hedge-fund：概念很直观，但它自己也强调不是实盘系统</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%83%E3%80%81daily-stock-analysis%EF%BC%9A%E4%B8%AA%E4%BA%BA%E7%9B%AF%E7%9B%98-x2F-%E6%8E%A8%E9%80%81%E7%B3%BB%E7%BB%9F%EF%BC%8C%E5%B7%A5%E7%A8%8B%E9%87%8F%E6%AF%94%E6%83%B3%E8%B1%A1%E4%B8%AD%E5%A4%A7"><span class="nav-text">七、daily_stock_analysis：个人盯盘&#x2F;推送系统，工程量比想象中大</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AB%E3%80%81FinGPT-%E4%B8%8E-FinRobot%EF%BC%9A%E4%B8%80%E4%B8%AA%E5%81%8F%E6%A8%A1%E5%9E%8B%EF%BC%8C%E4%B8%80%E4%B8%AA%E5%81%8F-Agent-%E5%B7%A5%E4%BD%9C%E6%B5%81"><span class="nav-text">八、FinGPT 与 FinRobot：一个偏模型，一个偏 Agent 工作流</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B9%9D%E3%80%81MarS%EF%BC%9A%E6%9C%80%E7%A1%AC%E6%A0%B8%EF%BC%8C%E4%BD%86%E5%BD%93%E5%89%8D%E4%B8%8D%E8%A6%81%E8%AF%AF%E8%AF%BB%E6%88%90%E5%AE%8C%E6%95%B4%E5%8F%AF%E5%A4%8D%E7%8E%B0%E4%BA%A7%E5%93%81"><span class="nav-text">九、MarS：最硬核，但当前不要误读成完整可复现产品</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%81%E3%80%81%E5%89%A9%E4%B8%8B-8-%E4%B8%AA%E9%A1%B9%E7%9B%AE%E6%80%8E%E4%B9%88%E5%AE%9A%E4%BD%8D"><span class="nav-text">十、剩下 8 个项目怎么定位</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%81%E4%B8%80%E3%80%81%E5%A6%82%E6%9E%9C%E4%BD%A0%E7%9C%9F%E7%9A%84%E8%A6%81%E5%AD%A6%E4%B9%A0%E6%BA%90%E7%A0%81%EF%BC%8C%E6%8E%A8%E8%8D%90%E9%A1%BA%E5%BA%8F%E6%98%AF%E8%BF%99%E6%A0%B7"><span class="nav-text">十一、如果你真的要学习源码，推荐顺序是这样</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%81%E4%BA%8C%E3%80%81%E6%9C%80%E5%90%8E%E7%9A%84%E5%88%A4%E6%96%AD%EF%BC%9AAI-%E6%8A%95%E8%B5%84%E9%A1%B9%E7%9B%AE%E7%9A%84%E5%88%86%E6%B0%B4%E5%B2%AD%E6%9D%A5%E4%BA%86"><span class="nav-text">十二、最后的判断：AI 投资项目的分水岭来了</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BA%90%E7%A0%81%E4%B8%8E%E8%B5%84%E6%96%99%E6%9D%A5%E6%BA%90"><span class="nav-text">源码与资料来源</span></a></li></ol>
+
+	</div>
+</div>
+	</div>
+	
+</div>
+
+			</div>
+
+			
+		</div>
+
+		<div class="main-content-footer">
+			<footer class="footer mt-5 py-5 h-auto text-base text-third-text-color relative border-t-2 border-t-border-color">
+    <div class="info-container py-3 text-center">
+        
+        <div class="text-center">
+            &copy;
+            
+              <span>2024</span>
+              -
+            
+            2026&nbsp;&nbsp;<i class="fa-solid fa-heart fa-beat" style="--fa-animation-duration: 0.5s; color: #333"></i>&nbsp;&nbsp;<a href="/">Nathan</a>
+            
+                
+                <p class="post-count space-x-0.5">
+                    <span>
+                        共撰写了 290 篇文章
+                    </span>
+                    
+                        <span>
+                            共 612.1k 字
+                        </span>
+                    
+                </p>
+            
+        </div>
+        
+        <div class="relative text-center lg:absolute lg:left-[20px] lg:top-1/2 lg:-translate-y-1/2 lg:text-left">
+            <span class="lg:block text-sm">由 <?xml version="1.0" encoding="utf-8"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg class="relative top-[2px] inline-block align-baseline" version="1.1" id="圖層_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="1rem" height="1rem" viewBox="0 0 512 512" enable-background="new 0 0 512 512" xml:space="preserve"><path fill="#0E83CD" d="M256.4,25.8l-200,115.5L56,371.5l199.6,114.7l200-115.5l0.4-230.2L256.4,25.8z M349,354.6l-18.4,10.7l-18.6-11V275H200v79.6l-18.4,10.7l-18.6-11v-197l18.5-10.6l18.5,10.8V237h112v-79.6l18.5-10.6l18.5,10.8V354.6z"/></svg><a target="_blank" class="text-base" href="https://hexo.io">Hexo</a> 驱动</span>
+            <span class="text-sm lg:block">主题&nbsp;<a class="text-base" target="_blank" href="https://github.com/EvanNotFound/hexo-theme-redefine">Redefine v2.9.0</a></span>
+        </div>
+        
+        
+            <div>
+                博客已运行 <span class="odometer" id="runtime_days" ></span> 天 <span class="odometer" id="runtime_hours"></span> 小时 <span class="odometer" id="runtime_minutes"></span> 分钟 <span class="odometer" id="runtime_seconds"></span> 秒
+            </div>
+        
+        
+            <script data-swup-reload-script>
+                try {
+                    function odometer_init() {
+                    const elements = document.querySelectorAll('.odometer');
+                    elements.forEach(el => {
+                        new Odometer({
+                            el,
+                            format: '( ddd).dd',
+                            duration: 200
+                        });
+                    });
+                    }
+                    odometer_init();
+                } catch (error) {}
+            </script>
+        
+        
+            
+                
+        
+                
+        
+        
+    </div>  
+</footer>
+		</div>
+	</div>
+
+	
+	<div class="post-tools">
+		<div class="post-tools-container">
+	<ul class="article-tools-list">
+		<!-- TOC aside toggle -->
+		
+		<li class="right-bottom-tools page-aside-toggle">
+			<i class="fa-regular fa-outdent"></i>
+		</li>
+		
+
+		<!-- go comment -->
+		
+	</ul>
+</div>
+	</div>
+	
+
+	<div class="right-side-tools-container">
+		<div class="side-tools-container">
+	<ul class="hidden-tools-list">
+		<li class="right-bottom-tools tool-font-adjust-plus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-plus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-font-adjust-minus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-minus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-dark-light-toggle flex justify-center items-center">
+			<i class="fa-regular fa-moon"></i>
+		</li>
+
+		<!-- rss -->
+		
+
+		
+
+		<li class="right-bottom-tools tool-scroll-to-bottom flex justify-center items-center">
+			<i class="fa-regular fa-arrow-down"></i>
+		</li>
+	</ul>
+
+	<ul class="visible-tools-list">
+		<li class="right-bottom-tools toggle-tools-list flex justify-center items-center">
+			<i class="fa-regular fa-cog fa-spin"></i>
+		</li>
+		
+		<li class="right-bottom-tools tool-scroll-to-top flex justify-center items-center">
+			<i class="arrow-up fas fa-arrow-up"></i>
+			<span class="percent"></span>
+		</li>
+		
+		
+	</ul>
+</div>
+	</div>
+
+	<div class="image-viewer-container" role="dialog" aria-modal="true" aria-label="图片查看器">
+	<button class="image-viewer-close" type="button" aria-label="关闭">
+		<i class="fa-solid fa-xmark"></i>
+	</button>
+	<button class="image-viewer-prev" type="button" aria-label="上一页">
+		<i class="fa-solid fa-chevron-left"></i>
+	</button>
+	<div class="image-viewer-frame">
+		<img src="" alt="">
+	</div>
+	<div class="image-viewer-exif-panel hidden absolute left-1/2 bottom-20 -translate-x-1/2 w-[min(92vw,420px)] max-h-[60vh] overflow-hidden rounded-2xl bg-background-color-transparent-80 p-4 text-left shadow-redefine-flat backdrop-blur-md" role="dialog" aria-label="EXIF" aria-hidden="true">
+		<div class="flex items-center justify-between mb-3">
+			<span class="text-sm font-semibold text-first-text-color">EXIF</span>
+			<button class="image-viewer-exif-close flex h-8 w-8 items-center justify-center rounded-full bg-background-color-transparent-80 text-first-text-color transition hover:bg-background-color-transparent-40" type="button" aria-label="关闭">
+				<i class="fa-solid fa-xmark text-[0.65rem]"></i>
+			</button>
+		</div>
+		<div class="image-viewer-exif-cards grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[50vh] overflow-y-auto pr-1 scrollbar-hide"></div>
+		<template class="image-viewer-exif-card-template">
+			<div class="rounded-lg bg-background-color-transparent-40 px-3 py-2">
+				<div class="image-viewer-exif-card-header flex items-center gap-2 mb-1">
+					<i class="image-viewer-exif-card-icon fa-solid fa-circle-info text-xs text-third-text-color"></i>
+					<div class="image-viewer-exif-card-title text-xs font-semibold text-first-text-color"></div>
+				</div>
+				<div class="image-viewer-exif-card-items flex flex-col gap-1"></div>
+			</div>
+		</template>
+	</div>
+	<button class="image-viewer-exif-toggle flex items-center gap-2 hidden absolute left-1/2 bottom-6 -translate-x-1/2 rounded-full border border-border-color bg-background-color-transparent-80 px-4 py-2 text-first-text-color backdrop-blur-md transition hover:bg-background-color-transparent-40" type="button" aria-label="EXIF" aria-expanded="false">
+		<i class="fa-solid fa-circle-info text-xs"></i>
+		<span class="text-xs font-semibold uppercase tracking-wider">EXIF</span>
+	</button>
+	<button class="image-viewer-next" type="button" aria-label="下一页">
+		<i class="fa-solid fa-chevron-right"></i>
+	</button>
+</div>
+
+
+	
+	<div class="search-pop-overlay">
+	<div class="popup search-popup">
+		<div class="search-header">
+			<span class="search-input-field-pre">
+				<i class="fa-solid fa-keyboard"></i>
+			</span>
+			<div class="search-input-container">
+				<input autocomplete="off" autocorrect="off" autocapitalize="off" placeholder="站内搜索您需要的内容..." spellcheck="false" type="search" class="search-input">
+			</div>
+			<span class="popup-btn-close">
+				<i class="fa-solid fa-times"></i>
+			</span>
+		</div>
+		<div id="search-result">
+			<div id="no-result">
+				<i class="fa-solid fa-spinner fa-spin-pulse fa-5x fa-fw"></i>
+			</div>
+		</div>
+	</div>
+</div>
+	
+
+</main>
+
+
+
+<script src="/js/build/libs/Swup.min.js"></script>
+
+<script src="/js/build/libs/SwupSlideTheme.min.js"></script>
+
+<script src="/js/build/libs/SwupScriptsPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupProgressPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupScrollPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupPreloadPlugin.min.js"></script>
+
+<script>
+    window.swup = new Swup({
+        plugins: [
+            new SwupScriptsPlugin({
+                optin: true,
+            }),
+            new SwupProgressPlugin(),
+            new SwupScrollPlugin({
+                offset: 80,
+            }),
+            new SwupSlideTheme({
+                mainElement: ".main-content-body",
+            }),
+            new SwupPreloadPlugin(),
+        ],
+        containers: ["#swup"],
+    });
+
+    window.dispatchEvent(
+        new CustomEvent("redefine:swup:ready", {
+            detail: {
+                swup: window.swup,
+            },
+        }),
+    );
+</script>
+
+
+
+
+	
+<script src="/js/build/main.js" type="module"></script>
+
+
+
+    
+<script src="/js/build/libs/odometer.min.js"></script>
+
+    
+<link rel="stylesheet" href="/assets/odometer-theme-minimal.css">
+
+
+
+
+
+
+
+  
+<script src="/js/build/libs/Typed.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+<script src="/js/build/libs/moment-with-locales.min.js" data-swup-reload-script=""></script>
+
+
+
+	
+</body>
+
+</html>
