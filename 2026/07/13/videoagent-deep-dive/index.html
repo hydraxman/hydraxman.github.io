@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="keywords" content="计算机技术, 生活中的胡思乱想">
+    
+    
+    <meta name="author" content="Nathan">
+    
+    <!-- Completely eliminate flash of wrong theme -->
+    <script>
+        (function() {
+            const THEME_KEY = "REDEFINE-THEME-STATUS";
+            const DARK = "dark", LIGHT = "light";
+            
+            // Get preferred theme
+            function getTheme() {
+                try {
+                    const saved = localStorage.getItem(THEME_KEY);
+                    if (saved) {
+                        const { isDark } = JSON.parse(saved);
+                        return isDark ? DARK : LIGHT;
+                    }
+                } catch (e) {}
+                
+                return matchMedia("(prefers-color-scheme: dark)").matches ? DARK : LIGHT;
+            }
+            
+            // Apply theme to document
+            function applyTheme(theme) {
+                const isDark = theme === DARK;
+                const root = document.documentElement;
+                
+                // Set classes for compatibility
+                root.classList.add(theme);
+                root.classList.remove(isDark ? LIGHT : DARK);
+                root.style.colorScheme = theme;
+            }
+            
+            // Initial application
+            const theme = getTheme();
+            applyTheme(theme);
+            
+            // Listen for system preference changes
+            matchMedia("(prefers-color-scheme: dark)").addEventListener("change", ({ matches }) => {
+                // Only update if using system preference (no localStorage entry)
+                if (!localStorage.getItem(THEME_KEY)) {
+                    applyTheme(matches ? DARK : LIGHT);
+                }
+            });
+            
+            // Set body classes ASAP (before DOMContentLoaded)
+            (function() {
+                const addBodyClass = () => {
+                    const b = document.body;
+                    if (!b) return false;
+                    b.classList.add(theme + "-mode");
+                    return true;
+                };
+
+                // Try immediately
+                if (addBodyClass()) return;
+
+                // Observe until body exists
+                const mo = new MutationObserver(() => {
+                    if (addBodyClass()) mo.disconnect();
+                });
+                mo.observe(document.documentElement, { childList: true, subtree: true });
+            })();
+        })();
+    </script>
+    
+    <!-- preconnect -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    
+    <!--- Seo Part-->
+    
+    <link rel="canonical" href="https://hydraxman.github.io/2026/07/13/videoagent-deep-dive/"/>
+    <meta name="robots" content="index,follow">
+    <meta name="googlebot" content="index,follow">
+    <meta name="revisit-after" content="1 days">
+    
+    
+        
+        <meta name="description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="VideoAgent 源码深读：把视频理解、检索与剪辑装进一张 Agent Graph">
+<meta property="og:url" content="https://hydraxman.github.io/2026/07/13/videoagent-deep-dive/index.html">
+<meta property="og:site_name" content="内森淼文">
+<meta property="og:description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://hydraxman.github.io/images/redefine-og.webp">
+<meta property="article:published_time" content="2026-07-13T07:00:00.000Z">
+<meta property="article:modified_time" content="2026-07-13T06:48:02.876Z">
+<meta property="article:author" content="Nathan">
+<meta property="article:tag" content="AI Agent">
+<meta property="article:tag" content="视频剪辑">
+<meta property="article:tag" content="视频理解">
+<meta property="article:tag" content="多模态">
+<meta property="article:tag" content="源码分析">
+<meta property="article:tag" content="VideoAgent">
+<meta property="article:tag" content="VideoRAG">
+<meta property="article:tag" content="技术调研">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://hydraxman.github.io/images/redefine-og.webp">
+    
+    
+    <!--- Icon Part-->
+    <link rel="icon" type="image/png" href="/images/favicon.svg" sizes="192x192">
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.svg">
+    <meta name="theme-color" content="#ffffff">
+    <link rel="shortcut icon" href="/images/favicon.svg">
+    <!--- Page Info-->
+    
+    <title>
+        
+            VideoAgent 源码深读：把视频理解、检索与剪辑装进一张 Agent Graph | 内森淼文
+        
+    </title>
+
+    
+<link rel="stylesheet" href="/fonts/Chillax/chillax.css">
+
+
+    <!--- Inject Part-->
+    
+        
+            
+    
+            
+    
+            
+                
+                    <link rel="stylesheet" href="/css/custom.css">
+                
+    
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    
+        
+<link rel="stylesheet" href="/css/build/tailwind.css">
+
+    
+
+    
+<link rel="stylesheet" href="/fonts/GeistMono/geist-mono.css">
+
+    
+<link rel="stylesheet" href="/fonts/Geist/geist.css">
+
+    <!--- Font Part-->
+    
+    
+    
+    
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&display=swap" rel="stylesheet">
+    
+    
+
+    <script id="hexo-configurations">
+    window.config = {"hostname":"hydraxman.github.io","root":"/","language":"zh-CN","path":"search.json"};
+    window.theme = {"articles":{"style":{"font_size":"16px","line_height":1.5,"image_border_radius":"14px","image_alignment":"center","image_caption":false,"link_icon":true,"delete_mask":false,"title_alignment":"left","headings_top_spacing":{"h1":"3.2rem","h2":"2.4rem","h3":"1.9rem","h4":"1.6rem","h5":"1.4rem","h6":"1.3rem"}},"word_count":{"enable":true,"count":true,"min2read":true},"author_label":{"enable":false,"auto":false,"list":[]},"code_block":{"copy":true,"style":"mac","highlight_theme":{"light":"github","dark":"vs2015"},"font":{"enable":false,"family":null,"url":null}},"toc":{"enable":true,"max_depth":3,"number":false,"expand":true,"init_open":true},"copyright":{"enable":true,"default":"cc_by_nc_sa"},"lazyload":true,"pangu_js":false,"recommendation":{"enable":false,"title":"推荐阅读","limit":3,"mobile_limit":2,"placeholder":"/images/wallhaven-wqery6-light.webp","skip_dirs":[]}},"colors":{"primary":"#ffffff","secondary":null,"default_mode":"light"},"global":{"fonts":{"chinese":{"enable":false,"family":null,"url":null},"english":{"enable":true,"family":"Inter","url":"https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"},"title":{"enable":true,"family":"Noto Serif","url":"https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&display=swap"}},"content_max_width":"1000px","sidebar_width":"210px","hover":{"shadow":true,"scale":false},"scroll_progress":{"bar":true,"percentage":true},"website_counter":{"url":"https://cn.vercount.one/js","enable":false,"site_pv":true,"site_uv":true,"post_pv":true},"single_page":true,"preloader":{"enable":false,"custom_message":null},"side_tools":{"gear_rotation":true,"auto_expand":false},"open_graph":{"enable":true,"image":"/images/redefine-og.webp","description":"Hexo Theme Redefine, Redefine Your Hexo Journey."},"google_analytics":{"enable":false,"id":null}},"home_banner":{"enable":true,"style":"fixed","image":{"light":"/images/banner-light.jpg","dark":"/images/banner-dark.jpg"},"title":"内森淼文","subtitle":{"text":["AI · 编程 · 科技见闻","Write Code, Read World"],"hitokoto":{"enable":false,"show_author":false,"api":"https://v1.hitokoto.cn"},"typing_speed":100,"backing_speed":80,"starting_delay":500,"backing_delay":1500,"loop":true,"smart_backspace":true},"text_color":{"light":"#fff","dark":"#d1d1b6"},"text_style":{"title_size":"2.8rem","subtitle_size":"1.5rem","line_height":1.2},"custom_font":{"enable":false,"family":null,"url":null},"social_links":{"enable":true,"style":"default","links":[{"icon":"fa-brands fa-github","url":"https://github.com/hydraxman"}],"qrs":[{"icon":"fa-brands fa-weixin","qr":null},{"icon":"/images/custom-icon.svg","qr":null}]}},"plugins":{"feed":{"enable":false},"aplayer":{"enable":false,"type":"fixed","audios":[{"name":null,"artist":null,"url":null,"cover":null,"lrc":null}]},"mermaid":{"enable":false,"version":"11.4.1","theme":{"light":"default","dark":"dark"}}},"version":"2.9.0","navbar":{"auto_hide":false,"color":{"left":"#333333","right":"#555555","transparency":35},"width":{"home":"1200px","pages":"1000px"},"links":{"Home":{"path":"/","icon":"fa-regular fa-house"},"Archives":{"path":"/archives","icon":"fa-regular fa-archive"},"Categories":{"path":"/categories","icon":"fa-regular fa-folder"},"Tags":{"path":"/tags","icon":"fa-regular fa-tags"},"About":{"path":"/about","icon":"fa-regular fa-user"}},"search":{"enable":true,"preload":true}},"page_templates":{"friends_column":2,"tags_style":"blur","masonry":{"batch_size":12,"initial_batch_size":24}},"home":{"sidebar":{"enable":true,"position":"left","first_item":"menu","announcement":"AI · 编程 · 科技","show_on_mobile":true,"links":{"Archives":{"path":"/archives","icon":"fa-regular fa-archive"},"Tags":{"path":"/tags","icon":"fa-regular fa-tags"},"Categories":{"path":"/categories","icon":"fa-regular fa-folder"}}},"article_date_format":"auto","excerpt_length":200,"categories":{"enable":true,"limit":3},"tags":{"enable":true,"limit":3}},"footer":{"runtime":true,"icon":"<i class=\"fa-solid fa-heart fa-beat\" style=\"--fa-animation-duration: 0.5s; color: #333\"></i>","start":"2024/01/01 00:00:00","statistics":true,"customize":null,"icp":{"enable":false,"number":null,"url":null}},"footerStart":"2024/01/01 00:00:00","mermaid":{"style":{"light":"default","dark":"dark"}}};
+    window.lang_ago = {"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"};
+    window.i18n = {"search":"站内搜索您需要的内容...","toc":"目录","prev":"上一页","next":"下一页","prev_posts":"上一篇","next_posts":"下一篇","page":"第 %d 页","recent_posts":"最新文章","share":"分享","powered_by":"由 %s 驱动","theme":"主题","rss_feed":"RSS Feed","category":"分类","categories":"分类","tag":"标签","tags":"标签","post":"文章","posts":"文章","tagcloud":"标签云","comment":"评论","comments":"评论","top":"置顶","sticky":"置顶","go-back-home":"回到首页","masonry_loading":"照片加载中...","image_viewer":"图片查看器","close":"关闭","exif":{"title":"EXIF","cards":{"camera":"相机","lens":"镜头","exposure":"曝光","other":"其他"},"fields":{"make":"品牌","model":"机型","date_taken":"拍摄时间","lens_model":"镜头","focal_length":"焦距","focus_mode":"对焦模式","shutter":"快门","aperture":"光圈","iso":"感光度","exposure_program":"曝光程序","exposure_compensation":"曝光补偿","metering_mode":"测光模式","flash":"闪光灯","white_balance":"白平衡","latitude":"纬度","longitude":"经度","altitude":"海拔"},"status":{"loading":"加载中...","no_exif":"无 EXIF 信息","library_missing":"EXIF 库未加载","image_source_missing":"图片地址不可用","unavailable":"EXIF 不可用（可能被 CORS 阻止或缺少元数据）","flag_unavailable":"EXIF 不可用"}},"home":"首页","archive":"归档","archives":"归档","about":"关于","links":"链接","link":"链接","friends":"友情链接","friend":"友情链接","timeline":"时间轴","shuoshuo":"说说","bookmarks":"书签","site_uv":"访问人数","site_pv":"总访问量","read_more":"阅读全文","wordcount":"字","min2read":"分钟","changelog":"更新日志","status":"状态","runtime":"博客已运行","days":"天","hours":"小时","minutes":"分钟","seconds":"秒","optimized_by":"并由 Evan 进行优化","rights":"版权所有","site_posts":"共撰写了 %s 篇文章","site_wordcount":"共 %s 字","copyright":{"title":"标题","author":"作者","link":"链接","create_time":"创建于","update_time":"更新于","license_title":"版权声明","license_content":"本文章采用 %s 进行许可。","all_rights_reserved":"版权所有 &#169 %s，禁止转载。","public_domain":"本文为公有领域作品，可自由转载、引用。"},"ago":{"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"},"create_time":"创建","update_time":"更新","expired":"这篇文章最后更新于 %s 天前，内容可能已经过时。"};
+    window.data = {"masonry":false};
+  </script>
+    
+    <!--- Fontawesome Part-->
+    
+<link rel="stylesheet" href="/fontawesome/fontawesome.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/brands.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/solid.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/regular.min.css">
+
+    
+    
+    
+    
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+	<div class="progress-bar-container">
+	
+	<span class="scroll-progress-bar"></span>
+	
+
+	
+	<span class="pjax-progress-bar"></span>
+	<!--        <span class="swup-progress-icon">-->
+	<!--            <i class="fa-solid fa-circle-notch fa-spin"></i>-->
+	<!--        </span>-->
+	
+</div>
+
+<main class="page-container" id="swup">
+
+	
+
+	<div class="main-content-container flex flex-col justify-between min-h-dvh">
+		<div class="main-content-header">
+			<header class="navbar-container px-6 md:px-12">
+    <div class="navbar-content transition-navbar ">
+        <div class="left">
+            
+            <a class="logo-title" href="/">
+                
+                内森淼文
+                
+            </a>
+        </div>
+
+        <div class="right">
+            <!-- PC -->
+            <div class="desktop">
+                <ul class="navbar-list">
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/"
+                                        >
+                                    <i class="fa-regular fa-house fa-fw"></i>
+                                    首页
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/archives"
+                                        >
+                                    <i class="fa-regular fa-archive fa-fw"></i>
+                                    归档
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/categories"
+                                        >
+                                    <i class="fa-regular fa-folder fa-fw"></i>
+                                    分类
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/tags"
+                                        >
+                                    <i class="fa-regular fa-tags fa-fw"></i>
+                                    标签
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/about"
+                                        >
+                                    <i class="fa-regular fa-user fa-fw"></i>
+                                    关于
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                    
+                        <li class="navbar-item search search-popup-trigger">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </li>
+                    
+                </ul>
+            </div>
+            <!-- Mobile -->
+            <div class="mobile">
+                
+                    <div class="icon-item search search-popup-trigger"><i class="fa-solid fa-magnifying-glass"></i>
+                    </div>
+                
+                <div class="icon-item navbar-bar">
+                    <div class="navbar-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile sheet -->
+    <div class="navbar-drawer h-dvh w-full absolute top-0 left-0 bg-background-color flex flex-col justify-between">
+        <ul class="drawer-navbar-list flex flex-col px-4 justify-center items-start">
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/"
+                        >
+                            <span>
+                                首页
+                            </span>
+                            
+                                <i class="fa-regular fa-house fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/archives"
+                        >
+                            <span>
+                                归档
+                            </span>
+                            
+                                <i class="fa-regular fa-archive fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/categories"
+                        >
+                            <span>
+                                分类
+                            </span>
+                            
+                                <i class="fa-regular fa-folder fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/tags"
+                        >
+                            <span>
+                                标签
+                            </span>
+                            
+                                <i class="fa-regular fa-tags fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/about"
+                        >
+                            <span>
+                                关于
+                            </span>
+                            
+                                <i class="fa-regular fa-user fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+
+            
+            
+                
+                    
+                    
+                    
+            
+        </ul>
+
+        <div class="statistics flex justify-around my-2.5">
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/tags">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">345</div>
+        <div class="label text-third-text-color text-sm">标签</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/categories">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">9</div>
+        <div class="label text-third-text-color text-sm">分类</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/archives">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">294</div>
+        <div class="label text-third-text-color text-sm">文章</div>
+    </a>
+</div>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+		</div>
+
+		<div class="main-content-body transition-fade-up">
+			
+
+			<div class="main-content">
+				<div class="post-page-container flex relative justify-between box-border w-full h-full">
+	<div class="article-content-container">
+
+		<div class="article-title relative w-full">
+			
+			
+			
+			<img src="/images/videoagent-deep-dive/framework.jpg" alt="VideoAgent 源码深读：把视频理解、检索与剪辑装进一张 Agent Graph" class="w-full h-60 sm:h-72 md:h-80 object-cover sm:rounded-t-large dark:brightness-75" />
+			
+			<div class="w-full flex items-center absolute bottom-0 justify-start">
+				<h1 class="article-title-cover text-center mx-6 my-6 text-second-text-color bg-background-color-transparent px-4 py-3 text-3xl sm:text-4xl md:text-5xl font-semibold backdrop-blur-lg rounded-xl border border-border-color ">VideoAgent 源码深读：把视频理解、检索与剪辑装进一张 Agent Graph</h1>
+			</div>
+			
+		</div>
+
+		
+		<div class="article-header flex flex-row gap-2 items-center px-2 sm:px-6 md:px-8">
+			<div class="avatar w-[46px] h-[46px] shrink-0 rounded-medium border border-border-color p-px">
+				<img src="/images/avatar.png">
+			</div>
+			<div class="info flex flex-col justify-between">
+				<div class="author flex items-center">
+					<span class="name text-default-text-color text-lg font-semibold">Nathan</span>
+					
+				</div>
+				<div class="meta-info">
+					<div class="article-meta-info">
+    <span class="article-date article-meta-item">
+        <i class="fa-regular fa-pen-fancy"></i>&nbsp;
+        <span class="desktop">2026-07-13 15:00</span>
+        <span class="mobile">2026-07-13 15:00</span>
+        <span class="hover-info">创建</span>
+    </span>
+    
+        <span class="article-date article-meta-item">
+            <i class="fa-regular fa-wrench"></i>&nbsp;
+            <span class="desktop">2026-07-13 14:48:02</span>
+            <span class="mobile">2026-07-13 14:48:02</span>
+            <span class="hover-info">更新</span>
+        </span>
+    
+
+    
+        <span class="article-categories article-meta-item">
+            <i class="fa-regular fa-folders"></i>&nbsp;
+            <ul>
+                
+                
+                    
+                        
+                        <li>
+                            <a href="/categories/%E6%B7%B1%E5%BA%A6%E5%88%86%E6%9E%90/">深度分析</a>&nbsp;
+                        </li>
+                    
+                    
+                
+            </ul>
+        </span>
+    
+    
+        <span class="article-tags article-meta-item">
+            <i class="fa-regular fa-tags"></i>&nbsp;
+            <ul>
+                
+                    <li>
+                        <a href="/tags/AI-Agent/">AI Agent</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/%E8%A7%86%E9%A2%91%E5%89%AA%E8%BE%91/">视频剪辑</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/%E8%A7%86%E9%A2%91%E7%90%86%E8%A7%A3/">视频理解</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/%E5%A4%9A%E6%A8%A1%E6%80%81/">多模态</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/">源码分析</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/VideoAgent/">VideoAgent</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/VideoRAG/">VideoRAG</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/%E6%8A%80%E6%9C%AF%E8%B0%83%E7%A0%94/">技术调研</a>&nbsp;
+                    </li>
+                
+            </ul>
+        </span>
+    
+
+    
+    
+        <span class="article-wordcount article-meta-item">
+            <i class="fa-regular fa-typewriter"></i>&nbsp;<span>5k 字</span>
+        </span>
+    
+    
+        <span class="article-min2read article-meta-item">
+            <i class="fa-regular fa-clock"></i>&nbsp;<span>18 分钟</span>
+        </span>
+    
+    
+</div>
+
+				</div>
+			</div>
+		</div>
+		
+
+		
+
+
+		<div class="article-content markdown-body px-2 sm:px-6 md:px-8 pb-8">
+			<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/videoagent-deep-dive/framework.jpg"
+                      alt="VideoAgent 整体框架"
+                ></p>
+<p>视频 Agent 正在从“帮你生成一段视频”走向更难的一层：<strong>面对一堆原始视频、音频、脚本和模糊要求，自己决定先理解什么、调用哪些工具、怎样串起数据流，最后交付一段可以播放的成片。</strong></p>
+<p>HKUDS 开源的 <a class="link"   target="_blank" rel="noopener" href="https://github.com/HKUDS/VideoAgent" >VideoAgent<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a> 就是在做这件事。它把视频问答、摘要、素材检索、节奏卡点、解说视频、语音合成、声音转换和最终剪辑，统一放进一个由大模型动态生成的 Agent Graph 中。</p>
+<p>从项目介绍看，它像一个“全能视频工作台”；但真正读完核心源码后，会发现它更准确的定位是：</p>
+<blockquote>
+<p><strong>VideoAgent 不是一个成熟的自动剪辑产品，而是一套很有研究价值的“多模态工具编排 + 视频素材检索 + 反思式工作流生成”原型。</strong></p>
+</blockquote>
+<p>它最值得研究的不是接入了多少视频模型，而是怎样把一句自然语言需求，变成一张带输入输出端口、可被执行和重写的工具图。同时，它也暴露了研究原型走向工程产品时最典型的问题：依赖过重、图执行仍然线性、验证主要依赖同一个 LLM、缺少测试与可观测性，部分路径甚至硬编码 CUDA。</p>
+<p>本文基于 2026 年 7 月 13 日检出的 <code>main</code> 分支提交 <code>44611659e43628c5eb7f77158b3b94a32bcbb5c5</code>，结合论文、仓库历史与关键源码进行分析。</p>
+<h2 id="先给结论：它解决的是“怎么做视频”，不只是“怎么剪视频”"><a href="#先给结论：它解决的是“怎么做视频”，不只是“怎么剪视频”" class="headerlink" title="先给结论：它解决的是“怎么做视频”，不只是“怎么剪视频”"></a>先给结论：它解决的是“怎么做视频”，不只是“怎么剪视频”</h2><p>传统自动剪辑流水线通常是固定的：转录、切片、匹配素材、拼接、配音、渲染。固定流程容易稳定，但一旦用户要求从“做解说视频”变成“把英文脱口秀改成中文相声，再匹配另一批画面”，就需要人工重新设计管线。</p>
+<p>VideoAgent 的核心想法是把流程设计本身交给 Agent：</p>
+<ol>
+<li>从用户需求中识别多个意图；</li>
+<li>用意图把 30 多个工具缩小成一个候选子集；</li>
+<li>让 Claude 生成带参数连接关系的 Agent Graph；</li>
+<li>再用“判断 + 反思”检查工具顺序、参数路由和冗余节点；</li>
+<li>最多迭代三轮，得到可执行链；</li>
+<li>收集缺失的用户输入，按链逐个执行工具；</li>
+<li>视频场景通过 VideoRAG 检索素材，再由 VLM 做秒级片段细化，最后用 MoviePy 渲染。</li>
+</ol>
+<p>这比“模型直接输出一段 Python”更可控，也比把全部工具一次性塞给模型更节省上下文和调用成本。论文报告其工作流编排成功率达到 <strong>0.87–0.95</strong>，相对强基线提升 <strong>2–25 个百分点</strong>，并通过意图过滤把 API 成本降低约 <strong>60%<strong>。这些是论文实验结果，不应直接等同于任意真实项目的线上成功率，但它说明了一个方向：</strong>工具越多，先缩小能力空间，再做图规划，比一次性自由调用更可靠。</strong></p>
+<h2 id="一、入口很薄，真正的系统在-MultiAgent"><a href="#一、入口很薄，真正的系统在-MultiAgent" class="headerlink" title="一、入口很薄，真正的系统在 MultiAgent"></a>一、入口很薄，真正的系统在 MultiAgent</h2><p>项目入口 <code>main.py</code> 几乎没有业务逻辑：调整两个 CosyVoice 路径，打印 Banner，创建 <code>MultiAgent</code>，然后调用 <code>run()</code>。</p>
+<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">main.py</span><br><span class="line">  └─ MultiAgent.run()</span><br><span class="line">      ├─ process_requirement(requirement)</span><br><span class="line">      │   ├─ intents_analysis()</span><br><span class="line">      │   ├─ get_tools_by_intents()</span><br><span class="line">      │   ├─ generate_agent_graph()</span><br><span class="line">      │   └─ judge_agent_graph()</span><br><span class="line">      └─ execute_agent_chain()</span><br></pre></td></tr></table></figure></div>
+
+<p>核心集中在 <code>environment/agents/multi.py</code>。初始化时，<code>FunctionRegistry.auto_register(&quot;environment/roles&quot;)</code> 会递归扫描角色目录，导入所有 Python 模块，寻找 <code>BaseTool</code> 的子类，并从 Pydantic Schema 自动提取工具元数据。</p>
+<p><code>environment/agents/base.py</code> 中每个工具都遵循同一套约定：</p>
+<ul>
+<li>类名就是工具名；</li>
+<li>Docstring 充当工具描述；</li>
+<li><code>InputSchema</code> 描述输入参数、类型和含义；</li>
+<li><code>OutputSchema</code> 描述输出；</li>
+<li><code>execute(**kwargs)</code> 是统一执行入口。</li>
+</ul>
+<p>注册表最终交给 LLM 的不是任意源码，而是一个结构化能力目录。类似下面这样的工具定义：</p>
+<div class="code-container" data-rel="Json"><figure class="iseeu highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;VideoEditor&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;description&quot;</span><span class="punctuation">:</span> <span class="string">&quot;...&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;input_params&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">      <span class="attr">&quot;video_dir&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span><span class="attr">&quot;type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;str&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;description&quot;</span><span class="punctuation">:</span> <span class="string">&quot;...&quot;</span><span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;audio_path&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span><span class="attr">&quot;type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;str&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;description&quot;</span><span class="punctuation">:</span> <span class="string">&quot;...&quot;</span><span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;timestamp_path&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span><span class="attr">&quot;type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;str&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;description&quot;</span><span class="punctuation">:</span> <span class="string">&quot;...&quot;</span><span class="punctuation">&#125;</span></span><br><span class="line">    <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;output_params&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">      <span class="attr">&quot;video_path&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span><span class="attr">&quot;type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;str&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;description&quot;</span><span class="punctuation">:</span> <span class="string">&quot;...&quot;</span><span class="punctuation">&#125;</span></span><br><span class="line">    <span class="punctuation">&#125;</span></span><br><span class="line">  <span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure></div>
+
+<p>这个设计是 VideoAgent 最扎实的一层：<strong>用 Schema 把多模态工具包装成带类型端口的节点，让规划器考虑数据如何流动，而不只是考虑工具名字。</strong></p>
+<p>不过，注册体系目前有两套来源：<code>FunctionRegistry</code> 动态扫描角色目录，<code>environment/config/registry.json</code> 又保存了“工具名 → Python 模块”的静态映射，执行阶段通过后者动态加载类。双注册表一旦不同步，就可能出现“规划时可见、执行时找不到”或反过来的问题。</p>
+<h2 id="二、Intent-Analysis：先剪枝，再规划"><a href="#二、Intent-Analysis：先剪枝，再规划" class="headerlink" title="二、Intent Analysis：先剪枝，再规划"></a>二、Intent Analysis：先剪枝，再规划</h2><p>VideoAgent 没有把所有 Agent 一股脑交给模型。<code>environment/config/intents.yml</code> 先定义了业务意图和候选工具的映射，例如：</p>
+<ul>
+<li><code>Audio Optimization</code> → AudioExtractor、Separator、Resampler、LoudnessNormalizer；</li>
+<li><code>Text-to-Speech</code> → Transcriber、TTSWriter、TTSInfer、TTSReplace 等；</li>
+<li><code>Video Edit</code> → VideoPreloader、VideoSearcher、VideoEditor 等；</li>
+<li><code>Video QA</code> → VideoContentQA；</li>
+<li><code>Audio Overview</code> → VideoSummarizationGenerator。</li>
+</ul>
+<p><code>intents_analysis()</code> 让 Claude 从候选意图中选择多个相关项，然后 <code>get_tools_by_intents()</code> 只取这些意图关联的工具。</p>
+<p>这一步看似简单，实际上非常关键。</p>
+<p>如果 34 个工具都带着输入输出说明进入规划 Prompt，模型既要理解需求，又要在庞大的能力空间中找组合。意图路由相当于先做一次粗粒度召回，把问题从“在整个工具宇宙中规划”变成“在一个相关子图中规划”。论文中约 60% 的 API 成本下降，核心来源正是这种能力空间压缩。</p>
+<p>它也支持反思后的重新分类。如果后续图生成判断为 <code>Infeasible</code>，系统会把失败原因作为 <code>intent_reflection</code>，清空当前意图并重新分析，而不是在错误工具集合里无限重试。</p>
+<p>但这里仍然是 Prompt 驱动的软分类，没有置信度、规则兜底或可学习路由器。模型返回内容通过正则找出列表，再用 <code>ast.literal_eval</code> 解析。这个安全解析是 2026 年 7 月合并的 PR #13 修复之一；此前代码直接对 LLM 输出执行 <code>eval()</code>，存在明显的代码执行风险。</p>
+<h2 id="三、Agent-Graph：有“图”的接口，但运行时仍是一条链"><a href="#三、Agent-Graph：有“图”的接口，但运行时仍是一条链" class="headerlink" title="三、Agent Graph：有“图”的接口，但运行时仍是一条链"></a>三、Agent Graph：有“图”的接口，但运行时仍是一条链</h2><p><code>environment/config/graph.txt</code> 规定了规划器的输出结构。每个节点包含：</p>
+<ul>
+<li>Agent 名称；</li>
+<li>输入参数；</li>
+<li>输出参数；</li>
+<li>每个输出指向哪个下游 Agent 的哪个输入；</li>
+<li>一条 <code>Agent Chain</code>；</li>
+<li>无入边参数组成的 <code>User Input Graph</code>；</li>
+<li>可行性与推理说明。</li>
+</ul>
+<p>生成结果大致是：</p>
+<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">用户需求</span><br><span class="line">  ↓</span><br><span class="line">Intent 列表</span><br><span class="line">  ↓</span><br><span class="line">候选工具元数据</span><br><span class="line">  ↓</span><br><span class="line">Agent Graph + Agent Chain + User Input Graph</span><br><span class="line">  ↓</span><br><span class="line">Judge / Reflection</span><br><span class="line">  ↓</span><br><span class="line">执行</span><br></pre></td></tr></table></figure></div>
+
+<p>相比只生成工具调用序列，这里多了一层显式数据流。规划 Prompt 会检查：</p>
+<ul>
+<li>输出链接的目标参数是否真实存在；</li>
+<li>文件路径是否被错误地接到目录参数；</li>
+<li>哪些无入边参数应该由用户提供；</li>
+<li>是否加入了功能重复的节点；</li>
+<li>工具顺序是否满足依赖。</li>
+</ul>
+<p>这让工作流具备了接近 DAG 编排器的描述能力。</p>
+<p>但必须指出：<strong>当前执行器还不是真正的图运行时。</strong></p>
+<p><code>execute_agent_chain()</code> 直接遍历 LLM 生成的 <code>Agent Chain</code>，逐个实例化并同步调用 <code>execute()</code>。节点输出写进一个扁平 <code>context</code> 字典，再按 links 映射到下游输入。它没有：</p>
+<ul>
+<li>拓扑排序与环检测；</li>
+<li>并行执行无依赖分支；</li>
+<li>节点级重试、超时和取消；</li>
+<li>持久化 checkpoint；</li>
+<li>类型的运行时兼容检查；</li>
+<li>中间产物血缘和可视化 trace；</li>
+<li>失败后的局部补偿或从断点恢复。</li>
+</ul>
+<p>因此更准确的说法是：<strong>LLM 生成了一张图，系统最后仍按一条线性链解释执行。</strong> 图主要服务于规划和参数路由，还没有升级为生产级 workflow engine。</p>
+<h2 id="四、反思循环：两次模型检查，比一次生成更稳，但不是硬验证"><a href="#四、反思循环：两次模型检查，比一次生成更稳，但不是硬验证" class="headerlink" title="四、反思循环：两次模型检查，比一次生成更稳，但不是硬验证"></a>四、反思循环：两次模型检查，比一次生成更稳，但不是硬验证</h2><p>VideoAgent 的编排不是生成一次就执行。<code>process_requirement()</code> 外层最多进行三轮 reflection，每个关键步骤内部又有三次重试。</p>
+<p>当规划器生成可行图后，<code>judge_agent_graph()</code> 先让 Claude 根据工具元数据检查执行顺序、无入边参数、上下游参数映射和冗余 Agent；随后又构造一个 Reflection Prompt，让模型反思前一次判断是否遗漏或误判。</p>
+<p>如果最终 <code>Result</code> 为 <code>0</code>，图通过；如果为 <code>1</code>，Reasoning 会作为 <code>graph_reflection</code> 回到下一轮图生成。若规划器自己认定不可行，则失败原因返回意图分析阶段，重新选择工具。</p>
+<p>这形成两个不同的反馈方向：</p>
+<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Infeasible</span><br><span class="line">  └─ 回到 Intent Analysis，换能力集合</span><br><span class="line"></span><br><span class="line">Judge Failed</span><br><span class="line">  └─ 保留 Intent，重写 Agent Graph</span><br></pre></td></tr></table></figure></div>
+
+<p>这个区分是合理的：工具找错了和工具连错了，本来就不该用同一种重试策略。</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/videoagent-deep-dive/reflection-video.jpg"
+                      alt="论文中的反思轮次实验"
+                ></p>
+<p>但这套验证仍然属于“模型检查模型”。生成、判断和反思默认都依赖 Claude 3.7，并没有确定性的 Schema 验证器去确认：</p>
+<ul>
+<li>Chain 是否覆盖 Graph 全部必要节点；</li>
+<li>links 是否形成无环图；</li>
+<li>参数类型是否兼容；</li>
+<li>必需输出是否一定存在；</li>
+<li>实际文件是否生成；</li>
+<li>最终视频是否可解码、时长是否正确、音画是否同步。</li>
+</ul>
+<p>所以它提高了规划一致性，却不能替代测试、FFprobe、媒体质量门禁和人工验收。论文中的“更多迭代带来更高成功率”是可信的研究信号，但工程落地还需要把模型评审变成软验证层，把确定性检查放在硬门禁层。</p>
+<h2 id="五、VideoRAG：先建立素材记忆，再按-Storyboard-找镜头"><a href="#五、VideoRAG：先建立素材记忆，再按-Storyboard-找镜头" class="headerlink" title="五、VideoRAG：先建立素材记忆，再按 Storyboard 找镜头"></a>五、VideoRAG：先建立素材记忆，再按 Storyboard 找镜头</h2><p>VideoAgent 的视频编辑不是让 VLM 每次从整部视频开始看。它在 <code>tools/videorag/</code> 中维护了一个素材索引。</p>
+<p><code>VideoRAG.insert_video()</code> 的处理链是：</p>
+<ol>
+<li>按固定窗口切分视频；</li>
+<li>提取音频并用 Whisper 转录；</li>
+<li>每个片段抽取少量帧；</li>
+<li>把帧和转录一起交给 Gemini 生成场景描述；</li>
+<li>保存片段时间、Caption、Transcript 和采样帧时间；</li>
+<li>用 ImageBind 为视频片段生成 1024 维向量；</li>
+<li>写入 NanoVectorDB 和 JSON KV Storage；</li>
+<li>清理临时切片。</li>
+</ol>
+<p>默认配置值得注意：源码当前 <code>video_segment_length=10</code>、每段粗采样 3 帧、向量检索 Top-K 为 30。代码旁边的旧注释仍写着“30 seconds”“5 frames”，说明实现已经变化但注释没有同步。</p>
+<p>查询阶段，Storyboard 以 <code>/////</code> 分隔成多个场景句子，每个句子用 ImageBind 文本向量检索视频片段。系统还加入了两个启发式约束：</p>
+<ul>
+<li>同一片段不重复用于多个场景；</li>
+<li>默认跳过每个视频大约前后 10% 的片段，以避开片头片尾。</li>
+</ul>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/videoagent-deep-dive/retrieval-evaluation.png"
+                      alt="VideoAgent 素材检索评测"
+                ></p>
+<p>论文报告，在 GPT-4o 配置下，这套“全局 Storyboard + 跨模态检索”把 Recall@1 从 **31.22% 提升到 48.85%**。这里的价值不只是换了更强 embedding，而是先用整个素材库的信息规划镜头，再把每个镜头转成视觉语义查询，避免逐句孤立检索。</p>
+<p>不过源码实现仍有明显工程债：</p>
+<ul>
+<li>ImageBind 在插入和查询时都会重新构建，并硬编码 <code>.cuda()</code>；</li>
+<li>ASR 虽支持 CPU fallback，但默认加载 Whisper Large v3 Turbo，CPU 成本很高；</li>
+<li>Caption 会把每段多张 1280×720 JPEG 转成 Base64 发给 Gemini，长视频 API 成本可观；</li>
+<li>向量库和 KV 数据依赖固定工作目录与 JSON 文件；</li>
+<li>查询排序中仍使用 <code>eval(x.split(&#39;_&#39;)[-1])</code>，虽然输入通常来自内部片段 ID，仍应改为显式整数解析；</li>
+<li><code>VideoSearcher</code> 对外只返回 <code>status</code>，真正检索结果靠写入固定 JSON 文件传给下游，数据契约并不透明。</li>
+</ul>
+<h2 id="六、细粒度剪辑：检索负责找十秒，VLM-负责找起点"><a href="#六、细粒度剪辑：检索负责找十秒，VLM-负责找起点" class="headerlink" title="六、细粒度剪辑：检索负责找十秒，VLM 负责找起点"></a>六、细粒度剪辑：检索负责找十秒，VLM 负责找起点</h2><p>检索得到候选片段后，<code>environment/roles/vid_editor.py</code> 负责最终剪辑。</p>
+<p>它先根据节拍或句子时间戳建立目标时段，再读取 Storyboard 描述与检索片段。对每个候选片段按 1 FPS 抽帧，缩放到 224×224，发给 Gemini，让模型返回最合适的起始帧。随后按目标时长截取连续视频，最后用 MoviePy：</p>
+<ul>
+<li>拼接片段；</li>
+<li>保留原声或加入背景音；</li>
+<li>以 H.264 + AAC、24 FPS 输出 <code>dataset/final.mp4</code>。</li>
+</ul>
+<p>这是一个两级检索结构：</p>
+<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">ImageBind：从素材库找候选时间窗</span><br><span class="line">          ↓</span><br><span class="line">Gemini：在候选窗内找更精确的起始秒</span><br><span class="line">          ↓</span><br><span class="line">MoviePy：按节拍时长截取并渲染</span><br></pre></td></tr></table></figure></div>
+
+<p>它比“让 VLM 看完整长视频”更省成本，也比只依赖 embedding 的固定十秒切片更细。</p>
+<p>但目前所谓“精确”仍是 1 FPS 级别，起点通过模型返回一个整数帧号，再按秒偏移。对于快切、口型、动作落点和音乐重拍，一秒误差仍然很大。真正的专业剪辑还需要镜头边界检测、音频 onset、光流&#x2F;动作连续性、过渡质量和帧级 QA。</p>
+<h2 id="七、30-多个-Agent-的代价：这更像集成仓库，不像轻量框架"><a href="#七、30-多个-Agent-的代价：这更像集成仓库，不像轻量框架" class="headerlink" title="七、30 多个 Agent 的代价：这更像集成仓库，不像轻量框架"></a>七、30 多个 Agent 的代价：这更像集成仓库，不像轻量框架</h2><p>VideoAgent 的能力广，原因之一是把 CosyVoice、Fish Speech、Seed-VC、DiffSinger、ImageBind 等大量第三方项目或代码直接纳入 <code>tools/</code>。</p>
+<p>本次检出的仓库有：</p>
+<ul>
+<li>851 个 tracked files；</li>
+<li>414 个 Python 文件；</li>
+<li>clone 后约 294 MB；</li>
+<li><code>tools/seed-vc</code> 单目录约 54 MB；</li>
+<li>至少 9 份第三方 License 文件；</li>
+<li>根项目没有测试目录，也没有 GitHub Actions 工作流和正式 Release。</li>
+</ul>
+<p>根 <code>pyproject.toml</code> 一次性声明了一百余项依赖，包括 CUDA 版 PyTorch 索引、<code>onnxruntime-gpu</code>、<code>bitsandbytes</code>、MoviePy、Whisper、Diffusers、Cartopy、Neo4j、ImageBind 等。它还同时声明 <code>onnxruntime-gpu</code> 与 <code>onnxruntime</code>，并把 <code>torch==2.3.1</code> 固定下来。</p>
+<p>README 给出的目标环境是 Python 3.10、Linux&#x2F;Windows、8GB GPU，并要求用户按功能手动下载多个模型。核心视频检索路径中 ImageBind 明确调用 <code>.cuda()</code>，因此 macOS 即使能做静态导入和部分 CPU 任务，也不能按当前代码跑通完整 VideoRAG。</p>
+<p>项目的配置也不是“填一个 API Key”这么简单：</p>
+<ul>
+<li>Claude：意图分析与 Agent Graph Router；</li>
+<li>Gemini：视频 Caption 与细粒度帧选择；</li>
+<li>GPT：部分视频摘要、问答和解说；</li>
+<li>DeepSeek：部分改写、TTS、SVC 与创作任务；</li>
+<li>本地模型：Whisper、CosyVoice、Fish Speech、Seed-VC、DiffSinger、ImageBind。</li>
+</ul>
+<p>这意味着一次复杂任务可能同时依赖多个付费 API、多个本地模型和 FFmpeg 环境。它证明了“统一编排异构能力”是可能的，但距离一键安装、按需加载、可复现部署还有很远。</p>
+<p>还有一个容易忽略的元数据问题：GitHub 根 <code>LICENSE</code> 是 MIT，而 <code>pyproject.toml</code> 中写的是 <code>license = &#123;text = &quot;Apache&quot;&#125;</code>。发布包和仓库的许可证声明应保持一致。</p>
+<h2 id="八、项目成熟度：研究价值高，生产成熟度低"><a href="#八、项目成熟度：研究价值高，生产成熟度低" class="headerlink" title="八、项目成熟度：研究价值高，生产成熟度低"></a>八、项目成熟度：研究价值高，生产成熟度低</h2><p>从社区状态看，截至检出时仓库约 1,358 Stars、189 Forks，默认分支最近一次提交是 2026 年 7 月 3 日。仓库共有 11 个 Issue（10 个仍开放）、2 个 PR（1 个合并、1 个开放）。开放问题已经集中暴露出真实使用痛点：</p>
+<ul>
+<li>用户不知道 <code>User Requirement</code> 应该用什么格式；</li>
+<li>Agent Graph 判断反复失败；</li>
+<li>Demo 无法复现并提示没有合适 Agent；</li>
+<li>Storytelling Video 缺少清晰用法；</li>
+<li>视频片段疑似没有正确去重；</li>
+<li>上传视频路径存在障碍。</li>
+</ul>
+<p>最近合并的 PR #13 很有代表性。它修复了四类 Orchestrator 问题：</p>
+<ol>
+<li>LLM 输出使用 <code>eval()</code> 的安全风险；</li>
+<li>重试次数的 off-by-one；</li>
+<li>图生成返回空值时先解引用导致崩溃；</li>
+<li>规划失败返回整数后，<code>run()</code> 仍按字典访问。</li>
+</ol>
+<p>这些并非边角问题，而是主流程的安全性和可恢复性问题。修复之后项目能更稳地失败，但依旧没有单元测试锁住这些行为。此次静态验证中，<code>main.py</code>、<code>environment/</code> 和 <code>tools/videorag/</code> 共 57 个 Python 文件均可通过 AST 解析和 <code>compileall</code>；这只能证明语法完整，不能证明依赖、模型和真实视频流水线可运行。</p>
+<p>因此当前适合的使用方式是：</p>
+<ul>
+<li>作为视频 Agent 架构研究样本；</li>
+<li>参考其 Intent → Tool Subset → Typed Graph → Critic 的规划方法；</li>
+<li>单独抽取 VideoRAG 或部分音视频工具；</li>
+<li>在受控数据、固定模型和明确工作流中做二次工程化。</li>
+</ul>
+<p>不适合直接作为无人值守的生产视频系统。</p>
+<h2 id="九、如果把它工程化，优先做这六件事"><a href="#九、如果把它工程化，优先做这六件事" class="headerlink" title="九、如果把它工程化，优先做这六件事"></a>九、如果把它工程化，优先做这六件事</h2><h3 id="1-把“图描述”变成真正的图运行时"><a href="#1-把“图描述”变成真正的图运行时" class="headerlink" title="1. 把“图描述”变成真正的图运行时"></a>1. 把“图描述”变成真正的图运行时</h3><p>用确定性代码解析 DAG，完成拓扑排序、环检测、并行分支、节点超时、重试、checkpoint 和补偿。LLM 只负责提出图，运行时负责证明图可执行。</p>
+<h3 id="2-给规划器增加硬验证器"><a href="#2-给规划器增加硬验证器" class="headerlink" title="2. 给规划器增加硬验证器"></a>2. 给规划器增加硬验证器</h3><p>在 LLM Judge 之外增加 JSON Schema、参数类型兼容、必需输出覆盖、文件存在性和路径安全检查。生成失败应返回结构化错误，而不是依赖正则从自由文本里捞 JSON。</p>
+<h3 id="3-合并双注册表"><a href="#3-合并双注册表" class="headerlink" title="3. 合并双注册表"></a>3. 合并双注册表</h3><p>工具发现、规划元数据和运行时加载应来自同一个 manifest。每个 Agent 需要声明依赖、设备、模型、预估显存、API 成本、是否可并行及可缓存性。</p>
+<h3 id="4-按功能拆分依赖和容器"><a href="#4-按功能拆分依赖和容器" class="headerlink" title="4. 按功能拆分依赖和容器"></a>4. 按功能拆分依赖和容器</h3><p>把核心 Orchestrator、VideoRAG、TTS、SVC、DiffSinger 分成独立 extras 或服务。不要让只想做视频问答的用户安装整套歌声转换和 CUDA 依赖。</p>
+<h3 id="5-把文件副作用改成显式-Artifact"><a href="#5-把文件副作用改成显式-Artifact" class="headerlink" title="5. 把文件副作用改成显式 Artifact"></a>5. 把文件副作用改成显式 Artifact</h3><p>目前多个 Agent 通过固定目录中的 JSON&#x2F;WAV&#x2F;MP4 隐式通信。更好的做法是定义统一 Artifact：URI、媒体类型、时长、hash、生产节点、依赖和校验结果，使中间产物可追踪、可缓存、可恢复。</p>
+<h3 id="6-建立媒体质量门禁"><a href="#6-建立媒体质量门禁" class="headerlink" title="6. 建立媒体质量门禁"></a>6. 建立媒体质量门禁</h3><p>至少自动检查：视频可解码、分辨率&#x2F;FPS、时长误差、音频响度、黑帧、静音、重复镜头、镜头边界和音画同步。最终成片不能只以“<code>write_videofile()</code> 没报错”为成功标准。</p>
+<h2 id="十、VideoAgent-最值得带走的三个判断"><a href="#十、VideoAgent-最值得带走的三个判断" class="headerlink" title="十、VideoAgent 最值得带走的三个判断"></a>十、VideoAgent 最值得带走的三个判断</h2><p>第一，<strong>视频 Agent 的核心不是模型生成，而是工作流生成。</strong> 真正复杂的视频任务天然跨越理解、检索、语音、音乐、剪辑和渲染，单模型无法替代编排层。</p>
+<p>第二，<strong>工具多了以后，能力剪枝比 Prompt 堆料更重要。</strong> VideoAgent 用 Intent 先缩小工具集合，再生成图，这比把几十个工具全部暴露给模型更有扩展性。</p>
+<p>第三，<strong>LLM Reflection 可以提高规划质量，但不能成为唯一验收。</strong> 模型适合判断语义和创意，确定性运行时必须负责类型、依赖、文件、媒体参数和失败恢复。</p>
+<p>VideoAgent 现在还不是一个可以放心交付商业视频的自动导演，但它已经把未来视频生产系统的骨架展示出来了：</p>
+<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">自然语言需求</span><br><span class="line">  → 意图与能力路由</span><br><span class="line">  → 可执行多模态工作流</span><br><span class="line">  → 素材级长期记忆与检索</span><br><span class="line">  → VLM 细粒度镜头选择</span><br><span class="line">  → 确定性媒体渲染与质量验证</span><br></pre></td></tr></table></figure></div>
+
+<p>下一阶段真正有竞争力的视频 Agent，不会只是“接入更多生成模型”，而是谁能把这条链做得更稳定、更便宜、更可观察，也更容易在人类导演介入时修改。</p>
+<p><strong>VideoAgent 的价值，是把“AI 会不会剪视频”的问题，推进成了“AI 能不能设计并运行一条视频生产线”。</strong></p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li>HKUDS&#x2F;VideoAgent 源码（本文检出提交 <code>44611659e43628c5eb7f77158b3b94a32bcbb5c5</code>）<br><a class="link"   target="_blank" rel="noopener" href="https://github.com/HKUDS/VideoAgent" >https://github.com/HKUDS/VideoAgent<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li>Zhou et al., <em>VideoAgent: All-in-One Framework for Video Understanding and Editing</em>, arXiv:2606.23327v2<br><a class="link"   target="_blank" rel="noopener" href="https://arxiv.org/abs/2606.23327" >https://arxiv.org/abs/2606.23327<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li>VideoAgent PR #13: Fix orchestrator crashes and unsafe eval() in MultiAgent<br><a class="link"   target="_blank" rel="noopener" href="https://github.com/HKUDS/VideoAgent/pull/13" >https://github.com/HKUDS/VideoAgent/pull/13<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li>ImageBind<br><a class="link"   target="_blank" rel="noopener" href="https://github.com/facebookresearch/ImageBind" >https://github.com/facebookresearch/ImageBind<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li>NanoVectorDB<br><a class="link"   target="_blank" rel="noopener" href="https://github.com/gusye1234/nano-vectordb" >https://github.com/gusye1234/nano-vectordb<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li>CosyVoice<br><a class="link"   target="_blank" rel="noopener" href="https://github.com/FunAudioLLM/CosyVoice" >https://github.com/FunAudioLLM/CosyVoice<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li>Fish Speech<br><a class="link"   target="_blank" rel="noopener" href="https://github.com/fishaudio/fish-speech" >https://github.com/fishaudio/fish-speech<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li>Seed-VC<br><a class="link"   target="_blank" rel="noopener" href="https://github.com/Plachtaa/seed-vc" >https://github.com/Plachtaa/seed-vc<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li>DiffSinger<br><a class="link"   target="_blank" rel="noopener" href="https://github.com/MoonInTheRiver/DiffSinger" >https://github.com/MoonInTheRiver/DiffSinger<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+</ul>
+
+		</div>
+
+		
+		<div class="post-copyright-info w-full my-8 px-2 sm:px-6 md:px-8">
+			<div class="article-copyright-info-container">
+    <ul>
+        <li><strong>标题:</strong> VideoAgent 源码深读：把视频理解、检索与剪辑装进一张 Agent Graph</li>
+        <li><strong>作者:</strong> Nathan</li>
+        <li><strong>创建于
+                :</strong> 2026-07-13 15:00:00</li>
+        
+            <li>
+                <strong>更新于
+                    :</strong> 2026-07-13 14:48:02
+            </li>
+        
+        <li>
+            <strong>链接:</strong> https://hydraxman.github.io/2026/07/13/videoagent-deep-dive/
+        </li>
+        <li>
+            <strong>
+                版权声明:
+            </strong>
+            
+
+            
+                本文章采用 <a class="license" target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0">CC BY-NC-SA 4.0</a> 进行许可。
+            
+        </li>
+    </ul>
+</div>
+
+		</div>
+		
+
+		
+		<ul class="post-tags-box text-lg mt-1.5 flex-wrap justify-center flex md:hidden">
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/AI-Agent/">#AI Agent</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/%E8%A7%86%E9%A2%91%E5%89%AA%E8%BE%91/">#视频剪辑</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/%E8%A7%86%E9%A2%91%E7%90%86%E8%A7%A3/">#视频理解</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/%E5%A4%9A%E6%A8%A1%E6%80%81/">#多模态</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/">#源码分析</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/VideoAgent/">#VideoAgent</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/VideoRAG/">#VideoRAG</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/%E6%8A%80%E6%9C%AF%E8%B0%83%E7%A0%94/">#技术调研</a>&nbsp;
+			</li>
+			
+		</ul>
+		
+
+		
+
+		
+		<div class="article-nav my-8 flex justify-between items-center px-2 sm:px-6 md:px-8">
+			
+			
+			<div class="article-next border-border-color shadow-redefine-flat shadow-shadow-color-2 rounded-medium px-4 py-2 hover:shadow-redefine-flat-hover hover:shadow-shadow-color-2">
+				<a class="next" rel="next" href="/2026/07/13/github-trending/github-trending-2026-07-13/">
+					<span class="title flex justify-center items-center">
+						<span class="post-nav-title-item truncate max-w-48">今天的 GitHub 热榜，开始奖励那些真正能干活的项目</span>
+						<span class="post-nav-item">下一篇</span>
+					</span>
+					<span class="right arrow-icon flex justify-center items-center">
+						<i class="fa-solid fa-chevron-right"></i>
+					</span>
+				</a>
+			</div>
+			
+		</div>
+		
+
+
+		
+	</div>
+
+	
+	<div class="toc-content-container">
+		<div class="post-toc-wrap">
+	<div class="post-toc">
+		<div class="toc-title">目录</div>
+		<div class="page-title">VideoAgent 源码深读：把视频理解、检索与剪辑装进一张 Agent Graph</div>
+		<ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%88%E7%BB%99%E7%BB%93%E8%AE%BA%EF%BC%9A%E5%AE%83%E8%A7%A3%E5%86%B3%E7%9A%84%E6%98%AF%E2%80%9C%E6%80%8E%E4%B9%88%E5%81%9A%E8%A7%86%E9%A2%91%E2%80%9D%EF%BC%8C%E4%B8%8D%E5%8F%AA%E6%98%AF%E2%80%9C%E6%80%8E%E4%B9%88%E5%89%AA%E8%A7%86%E9%A2%91%E2%80%9D"><span class="nav-text">先给结论：它解决的是“怎么做视频”，不只是“怎么剪视频”</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E5%85%A5%E5%8F%A3%E5%BE%88%E8%96%84%EF%BC%8C%E7%9C%9F%E6%AD%A3%E7%9A%84%E7%B3%BB%E7%BB%9F%E5%9C%A8-MultiAgent"><span class="nav-text">一、入口很薄，真正的系统在 MultiAgent</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81Intent-Analysis%EF%BC%9A%E5%85%88%E5%89%AA%E6%9E%9D%EF%BC%8C%E5%86%8D%E8%A7%84%E5%88%92"><span class="nav-text">二、Intent Analysis：先剪枝，再规划</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81Agent-Graph%EF%BC%9A%E6%9C%89%E2%80%9C%E5%9B%BE%E2%80%9D%E7%9A%84%E6%8E%A5%E5%8F%A3%EF%BC%8C%E4%BD%86%E8%BF%90%E8%A1%8C%E6%97%B6%E4%BB%8D%E6%98%AF%E4%B8%80%E6%9D%A1%E9%93%BE"><span class="nav-text">三、Agent Graph：有“图”的接口，但运行时仍是一条链</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E5%8F%8D%E6%80%9D%E5%BE%AA%E7%8E%AF%EF%BC%9A%E4%B8%A4%E6%AC%A1%E6%A8%A1%E5%9E%8B%E6%A3%80%E6%9F%A5%EF%BC%8C%E6%AF%94%E4%B8%80%E6%AC%A1%E7%94%9F%E6%88%90%E6%9B%B4%E7%A8%B3%EF%BC%8C%E4%BD%86%E4%B8%8D%E6%98%AF%E7%A1%AC%E9%AA%8C%E8%AF%81"><span class="nav-text">四、反思循环：两次模型检查，比一次生成更稳，但不是硬验证</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%94%E3%80%81VideoRAG%EF%BC%9A%E5%85%88%E5%BB%BA%E7%AB%8B%E7%B4%A0%E6%9D%90%E8%AE%B0%E5%BF%86%EF%BC%8C%E5%86%8D%E6%8C%89-Storyboard-%E6%89%BE%E9%95%9C%E5%A4%B4"><span class="nav-text">五、VideoRAG：先建立素材记忆，再按 Storyboard 找镜头</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AD%E3%80%81%E7%BB%86%E7%B2%92%E5%BA%A6%E5%89%AA%E8%BE%91%EF%BC%9A%E6%A3%80%E7%B4%A2%E8%B4%9F%E8%B4%A3%E6%89%BE%E5%8D%81%E7%A7%92%EF%BC%8CVLM-%E8%B4%9F%E8%B4%A3%E6%89%BE%E8%B5%B7%E7%82%B9"><span class="nav-text">六、细粒度剪辑：检索负责找十秒，VLM 负责找起点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%83%E3%80%8130-%E5%A4%9A%E4%B8%AA-Agent-%E7%9A%84%E4%BB%A3%E4%BB%B7%EF%BC%9A%E8%BF%99%E6%9B%B4%E5%83%8F%E9%9B%86%E6%88%90%E4%BB%93%E5%BA%93%EF%BC%8C%E4%B8%8D%E5%83%8F%E8%BD%BB%E9%87%8F%E6%A1%86%E6%9E%B6"><span class="nav-text">七、30 多个 Agent 的代价：这更像集成仓库，不像轻量框架</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AB%E3%80%81%E9%A1%B9%E7%9B%AE%E6%88%90%E7%86%9F%E5%BA%A6%EF%BC%9A%E7%A0%94%E7%A9%B6%E4%BB%B7%E5%80%BC%E9%AB%98%EF%BC%8C%E7%94%9F%E4%BA%A7%E6%88%90%E7%86%9F%E5%BA%A6%E4%BD%8E"><span class="nav-text">八、项目成熟度：研究价值高，生产成熟度低</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B9%9D%E3%80%81%E5%A6%82%E6%9E%9C%E6%8A%8A%E5%AE%83%E5%B7%A5%E7%A8%8B%E5%8C%96%EF%BC%8C%E4%BC%98%E5%85%88%E5%81%9A%E8%BF%99%E5%85%AD%E4%BB%B6%E4%BA%8B"><span class="nav-text">九、如果把它工程化，优先做这六件事</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E6%8A%8A%E2%80%9C%E5%9B%BE%E6%8F%8F%E8%BF%B0%E2%80%9D%E5%8F%98%E6%88%90%E7%9C%9F%E6%AD%A3%E7%9A%84%E5%9B%BE%E8%BF%90%E8%A1%8C%E6%97%B6"><span class="nav-text">1. 把“图描述”变成真正的图运行时</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E7%BB%99%E8%A7%84%E5%88%92%E5%99%A8%E5%A2%9E%E5%8A%A0%E7%A1%AC%E9%AA%8C%E8%AF%81%E5%99%A8"><span class="nav-text">2. 给规划器增加硬验证器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E5%90%88%E5%B9%B6%E5%8F%8C%E6%B3%A8%E5%86%8C%E8%A1%A8"><span class="nav-text">3. 合并双注册表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E6%8C%89%E5%8A%9F%E8%83%BD%E6%8B%86%E5%88%86%E4%BE%9D%E8%B5%96%E5%92%8C%E5%AE%B9%E5%99%A8"><span class="nav-text">4. 按功能拆分依赖和容器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-%E6%8A%8A%E6%96%87%E4%BB%B6%E5%89%AF%E4%BD%9C%E7%94%A8%E6%94%B9%E6%88%90%E6%98%BE%E5%BC%8F-Artifact"><span class="nav-text">5. 把文件副作用改成显式 Artifact</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-%E5%BB%BA%E7%AB%8B%E5%AA%92%E4%BD%93%E8%B4%A8%E9%87%8F%E9%97%A8%E7%A6%81"><span class="nav-text">6. 建立媒体质量门禁</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%81%E3%80%81VideoAgent-%E6%9C%80%E5%80%BC%E5%BE%97%E5%B8%A6%E8%B5%B0%E7%9A%84%E4%B8%89%E4%B8%AA%E5%88%A4%E6%96%AD"><span class="nav-text">十、VideoAgent 最值得带走的三个判断</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="nav-text">参考资料</span></a></li></ol>
+
+	</div>
+</div>
+	</div>
+	
+</div>
+
+			</div>
+
+			
+		</div>
+
+		<div class="main-content-footer">
+			<footer class="footer mt-5 py-5 h-auto text-base text-third-text-color relative border-t-2 border-t-border-color">
+    <div class="info-container py-3 text-center">
+        
+        <div class="text-center">
+            &copy;
+            
+              <span>2024</span>
+              -
+            
+            2026&nbsp;&nbsp;<i class="fa-solid fa-heart fa-beat" style="--fa-animation-duration: 0.5s; color: #333"></i>&nbsp;&nbsp;<a href="/">Nathan</a>
+            
+                
+                <p class="post-count space-x-0.5">
+                    <span>
+                        共撰写了 294 篇文章
+                    </span>
+                    
+                        <span>
+                            共 626.8k 字
+                        </span>
+                    
+                </p>
+            
+        </div>
+        
+        <div class="relative text-center lg:absolute lg:left-[20px] lg:top-1/2 lg:-translate-y-1/2 lg:text-left">
+            <span class="lg:block text-sm">由 <?xml version="1.0" encoding="utf-8"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg class="relative top-[2px] inline-block align-baseline" version="1.1" id="圖層_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="1rem" height="1rem" viewBox="0 0 512 512" enable-background="new 0 0 512 512" xml:space="preserve"><path fill="#0E83CD" d="M256.4,25.8l-200,115.5L56,371.5l199.6,114.7l200-115.5l0.4-230.2L256.4,25.8z M349,354.6l-18.4,10.7l-18.6-11V275H200v79.6l-18.4,10.7l-18.6-11v-197l18.5-10.6l18.5,10.8V237h112v-79.6l18.5-10.6l18.5,10.8V354.6z"/></svg><a target="_blank" class="text-base" href="https://hexo.io">Hexo</a> 驱动</span>
+            <span class="text-sm lg:block">主题&nbsp;<a class="text-base" target="_blank" href="https://github.com/EvanNotFound/hexo-theme-redefine">Redefine v2.9.0</a></span>
+        </div>
+        
+        
+            <div>
+                博客已运行 <span class="odometer" id="runtime_days" ></span> 天 <span class="odometer" id="runtime_hours"></span> 小时 <span class="odometer" id="runtime_minutes"></span> 分钟 <span class="odometer" id="runtime_seconds"></span> 秒
+            </div>
+        
+        
+            <script data-swup-reload-script>
+                try {
+                    function odometer_init() {
+                    const elements = document.querySelectorAll('.odometer');
+                    elements.forEach(el => {
+                        new Odometer({
+                            el,
+                            format: '( ddd).dd',
+                            duration: 200
+                        });
+                    });
+                    }
+                    odometer_init();
+                } catch (error) {}
+            </script>
+        
+        
+            
+                
+        
+                
+        
+        
+    </div>  
+</footer>
+		</div>
+	</div>
+
+	
+	<div class="post-tools">
+		<div class="post-tools-container">
+	<ul class="article-tools-list">
+		<!-- TOC aside toggle -->
+		
+		<li class="right-bottom-tools page-aside-toggle">
+			<i class="fa-regular fa-outdent"></i>
+		</li>
+		
+
+		<!-- go comment -->
+		
+	</ul>
+</div>
+	</div>
+	
+
+	<div class="right-side-tools-container">
+		<div class="side-tools-container">
+	<ul class="hidden-tools-list">
+		<li class="right-bottom-tools tool-font-adjust-plus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-plus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-font-adjust-minus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-minus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-dark-light-toggle flex justify-center items-center">
+			<i class="fa-regular fa-moon"></i>
+		</li>
+
+		<!-- rss -->
+		
+
+		
+
+		<li class="right-bottom-tools tool-scroll-to-bottom flex justify-center items-center">
+			<i class="fa-regular fa-arrow-down"></i>
+		</li>
+	</ul>
+
+	<ul class="visible-tools-list">
+		<li class="right-bottom-tools toggle-tools-list flex justify-center items-center">
+			<i class="fa-regular fa-cog fa-spin"></i>
+		</li>
+		
+		<li class="right-bottom-tools tool-scroll-to-top flex justify-center items-center">
+			<i class="arrow-up fas fa-arrow-up"></i>
+			<span class="percent"></span>
+		</li>
+		
+		
+	</ul>
+</div>
+	</div>
+
+	<div class="image-viewer-container" role="dialog" aria-modal="true" aria-label="图片查看器">
+	<button class="image-viewer-close" type="button" aria-label="关闭">
+		<i class="fa-solid fa-xmark"></i>
+	</button>
+	<button class="image-viewer-prev" type="button" aria-label="上一页">
+		<i class="fa-solid fa-chevron-left"></i>
+	</button>
+	<div class="image-viewer-frame">
+		<img src="" alt="">
+	</div>
+	<div class="image-viewer-exif-panel hidden absolute left-1/2 bottom-20 -translate-x-1/2 w-[min(92vw,420px)] max-h-[60vh] overflow-hidden rounded-2xl bg-background-color-transparent-80 p-4 text-left shadow-redefine-flat backdrop-blur-md" role="dialog" aria-label="EXIF" aria-hidden="true">
+		<div class="flex items-center justify-between mb-3">
+			<span class="text-sm font-semibold text-first-text-color">EXIF</span>
+			<button class="image-viewer-exif-close flex h-8 w-8 items-center justify-center rounded-full bg-background-color-transparent-80 text-first-text-color transition hover:bg-background-color-transparent-40" type="button" aria-label="关闭">
+				<i class="fa-solid fa-xmark text-[0.65rem]"></i>
+			</button>
+		</div>
+		<div class="image-viewer-exif-cards grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[50vh] overflow-y-auto pr-1 scrollbar-hide"></div>
+		<template class="image-viewer-exif-card-template">
+			<div class="rounded-lg bg-background-color-transparent-40 px-3 py-2">
+				<div class="image-viewer-exif-card-header flex items-center gap-2 mb-1">
+					<i class="image-viewer-exif-card-icon fa-solid fa-circle-info text-xs text-third-text-color"></i>
+					<div class="image-viewer-exif-card-title text-xs font-semibold text-first-text-color"></div>
+				</div>
+				<div class="image-viewer-exif-card-items flex flex-col gap-1"></div>
+			</div>
+		</template>
+	</div>
+	<button class="image-viewer-exif-toggle flex items-center gap-2 hidden absolute left-1/2 bottom-6 -translate-x-1/2 rounded-full border border-border-color bg-background-color-transparent-80 px-4 py-2 text-first-text-color backdrop-blur-md transition hover:bg-background-color-transparent-40" type="button" aria-label="EXIF" aria-expanded="false">
+		<i class="fa-solid fa-circle-info text-xs"></i>
+		<span class="text-xs font-semibold uppercase tracking-wider">EXIF</span>
+	</button>
+	<button class="image-viewer-next" type="button" aria-label="下一页">
+		<i class="fa-solid fa-chevron-right"></i>
+	</button>
+</div>
+
+
+	
+	<div class="search-pop-overlay">
+	<div class="popup search-popup">
+		<div class="search-header">
+			<span class="search-input-field-pre">
+				<i class="fa-solid fa-keyboard"></i>
+			</span>
+			<div class="search-input-container">
+				<input autocomplete="off" autocorrect="off" autocapitalize="off" placeholder="站内搜索您需要的内容..." spellcheck="false" type="search" class="search-input">
+			</div>
+			<span class="popup-btn-close">
+				<i class="fa-solid fa-times"></i>
+			</span>
+		</div>
+		<div id="search-result">
+			<div id="no-result">
+				<i class="fa-solid fa-spinner fa-spin-pulse fa-5x fa-fw"></i>
+			</div>
+		</div>
+	</div>
+</div>
+	
+
+</main>
+
+
+
+<script src="/js/build/libs/Swup.min.js"></script>
+
+<script src="/js/build/libs/SwupSlideTheme.min.js"></script>
+
+<script src="/js/build/libs/SwupScriptsPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupProgressPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupScrollPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupPreloadPlugin.min.js"></script>
+
+<script>
+    window.swup = new Swup({
+        plugins: [
+            new SwupScriptsPlugin({
+                optin: true,
+            }),
+            new SwupProgressPlugin(),
+            new SwupScrollPlugin({
+                offset: 80,
+            }),
+            new SwupSlideTheme({
+                mainElement: ".main-content-body",
+            }),
+            new SwupPreloadPlugin(),
+        ],
+        containers: ["#swup"],
+    });
+
+    window.dispatchEvent(
+        new CustomEvent("redefine:swup:ready", {
+            detail: {
+                swup: window.swup,
+            },
+        }),
+    );
+</script>
+
+
+
+
+	
+<script src="/js/build/main.js" type="module"></script>
+
+
+
+    
+<script src="/js/build/libs/odometer.min.js"></script>
+
+    
+<link rel="stylesheet" href="/assets/odometer-theme-minimal.css">
+
+
+
+
+
+
+
+  
+<script src="/js/build/libs/Typed.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+<script src="/js/build/libs/moment-with-locales.min.js" data-swup-reload-script=""></script>
+
+
+
+	
+</body>
+
+</html>
