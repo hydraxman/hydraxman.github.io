@@ -94,7 +94,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://hydraxman.github.io/images/redefine-og.webp">
 <meta property="article:published_time" content="2026-07-13T07:00:00.000Z">
-<meta property="article:modified_time" content="2026-07-13T06:48:02.876Z">
+<meta property="article:modified_time" content="2026-07-13T06:57:17.534Z">
 <meta property="article:author" content="Nathan">
 <meta property="article:tag" content="AI Agent">
 <meta property="article:tag" content="视频剪辑">
@@ -512,8 +512,8 @@
     
         <span class="article-date article-meta-item">
             <i class="fa-regular fa-wrench"></i>&nbsp;
-            <span class="desktop">2026-07-13 14:48:02</span>
-            <span class="mobile">2026-07-13 14:48:02</span>
+            <span class="desktop">2026-07-13 14:57:17</span>
+            <span class="mobile">2026-07-13 14:57:17</span>
             <span class="hover-info">更新</span>
         </span>
     
@@ -579,12 +579,12 @@
     
     
         <span class="article-wordcount article-meta-item">
-            <i class="fa-regular fa-typewriter"></i>&nbsp;<span>5k 字</span>
+            <i class="fa-regular fa-typewriter"></i>&nbsp;<span>5.3k 字</span>
         </span>
     
     
         <span class="article-min2read article-meta-item">
-            <i class="fa-regular fa-clock"></i>&nbsp;<span>18 分钟</span>
+            <i class="fa-regular fa-clock"></i>&nbsp;<span>19 分钟</span>
         </span>
     
     
@@ -624,7 +624,8 @@
 <li>收集缺失的用户输入，按链逐个执行工具；</li>
 <li>视频场景通过 VideoRAG 检索素材，再由 VLM 做秒级片段细化，最后用 MoviePy 渲染。</li>
 </ol>
-<p>这比“模型直接输出一段 Python”更可控，也比把全部工具一次性塞给模型更节省上下文和调用成本。论文报告其工作流编排成功率达到 <strong>0.87–0.95</strong>，相对强基线提升 <strong>2–25 个百分点</strong>，并通过意图过滤把 API 成本降低约 <strong>60%<strong>。这些是论文实验结果，不应直接等同于任意真实项目的线上成功率，但它说明了一个方向：</strong>工具越多，先缩小能力空间，再做图规划，比一次性自由调用更可靠。</strong></p>
+<p>这比“模型直接输出一段 Python”更可控，也比把全部工具一次性塞给模型更节省上下文和调用成本。论文报告其工作流编排成功率达到 <strong>0.87–0.95</strong>，相对强基线提升 <strong>2–25 个百分点</strong>，并通过意图过滤把 API 成本降低约 **60%**。</p>
+<p>这里必须严格限定口径：这组成功率主要由 Judge Agent 判断生成的工作流是否满足指令，<strong>不是 2,000 条任务全部执行到最终成片后的端到端成功率</strong>；VideoEdit 指令还包含 Claude 生成的数据扩增。它更能证明规划协议有效，而不能直接代表生产可用性。但它仍说明了一个方向：<strong>工具越多，先缩小能力空间，再做图规划，比一次性自由调用更可靠。</strong></p>
 <h2 id="一、入口很薄，真正的系统在-MultiAgent"><a href="#一、入口很薄，真正的系统在-MultiAgent" class="headerlink" title="一、入口很薄，真正的系统在 MultiAgent"></a>一、入口很薄，真正的系统在 MultiAgent</h2><p>项目入口 <code>main.py</code> 几乎没有业务逻辑：调整两个 CosyVoice 路径，打印 Banner，创建 <code>MultiAgent</code>，然后调用 <code>run()</code>。</p>
 <div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">main.py</span><br><span class="line">  └─ MultiAgent.run()</span><br><span class="line">      ├─ process_requirement(requirement)</span><br><span class="line">      │   ├─ intents_analysis()</span><br><span class="line">      │   ├─ get_tools_by_intents()</span><br><span class="line">      │   ├─ generate_agent_graph()</span><br><span class="line">      │   └─ judge_agent_graph()</span><br><span class="line">      └─ execute_agent_chain()</span><br></pre></td></tr></table></figure></div>
 
@@ -768,9 +769,9 @@
 <li>至少 9 份第三方 License 文件；</li>
 <li>根项目没有测试目录，也没有 GitHub Actions 工作流和正式 Release。</li>
 </ul>
-<p>根 <code>pyproject.toml</code> 一次性声明了一百余项依赖，包括 CUDA 版 PyTorch 索引、<code>onnxruntime-gpu</code>、<code>bitsandbytes</code>、MoviePy、Whisper、Diffusers、Cartopy、Neo4j、ImageBind 等。它还同时声明 <code>onnxruntime-gpu</code> 与 <code>onnxruntime</code>，并把 <code>torch==2.3.1</code> 固定下来。</p>
+<p>根 <code>pyproject.toml</code> 一次性声明了一百余项依赖，包括 CUDA 版 PyTorch 索引、<code>onnxruntime-gpu</code>、<code>bitsandbytes</code>、MoviePy、Whisper、Diffusers、Cartopy、Neo4j、ImageBind 等。它还同时声明 <code>onnxruntime-gpu</code> 与 <code>onnxruntime</code>，并把 <code>torch==2.3.1</code> 固定下来。实际用 <code>uv pip install --dry-run -r requirements.txt</code> 检查时，多索引解析已经因 CUDA PyTorch 索引中的包版本不完整而失败；即使换回 pip 可能采用不同索引策略，这也说明安装路径缺乏锁文件和可重复性。</p>
 <p>README 给出的目标环境是 Python 3.10、Linux&#x2F;Windows、8GB GPU，并要求用户按功能手动下载多个模型。核心视频检索路径中 ImageBind 明确调用 <code>.cuda()</code>，因此 macOS 即使能做静态导入和部分 CPU 任务，也不能按当前代码跑通完整 VideoRAG。</p>
-<p>项目的配置也不是“填一个 API Key”这么简单：</p>
+<p>项目的配置也不是“填一个 API Key”这么简单。四类服务虽然名字不同，源码统一通过 OpenAI Python SDK 调用，因此 Claude、Gemini 与 DeepSeek 还需要 OpenAI-compatible endpoint；README 没有把这一点讲清楚，也没有环境变量或 <code>.env.example</code>，凭据只能写入仓库内 YAML：</p>
 <ul>
 <li>Claude：意图分析与 Agent Graph Router；</li>
 <li>Gemini：视频 Caption 与细粒度帧选择；</li>
@@ -789,6 +790,7 @@
 <li>视频片段疑似没有正确去重；</li>
 <li>上传视频路径存在障碍。</li>
 </ul>
+<p>论文与仓库能力表也需要分开看：论文列出的 Face Swapping、Lip Synchronization 等 Agent，在当前 registry 和源码中没有找到对应实现；“超过 30 个 Agent”可以描述研究系统的能力规模，却不能理解为仓库内每项能力都已提供可直接运行的实现。</p>
 <p>最近合并的 PR #13 很有代表性。它修复了四类 Orchestrator 问题：</p>
 <ol>
 <li>LLM 输出使用 <code>eval()</code> 的安全风险；</li>
@@ -844,7 +846,7 @@
         
             <li>
                 <strong>更新于
-                    :</strong> 2026-07-13 14:48:02
+                    :</strong> 2026-07-13 14:57:17
             </li>
         
         <li>
@@ -967,7 +969,7 @@
                     </span>
                     
                         <span>
-                            共 626.8k 字
+                            共 627.1k 字
                         </span>
                     
                 </p>
