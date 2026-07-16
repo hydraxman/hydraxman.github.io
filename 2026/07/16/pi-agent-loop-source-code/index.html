@@ -94,7 +94,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://hydraxman.github.io/images/redefine-og.webp">
 <meta property="article:published_time" content="2026-07-16T12:20:00.000Z">
-<meta property="article:modified_time" content="2026-07-16T12:28:26.042Z">
+<meta property="article:modified_time" content="2026-07-16T12:41:03.521Z">
 <meta property="article:author" content="Nathan">
 <meta property="article:tag" content="Coding Agent">
 <meta property="article:tag" content="Agent Loop">
@@ -509,8 +509,8 @@
     
         <span class="article-date article-meta-item">
             <i class="fa-regular fa-wrench"></i>&nbsp;
-            <span class="desktop">2026-07-16 20:28:26</span>
-            <span class="mobile">2026-07-16 20:28:26</span>
+            <span class="desktop">2026-07-16 20:41:03</span>
+            <span class="mobile">2026-07-16 20:41:03</span>
             <span class="hover-info">更新</span>
         </span>
     
@@ -564,7 +564,7 @@
     
     
         <span class="article-wordcount article-meta-item">
-            <i class="fa-regular fa-typewriter"></i>&nbsp;<span>3.5k 字</span>
+            <i class="fa-regular fa-typewriter"></i>&nbsp;<span>3.7k 字</span>
         </span>
     
     
@@ -685,6 +685,7 @@
 <li>如果一个批次里任何工具声明 <code>executionMode: &quot;sequential&quot;</code>，整批工具都会串行执行，避免写文件等副作用互相踩踏。</li>
 <li>如果模型因为输出 token 上限而以 <code>stopReason: &quot;length&quot;</code> 结束，Pi 不执行其中任何 Tool Call。因为被截断的 JSON 有时仍能被“抢救”为合法参数，但内容可能已经悄悄缺了一半。</li>
 </ul>
+<p>Coding Agent 在这层“整批开关”之外，又给 <code>edit</code> 和 <code>write</code> 加了一把更细的锁。<code>withFileMutationQueue()</code> 用文件真实路径做 Key：同一个文件的修改严格排队，不同文件仍然并行。即使 Abort 已经到达，它也会等当前文件系统操作真正结束后再释放锁，避免“调用方以为取消了，旧写入却稍后落盘”这种幽灵覆盖。</p>
 <p>第二条尤其重要。许多 Agent 只验证“JSON 能不能解析”，Pi 进一步问了一句：“这份 JSON 是不是在完整响应里产生的？”</p>
 <p>这不是为了显得谨慎而加的理论防线。2026 年 7 月 7 日，项目在 commit <code>351efc82</code> 中专门修复了 issue #6284：流式 JSON 的容错解析可能把半截参数补成一个“合法但不完整”的对象。最终方案不是继续改 Parser，而是在 Agent Loop 里拒绝执行整个截断批次，让模型重新发出完整调用。</p>
 <h2 id="AgentMessage：把-UI-历史和模型上下文分开"><a href="#AgentMessage：把-UI-历史和模型上下文分开" class="headerlink" title="AgentMessage：把 UI 历史和模型上下文分开"></a>AgentMessage：把 UI 历史和模型上下文分开</h2><p>Pi 内部使用的不是普通 <code>Message[]</code>，而是可扩展的 <code>AgentMessage[]</code>。</p>
@@ -731,6 +732,7 @@
 <p><code>beforeToolCall</code> 可以阻止工具执行，<code>afterToolCall</code> 可以替换结果；每个新 turn 开始前，系统还会重新读取当前模型、Thinking Level、工具列表和 System Prompt，所以扩展可以在运行中改变下一轮能力。</p>
 <p>但不要把 Hook 误解成沙箱。</p>
 <p>项目 README 明确写着：Pi 默认没有限制文件系统、进程、网络或凭据访问的内建 Permission System。它以启动进程的用户权限运行。需要更强边界时，应放进 Docker、micro-VM 或策略沙箱。</p>
+<p>Pi 的 Project Trust 也只是“是否加载项目本地设置、扩展、Skill 和 Prompt”的启动门禁。拒绝 Trust 能阻止仓库在启动前悄悄注入本地扩展，却不能限制模型启动后要求 Bash、Read 或 Write 做什么，更不能消除仓库文档和构建输出里的 Prompt Injection。</p>
 <p>源码还暴露出一个更细的边界：Tool Arguments 先做 Schema 校验，再交给 <code>beforeToolCall</code>。Hook 拿到的是同一个可变参数对象；测试甚至明确证明，Hook 修改参数后不会再次校验。</p>
 <p>这给兼容和拦截带来灵活性，但也意味着：</p>
 <p><strong>扩展不是“不可信插件”，而是 Agent Runtime 的受信代码。</strong></p>
@@ -790,7 +792,7 @@
         
             <li>
                 <strong>更新于
-                    :</strong> 2026-07-16 20:28:26
+                    :</strong> 2026-07-16 20:41:03
             </li>
         
         <li>
@@ -901,7 +903,7 @@
                     </span>
                     
                         <span>
-                            共 636.6k 字
+                            共 636.8k 字
                         </span>
                     
                 </p>
