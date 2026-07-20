@@ -1,0 +1,1393 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="keywords" content="计算机技术, 生活中的胡思乱想">
+    
+    
+    <meta name="author" content="Nathan">
+    
+    <!-- Completely eliminate flash of wrong theme -->
+    <script>
+        (function() {
+            const THEME_KEY = "REDEFINE-THEME-STATUS";
+            const DARK = "dark", LIGHT = "light";
+            
+            // Get preferred theme
+            function getTheme() {
+                try {
+                    const saved = localStorage.getItem(THEME_KEY);
+                    if (saved) {
+                        const { isDark } = JSON.parse(saved);
+                        return isDark ? DARK : LIGHT;
+                    }
+                } catch (e) {}
+                
+                return matchMedia("(prefers-color-scheme: dark)").matches ? DARK : LIGHT;
+            }
+            
+            // Apply theme to document
+            function applyTheme(theme) {
+                const isDark = theme === DARK;
+                const root = document.documentElement;
+                
+                // Set classes for compatibility
+                root.classList.add(theme);
+                root.classList.remove(isDark ? LIGHT : DARK);
+                root.style.colorScheme = theme;
+            }
+            
+            // Initial application
+            const theme = getTheme();
+            applyTheme(theme);
+            
+            // Listen for system preference changes
+            matchMedia("(prefers-color-scheme: dark)").addEventListener("change", ({ matches }) => {
+                // Only update if using system preference (no localStorage entry)
+                if (!localStorage.getItem(THEME_KEY)) {
+                    applyTheme(matches ? DARK : LIGHT);
+                }
+            });
+            
+            // Set body classes ASAP (before DOMContentLoaded)
+            (function() {
+                const addBodyClass = () => {
+                    const b = document.body;
+                    if (!b) return false;
+                    b.classList.add(theme + "-mode");
+                    return true;
+                };
+
+                // Try immediately
+                if (addBodyClass()) return;
+
+                // Observe until body exists
+                const mo = new MutationObserver(() => {
+                    if (addBodyClass()) mo.disconnect();
+                });
+                mo.observe(document.documentElement, { childList: true, subtree: true });
+            })();
+        })();
+    </script>
+    
+    <!-- preconnect -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    
+    <!--- Seo Part-->
+    
+    <link rel="canonical" href="https://hydraxman.github.io/2026/07/20/hermes-agent-source-code-02-provider-runtime-resolution/"/>
+    <meta name="robots" content="index,follow">
+    <meta name="googlebot" content="index,follow">
+    <meta name="revisit-after" content="1 days">
+    
+    
+        
+        <meta name="description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Hermes Agent 源码解析（2）：Provider Runtime Resolution">
+<meta property="og:url" content="https://hydraxman.github.io/2026/07/20/hermes-agent-source-code-02-provider-runtime-resolution/index.html">
+<meta property="og:site_name" content="内森淼文">
+<meta property="og:description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://hydraxman.github.io/images/redefine-og.webp">
+<meta property="article:published_time" content="2026-07-20T10:00:00.000Z">
+<meta property="article:modified_time" content="2026-07-20T10:02:39.600Z">
+<meta property="article:author" content="Nathan">
+<meta property="article:tag" content="Hermes Agent">
+<meta property="article:tag" content="源码分析">
+<meta property="article:tag" content="AI Agent">
+<meta property="article:tag" content="Provider Runtime">
+<meta property="article:tag" content="模型路由">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://hydraxman.github.io/images/redefine-og.webp">
+    
+    
+    <!--- Icon Part-->
+    <link rel="icon" type="image/png" href="/images/favicon.svg" sizes="192x192">
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.svg">
+    <meta name="theme-color" content="#ffffff">
+    <link rel="shortcut icon" href="/images/favicon.svg">
+    <!--- Page Info-->
+    
+    <title>
+        
+            Hermes Agent 源码解析（2）：Provider Runtime Resolution | 内森淼文
+        
+    </title>
+
+    
+<link rel="stylesheet" href="/fonts/Chillax/chillax.css">
+
+
+    <!--- Inject Part-->
+    
+        
+            
+    
+            
+    
+            
+                
+                    <link rel="stylesheet" href="/css/custom.css">
+                
+    
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    
+        
+<link rel="stylesheet" href="/css/build/tailwind.css">
+
+    
+
+    
+<link rel="stylesheet" href="/fonts/GeistMono/geist-mono.css">
+
+    
+<link rel="stylesheet" href="/fonts/Geist/geist.css">
+
+    <!--- Font Part-->
+    
+    
+    
+    
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&display=swap" rel="stylesheet">
+    
+    
+
+    <script id="hexo-configurations">
+    window.config = {"hostname":"hydraxman.github.io","root":"/","language":"zh-CN","path":"search.json"};
+    window.theme = {"articles":{"style":{"font_size":"16px","line_height":1.5,"image_border_radius":"14px","image_alignment":"center","image_caption":false,"link_icon":true,"delete_mask":false,"title_alignment":"left","headings_top_spacing":{"h1":"3.2rem","h2":"2.4rem","h3":"1.9rem","h4":"1.6rem","h5":"1.4rem","h6":"1.3rem"}},"word_count":{"enable":true,"count":true,"min2read":true},"author_label":{"enable":false,"auto":false,"list":[]},"code_block":{"copy":true,"style":"mac","highlight_theme":{"light":"github","dark":"vs2015"},"font":{"enable":false,"family":null,"url":null}},"toc":{"enable":true,"max_depth":3,"number":false,"expand":true,"init_open":true},"copyright":{"enable":true,"default":"cc_by_nc_sa"},"lazyload":true,"pangu_js":false,"recommendation":{"enable":false,"title":"推荐阅读","limit":3,"mobile_limit":2,"placeholder":"/images/wallhaven-wqery6-light.webp","skip_dirs":[]}},"colors":{"primary":"#ffffff","secondary":null,"default_mode":"light"},"global":{"fonts":{"chinese":{"enable":false,"family":null,"url":null},"english":{"enable":true,"family":"Inter","url":"https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"},"title":{"enable":true,"family":"Noto Serif","url":"https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&display=swap"}},"content_max_width":"1000px","sidebar_width":"210px","hover":{"shadow":true,"scale":false},"scroll_progress":{"bar":true,"percentage":true},"website_counter":{"url":"https://cn.vercount.one/js","enable":false,"site_pv":true,"site_uv":true,"post_pv":true},"single_page":true,"preloader":{"enable":false,"custom_message":null},"side_tools":{"gear_rotation":true,"auto_expand":false},"open_graph":{"enable":true,"image":"/images/redefine-og.webp","description":"Hexo Theme Redefine, Redefine Your Hexo Journey."},"google_analytics":{"enable":false,"id":null}},"home_banner":{"enable":true,"style":"fixed","image":{"light":"/images/banner-light.jpg","dark":"/images/banner-dark.jpg"},"title":"内森淼文","subtitle":{"text":["AI · 编程 · 科技见闻","Write Code, Read World"],"hitokoto":{"enable":false,"show_author":false,"api":"https://v1.hitokoto.cn"},"typing_speed":100,"backing_speed":80,"starting_delay":500,"backing_delay":1500,"loop":true,"smart_backspace":true},"text_color":{"light":"#fff","dark":"#d1d1b6"},"text_style":{"title_size":"2.8rem","subtitle_size":"1.5rem","line_height":1.2},"custom_font":{"enable":false,"family":null,"url":null},"social_links":{"enable":true,"style":"default","links":[{"icon":"fa-brands fa-github","url":"https://github.com/hydraxman"}],"qrs":[{"icon":"fa-brands fa-weixin","qr":null},{"icon":"/images/custom-icon.svg","qr":null}]}},"plugins":{"feed":{"enable":false},"aplayer":{"enable":false,"type":"fixed","audios":[{"name":null,"artist":null,"url":null,"cover":null,"lrc":null}]},"mermaid":{"enable":false,"version":"11.4.1","theme":{"light":"default","dark":"dark"}}},"version":"2.9.0","navbar":{"auto_hide":false,"color":{"left":"#333333","right":"#555555","transparency":35},"width":{"home":"1200px","pages":"1000px"},"links":{"Home":{"path":"/","icon":"fa-regular fa-house"},"Archives":{"path":"/archives","icon":"fa-regular fa-archive"},"Categories":{"path":"/categories","icon":"fa-regular fa-folder"},"Tags":{"path":"/tags","icon":"fa-regular fa-tags"},"About":{"path":"/about","icon":"fa-regular fa-user"}},"search":{"enable":true,"preload":true}},"page_templates":{"friends_column":2,"tags_style":"blur","masonry":{"batch_size":12,"initial_batch_size":24}},"home":{"sidebar":{"enable":true,"position":"left","first_item":"menu","announcement":"AI · 编程 · 科技","show_on_mobile":true,"links":{"Archives":{"path":"/archives","icon":"fa-regular fa-archive"},"Tags":{"path":"/tags","icon":"fa-regular fa-tags"},"Categories":{"path":"/categories","icon":"fa-regular fa-folder"}}},"article_date_format":"auto","excerpt_length":200,"categories":{"enable":true,"limit":3},"tags":{"enable":true,"limit":3}},"footer":{"runtime":true,"icon":"<i class=\"fa-solid fa-heart fa-beat\" style=\"--fa-animation-duration: 0.5s; color: #333\"></i>","start":"2024/01/01 00:00:00","statistics":true,"customize":null,"icp":{"enable":false,"number":null,"url":null}},"footerStart":"2024/01/01 00:00:00","mermaid":{"style":{"light":"default","dark":"dark"}}};
+    window.lang_ago = {"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"};
+    window.i18n = {"search":"站内搜索您需要的内容...","toc":"目录","prev":"上一页","next":"下一页","prev_posts":"上一篇","next_posts":"下一篇","page":"第 %d 页","recent_posts":"最新文章","share":"分享","powered_by":"由 %s 驱动","theme":"主题","rss_feed":"RSS Feed","category":"分类","categories":"分类","tag":"标签","tags":"标签","post":"文章","posts":"文章","tagcloud":"标签云","comment":"评论","comments":"评论","top":"置顶","sticky":"置顶","go-back-home":"回到首页","masonry_loading":"照片加载中...","image_viewer":"图片查看器","close":"关闭","exif":{"title":"EXIF","cards":{"camera":"相机","lens":"镜头","exposure":"曝光","other":"其他"},"fields":{"make":"品牌","model":"机型","date_taken":"拍摄时间","lens_model":"镜头","focal_length":"焦距","focus_mode":"对焦模式","shutter":"快门","aperture":"光圈","iso":"感光度","exposure_program":"曝光程序","exposure_compensation":"曝光补偿","metering_mode":"测光模式","flash":"闪光灯","white_balance":"白平衡","latitude":"纬度","longitude":"经度","altitude":"海拔"},"status":{"loading":"加载中...","no_exif":"无 EXIF 信息","library_missing":"EXIF 库未加载","image_source_missing":"图片地址不可用","unavailable":"EXIF 不可用（可能被 CORS 阻止或缺少元数据）","flag_unavailable":"EXIF 不可用"}},"home":"首页","archive":"归档","archives":"归档","about":"关于","links":"链接","link":"链接","friends":"友情链接","friend":"友情链接","timeline":"时间轴","shuoshuo":"说说","bookmarks":"书签","site_uv":"访问人数","site_pv":"总访问量","read_more":"阅读全文","wordcount":"字","min2read":"分钟","changelog":"更新日志","status":"状态","runtime":"博客已运行","days":"天","hours":"小时","minutes":"分钟","seconds":"秒","optimized_by":"并由 Evan 进行优化","rights":"版权所有","site_posts":"共撰写了 %s 篇文章","site_wordcount":"共 %s 字","copyright":{"title":"标题","author":"作者","link":"链接","create_time":"创建于","update_time":"更新于","license_title":"版权声明","license_content":"本文章采用 %s 进行许可。","all_rights_reserved":"版权所有 &#169 %s，禁止转载。","public_domain":"本文为公有领域作品，可自由转载、引用。"},"ago":{"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"},"create_time":"创建","update_time":"更新","expired":"这篇文章最后更新于 %s 天前，内容可能已经过时。"};
+    window.data = {"masonry":false};
+  </script>
+    
+    <!--- Fontawesome Part-->
+    
+<link rel="stylesheet" href="/fontawesome/fontawesome.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/brands.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/solid.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/regular.min.css">
+
+    
+    
+    
+    
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+	<div class="progress-bar-container">
+	
+	<span class="scroll-progress-bar"></span>
+	
+
+	
+	<span class="pjax-progress-bar"></span>
+	<!--        <span class="swup-progress-icon">-->
+	<!--            <i class="fa-solid fa-circle-notch fa-spin"></i>-->
+	<!--        </span>-->
+	
+</div>
+
+<main class="page-container" id="swup">
+
+	
+
+	<div class="main-content-container flex flex-col justify-between min-h-dvh">
+		<div class="main-content-header">
+			<header class="navbar-container px-6 md:px-12">
+    <div class="navbar-content transition-navbar ">
+        <div class="left">
+            
+            <a class="logo-title" href="/">
+                
+                内森淼文
+                
+            </a>
+        </div>
+
+        <div class="right">
+            <!-- PC -->
+            <div class="desktop">
+                <ul class="navbar-list">
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/"
+                                        >
+                                    <i class="fa-regular fa-house fa-fw"></i>
+                                    首页
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/archives"
+                                        >
+                                    <i class="fa-regular fa-archive fa-fw"></i>
+                                    归档
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/categories"
+                                        >
+                                    <i class="fa-regular fa-folder fa-fw"></i>
+                                    分类
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/tags"
+                                        >
+                                    <i class="fa-regular fa-tags fa-fw"></i>
+                                    标签
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/about"
+                                        >
+                                    <i class="fa-regular fa-user fa-fw"></i>
+                                    关于
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                    
+                        <li class="navbar-item search search-popup-trigger">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </li>
+                    
+                </ul>
+            </div>
+            <!-- Mobile -->
+            <div class="mobile">
+                
+                    <div class="icon-item search search-popup-trigger"><i class="fa-solid fa-magnifying-glass"></i>
+                    </div>
+                
+                <div class="icon-item navbar-bar">
+                    <div class="navbar-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile sheet -->
+    <div class="navbar-drawer h-dvh w-full absolute top-0 left-0 bg-background-color flex flex-col justify-between">
+        <ul class="drawer-navbar-list flex flex-col px-4 justify-center items-start">
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/"
+                        >
+                            <span>
+                                首页
+                            </span>
+                            
+                                <i class="fa-regular fa-house fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/archives"
+                        >
+                            <span>
+                                归档
+                            </span>
+                            
+                                <i class="fa-regular fa-archive fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/categories"
+                        >
+                            <span>
+                                分类
+                            </span>
+                            
+                                <i class="fa-regular fa-folder fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/tags"
+                        >
+                            <span>
+                                标签
+                            </span>
+                            
+                                <i class="fa-regular fa-tags fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/about"
+                        >
+                            <span>
+                                关于
+                            </span>
+                            
+                                <i class="fa-regular fa-user fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+
+            
+            
+                
+                    
+                    
+                    
+            
+        </ul>
+
+        <div class="statistics flex justify-around my-2.5">
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/tags">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">351</div>
+        <div class="label text-third-text-color text-sm">标签</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/categories">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">9</div>
+        <div class="label text-third-text-color text-sm">分类</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/archives">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">303</div>
+        <div class="label text-third-text-color text-sm">文章</div>
+    </a>
+</div>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+		</div>
+
+		<div class="main-content-body transition-fade-up">
+			
+
+			<div class="main-content">
+				<div class="post-page-container flex relative justify-between box-border w-full h-full">
+	<div class="article-content-container">
+
+		<div class="article-title relative w-full">
+			
+			
+			
+			<img src="/images/hermes-agent-source-02/cover.png" alt="Hermes Agent 源码解析（2）：Provider Runtime Resolution" class="w-full h-60 sm:h-72 md:h-80 object-cover sm:rounded-t-large dark:brightness-75" />
+			
+			<div class="w-full flex items-center absolute bottom-0 justify-start">
+				<h1 class="article-title-cover text-center mx-6 my-6 text-second-text-color bg-background-color-transparent px-4 py-3 text-3xl sm:text-4xl md:text-5xl font-semibold backdrop-blur-lg rounded-xl border border-border-color ">Hermes Agent 源码解析（2）：Provider Runtime Resolution</h1>
+			</div>
+			
+		</div>
+
+		
+		<div class="article-header flex flex-row gap-2 items-center px-2 sm:px-6 md:px-8">
+			<div class="avatar w-[46px] h-[46px] shrink-0 rounded-medium border border-border-color p-px">
+				<img src="/images/avatar.png">
+			</div>
+			<div class="info flex flex-col justify-between">
+				<div class="author flex items-center">
+					<span class="name text-default-text-color text-lg font-semibold">Nathan</span>
+					
+				</div>
+				<div class="meta-info">
+					<div class="article-meta-info">
+    <span class="article-date article-meta-item">
+        <i class="fa-regular fa-pen-fancy"></i>&nbsp;
+        <span class="desktop">2026-07-20 18:00</span>
+        <span class="mobile">2026-07-20 18:00</span>
+        <span class="hover-info">创建</span>
+    </span>
+    
+        <span class="article-date article-meta-item">
+            <i class="fa-regular fa-wrench"></i>&nbsp;
+            <span class="desktop">2026-07-20 18:02:39</span>
+            <span class="mobile">2026-07-20 18:02:39</span>
+            <span class="hover-info">更新</span>
+        </span>
+    
+
+    
+        <span class="article-categories article-meta-item">
+            <i class="fa-regular fa-folders"></i>&nbsp;
+            <ul>
+                
+                
+                    
+                        
+                        <li>
+                            <a href="/categories/%E4%BB%A3%E7%A0%81%E6%89%8B%E8%AE%B0/">代码手记</a>&nbsp;
+                        </li>
+                    
+                    
+                
+            </ul>
+        </span>
+    
+    
+        <span class="article-tags article-meta-item">
+            <i class="fa-regular fa-tags"></i>&nbsp;
+            <ul>
+                
+                    <li>
+                        <a href="/tags/Hermes-Agent/">Hermes Agent</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/">源码分析</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/AI-Agent/">AI Agent</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/Provider-Runtime/">Provider Runtime</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/%E6%A8%A1%E5%9E%8B%E8%B7%AF%E7%94%B1/">模型路由</a>&nbsp;
+                    </li>
+                
+            </ul>
+        </span>
+    
+
+    
+    
+        <span class="article-wordcount article-meta-item">
+            <i class="fa-regular fa-typewriter"></i>&nbsp;<span>4.4k 字</span>
+        </span>
+    
+    
+        <span class="article-min2read article-meta-item">
+            <i class="fa-regular fa-clock"></i>&nbsp;<span>17 分钟</span>
+        </span>
+    
+    
+</div>
+
+				</div>
+			</div>
+		</div>
+		
+
+		
+
+
+		<div class="article-content markdown-body px-2 sm:px-6 md:px-8 pb-8">
+			<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/hermes-agent-source-02/cover.png"
+                      alt="Hermes Agent Provider Runtime Resolution"
+                ></p>
+<p>当我们在Hermes里写下：</p>
+<div class="code-container" data-rel="Yaml"><figure class="iseeu highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">model:</span></span><br><span class="line">  <span class="attr">provider:</span> <span class="string">openai-codex</span></span><br><span class="line">  <span class="attr">default:</span> <span class="string">gpt-5.6-sol</span></span><br></pre></td></tr></table></figure></div>
+
+<p>或者在命令行里执行：</p>
+<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/model anthropic/claude-opus-4.6</span><br></pre></td></tr></table></figure></div>
+
+<p>真正进入Agent Loop的，绝不只是一个模型名。</p>
+<p>模型调用至少还需要回答这些问题：</p>
+<ul>
+<li>这个Provider的规范身份是什么？<code>claude</code>、<code>anthropic</code>和自定义同名Provider谁优先？</li>
+<li>请求应该发送到哪个Base URL？配置、环境变量、凭证池与默认地址谁覆盖谁？</li>
+<li>使用<code>chat_completions</code>、<code>codex_responses</code>、<code>anthropic_messages</code>，还是<code>bedrock_converse</code>？</li>
+<li>API key从显式参数、<code>config.yaml</code>、环境变量、OAuth状态还是Credential Pool获取？</li>
+<li>多个凭证里选哪一个？429、401之后如何轮换？</li>
+<li>同一个模型在OpenAI API、Codex OAuth、Copilot或Bedrock上的Context Length是否相同？</li>
+<li>主Provider认证失败和请求执行失败，分别在什么时候进入Fallback？</li>
+</ul>
+<p>这些问题共同构成Hermes的<strong>Provider Runtime Resolution</strong>。</p>
+<p>本文是“Hermes Agent源码解析”系列第二章。分析继续锁定第一章使用的源码commit：</p>
+<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">0f102fa4dc04b7dfdab048169aaaa640d09d7523</span><br><span class="line">2026-07-16</span><br><span class="line">feat(browser): store full snapshots on truncation; make eval denylist opt-in (#65923)</span><br></pre></td></tr></table></figure></div>
+
+<p>仓库地址：<a class="link"   target="_blank" rel="noopener" href="https://github.com/NousResearch/hermes-agent" >NousResearch&#x2F;hermes-agent<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a>。除“当前main差异”外，所有源码链接都固定到这个commit。</p>
+<h2 id="先给结论：Runtime-Resolver是一台“策略编译器”"><a href="#先给结论：Runtime-Resolver是一台“策略编译器”" class="headerlink" title="先给结论：Runtime Resolver是一台“策略编译器”"></a>先给结论：Runtime Resolver是一台“策略编译器”</h2><p><code>resolve_runtime_provider()</code>最终返回一个Python字典，但把它理解成“读取配置并拼字典”会严重低估它。</p>
+<p>更准确的模型是：</p>
+<blockquote>
+<p>Hermes把用户意图、持久配置、环境凭证、OAuth状态、Credential Pool、Provider目录、模型名和安全策略，编译成一次可执行的Runtime Route。</p>
+</blockquote>
+<p>它的主入口是：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/NousResearch/hermes-agent/blob/0f102fa4dc04b7dfdab048169aaaa640d09d7523/hermes_cli/runtime_provider.py#L1515-L2091"><code>resolve_runtime_provider()</code></a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/NousResearch/hermes-agent/blob/0f102fa4dc04b7dfdab048169aaaa640d09d7523/hermes_cli/auth.py#L1733-L1933"><code>resolve_provider()</code></a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/NousResearch/hermes-agent/blob/0f102fa4dc04b7dfdab048169aaaa640d09d7523/hermes_cli/providers.py#L719-L789"><code>resolve_provider_full()</code></a></li>
+</ul>
+<p>解析完成后的典型结果是：</p>
+<div class="code-container" data-rel="Python"><figure class="iseeu highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="string">&quot;provider&quot;</span>: <span class="string">&quot;openai-codex&quot;</span>,</span><br><span class="line">    <span class="string">&quot;requested_provider&quot;</span>: <span class="string">&quot;openai-codex&quot;</span>,</span><br><span class="line">    <span class="string">&quot;api_mode&quot;</span>: <span class="string">&quot;codex_responses&quot;</span>,</span><br><span class="line">    <span class="string">&quot;base_url&quot;</span>: <span class="string">&quot;https://chatgpt.com/backend-api/codex&quot;</span>,</span><br><span class="line">    <span class="string">&quot;api_key&quot;</span>: <span class="string">&quot;[REDACTED]&quot;</span>,</span><br><span class="line">    <span class="string">&quot;source&quot;</span>: <span class="string">&quot;credential_pool&quot;</span>,</span><br><span class="line">    <span class="string">&quot;credential_pool&quot;</span>: pool,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></div>
+
+<p>不同Provider还可能附带：</p>
+<ul>
+<li><code>model</code></li>
+<li><code>expires_at</code>或<code>last_refresh</code></li>
+<li><code>region</code></li>
+<li><code>guardrail_config</code></li>
+<li><code>bedrock_anthropic</code></li>
+<li><code>command</code>与<code>args</code></li>
+<li><code>request_overrides</code></li>
+<li><code>extra_headers</code></li>
+<li><code>max_output_tokens</code></li>
+</ul>
+<p>所以Runtime并不是“Provider配置”。它是<strong>本次Agent实例可以直接消费的路由快照</strong>。</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/hermes-agent-source-02/01-runtime-resolution-pipeline.png"
+                      alt="Provider Runtime解析总览"
+                ></p>
+<h2 id="真正调用链：先解凭证，再构造Agent"><a href="#真正调用链：先解凭证，再构造Agent" class="headerlink" title="真正调用链：先解凭证，再构造Agent"></a>真正调用链：先解凭证，再构造Agent</h2><p>经典CLI路径从<code>CLIAgentSetupMixin._ensure_runtime_credentials()</code>开始：</p>
+<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">CLI / Gateway / Cron / ACP</span><br><span class="line">  → resolve_runtime_provider()</span><br><span class="line">  → runtime &#123;provider, api_mode, base_url, api_key, pool, ...&#125;</span><br><span class="line">  → AIAgent(...runtime fields...)</span><br><span class="line">  → init_agent()</span><br><span class="line">  → Transport + Client + Context Engine</span><br></pre></td></tr></table></figure></div>
+
+<p>源码位置：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/NousResearch/hermes-agent/blob/0f102fa4dc04b7dfdab048169aaaa640d09d7523/hermes_cli/cli_agent_setup_mixin.py#L25-L180"><code>_ensure_runtime_credentials()</code></a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/NousResearch/hermes-agent/blob/0f102fa4dc04b7dfdab048169aaaa640d09d7523/hermes_cli/cli_agent_setup_mixin.py#L226-L453"><code>_init_agent()</code></a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/NousResearch/hermes-agent/blob/0f102fa4dc04b7dfdab048169aaaa640d09d7523/agent/agent_init.py#L276-L2181"><code>init_agent()</code></a></li>
+</ul>
+<p>CLI不会只在进程启动时解析一次凭证。<code>_ensure_runtime_credentials()</code>明确会在使用Agent前重新解析，目的是拾取：</p>
+<ul>
+<li>API key轮换；</li>
+<li>OAuth token刷新；</li>
+<li>Credential Pool当前选择；</li>
+<li><code>/model</code>之后的新Provider；</li>
+<li>Base URL或API Mode变化。</li>
+</ul>
+<p>如果<code>api_key</code>、<code>base_url</code>、<code>provider</code>、<code>api_mode</code>、ACP命令或实际模型发生变化，已有<code>AIAgent</code>会被丢弃并重新构造。原因很直接：OpenAI&#x2F;Anthropic客户端在初始化时已经绑定了认证与路由，不能假装只改一个字符串就完成切换。</p>
+<p>这也解释了为什么Runtime Route Signature包含：</p>
+<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(model, provider, base_url, api_mode, command, args)</span><br></pre></td></tr></table></figure></div>
+
+<p>Credential Pool对象没有进入签名，因为它可以在同一路由内部轮换凭证；Provider、协议或端点变化则必须重建客户端。</p>
+<h2 id="第一层解析：用户“请求了谁”"><a href="#第一层解析：用户“请求了谁”" class="headerlink" title="第一层解析：用户“请求了谁”"></a>第一层解析：用户“请求了谁”</h2><p><code>resolve_runtime_provider()</code>开头先调用<code>resolve_requested_provider()</code>：</p>
+<div class="code-container" data-rel="Python"><figure class="iseeu highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">requested_provider = resolve_requested_provider(requested)</span><br></pre></td></tr></table></figure></div>
+
+<p>源码：<a class="link"   target="_blank" rel="noopener" href="https://github.com/NousResearch/hermes-agent/blob/0f102fa4dc04b7dfdab048169aaaa640d09d7523/hermes_cli/runtime_provider.py#L541-L557" >runtime_provider.py#L541-L557<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></p>
+<p>优先级非常明确：</p>
+<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">显式requested参数</span><br><span class="line">  &gt; config.yaml model.provider</span><br><span class="line">  &gt; HERMES_INFERENCE_PROVIDER</span><br><span class="line">  &gt; auto</span><br></pre></td></tr></table></figure></div>
+
+<p>这里有一个容易误读的细节：环境变量并不总比配置优先。</p>
+<p>Hermes把通过<code>hermes model</code>保存的Provider选择视为正常运行的Source of Truth。这样，用户之前在Shell里残留的<code>HERMES_INFERENCE_PROVIDER</code>不会偷偷覆盖已经保存的端点。</p>
+<p>进入<code>auto</code>以后，<code>auth.py::resolve_provider()</code>才进行更大的探测链：</p>
+<ol>
+<li>显式API key或Base URL；</li>
+<li><code>config.yaml model.provider</code>；</li>
+<li><code>OPENAI_API_KEY</code>或<code>OPENROUTER_API_KEY</code>；</li>
+<li>OpenRouter Credential Pool；</li>
+<li>其他Provider专属API key；</li>
+<li><code>auth.json active_provider</code>中的OAuth登录；</li>
+<li>AWS Bedrock凭证链；</li>
+<li>找不到则Fail Closed。</li>
+</ol>
+<p>源码：<a class="link"   target="_blank" rel="noopener" href="https://github.com/NousResearch/hermes-agent/blob/0f102fa4dc04b7dfdab048169aaaa640d09d7523/hermes_cli/auth.py#L1733-L1933" >auth.py#L1733-L1933<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></p>
+<p>这个排序表达了一个重要原则：</p>
+<blockquote>
+<p>明确的当前意图，应当压过陈旧但仍有效的登录状态。</p>
+</blockquote>
+<p>例如用户曾登录Codex OAuth，但现在导出了DeepSeek key。Hermes会选择显式环境凭证，并写Warning说明它覆盖了旧OAuth Provider，而不是静默沿用旧登录。</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/hermes-agent-source-02/02-provider-precedence.png"
+                      alt="Provider选择优先级"
+                ></p>
+<h2 id="第二层解析：Provider名字不是简单字符串"><a href="#第二层解析：Provider名字不是简单字符串" class="headerlink" title="第二层解析：Provider名字不是简单字符串"></a>第二层解析：Provider名字不是简单字符串</h2><p>Hermes同时维护三类Provider事实：</p>
+<ol>
+<li><code>models.dev</code>目录：Provider名称、Base URL、环境变量、模型元数据；</li>
+<li>Hermes Overlay：Transport、认证类型、Aggregator属性、额外环境变量；</li>
+<li>用户配置：<code>providers:</code>和兼容的<code>custom_providers:</code>。</li>
+</ol>
+<p><code>ProviderDef</code>是三者合并后的统一结构：</p>
+<div class="code-container" data-rel="Python"><figure class="iseeu highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@dataclass</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">ProviderDef</span>:</span><br><span class="line">    <span class="built_in">id</span>: <span class="built_in">str</span></span><br><span class="line">    name: <span class="built_in">str</span></span><br><span class="line">    transport: <span class="built_in">str</span></span><br><span class="line">    api_key_env_vars: <span class="built_in">tuple</span>[<span class="built_in">str</span>, ...]</span><br><span class="line">    base_url: <span class="built_in">str</span> = <span class="string">&quot;&quot;</span></span><br><span class="line">    base_url_env_var: <span class="built_in">str</span> = <span class="string">&quot;&quot;</span></span><br><span class="line">    is_aggregator: <span class="built_in">bool</span> = <span class="literal">False</span></span><br><span class="line">    auth_type: <span class="built_in">str</span> = <span class="string">&quot;api_key&quot;</span></span><br><span class="line">    source: <span class="built_in">str</span> = <span class="string">&quot;&quot;</span></span><br></pre></td></tr></table></figure></div>
+
+<p>源码：<a class="link"   target="_blank" rel="noopener" href="https://github.com/NousResearch/hermes-agent/blob/0f102fa4dc04b7dfdab048169aaaa640d09d7523/hermes_cli/providers.py#L232-L244" >providers.py#L232-L244<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></p>
+<h3 id="Alias可能改变Provider语义"><a href="#Alias可能改变Provider语义" class="headerlink" title="Alias可能改变Provider语义"></a>Alias可能改变Provider语义</h3><p>Alias不仅处理大小写或短名称，还可能改变路由：</p>
+<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">claude       → anthropic</span><br><span class="line">openai       → openrouter</span><br><span class="line">ollama       → custom</span><br><span class="line">aws          → bedrock</span><br><span class="line">lm-studio    → lmstudio</span><br></pre></td></tr></table></figure></div>
+
+<p>源码：<a class="link"   target="_blank" rel="noopener" href="https://github.com/NousResearch/hermes-agent/blob/0f102fa4dc04b7dfdab048169aaaa640d09d7523/hermes_cli/providers.py#L251-L373" >providers.py#L251-L373<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></p>
+<p>其中<code>openai → openrouter</code>尤其容易让读者惊讶。Hermes必须同时允许用户在<code>providers.openai</code>里声明自己的Direct OpenAI端点，因此<code>resolve_provider_full()</code>会先用<strong>原始、未套Alias的名字</strong>检查用户配置：</p>
+<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">用户显式providers.openai</span><br><span class="line">  &gt; 内置Alias openai → openrouter</span><br></pre></td></tr></table></figure></div>
+
+<p>源码：<a class="link"   target="_blank" rel="noopener" href="https://github.com/NousResearch/hermes-agent/blob/0f102fa4dc04b7dfdab048169aaaa640d09d7523/hermes_cli/providers.py#L739-L771" >providers.py#L739-L771<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></p>
+<p>这不是普通的“配置覆盖默认值”。它是在避免Alias劫持用户明确声明的Provider身份。</p>
+<h3 id="models-dev不是唯一真相"><a href="#models-dev不是唯一真相" class="headerlink" title="models.dev不是唯一真相"></a><code>models.dev</code>不是唯一真相</h3><p><code>get_provider()</code>会读取<code>models.dev</code>，再叠加Hermes Overlay：</p>
+<ul>
+<li><code>models.dev</code>提供Provider API地址和Key环境变量；</li>
+<li>Overlay补充<code>codex_responses</code>、<code>anthropic_messages</code>等Transport；</li>
+<li>用户配置最终可以声明自己的端点。</li>
+</ul>
+<p>源码：<a class="link"   target="_blank" rel="noopener" href="https://github.com/NousResearch/hermes-agent/blob/0f102fa4dc04b7dfdab048169aaaa640d09d7523/hermes_cli/providers.py#L420-L487" >providers.py#L420-L487<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></p>
+<p><code>models.dev</code>本身还有内存、磁盘与网络三级缓存：</p>
+<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">新鲜内存缓存</span><br><span class="line">  → 新鲜磁盘缓存</span><br><span class="line">  → 网络请求</span><br><span class="line">  → 网络失败时使用任意磁盘缓存</span><br></pre></td></tr></table></figure></div>
+
+<p>源码：<a class="link"   target="_blank" rel="noopener" href="https://github.com/NousResearch/hermes-agent/blob/0f102fa4dc04b7dfdab048169aaaa640d09d7523/agent/models_dev.py#L240-L318" >models_dev.py#L240-L318<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></p>
+<p>这意味着Provider目录允许短暂陈旧，但不能因为目录服务不可用就让Hermes完全无法启动。</p>
+<h2 id="第三层解析：专用Provider先走短路"><a href="#第三层解析：专用Provider先走短路" class="headerlink" title="第三层解析：专用Provider先走短路"></a>第三层解析：专用Provider先走短路</h2><p>主函数并不是一条平均分配的流水线。部分Provider必须在通用逻辑之前短路：</p>
+<ul>
+<li><code>moa</code>返回本地虚拟Runtime；</li>
+<li>Azure Anthropic直接进入<code>anthropic_messages</code>；</li>
+<li>Azure Foundry读取端点、认证模式和模型族；</li>
+<li>Vertex把凭证文件转换为短期OAuth token，不能把文件路径当API key；</li>
+<li>Named Custom Provider先于通用Provider探测；</li>
+<li><code>auto + 非已知云Base URL</code>优先按Custom Endpoint处理，避免环境中的云Key把本地路由劫持走。</li>
+</ul>
+<p>源码：<a class="link"   target="_blank" rel="noopener" href="https://github.com/NousResearch/hermes-agent/blob/0f102fa4dc04b7dfdab048169aaaa640d09d7523/hermes_cli/runtime_provider.py#L1532-L1656" >runtime_provider.py#L1532-L1656<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></p>
+<p>这类短路的共同原因不是“代码写乱了”，而是通用规则会破坏Provider自己的安全契约。</p>
+<p>例如Vertex的<code>GOOGLE_APPLICATION_CREDENTIALS</code>是文件路径。如果它进入通用<code>api_key</code>解析器，系统可能把：</p>
+<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/Users/example/service-account.json</span><br></pre></td></tr></table></figure></div>
+
+<p>当成Bearer Token发送。这不仅会失败，还可能泄漏本机路径。</p>
+<p>所以Resolver先调用<code>get_vertex_config()</code>生成短期Token，再把Token和计算出的Base URL交给OpenAI兼容客户端。</p>
+<h2 id="Named-Custom-Provider：最复杂的不是兼容，而是“别泄漏Key”"><a href="#Named-Custom-Provider：最复杂的不是兼容，而是“别泄漏Key”" class="headerlink" title="Named Custom Provider：最复杂的不是兼容，而是“别泄漏Key”"></a>Named Custom Provider：最复杂的不是兼容，而是“别泄漏Key”</h2><p>自定义端点看起来最简单：给一个URL和Key即可。实际上它是Provider解析里最敏感的一条路径。</p>
+<p>源码主段：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/NousResearch/hermes-agent/blob/0f102fa4dc04b7dfdab048169aaaa640d09d7523/hermes_cli/runtime_provider.py#L917-L1046"><code>_resolve_named_custom_runtime()</code></a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/NousResearch/hermes-agent/blob/0f102fa4dc04b7dfdab048169aaaa640d09d7523/hermes_cli/runtime_provider.py#L1049-L1188"><code>_resolve_openrouter_runtime()</code></a></li>
+</ul>
+<h3 id="Base-URL来源"><a href="#Base-URL来源" class="headerlink" title="Base URL来源"></a>Base URL来源</h3><p>通用Custom&#x2F;OpenRouter分支大致按以下顺序解析URL：</p>
+<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">explicit_base_url</span><br><span class="line">  &gt; CUSTOM_BASE_URL</span><br><span class="line">  &gt; 与Provider身份匹配的config.yaml model.base_url</span><br><span class="line">  &gt; OPENROUTER_BASE_URL</span><br><span class="line">  &gt; OpenRouter默认地址</span><br></pre></td></tr></table></figure></div>
+
+<p>一个陈旧的<code>model.base_url</code>不能无条件接管<code>provider: custom</code>。远程地址只有在配置Provider也明确是Custom或其本地Alias时才可信；否则默认只信Loopback地址。</p>
+<h3 id="API-key不是随便“找一个能用的”"><a href="#API-key不是随便“找一个能用的”" class="headerlink" title="API key不是随便“找一个能用的”"></a>API key不是随便“找一个能用的”</h3><p>Hermes不会把<code>OPENAI_API_KEY</code>发送给任意OpenAI兼容端点。</p>
+<p>选择逻辑按Host门控：</p>
+<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">openrouter.ai      → OPENROUTER_API_KEY</span><br><span class="line">openai.com         → OPENAI_API_KEY</span><br><span class="line">ollama.com         → OLLAMA_API_KEY</span><br><span class="line">api.deepseek.com   → DEEPSEEK_API_KEY（Host派生）</span><br><span class="line">未知/本地端点       → 显式Key、配置Key、Custom Pool或no-key-required</span><br></pre></td></tr></table></figure></div>
+
+<p>更重要的是Host匹配不是字符串包含：</p>
+<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">api.deepseek.com.attacker.test</span><br></pre></td></tr></table></figure></div>
+
+<p>不会得到<code>DEEPSEEK_API_KEY</code>。Hermes取实际Hostname的可注册标签，Lookalike Host会导出<code>ATTACKER_API_KEY</code>，从而让真正的DeepSeek Key留在本机。</p>
+<p>源码：<a class="link"   target="_blank" rel="noopener" href="https://github.com/NousResearch/hermes-agent/blob/0f102fa4dc04b7dfdab048169aaaa640d09d7523/hermes_cli/runtime_provider.py#L164-L218" >runtime_provider.py#L164-L218<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/hermes-agent-source-02/03-credential-boundary.png"
+                      alt="自定义端点的凭证隔离边界"
+                ></p>
+<p>这段设计揭示了一个通用安全原则：</p>
+<blockquote>
+<p>“协议兼容”不代表“认证域兼容”。Base URL、Provider身份和Credential Scope必须一起解析。</p>
+</blockquote>
+<h2 id="Credential-Pool不是Key列表，而是有状态调度器"><a href="#Credential-Pool不是Key列表，而是有状态调度器" class="headerlink" title="Credential Pool不是Key列表，而是有状态调度器"></a>Credential Pool不是Key列表，而是有状态调度器</h2><p><code>load_pool(provider)</code>会把多个来源合并为<code>CredentialPool</code>：</p>
+<ul>
+<li>持久化Pool条目；</li>
+<li>单例OAuth&#x2F;Auth Store；</li>
+<li>环境变量；</li>
+<li>Custom Provider配置。</li>
+</ul>
+<p>源码：<a class="link"   target="_blank" rel="noopener" href="https://github.com/NousResearch/hermes-agent/blob/0f102fa4dc04b7dfdab048169aaaa640d09d7523/agent/credential_pool.py#L2491-L2554" >credential_pool.py#L2491-L2554<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></p>
+<p>Pool选择前会处理：</p>
+<ul>
+<li>OAuth token是否接近过期；</li>
+<li>其他进程是否已经刷新Auth Store；</li>
+<li><code>DEAD</code>条目是否永久退出；</li>
+<li><code>EXHAUSTED</code>冷却是否到期；</li>
+<li>手动条目是否应该清理；</li>
+<li>环境来源缺失是否只是另一个进程没有同样环境，而不应删除全局条目。</li>
+</ul>
+<p>支持的选择策略包括：</p>
+<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">priority/default</span><br><span class="line">random</span><br><span class="line">least_used</span><br><span class="line">round_robin</span><br></pre></td></tr></table></figure></div>
+
+<p>源码：<a class="link"   target="_blank" rel="noopener" href="https://github.com/NousResearch/hermes-agent/blob/0f102fa4dc04b7dfdab048169aaaa640d09d7523/agent/credential_pool.py#L1459-L1638" >credential_pool.py#L1459-L1638<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></p>
+<p>遇到429或认证失败时，Pool不是简单<code>index += 1</code>。它会：</p>
+<ol>
+<li>找到真正发出失败请求的Key；</li>
+<li>根据状态码和错误上下文标记<code>EXHAUSTED</code>或<code>DEAD</code>；</li>
+<li>写入冷却时间与失败原因；</li>
+<li>重新选择下一条可用凭证；</li>
+<li>对并发任务使用Soft Lease，尽量避免所有Worker抢同一Key。</li>
+</ol>
+<p>源码：<a class="link"   target="_blank" rel="noopener" href="https://github.com/NousResearch/hermes-agent/blob/0f102fa4dc04b7dfdab048169aaaa640d09d7523/agent/credential_pool.py#L1647-L1722" >credential_pool.py#L1647-L1722<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></p>
+<p>这意味着Credential Pool负责的是<strong>同一Provider内部的认证容错</strong>，而Fallback Provider负责的是<strong>跨Provider路由容错</strong>。两者不是同一层。</p>
+<h2 id="api-mode：Provider身份不等于Wire-Protocol"><a href="#api-mode：Provider身份不等于Wire-Protocol" class="headerlink" title="api_mode：Provider身份不等于Wire Protocol"></a><code>api_mode</code>：Provider身份不等于Wire Protocol</h2><p>Hermes在固定commit中支持五种Runtime Mode：</p>
+<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">chat_completions</span><br><span class="line">codex_responses</span><br><span class="line">anthropic_messages</span><br><span class="line">bedrock_converse</span><br><span class="line">codex_app_server</span><br></pre></td></tr></table></figure></div>
+
+<p><code>init_agent()</code>会优先尊重Resolver显式传入的<code>api_mode</code>，否则才根据Provider和URL重新推断。</p>
+<p>源码：<a class="link"   target="_blank" rel="noopener" href="https://github.com/NousResearch/hermes-agent/blob/0f102fa4dc04b7dfdab048169aaaa640d09d7523/agent/agent_init.py#L433-L540" >agent_init.py#L433-L540<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></p>
+<p>典型映射包括：</p>
+<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">openai-codex / xAI      → codex_responses</span><br><span class="line">anthropic               → anthropic_messages</span><br><span class="line">Bedrock非Claude模型      → bedrock_converse</span><br><span class="line">普通OpenAI兼容端点        → chat_completions</span><br></pre></td></tr></table></figure></div>
+
+<p>但真实规则比映射表复杂：</p>
+<ul>
+<li><code>api.openai.com</code>即使看起来兼容Chat Completions，也会为新模型转到Responses；</li>
+<li><code>/anthropic</code>后缀表示第三方Anthropic Messages兼容端点；</li>
+<li>Kimi Coding端点使用Anthropic Messages协议；</li>
+<li>Bedrock Claude在没有Bearer Token时走Anthropic Bedrock SDK；其他模型走Converse；</li>
+<li>OpenCode同一Provider可能按模型在Anthropic与Chat Completions之间切换；</li>
+<li>Azure OpenAI对GPT-5.x仍可能要求Chat Completions，不能套Direct OpenAI规则。</li>
+</ul>
+<p>源码：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/NousResearch/hermes-agent/blob/0f102fa4dc04b7dfdab048169aaaa640d09d7523/hermes_cli/providers.py#L552-L591"><code>determine_api_mode()</code></a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/NousResearch/hermes-agent/blob/0f102fa4dc04b7dfdab048169aaaa640d09d7523/hermes_cli/runtime_provider.py#L101-L139"><code>_detect_api_mode_for_url()</code></a></li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://github.com/NousResearch/hermes-agent/blob/0f102fa4dc04b7dfdab048169aaaa640d09d7523/hermes_cli/runtime_provider.py#L1936-L2011" >Bedrock双路径<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+</ul>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/hermes-agent-source-02/04-api-mode-routing.png"
+                      alt="Provider与API Mode决策"
+                ></p>
+<p>这里最值得复用的设计是：<strong>Provider是商业&#x2F;认证身份，API Mode是协议身份。</strong></p>
+<p>两者必须分开建模。否则同一个Provider提供多种协议、同一个模型在不同Provider上受不同限制时，主循环会被大量例外污染。</p>
+<h2 id="Runtime进入AIAgent后，仍有一次防御性校正"><a href="#Runtime进入AIAgent后，仍有一次防御性校正" class="headerlink" title="Runtime进入AIAgent后，仍有一次防御性校正"></a>Runtime进入<code>AIAgent</code>后，仍有一次防御性校正</h2><p>CLI把Runtime字段原样传给<code>AIAgent</code>：</p>
+<div class="code-container" data-rel="Python"><figure class="iseeu highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">AIAgent(</span><br><span class="line">    model=effective_model,</span><br><span class="line">    api_key=runtime.get(<span class="string">&quot;api_key&quot;</span>),</span><br><span class="line">    base_url=runtime.get(<span class="string">&quot;base_url&quot;</span>),</span><br><span class="line">    provider=runtime.get(<span class="string">&quot;provider&quot;</span>),</span><br><span class="line">    api_mode=runtime.get(<span class="string">&quot;api_mode&quot;</span>),</span><br><span class="line">    credential_pool=runtime.get(<span class="string">&quot;credential_pool&quot;</span>),</span><br><span class="line">    fallback_model=self._fallback_model,</span><br><span class="line">)</span><br></pre></td></tr></table></figure></div>
+
+<p>源码：<a class="link"   target="_blank" rel="noopener" href="https://github.com/NousResearch/hermes-agent/blob/0f102fa4dc04b7dfdab048169aaaa640d09d7523/hermes_cli/cli_agent_setup_mixin.py#L342-L404" >cli_agent_setup_mixin.py#L342-L404<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></p>
+<p><code>init_agent()</code>仍会做防御性处理：</p>
+<ul>
+<li>无显式Provider时，可从Base URL识别Codex、xAI、Anthropic或Bedrock；</li>
+<li>验证Credential Pool是否与最终Provider和Base URL匹配；</li>
+<li>非Aggregator Provider会规范化模型名；</li>
+<li>Direct OpenAI的新模型可升级到Responses；</li>
+<li>Transport Cache会提前预热，尽早暴露缺失依赖或非法Mode。</li>
+</ul>
+<p>这不是重复解析，而是不同信任边界：</p>
+<ul>
+<li>Runtime Resolver负责从外部配置与凭证构造Route；</li>
+<li>Agent Init负责验证构造后的Route是否满足Agent内部不变量。</li>
+</ul>
+<h2 id="Context-Length是第二条解析链"><a href="#Context-Length是第二条解析链" class="headerlink" title="Context Length是第二条解析链"></a>Context Length是第二条解析链</h2><p><code>resolve_runtime_provider()</code>并不返回Context Length。</p>
+<p>Context窗口在Agent初始化Context Engine时，通过<code>get_model_context_length()</code>单独解析：</p>
+<p>源码：<a class="link"   target="_blank" rel="noopener" href="https://github.com/NousResearch/hermes-agent/blob/0f102fa4dc04b7dfdab048169aaaa640d09d7523/agent/model_metadata.py#L2070-L2496" >model_metadata.py#L2070-L2496<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></p>
+<p>优先级远比“查一张模型表”复杂：</p>
+<ol>
+<li><code>model.context_length</code>显式配置；</li>
+<li>Custom Provider的per-model配置；</li>
+<li>Endpoint-scoped元数据；</li>
+<li>持久缓存，但会为Codex、Kimi、MiniMax、Grok等已知漂移主动失效；</li>
+<li>Bedrock静态表；</li>
+<li>Custom Endpoint <code>/models</code>或Ollama <code>/api/show</code>；</li>
+<li>本地Server实时查询；</li>
+<li>Anthropic <code>/v1/models</code>；</li>
+<li>Copilot、Nous、Codex OAuth、GMI等Provider专用探测；</li>
+<li>OpenRouter实时元数据；</li>
+<li><code>models.dev</code>目录；</li>
+<li>Hardcoded Family Defaults；</li>
+<li>最终Fallback为256K。</li>
+</ol>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/hermes-agent-source-02/05-context-and-fallback.png"
+                      alt="Context Length与Fallback双链"
+                ></p>
+<p>为什么同一个模型名不能只对应一个数字？</p>
+<p>例如同一Claude模型：</p>
+<ul>
+<li>Anthropic原生API可能提供更大窗口；</li>
+<li>Copilot返回账户实际可用的<code>max_prompt_tokens</code>；</li>
+<li>Bedrock受AWS路径限制；</li>
+<li>OpenRouter目录可能短暂低报；</li>
+<li>本地vLLM可能因为显存参数只开放32K。</li>
+</ul>
+<p>所以缓存键和探测策略必须把Endpoint与Provider纳入考虑，而不是只用Model Slug。</p>
+<p>初始化完成后，Hermes还会拒绝低于64K的Context窗口：</p>
+<p>源码：<a class="link"   target="_blank" rel="noopener" href="https://github.com/NousResearch/hermes-agent/blob/0f102fa4dc04b7dfdab048169aaaa640d09d7523/agent/agent_init.py#L1921-L1932" >agent_init.py#L1921-L1932<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></p>
+<p>这是一条产品级约束：Hermes的Prompt、Tool Schema和多轮轨迹需要足够空间。一个模型“API可调用”，不代表它适合运行完整Agent Harness。</p>
+<h2 id="Fallback有两个时机，不能混为一谈"><a href="#Fallback有两个时机，不能混为一谈" class="headerlink" title="Fallback有两个时机，不能混为一谈"></a>Fallback有两个时机，不能混为一谈</h2><p>配置读取由<code>get_fallback_chain()</code>统一处理：</p>
+<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">fallback_providers（新格式，保持顺序）</span><br><span class="line">  + fallback_model（旧格式，兼容追加）</span><br><span class="line">  → 按provider/model/base_url去重</span><br></pre></td></tr></table></figure></div>
+
+<p>源码：<a class="link"   target="_blank" rel="noopener" href="https://github.com/NousResearch/hermes-agent/blob/0f102fa4dc04b7dfdab048169aaaa640d09d7523/hermes_cli/fallback_config.py#L71-L92" >fallback_config.py#L71-L92<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></p>
+<h3 id="初始化前的Auth-Fallback"><a href="#初始化前的Auth-Fallback" class="headerlink" title="初始化前的Auth Fallback"></a>初始化前的Auth Fallback</h3><p>如果Primary Provider在<code>resolve_runtime_provider()</code>阶段抛出<code>AuthError</code>，CLI会依次解析Fallback Entry。成功后直接更新：</p>
+<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">requested_provider</span><br><span class="line">model</span><br><span class="line">runtime credentials</span><br></pre></td></tr></table></figure></div>
+
+<p>源码：<a class="link"   target="_blank" rel="noopener" href="https://github.com/NousResearch/hermes-agent/blob/0f102fa4dc04b7dfdab048169aaaa640d09d7523/hermes_cli/cli_agent_setup_mixin.py#L49-L79" >cli_agent_setup_mixin.py#L49-L79<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></p>
+<h3 id="请求期间的Runtime-Fallback"><a href="#请求期间的Runtime-Fallback" class="headerlink" title="请求期间的Runtime Fallback"></a>请求期间的Runtime Fallback</h3><p>如果Agent已经创建，但Provider请求因重试耗尽、非重试错误或无效响应失败，Conversation Loop会激活下一条Fallback Route，交换Provider、Client、Base URL、API Mode和Credential Pool。</p>
+<p>这部分属于第一章的Agent Loop，也是第三、四章Transport与Streaming会深入的内容。此处只强调边界：</p>
+<blockquote>
+<p>Auth Fallback发生在Agent构造前；Runtime Fallback发生在Provider请求执行中。</p>
+</blockquote>
+<p>Credential Pool轮换又位于两者之内：同一个Provider还有可用Key时，通常不应该立刻跳到下一个Provider。</p>
+<h2 id="367个测试证明了哪些契约？"><a href="#367个测试证明了哪些契约？" class="headerlink" title="367个测试证明了哪些契约？"></a>367个测试证明了哪些契约？</h2><p>为了避免“只读代码不跑测试”，我在独立detached worktree中对固定commit执行了9个相关测试文件：</p>
+<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">tests/hermes_cli/test_runtime_provider_resolution.py</span><br><span class="line">tests/hermes_cli/test_provider_precedence.py</span><br><span class="line">tests/run_agent/test_provider_fallback.py</span><br><span class="line">tests/agent/test_credential_pool_provider_boundary.py</span><br><span class="line">tests/agent/test_model_metadata.py</span><br><span class="line">tests/agent/test_model_metadata_local_ctx.py</span><br><span class="line">tests/agent/test_model_metadata_ssl.py</span><br><span class="line">tests/hermes_cli/test_custom_provider_context_length.py</span><br><span class="line">tests/run_agent/test_invalid_context_length_warning.py</span><br></pre></td></tr></table></figure></div>
+
+<p>结果：</p>
+<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">367 passed in 13.62s</span><br></pre></td></tr></table></figure></div>
+
+<p>这些测试覆盖的不是Provider列表快照，而是行为关系：</p>
+<ul>
+<li>配置Provider压过旧环境状态；</li>
+<li>OpenRouter Key与OpenAI Key按Host隔离；</li>
+<li>Lookalike Host不能获得目标Provider Key；</li>
+<li>Named Custom Provider不能误覆盖Canonical Built-in；</li>
+<li>Custom Provider共享Base URL时仍按名称匹配Credential Pool；</li>
+<li>API Mode按端点与目标模型重新推导；</li>
+<li>Bedrock Claude与非Claude走不同协议；</li>
+<li>Context Length配置压过自动探测；</li>
+<li>Fallback链去重并保留顺序；</li>
+<li>Primary与Fallback凭证不串线。</li>
+</ul>
+<p>测试无法证明真实OAuth服务、Provider限流或目录数据永远正确，但它证明了解析器希望维持的核心不变量。</p>
+<h2 id="官方文档与固定源码的差异"><a href="#官方文档与固定源码的差异" class="headerlink" title="官方文档与固定源码的差异"></a>官方文档与固定源码的差异</h2><p>线上<a class="link"   target="_blank" rel="noopener" href="https://hermes-agent.nousresearch.com/docs/developer-guide/provider-runtime" >Provider Runtime Resolution<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a>给出了正确的高层模型，但部分实现描述已与源码漂移。</p>
+<table>
+<thead>
+<tr>
+<th>文档描述</th>
+<th><code>0f102fa4d</code>与当前main观察</th>
+<th>判断</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>主实现包含<code>_resolve_custom_runtime()</code></td>
+<td>实际函数名是<code>_resolve_named_custom_runtime()</code></td>
+<td>符号名过时</td>
+</tr>
+<tr>
+<td><code>providers/</code>的<code>get_provider_profile()</code>是Runtime Resolver主数据源</td>
+<td>固定commit和检查时的当前main，<code>runtime_provider.py</code>仍直接使用<code>auth.py::PROVIDER_REGISTRY</code>；<code>hermes_cli/providers.py</code>另行合并<code>models.dev + overlay + user config</code></td>
+<td>迁移目标已进入文档，但主路径尚未完全收敛</td>
+</tr>
+<tr>
+<td>优先级是“显式→配置→环境→默认&#x2F;auto”</td>
+<td>高层正确，但真实代码还包含OAuth状态、Credential Pool、Host安全门、Provider专用短路和Auth Fallback</td>
+<td>文档是概念简化</td>
+</tr>
+<tr>
+<td>Fallback主循环位于<code>run_agent.py</code></td>
+<td>固定commit的真实主循环已拆到<code>agent/conversation_loop.py</code></td>
+<td>架构描述滞后</td>
+</tr>
+<tr>
+<td>添加Provider Plugin即可无需Resolver分支</td>
+<td>长期方向合理，但当前Resolver仍有Azure、Vertex、Bedrock、Codex、Nous等大量专用分支</td>
+<td>“无需分支”尚不是完整现状</td>
+</tr>
+</tbody></table>
+<p>这不是说文档错误到不可用，而是说明：</p>
+<blockquote>
+<p>文档描述的是稳定概念和目标架构；源码文章必须额外说明当前迁移阶段。</p>
+</blockquote>
+<h2 id="最值得复用的六条设计"><a href="#最值得复用的六条设计" class="headerlink" title="最值得复用的六条设计"></a>最值得复用的六条设计</h2><h3 id="1-把用户意图和自动探测分开"><a href="#1-把用户意图和自动探测分开" class="headerlink" title="1. 把用户意图和自动探测分开"></a>1. 把用户意图和自动探测分开</h3><p>显式选择、持久配置和auto探测不应该混成一个“第一个有值的环境变量”。只有这样才能解释路由，也能避免旧OAuth状态劫持当前选择。</p>
+<h3 id="2-Provider身份与Wire-Protocol分开"><a href="#2-Provider身份与Wire-Protocol分开" class="headerlink" title="2. Provider身份与Wire Protocol分开"></a>2. Provider身份与Wire Protocol分开</h3><p>一个Provider可以暴露多种协议，同一个协议也可以由多个Provider实现。把<code>provider</code>与<code>api_mode</code>拆开后，Agent Loop只依赖Transport契约。</p>
+<h3 id="3-Credential必须绑定Endpoint"><a href="#3-Credential必须绑定Endpoint" class="headerlink" title="3. Credential必须绑定Endpoint"></a>3. Credential必须绑定Endpoint</h3><p>Key不能因为“都是OpenAI兼容”就跨Host复用。准确Host匹配、Lookalike防护与Named Pool是Provider系统的安全底座。</p>
+<h3 id="4-Pool-Rotation与Provider-Fallback分层"><a href="#4-Pool-Rotation与Provider-Fallback分层" class="headerlink" title="4. Pool Rotation与Provider Fallback分层"></a>4. Pool Rotation与Provider Fallback分层</h3><p>先在同一认证域内轮换可用凭证，再决定是否切换Provider。否则一个临时429就可能把请求送到完全不同的价格、隐私和能力边界。</p>
+<h3 id="5-Model-Metadata必须Provider-aware"><a href="#5-Model-Metadata必须Provider-aware" class="headerlink" title="5. Model Metadata必须Provider-aware"></a>5. Model Metadata必须Provider-aware</h3><p>模型名不是能力主键。Context Length、输出上限、Vision和Reasoning能力都可能由Endpoint、账户与协议共同决定。</p>
+<h3 id="6-Resolver输出应当可审计但不能泄密"><a href="#6-Resolver输出应当可审计但不能泄密" class="headerlink" title="6. Resolver输出应当可审计但不能泄密"></a>6. Resolver输出应当可审计但不能泄密</h3><p><code>source</code>、<code>requested_provider</code>、<code>api_mode</code>和Route Signature让行为可解释；<code>api_key</code>与<code>extra_headers</code>则必须留在内存，不能进入普通日志和会话持久化。</p>
+<h2 id="仍然存在的边界"><a href="#仍然存在的边界" class="headerlink" title="仍然存在的边界"></a>仍然存在的边界</h2><p>Provider Runtime Resolution很强，但仍有明显成本：</p>
+<ul>
+<li><code>runtime_provider.py</code>超过2000行，Provider专用分支仍然很多；</li>
+<li><code>auth.py</code>、<code>runtime_provider.py</code>、<code>providers.py</code>与新<code>providers/</code>插件注册表之间存在迁移期重叠；</li>
+<li>Alias在多个模块保留兼容逻辑，长期可能漂移；</li>
+<li>URL启发式只能识别约定，不能真正证明远端支持某协议；</li>
+<li><code>models.dev</code>、Provider <code>/models</code>和Hardcoded Defaults之间可能互相矛盾；</li>
+<li><code>no-key-required</code>是适配OpenAI SDK的占位值，不代表远端真的无需认证；</li>
+<li>Fallback可能改变成本、数据边界和模型能力，配置者必须明确接受这种变化；</li>
+<li>实际OAuth刷新、429冷却和Provider故障仍需真实环境压力验证。</li>
+</ul>
+<h2 id="下一章：Transport如何统一四种协议"><a href="#下一章：Transport如何统一四种协议" class="headerlink" title="下一章：Transport如何统一四种协议"></a>下一章：Transport如何统一四种协议</h2><p>第二章得到的是一份Runtime Route：</p>
+<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">provider + model + base_url + api_mode + credentials + metadata</span><br></pre></td></tr></table></figure></div>
+
+<p>下一章将继续追踪它如何进入Transport层，回答：</p>
+<ul>
+<li>Chat Completions、Anthropic Messages、Responses和Bedrock Converse如何被统一？</li>
+<li>Provider原始响应如何变成<code>NormalizedResponse</code>？</li>
+<li>Tool Call、Reasoning、Usage和Finish Reason在哪一层归一化？</li>
+<li>为什么Provider细节应该停在Transport边界，而不是渗透进Agent Loop？</li>
+</ul>
+<h2 id="参考源码与文档"><a href="#参考源码与文档" class="headerlink" title="参考源码与文档"></a>参考源码与文档</h2><ul>
+<li><a class="link"   target="_blank" rel="noopener" href="https://hermes-agent.nousresearch.com/docs/developer-guide/provider-runtime" >Provider Runtime Resolution官方文档<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://github.com/NousResearch/hermes-agent/blob/0f102fa4dc04b7dfdab048169aaaa640d09d7523/hermes_cli/runtime_provider.py" >hermes_cli&#x2F;runtime_provider.py<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://github.com/NousResearch/hermes-agent/blob/0f102fa4dc04b7dfdab048169aaaa640d09d7523/hermes_cli/auth.py" >hermes_cli&#x2F;auth.py<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://github.com/NousResearch/hermes-agent/blob/0f102fa4dc04b7dfdab048169aaaa640d09d7523/hermes_cli/providers.py" >hermes_cli&#x2F;providers.py<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://github.com/NousResearch/hermes-agent/blob/0f102fa4dc04b7dfdab048169aaaa640d09d7523/hermes_cli/cli_agent_setup_mixin.py" >hermes_cli&#x2F;cli_agent_setup_mixin.py<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://github.com/NousResearch/hermes-agent/blob/0f102fa4dc04b7dfdab048169aaaa640d09d7523/hermes_cli/fallback_config.py" >hermes_cli&#x2F;fallback_config.py<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://github.com/NousResearch/hermes-agent/blob/0f102fa4dc04b7dfdab048169aaaa640d09d7523/agent/agent_init.py" >agent&#x2F;agent_init.py<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://github.com/NousResearch/hermes-agent/blob/0f102fa4dc04b7dfdab048169aaaa640d09d7523/agent/credential_pool.py" >agent&#x2F;credential_pool.py<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://github.com/NousResearch/hermes-agent/blob/0f102fa4dc04b7dfdab048169aaaa640d09d7523/agent/model_metadata.py" >agent&#x2F;model_metadata.py<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://github.com/NousResearch/hermes-agent/blob/0f102fa4dc04b7dfdab048169aaaa640d09d7523/agent/models_dev.py" >agent&#x2F;models_dev.py<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+</ul>
+<hr>
+<p><strong>一句话总结：</strong> Hermes不是把模型名塞给SDK，而是把用户意图、Provider身份、协议、端点、凭证池、能力元数据和Fallback策略编译成一份可执行且尽量不泄密的Runtime Route。</p>
+
+		</div>
+
+		
+		<div class="post-copyright-info w-full my-8 px-2 sm:px-6 md:px-8">
+			<div class="article-copyright-info-container">
+    <ul>
+        <li><strong>标题:</strong> Hermes Agent 源码解析（2）：Provider Runtime Resolution</li>
+        <li><strong>作者:</strong> Nathan</li>
+        <li><strong>创建于
+                :</strong> 2026-07-20 18:00:00</li>
+        
+            <li>
+                <strong>更新于
+                    :</strong> 2026-07-20 18:02:39
+            </li>
+        
+        <li>
+            <strong>链接:</strong> https://hydraxman.github.io/2026/07/20/hermes-agent-source-code-02-provider-runtime-resolution/
+        </li>
+        <li>
+            <strong>
+                版权声明:
+            </strong>
+            
+
+            
+                本文章采用 <a class="license" target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0">CC BY-NC-SA 4.0</a> 进行许可。
+            
+        </li>
+    </ul>
+</div>
+
+		</div>
+		
+
+		
+		<ul class="post-tags-box text-lg mt-1.5 flex-wrap justify-center flex md:hidden">
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/Hermes-Agent/">#Hermes Agent</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/">#源码分析</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/AI-Agent/">#AI Agent</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/Provider-Runtime/">#Provider Runtime</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/%E6%A8%A1%E5%9E%8B%E8%B7%AF%E7%94%B1/">#模型路由</a>&nbsp;
+			</li>
+			
+		</ul>
+		
+
+		
+
+		
+		<div class="article-nav my-8 flex justify-between items-center px-2 sm:px-6 md:px-8">
+			
+			<div class="article-prev border-border-color shadow-redefine-flat shadow-shadow-color-2 rounded-medium px-4 py-2 hover:shadow-redefine-flat-hover hover:shadow-shadow-color-2">
+				<a class="prev" rel="prev" href="/2026/07/21/github-trending/github-trending-2026-07-21/">
+					<span class="left arrow-icon flex justify-center items-center">
+						<i class="fa-solid fa-chevron-left"></i>
+					</span>
+					<span class="title flex justify-center items-center">
+						<span class="post-nav-title-item truncate max-w-48">今天 GitHub 热榜的 10 个信号：AI 开始接管代码、声音和搜索</span>
+						<span class="post-nav-item">上一篇</span>
+					</span>
+				</a>
+			</div>
+			
+			
+			<div class="article-next border-border-color shadow-redefine-flat shadow-shadow-color-2 rounded-medium px-4 py-2 hover:shadow-redefine-flat-hover hover:shadow-shadow-color-2">
+				<a class="next" rel="next" href="/2026/07/20/hermes-agent-source-code-01-agent-loop-prompt-assembly/">
+					<span class="title flex justify-center items-center">
+						<span class="post-nav-title-item truncate max-w-48">Hermes Agent 源码解析（1）：Agent Loop 与 Prompt 构建</span>
+						<span class="post-nav-item">下一篇</span>
+					</span>
+					<span class="right arrow-icon flex justify-center items-center">
+						<i class="fa-solid fa-chevron-right"></i>
+					</span>
+				</a>
+			</div>
+			
+		</div>
+		
+
+
+		
+	</div>
+
+	
+	<div class="toc-content-container">
+		<div class="post-toc-wrap">
+	<div class="post-toc">
+		<div class="toc-title">目录</div>
+		<div class="page-title">Hermes Agent 源码解析（2）：Provider Runtime Resolution</div>
+		<ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%88%E7%BB%99%E7%BB%93%E8%AE%BA%EF%BC%9ARuntime-Resolver%E6%98%AF%E4%B8%80%E5%8F%B0%E2%80%9C%E7%AD%96%E7%95%A5%E7%BC%96%E8%AF%91%E5%99%A8%E2%80%9D"><span class="nav-text">先给结论：Runtime Resolver是一台“策略编译器”</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%9C%9F%E6%AD%A3%E8%B0%83%E7%94%A8%E9%93%BE%EF%BC%9A%E5%85%88%E8%A7%A3%E5%87%AD%E8%AF%81%EF%BC%8C%E5%86%8D%E6%9E%84%E9%80%A0Agent"><span class="nav-text">真正调用链：先解凭证，再构造Agent</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E4%B8%80%E5%B1%82%E8%A7%A3%E6%9E%90%EF%BC%9A%E7%94%A8%E6%88%B7%E2%80%9C%E8%AF%B7%E6%B1%82%E4%BA%86%E8%B0%81%E2%80%9D"><span class="nav-text">第一层解析：用户“请求了谁”</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E4%BA%8C%E5%B1%82%E8%A7%A3%E6%9E%90%EF%BC%9AProvider%E5%90%8D%E5%AD%97%E4%B8%8D%E6%98%AF%E7%AE%80%E5%8D%95%E5%AD%97%E7%AC%A6%E4%B8%B2"><span class="nav-text">第二层解析：Provider名字不是简单字符串</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Alias%E5%8F%AF%E8%83%BD%E6%94%B9%E5%8F%98Provider%E8%AF%AD%E4%B9%89"><span class="nav-text">Alias可能改变Provider语义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#models-dev%E4%B8%8D%E6%98%AF%E5%94%AF%E4%B8%80%E7%9C%9F%E7%9B%B8"><span class="nav-text">models.dev不是唯一真相</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E4%B8%89%E5%B1%82%E8%A7%A3%E6%9E%90%EF%BC%9A%E4%B8%93%E7%94%A8Provider%E5%85%88%E8%B5%B0%E7%9F%AD%E8%B7%AF"><span class="nav-text">第三层解析：专用Provider先走短路</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Named-Custom-Provider%EF%BC%9A%E6%9C%80%E5%A4%8D%E6%9D%82%E7%9A%84%E4%B8%8D%E6%98%AF%E5%85%BC%E5%AE%B9%EF%BC%8C%E8%80%8C%E6%98%AF%E2%80%9C%E5%88%AB%E6%B3%84%E6%BC%8FKey%E2%80%9D"><span class="nav-text">Named Custom Provider：最复杂的不是兼容，而是“别泄漏Key”</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Base-URL%E6%9D%A5%E6%BA%90"><span class="nav-text">Base URL来源</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#API-key%E4%B8%8D%E6%98%AF%E9%9A%8F%E4%BE%BF%E2%80%9C%E6%89%BE%E4%B8%80%E4%B8%AA%E8%83%BD%E7%94%A8%E7%9A%84%E2%80%9D"><span class="nav-text">API key不是随便“找一个能用的”</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Credential-Pool%E4%B8%8D%E6%98%AFKey%E5%88%97%E8%A1%A8%EF%BC%8C%E8%80%8C%E6%98%AF%E6%9C%89%E7%8A%B6%E6%80%81%E8%B0%83%E5%BA%A6%E5%99%A8"><span class="nav-text">Credential Pool不是Key列表，而是有状态调度器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#api-mode%EF%BC%9AProvider%E8%BA%AB%E4%BB%BD%E4%B8%8D%E7%AD%89%E4%BA%8EWire-Protocol"><span class="nav-text">api_mode：Provider身份不等于Wire Protocol</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Runtime%E8%BF%9B%E5%85%A5AIAgent%E5%90%8E%EF%BC%8C%E4%BB%8D%E6%9C%89%E4%B8%80%E6%AC%A1%E9%98%B2%E5%BE%A1%E6%80%A7%E6%A0%A1%E6%AD%A3"><span class="nav-text">Runtime进入AIAgent后，仍有一次防御性校正</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Context-Length%E6%98%AF%E7%AC%AC%E4%BA%8C%E6%9D%A1%E8%A7%A3%E6%9E%90%E9%93%BE"><span class="nav-text">Context Length是第二条解析链</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Fallback%E6%9C%89%E4%B8%A4%E4%B8%AA%E6%97%B6%E6%9C%BA%EF%BC%8C%E4%B8%8D%E8%83%BD%E6%B7%B7%E4%B8%BA%E4%B8%80%E8%B0%88"><span class="nav-text">Fallback有两个时机，不能混为一谈</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96%E5%89%8D%E7%9A%84Auth-Fallback"><span class="nav-text">初始化前的Auth Fallback</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%B7%E6%B1%82%E6%9C%9F%E9%97%B4%E7%9A%84Runtime-Fallback"><span class="nav-text">请求期间的Runtime Fallback</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#367%E4%B8%AA%E6%B5%8B%E8%AF%95%E8%AF%81%E6%98%8E%E4%BA%86%E5%93%AA%E4%BA%9B%E5%A5%91%E7%BA%A6%EF%BC%9F"><span class="nav-text">367个测试证明了哪些契约？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3%E4%B8%8E%E5%9B%BA%E5%AE%9A%E6%BA%90%E7%A0%81%E7%9A%84%E5%B7%AE%E5%BC%82"><span class="nav-text">官方文档与固定源码的差异</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%80%E5%80%BC%E5%BE%97%E5%A4%8D%E7%94%A8%E7%9A%84%E5%85%AD%E6%9D%A1%E8%AE%BE%E8%AE%A1"><span class="nav-text">最值得复用的六条设计</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E6%8A%8A%E7%94%A8%E6%88%B7%E6%84%8F%E5%9B%BE%E5%92%8C%E8%87%AA%E5%8A%A8%E6%8E%A2%E6%B5%8B%E5%88%86%E5%BC%80"><span class="nav-text">1. 把用户意图和自动探测分开</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Provider%E8%BA%AB%E4%BB%BD%E4%B8%8EWire-Protocol%E5%88%86%E5%BC%80"><span class="nav-text">2. Provider身份与Wire Protocol分开</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Credential%E5%BF%85%E9%A1%BB%E7%BB%91%E5%AE%9AEndpoint"><span class="nav-text">3. Credential必须绑定Endpoint</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-Pool-Rotation%E4%B8%8EProvider-Fallback%E5%88%86%E5%B1%82"><span class="nav-text">4. Pool Rotation与Provider Fallback分层</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-Model-Metadata%E5%BF%85%E9%A1%BBProvider-aware"><span class="nav-text">5. Model Metadata必须Provider-aware</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-Resolver%E8%BE%93%E5%87%BA%E5%BA%94%E5%BD%93%E5%8F%AF%E5%AE%A1%E8%AE%A1%E4%BD%86%E4%B8%8D%E8%83%BD%E6%B3%84%E5%AF%86"><span class="nav-text">6. Resolver输出应当可审计但不能泄密</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%8D%E7%84%B6%E5%AD%98%E5%9C%A8%E7%9A%84%E8%BE%B9%E7%95%8C"><span class="nav-text">仍然存在的边界</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%8B%E4%B8%80%E7%AB%A0%EF%BC%9ATransport%E5%A6%82%E4%BD%95%E7%BB%9F%E4%B8%80%E5%9B%9B%E7%A7%8D%E5%8D%8F%E8%AE%AE"><span class="nav-text">下一章：Transport如何统一四种协议</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%BA%90%E7%A0%81%E4%B8%8E%E6%96%87%E6%A1%A3"><span class="nav-text">参考源码与文档</span></a></li></ol>
+
+	</div>
+</div>
+	</div>
+	
+</div>
+
+			</div>
+
+			
+		</div>
+
+		<div class="main-content-footer">
+			<footer class="footer mt-5 py-5 h-auto text-base text-third-text-color relative border-t-2 border-t-border-color">
+    <div class="info-container py-3 text-center">
+        
+        <div class="text-center">
+            &copy;
+            
+              <span>2024</span>
+              -
+            
+            2026&nbsp;&nbsp;<i class="fa-solid fa-heart fa-beat" style="--fa-animation-duration: 0.5s; color: #333"></i>&nbsp;&nbsp;<a href="/">Nathan</a>
+            
+                
+                <p class="post-count space-x-0.5">
+                    <span>
+                        共撰写了 303 篇文章
+                    </span>
+                    
+                        <span>
+                            共 660.3k 字
+                        </span>
+                    
+                </p>
+            
+        </div>
+        
+        <div class="relative text-center lg:absolute lg:left-[20px] lg:top-1/2 lg:-translate-y-1/2 lg:text-left">
+            <span class="lg:block text-sm">由 <?xml version="1.0" encoding="utf-8"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg class="relative top-[2px] inline-block align-baseline" version="1.1" id="圖層_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="1rem" height="1rem" viewBox="0 0 512 512" enable-background="new 0 0 512 512" xml:space="preserve"><path fill="#0E83CD" d="M256.4,25.8l-200,115.5L56,371.5l199.6,114.7l200-115.5l0.4-230.2L256.4,25.8z M349,354.6l-18.4,10.7l-18.6-11V275H200v79.6l-18.4,10.7l-18.6-11v-197l18.5-10.6l18.5,10.8V237h112v-79.6l18.5-10.6l18.5,10.8V354.6z"/></svg><a target="_blank" class="text-base" href="https://hexo.io">Hexo</a> 驱动</span>
+            <span class="text-sm lg:block">主题&nbsp;<a class="text-base" target="_blank" href="https://github.com/EvanNotFound/hexo-theme-redefine">Redefine v2.9.0</a></span>
+        </div>
+        
+        
+            <div>
+                博客已运行 <span class="odometer" id="runtime_days" ></span> 天 <span class="odometer" id="runtime_hours"></span> 小时 <span class="odometer" id="runtime_minutes"></span> 分钟 <span class="odometer" id="runtime_seconds"></span> 秒
+            </div>
+        
+        
+            <script data-swup-reload-script>
+                try {
+                    function odometer_init() {
+                    const elements = document.querySelectorAll('.odometer');
+                    elements.forEach(el => {
+                        new Odometer({
+                            el,
+                            format: '( ddd).dd',
+                            duration: 200
+                        });
+                    });
+                    }
+                    odometer_init();
+                } catch (error) {}
+            </script>
+        
+        
+            
+                
+        
+                
+        
+        
+    </div>  
+</footer>
+		</div>
+	</div>
+
+	
+	<div class="post-tools">
+		<div class="post-tools-container">
+	<ul class="article-tools-list">
+		<!-- TOC aside toggle -->
+		
+		<li class="right-bottom-tools page-aside-toggle">
+			<i class="fa-regular fa-outdent"></i>
+		</li>
+		
+
+		<!-- go comment -->
+		
+	</ul>
+</div>
+	</div>
+	
+
+	<div class="right-side-tools-container">
+		<div class="side-tools-container">
+	<ul class="hidden-tools-list">
+		<li class="right-bottom-tools tool-font-adjust-plus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-plus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-font-adjust-minus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-minus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-dark-light-toggle flex justify-center items-center">
+			<i class="fa-regular fa-moon"></i>
+		</li>
+
+		<!-- rss -->
+		
+
+		
+
+		<li class="right-bottom-tools tool-scroll-to-bottom flex justify-center items-center">
+			<i class="fa-regular fa-arrow-down"></i>
+		</li>
+	</ul>
+
+	<ul class="visible-tools-list">
+		<li class="right-bottom-tools toggle-tools-list flex justify-center items-center">
+			<i class="fa-regular fa-cog fa-spin"></i>
+		</li>
+		
+		<li class="right-bottom-tools tool-scroll-to-top flex justify-center items-center">
+			<i class="arrow-up fas fa-arrow-up"></i>
+			<span class="percent"></span>
+		</li>
+		
+		
+	</ul>
+</div>
+	</div>
+
+	<div class="image-viewer-container" role="dialog" aria-modal="true" aria-label="图片查看器">
+	<button class="image-viewer-close" type="button" aria-label="关闭">
+		<i class="fa-solid fa-xmark"></i>
+	</button>
+	<button class="image-viewer-prev" type="button" aria-label="上一页">
+		<i class="fa-solid fa-chevron-left"></i>
+	</button>
+	<div class="image-viewer-frame">
+		<img src="" alt="">
+	</div>
+	<div class="image-viewer-exif-panel hidden absolute left-1/2 bottom-20 -translate-x-1/2 w-[min(92vw,420px)] max-h-[60vh] overflow-hidden rounded-2xl bg-background-color-transparent-80 p-4 text-left shadow-redefine-flat backdrop-blur-md" role="dialog" aria-label="EXIF" aria-hidden="true">
+		<div class="flex items-center justify-between mb-3">
+			<span class="text-sm font-semibold text-first-text-color">EXIF</span>
+			<button class="image-viewer-exif-close flex h-8 w-8 items-center justify-center rounded-full bg-background-color-transparent-80 text-first-text-color transition hover:bg-background-color-transparent-40" type="button" aria-label="关闭">
+				<i class="fa-solid fa-xmark text-[0.65rem]"></i>
+			</button>
+		</div>
+		<div class="image-viewer-exif-cards grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[50vh] overflow-y-auto pr-1 scrollbar-hide"></div>
+		<template class="image-viewer-exif-card-template">
+			<div class="rounded-lg bg-background-color-transparent-40 px-3 py-2">
+				<div class="image-viewer-exif-card-header flex items-center gap-2 mb-1">
+					<i class="image-viewer-exif-card-icon fa-solid fa-circle-info text-xs text-third-text-color"></i>
+					<div class="image-viewer-exif-card-title text-xs font-semibold text-first-text-color"></div>
+				</div>
+				<div class="image-viewer-exif-card-items flex flex-col gap-1"></div>
+			</div>
+		</template>
+	</div>
+	<button class="image-viewer-exif-toggle flex items-center gap-2 hidden absolute left-1/2 bottom-6 -translate-x-1/2 rounded-full border border-border-color bg-background-color-transparent-80 px-4 py-2 text-first-text-color backdrop-blur-md transition hover:bg-background-color-transparent-40" type="button" aria-label="EXIF" aria-expanded="false">
+		<i class="fa-solid fa-circle-info text-xs"></i>
+		<span class="text-xs font-semibold uppercase tracking-wider">EXIF</span>
+	</button>
+	<button class="image-viewer-next" type="button" aria-label="下一页">
+		<i class="fa-solid fa-chevron-right"></i>
+	</button>
+</div>
+
+
+	
+	<div class="search-pop-overlay">
+	<div class="popup search-popup">
+		<div class="search-header">
+			<span class="search-input-field-pre">
+				<i class="fa-solid fa-keyboard"></i>
+			</span>
+			<div class="search-input-container">
+				<input autocomplete="off" autocorrect="off" autocapitalize="off" placeholder="站内搜索您需要的内容..." spellcheck="false" type="search" class="search-input">
+			</div>
+			<span class="popup-btn-close">
+				<i class="fa-solid fa-times"></i>
+			</span>
+		</div>
+		<div id="search-result">
+			<div id="no-result">
+				<i class="fa-solid fa-spinner fa-spin-pulse fa-5x fa-fw"></i>
+			</div>
+		</div>
+	</div>
+</div>
+	
+
+</main>
+
+
+
+<script src="/js/build/libs/Swup.min.js"></script>
+
+<script src="/js/build/libs/SwupSlideTheme.min.js"></script>
+
+<script src="/js/build/libs/SwupScriptsPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupProgressPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupScrollPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupPreloadPlugin.min.js"></script>
+
+<script>
+    window.swup = new Swup({
+        plugins: [
+            new SwupScriptsPlugin({
+                optin: true,
+            }),
+            new SwupProgressPlugin(),
+            new SwupScrollPlugin({
+                offset: 80,
+            }),
+            new SwupSlideTheme({
+                mainElement: ".main-content-body",
+            }),
+            new SwupPreloadPlugin(),
+        ],
+        containers: ["#swup"],
+    });
+
+    window.dispatchEvent(
+        new CustomEvent("redefine:swup:ready", {
+            detail: {
+                swup: window.swup,
+            },
+        }),
+    );
+</script>
+
+
+
+
+	
+<script src="/js/build/main.js" type="module"></script>
+
+
+
+    
+<script src="/js/build/libs/odometer.min.js"></script>
+
+    
+<link rel="stylesheet" href="/assets/odometer-theme-minimal.css">
+
+
+
+
+
+
+
+  
+<script src="/js/build/libs/Typed.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+<script src="/js/build/libs/moment-with-locales.min.js" data-swup-reload-script=""></script>
+
+
+
+	
+</body>
+
+</html>
