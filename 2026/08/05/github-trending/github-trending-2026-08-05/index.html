@@ -1,0 +1,1144 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="keywords" content="计算机技术, 生活中的胡思乱想">
+    
+    
+    <meta name="author" content="Nathan">
+    
+    <!-- Completely eliminate flash of wrong theme -->
+    <script>
+        (function() {
+            const THEME_KEY = "REDEFINE-THEME-STATUS";
+            const DARK = "dark", LIGHT = "light";
+            
+            // Get preferred theme
+            function getTheme() {
+                try {
+                    const saved = localStorage.getItem(THEME_KEY);
+                    if (saved) {
+                        const { isDark } = JSON.parse(saved);
+                        return isDark ? DARK : LIGHT;
+                    }
+                } catch (e) {}
+                
+                return matchMedia("(prefers-color-scheme: dark)").matches ? DARK : LIGHT;
+            }
+            
+            // Apply theme to document
+            function applyTheme(theme) {
+                const isDark = theme === DARK;
+                const root = document.documentElement;
+                
+                // Set classes for compatibility
+                root.classList.add(theme);
+                root.classList.remove(isDark ? LIGHT : DARK);
+                root.style.colorScheme = theme;
+            }
+            
+            // Initial application
+            const theme = getTheme();
+            applyTheme(theme);
+            
+            // Listen for system preference changes
+            matchMedia("(prefers-color-scheme: dark)").addEventListener("change", ({ matches }) => {
+                // Only update if using system preference (no localStorage entry)
+                if (!localStorage.getItem(THEME_KEY)) {
+                    applyTheme(matches ? DARK : LIGHT);
+                }
+            });
+            
+            // Set body classes ASAP (before DOMContentLoaded)
+            (function() {
+                const addBodyClass = () => {
+                    const b = document.body;
+                    if (!b) return false;
+                    b.classList.add(theme + "-mode");
+                    return true;
+                };
+
+                // Try immediately
+                if (addBodyClass()) return;
+
+                // Observe until body exists
+                const mo = new MutationObserver(() => {
+                    if (addBodyClass()) mo.disconnect();
+                });
+                mo.observe(document.documentElement, { childList: true, subtree: true });
+            })();
+        })();
+    </script>
+    
+    <!-- preconnect -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    
+    <!--- Seo Part-->
+    
+    <link rel="canonical" href="https://hydraxman.github.io/2026/08/05/github-trending/github-trending-2026-08-05/"/>
+    <meta name="robots" content="index,follow">
+    <meta name="googlebot" content="index,follow">
+    <meta name="revisit-after" content="1 days">
+    
+    
+        
+        <meta name="description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="GitHub 热榜今天露出一个反差：AI Agent 在冲刺，工程老兵在回潮">
+<meta property="og:url" content="https://hydraxman.github.io/2026/08/05/github-trending/github-trending-2026-08-05/index.html">
+<meta property="og:site_name" content="内森淼文">
+<meta property="og:description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://hydraxman.github.io/images/redefine-og.webp">
+<meta property="article:published_time" content="2026-08-04T20:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-04T20:04:08.941Z">
+<meta property="article:author" content="Nathan">
+<meta property="article:tag" content="AI Agent">
+<meta property="article:tag" content="开源项目">
+<meta property="article:tag" content="GitHub Trending">
+<meta property="article:tag" content="开发者工具">
+<meta property="article:tag" content="工程效率">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://hydraxman.github.io/images/redefine-og.webp">
+    
+    
+    <!--- Icon Part-->
+    <link rel="icon" type="image/png" href="/images/favicon.svg" sizes="192x192">
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.svg">
+    <meta name="theme-color" content="#ffffff">
+    <link rel="shortcut icon" href="/images/favicon.svg">
+    <!--- Page Info-->
+    
+    <title>
+        
+            GitHub 热榜今天露出一个反差：AI Agent 在冲刺，工程老兵在回潮 | 内森淼文
+        
+    </title>
+
+    
+<link rel="stylesheet" href="/fonts/Chillax/chillax.css">
+
+
+    <!--- Inject Part-->
+    
+        
+            
+    
+            
+    
+            
+                
+                    <link rel="stylesheet" href="/css/custom.css">
+                
+    
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    
+        
+<link rel="stylesheet" href="/css/build/tailwind.css">
+
+    
+
+    
+<link rel="stylesheet" href="/fonts/GeistMono/geist-mono.css">
+
+    
+<link rel="stylesheet" href="/fonts/Geist/geist.css">
+
+    <!--- Font Part-->
+    
+    
+    
+    
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&display=swap" rel="stylesheet">
+    
+    
+
+    <script id="hexo-configurations">
+    window.config = {"hostname":"hydraxman.github.io","root":"/","language":"zh-CN","path":"search.json"};
+    window.theme = {"articles":{"style":{"font_size":"16px","line_height":1.5,"image_border_radius":"14px","image_alignment":"center","image_caption":false,"link_icon":true,"delete_mask":false,"title_alignment":"left","headings_top_spacing":{"h1":"3.2rem","h2":"2.4rem","h3":"1.9rem","h4":"1.6rem","h5":"1.4rem","h6":"1.3rem"}},"word_count":{"enable":true,"count":true,"min2read":true},"author_label":{"enable":false,"auto":false,"list":[]},"code_block":{"copy":true,"style":"mac","highlight_theme":{"light":"github","dark":"vs2015"},"font":{"enable":false,"family":null,"url":null}},"toc":{"enable":true,"max_depth":3,"number":false,"expand":true,"init_open":true},"copyright":{"enable":true,"default":"cc_by_nc_sa"},"lazyload":true,"pangu_js":false,"recommendation":{"enable":false,"title":"推荐阅读","limit":3,"mobile_limit":2,"placeholder":"/images/wallhaven-wqery6-light.webp","skip_dirs":[]}},"colors":{"primary":"#ffffff","secondary":null,"default_mode":"light"},"global":{"fonts":{"chinese":{"enable":false,"family":null,"url":null},"english":{"enable":true,"family":"Inter","url":"https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"},"title":{"enable":true,"family":"Noto Serif","url":"https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&display=swap"}},"content_max_width":"1000px","sidebar_width":"210px","hover":{"shadow":true,"scale":false},"scroll_progress":{"bar":true,"percentage":true},"website_counter":{"url":"https://cn.vercount.one/js","enable":false,"site_pv":true,"site_uv":true,"post_pv":true},"single_page":true,"preloader":{"enable":false,"custom_message":null},"side_tools":{"gear_rotation":true,"auto_expand":false},"open_graph":{"enable":true,"image":"/images/redefine-og.webp","description":"Hexo Theme Redefine, Redefine Your Hexo Journey."},"google_analytics":{"enable":false,"id":null}},"home_banner":{"enable":true,"style":"fixed","image":{"light":"/images/banner-light.jpg","dark":"/images/banner-dark.jpg"},"title":"内森淼文","subtitle":{"text":["AI · 编程 · 科技见闻","Write Code, Read World"],"hitokoto":{"enable":false,"show_author":false,"api":"https://v1.hitokoto.cn"},"typing_speed":100,"backing_speed":80,"starting_delay":500,"backing_delay":1500,"loop":true,"smart_backspace":true},"text_color":{"light":"#fff","dark":"#d1d1b6"},"text_style":{"title_size":"2.8rem","subtitle_size":"1.5rem","line_height":1.2},"custom_font":{"enable":false,"family":null,"url":null},"social_links":{"enable":true,"style":"default","links":[{"icon":"fa-brands fa-github","url":"https://github.com/hydraxman"}],"qrs":[{"icon":"fa-brands fa-weixin","qr":null},{"icon":"/images/custom-icon.svg","qr":null}]}},"plugins":{"feed":{"enable":false},"aplayer":{"enable":false,"type":"fixed","audios":[{"name":null,"artist":null,"url":null,"cover":null,"lrc":null}]},"mermaid":{"enable":false,"version":"11.4.1","theme":{"light":"default","dark":"dark"}}},"version":"2.9.0","navbar":{"auto_hide":false,"color":{"left":"#333333","right":"#555555","transparency":35},"width":{"home":"1200px","pages":"1000px"},"links":{"Home":{"path":"/","icon":"fa-regular fa-house"},"Archives":{"path":"/archives","icon":"fa-regular fa-archive"},"Categories":{"path":"/categories","icon":"fa-regular fa-folder"},"Tags":{"path":"/tags","icon":"fa-regular fa-tags"},"About":{"path":"/about","icon":"fa-regular fa-user"}},"search":{"enable":true,"preload":true}},"page_templates":{"friends_column":2,"tags_style":"blur","masonry":{"batch_size":12,"initial_batch_size":24}},"home":{"sidebar":{"enable":true,"position":"left","first_item":"menu","announcement":"AI · 编程 · 科技","show_on_mobile":true,"links":{"Archives":{"path":"/archives","icon":"fa-regular fa-archive"},"Tags":{"path":"/tags","icon":"fa-regular fa-tags"},"Categories":{"path":"/categories","icon":"fa-regular fa-folder"}}},"article_date_format":"auto","excerpt_length":200,"categories":{"enable":true,"limit":3},"tags":{"enable":true,"limit":3}},"footer":{"runtime":true,"icon":"<i class=\"fa-solid fa-heart fa-beat\" style=\"--fa-animation-duration: 0.5s; color: #333\"></i>","start":"2024/01/01 00:00:00","statistics":true,"customize":null,"icp":{"enable":false,"number":null,"url":null}},"footerStart":"2024/01/01 00:00:00","mermaid":{"style":{"light":"default","dark":"dark"}}};
+    window.lang_ago = {"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"};
+    window.i18n = {"search":"站内搜索您需要的内容...","toc":"目录","prev":"上一页","next":"下一页","prev_posts":"上一篇","next_posts":"下一篇","page":"第 %d 页","recent_posts":"最新文章","share":"分享","powered_by":"由 %s 驱动","theme":"主题","rss_feed":"RSS Feed","category":"分类","categories":"分类","tag":"标签","tags":"标签","post":"文章","posts":"文章","tagcloud":"标签云","comment":"评论","comments":"评论","top":"置顶","sticky":"置顶","go-back-home":"回到首页","masonry_loading":"照片加载中...","image_viewer":"图片查看器","close":"关闭","exif":{"title":"EXIF","cards":{"camera":"相机","lens":"镜头","exposure":"曝光","other":"其他"},"fields":{"make":"品牌","model":"机型","date_taken":"拍摄时间","lens_model":"镜头","focal_length":"焦距","focus_mode":"对焦模式","shutter":"快门","aperture":"光圈","iso":"感光度","exposure_program":"曝光程序","exposure_compensation":"曝光补偿","metering_mode":"测光模式","flash":"闪光灯","white_balance":"白平衡","latitude":"纬度","longitude":"经度","altitude":"海拔"},"status":{"loading":"加载中...","no_exif":"无 EXIF 信息","library_missing":"EXIF 库未加载","image_source_missing":"图片地址不可用","unavailable":"EXIF 不可用（可能被 CORS 阻止或缺少元数据）","flag_unavailable":"EXIF 不可用"}},"home":"首页","archive":"归档","archives":"归档","about":"关于","links":"链接","link":"链接","friends":"友情链接","friend":"友情链接","timeline":"时间轴","shuoshuo":"说说","bookmarks":"书签","site_uv":"访问人数","site_pv":"总访问量","read_more":"阅读全文","wordcount":"字","min2read":"分钟","changelog":"更新日志","status":"状态","runtime":"博客已运行","days":"天","hours":"小时","minutes":"分钟","seconds":"秒","optimized_by":"并由 Evan 进行优化","rights":"版权所有","site_posts":"共撰写了 %s 篇文章","site_wordcount":"共 %s 字","copyright":{"title":"标题","author":"作者","link":"链接","create_time":"创建于","update_time":"更新于","license_title":"版权声明","license_content":"本文章采用 %s 进行许可。","all_rights_reserved":"版权所有 &#169 %s，禁止转载。","public_domain":"本文为公有领域作品，可自由转载、引用。"},"ago":{"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"},"create_time":"创建","update_time":"更新","expired":"这篇文章最后更新于 %s 天前，内容可能已经过时。"};
+    window.data = {"masonry":false};
+  </script>
+    
+    <!--- Fontawesome Part-->
+    
+<link rel="stylesheet" href="/fontawesome/fontawesome.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/brands.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/solid.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/regular.min.css">
+
+    
+    
+    
+    
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+	<div class="progress-bar-container">
+	
+	<span class="scroll-progress-bar"></span>
+	
+
+	
+	<span class="pjax-progress-bar"></span>
+	<!--        <span class="swup-progress-icon">-->
+	<!--            <i class="fa-solid fa-circle-notch fa-spin"></i>-->
+	<!--        </span>-->
+	
+</div>
+
+<main class="page-container" id="swup">
+
+	
+
+	<div class="main-content-container flex flex-col justify-between min-h-dvh">
+		<div class="main-content-header">
+			<header class="navbar-container px-6 md:px-12">
+    <div class="navbar-content transition-navbar ">
+        <div class="left">
+            
+            <a class="logo-title" href="/">
+                
+                内森淼文
+                
+            </a>
+        </div>
+
+        <div class="right">
+            <!-- PC -->
+            <div class="desktop">
+                <ul class="navbar-list">
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/"
+                                        >
+                                    <i class="fa-regular fa-house fa-fw"></i>
+                                    首页
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/archives"
+                                        >
+                                    <i class="fa-regular fa-archive fa-fw"></i>
+                                    归档
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/categories"
+                                        >
+                                    <i class="fa-regular fa-folder fa-fw"></i>
+                                    分类
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/tags"
+                                        >
+                                    <i class="fa-regular fa-tags fa-fw"></i>
+                                    标签
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/about"
+                                        >
+                                    <i class="fa-regular fa-user fa-fw"></i>
+                                    关于
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                    
+                        <li class="navbar-item search search-popup-trigger">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </li>
+                    
+                </ul>
+            </div>
+            <!-- Mobile -->
+            <div class="mobile">
+                
+                    <div class="icon-item search search-popup-trigger"><i class="fa-solid fa-magnifying-glass"></i>
+                    </div>
+                
+                <div class="icon-item navbar-bar">
+                    <div class="navbar-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile sheet -->
+    <div class="navbar-drawer h-dvh w-full absolute top-0 left-0 bg-background-color flex flex-col justify-between">
+        <ul class="drawer-navbar-list flex flex-col px-4 justify-center items-start">
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/"
+                        >
+                            <span>
+                                首页
+                            </span>
+                            
+                                <i class="fa-regular fa-house fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/archives"
+                        >
+                            <span>
+                                归档
+                            </span>
+                            
+                                <i class="fa-regular fa-archive fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/categories"
+                        >
+                            <span>
+                                分类
+                            </span>
+                            
+                                <i class="fa-regular fa-folder fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/tags"
+                        >
+                            <span>
+                                标签
+                            </span>
+                            
+                                <i class="fa-regular fa-tags fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/about"
+                        >
+                            <span>
+                                关于
+                            </span>
+                            
+                                <i class="fa-regular fa-user fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+
+            
+            
+                
+                    
+                    
+                    
+            
+        </ul>
+
+        <div class="statistics flex justify-around my-2.5">
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/tags">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">358</div>
+        <div class="label text-third-text-color text-sm">标签</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/categories">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">9</div>
+        <div class="label text-third-text-color text-sm">分类</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/archives">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">319</div>
+        <div class="label text-third-text-color text-sm">文章</div>
+    </a>
+</div>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+		</div>
+
+		<div class="main-content-body transition-fade-up">
+			
+
+			<div class="main-content">
+				<div class="post-page-container flex relative justify-between box-border w-full h-full">
+	<div class="article-content-container">
+
+		<div class="article-title relative w-full">
+			
+			
+			
+			<img src="/images/morning-news-cover.png" alt="GitHub 热榜今天露出一个反差：AI Agent 在冲刺，工程老兵在回潮" class="w-full h-60 sm:h-72 md:h-80 object-cover sm:rounded-t-large dark:brightness-75" />
+			
+			<div class="w-full flex items-center absolute bottom-0 justify-start">
+				<h1 class="article-title-cover text-center mx-6 my-6 text-second-text-color bg-background-color-transparent px-4 py-3 text-3xl sm:text-4xl md:text-5xl font-semibold backdrop-blur-lg rounded-xl border border-border-color ">GitHub 热榜今天露出一个反差：AI Agent 在冲刺，工程老兵在回潮</h1>
+			</div>
+			
+		</div>
+
+		
+		<div class="article-header flex flex-row gap-2 items-center px-2 sm:px-6 md:px-8">
+			<div class="avatar w-[46px] h-[46px] shrink-0 rounded-medium border border-border-color p-px">
+				<img src="/images/avatar.png">
+			</div>
+			<div class="info flex flex-col justify-between">
+				<div class="author flex items-center">
+					<span class="name text-default-text-color text-lg font-semibold">Nathan</span>
+					
+				</div>
+				<div class="meta-info">
+					<div class="article-meta-info">
+    <span class="article-date article-meta-item">
+        <i class="fa-regular fa-pen-fancy"></i>&nbsp;
+        <span class="desktop">2026-08-05 04:00</span>
+        <span class="mobile">2026-08-05 04:00</span>
+        <span class="hover-info">创建</span>
+    </span>
+    
+        <span class="article-date article-meta-item">
+            <i class="fa-regular fa-wrench"></i>&nbsp;
+            <span class="desktop">2026-08-05 04:04:08</span>
+            <span class="mobile">2026-08-05 04:04:08</span>
+            <span class="hover-info">更新</span>
+        </span>
+    
+
+    
+        <span class="article-categories article-meta-item">
+            <i class="fa-regular fa-folders"></i>&nbsp;
+            <ul>
+                
+                
+                    
+                        
+                        <li>
+                            <a href="/categories/%E7%A7%91%E6%8A%80%E9%80%9F%E9%80%92/">科技速递</a>&nbsp;
+                        </li>
+                    
+                    
+                
+            </ul>
+        </span>
+    
+    
+        <span class="article-tags article-meta-item">
+            <i class="fa-regular fa-tags"></i>&nbsp;
+            <ul>
+                
+                    <li>
+                        <a href="/tags/AI-Agent/">AI Agent</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/%E5%BC%80%E6%BA%90%E9%A1%B9%E7%9B%AE/">开源项目</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/GitHub-Trending/">GitHub Trending</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/%E5%BC%80%E5%8F%91%E8%80%85%E5%B7%A5%E5%85%B7/">开发者工具</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/%E5%B7%A5%E7%A8%8B%E6%95%88%E7%8E%87/">工程效率</a>&nbsp;
+                    </li>
+                
+            </ul>
+        </span>
+    
+
+    
+    
+        <span class="article-wordcount article-meta-item">
+            <i class="fa-regular fa-typewriter"></i>&nbsp;<span>3.5k 字</span>
+        </span>
+    
+    
+        <span class="article-min2read article-meta-item">
+            <i class="fa-regular fa-clock"></i>&nbsp;<span>13 分钟</span>
+        </span>
+    
+    
+</div>
+
+				</div>
+			</div>
+		</div>
+		
+
+		
+
+
+		<div class="article-content markdown-body px-2 sm:px-6 md:px-8 pb-8">
+			<p>今天的 GitHub 热榜像一张开发者焦虑清单：Agent 要有长期记忆，PDF 不能见一个就送去 OCR，超大模型最好塞进小显卡，安全团队还得看清 AI 到底调用了什么工具。</p>
+<p>但真正有意思的是榜单后半段。Cypress、webpack、spdlog 三位“工程老兵”同时回来，单日新增 Stars 都只有个位数。<strong>这不是一次集体爆红，而是一个更朴素的信号：AI 可以加速写代码，测试、构建和日志这些地基仍然没人能绕开。</strong></p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/github-trending/2026-08-05/cover.png"
+                      alt="GitHub Trending Daily Top 10"
+                ></p>
+<h2 id="今日-Top-10"><a href="#今日-Top-10" class="headerlink" title="今日 Top 10"></a>今日 Top 10</h2><table>
+<thead>
+<tr>
+<th align="right">排名</th>
+<th>项目</th>
+<th>语言</th>
+<th align="right">Stars</th>
+<th align="right">Today</th>
+<th>简介</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="right">1</td>
+<td><a class="link"   target="_blank" rel="noopener" href="https://github.com/TencentCloud/TencentDB-Agent-Memory" >TencentCloud&#x2F;TencentDB-Agent-Memory<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></td>
+<td>TypeScript</td>
+<td align="right">13,353</td>
+<td align="right">+1,138</td>
+<td>把对话、文档和代码沉淀为团队可治理、可共享的 Agent 记忆。</td>
+</tr>
+<tr>
+<td align="right">2</td>
+<td><a class="link"   target="_blank" rel="noopener" href="https://github.com/zhaoxuya520/reverse-skill" >zhaoxuya520&#x2F;reverse-skill<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></td>
+<td>PowerShell</td>
+<td align="right">17,700</td>
+<td align="right">+2,310</td>
+<td>为授权逆向与安全研究准备的 AI 技能路由和工具链引导包。</td>
+</tr>
+<tr>
+<td align="right">3</td>
+<td><a class="link"   target="_blank" rel="noopener" href="https://github.com/firecrawl/pdf-inspector" >firecrawl&#x2F;pdf-inspector<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></td>
+<td>Rust</td>
+<td align="right">9,793</td>
+<td align="right">+2,524</td>
+<td>快速判断 PDF 类型、提取结构化文本，并为 OCR 做逐页分流。</td>
+</tr>
+<tr>
+<td align="right">4</td>
+<td><a class="link"   target="_blank" rel="noopener" href="https://github.com/uber/ADR" >uber&#x2F;ADR<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></td>
+<td>Python</td>
+<td align="right">627</td>
+<td align="right">+140</td>
+<td>Uber 开源的企业 Agent 可观测、评测与威胁检测系统。</td>
+</tr>
+<tr>
+<td align="right">5</td>
+<td><a class="link"   target="_blank" rel="noopener" href="https://github.com/obra/superpowers" >obra&#x2F;superpowers<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></td>
+<td>Shell</td>
+<td align="right">266,364</td>
+<td align="right">+617</td>
+<td>用可组合技能把需求澄清、规划、TDD 和代码审查塞进 Coding Agent。</td>
+</tr>
+<tr>
+<td align="right">6</td>
+<td><a class="link"   target="_blank" rel="noopener" href="https://github.com/microsoft/generative-ai-for-beginners" >microsoft&#x2F;generative-ai-for-beginners<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></td>
+<td>Jupyter Notebook</td>
+<td align="right">116,194</td>
+<td align="right">+784</td>
+<td>微软维护的 21 课生成式 AI 应用开发课程。</td>
+</tr>
+<tr>
+<td align="right">7</td>
+<td><a class="link"   target="_blank" rel="noopener" href="https://github.com/cypress-io/cypress" >cypress-io&#x2F;cypress<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></td>
+<td>TypeScript</td>
+<td align="right">50,748</td>
+<td align="right">+6</td>
+<td>面向浏览器应用的端到端与组件测试工具。</td>
+</tr>
+<tr>
+<td align="right">8</td>
+<td><a class="link"   target="_blank" rel="noopener" href="https://github.com/lyogavin/airllm" >lyogavin&#x2F;airllm<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></td>
+<td>Jupyter Notebook</td>
+<td align="right">28,228</td>
+<td align="right">+1,716</td>
+<td>通过分层和稀疏专家流式加载，让超大模型在小显存设备上推理。</td>
+</tr>
+<tr>
+<td align="right">9</td>
+<td><a class="link"   target="_blank" rel="noopener" href="https://github.com/webpack/webpack" >webpack&#x2F;webpack<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></td>
+<td>JavaScript</td>
+<td align="right">65,912</td>
+<td align="right">+8</td>
+<td>JavaScript 生态最经典的模块打包与资源处理工具之一。</td>
+</tr>
+<tr>
+<td align="right">10</td>
+<td><a class="link"   target="_blank" rel="noopener" href="https://github.com/gabime/spdlog" >gabime&#x2F;spdlog<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></td>
+<td>C++</td>
+<td align="right">29,363</td>
+<td align="right">+9</td>
+<td>兼顾性能、格式化能力与多种输出目标的 C++ 日志库。</td>
+</tr>
+</tbody></table>
+<h2 id="1-TencentCloud-x2F-TencentDB-Agent-Memory"><a href="#1-TencentCloud-x2F-TencentDB-Agent-Memory" class="headerlink" title="1. TencentCloud&#x2F;TencentDB-Agent-Memory"></a>1. <a class="link"   target="_blank" rel="noopener" href="https://github.com/TencentCloud/TencentDB-Agent-Memory" >TencentCloud&#x2F;TencentDB-Agent-Memory<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></h2><p><img src="/images/github-trending/2026-08-05/01-TencentCloud__TencentDB-Agent-Memory.png" alt="TencentCloud/TencentDB-Agent-Memory"></p>
+<ul>
+<li><strong>项目简介：</strong> 面向团队的 Agent 记忆中枢，把对话、文档和代码整理成 Chat Memory、Skill、LLM-Wiki 与 Code-Graph 四类可复用资产，再分配给不同成员和 Agent。</li>
+<li><strong>为什么火：</strong> Agent 一换会话就“失忆”，团队便会反复解释项目背景、踩同样的坑。这个项目把一次任务留下的经验变成下一次可直接调用的资产，一天新增 1,138 Stars，击中了多 Agent 协作最现实的浪费。</li>
+<li><strong>技术亮点：</strong> 它不仅保存聊天记录，还能抽取偏好、事实、流程技能、文档知识和代码调用关系；资产支持版本、可见范围、ACL 与 Agent 绑定。治理越细，部署和权限设计也越重，502 个开放 Issue 说明项目仍处在快速迭代期。</li>
+<li><strong>适用场景：</strong> 软件研发团队、企业知识库、客服与运营 Agent、需要跨框架共享长期经验的多 Agent 平台。</li>
+<li><strong>关键数据：</strong> 语言 TypeScript｜Stars 13,353｜Today +1,138｜Forks 1,259｜License 未明确｜最近更新 2026-08-03｜Topics agent、ai-agent、embedding、long-term-memory｜Homepage —。</li>
+</ul>
+<h2 id="2-zhaoxuya520-x2F-reverse-skill"><a href="#2-zhaoxuya520-x2F-reverse-skill" class="headerlink" title="2. zhaoxuya520&#x2F;reverse-skill"></a>2. <a class="link"   target="_blank" rel="noopener" href="https://github.com/zhaoxuya520/reverse-skill" >zhaoxuya520&#x2F;reverse-skill<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></h2><p><img src="/images/github-trending/2026-08-05/02-zhaoxuya520__reverse-skill.png" alt="zhaoxuya520/reverse-skill"></p>
+<ul>
+<li><strong>项目简介：</strong> 一套面向逆向工程、授权渗透测试和安全研究的 AI 技能路由包，帮助 Coding Agent 判断 APK、二进制、前端加密、API、PCAP 或 CTF 任务应该走哪条分析路线。</li>
+<li><strong>为什么火：</strong> 安全工具并不稀缺，真正费时间的是选错工具、漏掉前置检查，再从头返工。它把“该用 jadx、Frida、BurpSuite 还是别的工具”做成可复用方法论，Today +2,310 说明安全团队同样想要更懂流程的 Agent。</li>
+<li><strong>技术亮点：</strong> 按场景路由技能、按需检查并引导安装工具链，还能把任务经验沉淀进知识库；覆盖移动端、二进制、Web&#x2F;API、供应链和 LLM 安全。它不是一键攻防按钮，依赖环境权限和外部工具，使用边界必须限定在明确授权的目标上。</li>
+<li><strong>适用场景：</strong> 企业安全团队的标准化分析流程、CTF 教学、恶意样本研究、移动端和二进制逆向实验室。</li>
+<li><strong>关键数据：</strong> 语言 PowerShell｜Stars 17,700｜Today +2,310｜Forks 2,439｜License MIT｜最近更新 2026-08-04｜Topics —｜Homepage —。</li>
+</ul>
+<h2 id="3-firecrawl-x2F-pdf-inspector"><a href="#3-firecrawl-x2F-pdf-inspector" class="headerlink" title="3. firecrawl&#x2F;pdf-inspector"></a>3. <a class="link"   target="_blank" rel="noopener" href="https://github.com/firecrawl/pdf-inspector" >firecrawl&#x2F;pdf-inspector<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></h2><p><img src="/images/github-trending/2026-08-05/03-firecrawl__pdf-inspector.png" alt="firecrawl/pdf-inspector"></p>
+<ul>
+<li><strong>项目简介：</strong> Firecrawl 开源的 Rust PDF 分类与文本提取库，可区分文本型、扫描型、图片型和混合型文档，再把可直接读取的内容转换成干净 Markdown。</li>
+<li><strong>为什么火：</strong> 许多文档管线把每份 PDF 都送去 OCR，速度慢、成本高，还可能破坏原有文本结构。pdf-inspector 先用约 10—50ms 做分类，项目称大约 54% 的 PDF 可以跳过 OCR；Today +2,524 是今天全榜最高。</li>
+<li><strong>技术亮点：</strong> 支持置信度和逐页 OCR 路由、多栏阅读顺序、表格检测、CID 字体、RTL 文本，并提供 Rust、Python、Node.js 和浏览器 WebAssembly 入口。它没有内置 OCR，复杂扫描件仍需交给后续识别服务。</li>
+<li><strong>适用场景：</strong> RAG 文档入库、报告与发票批处理、浏览器端本地解析、需要压低 OCR 延迟和费用的文档平台。</li>
+<li><strong>关键数据：</strong> 语言 Rust｜Stars 9,793｜Today +2,524｜Forks 644｜License MIT｜最近更新 2026-08-04｜Topics pdf、ocr-routing、pdf-extraction、wasm｜Homepage <a class="link"   target="_blank" rel="noopener" href="https://firecrawl.github.io/pdf-inspector/%E3%80%82" >https://firecrawl.github.io/pdf-inspector/。<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+</ul>
+<h2 id="4-uber-x2F-ADR"><a href="#4-uber-x2F-ADR" class="headerlink" title="4. uber&#x2F;ADR"></a>4. <a class="link"   target="_blank" rel="noopener" href="https://github.com/uber/ADR" >uber&#x2F;ADR<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></h2><p><img src="/images/github-trending/2026-08-05/04-uber__ADR.png" alt="uber/ADR"></p>
+<ul>
+<li><strong>项目简介：</strong> ADR 全称 Agentic AI Detection and Response，是 Uber 面向企业 AI Agent 的可观测、基准评测和威胁检测系统，已用于 Uber 生产环境。</li>
+<li><strong>为什么火：</strong> Coding Agent 开始读仓库、调终端、连 MCP 后，安全问题不再只是“回答里有没有敏感词”，而是它想做什么、调用了什么、是否会执行危险动作。Uber 把真实部署经验和 MLSys 2026 论文一起开源，让这套问题第一次有了较完整的工程参照。</li>
+<li><strong>技术亮点：</strong> Sensor 层统一采集多种 Agent 的意图、工具调用和执行轨迹；ADR-Bench 包含 300 多个任务、133 个 MCP 服务器和 17 类攻击技术；检测侧先高召回筛查，再对可疑会话做深度推理。它面向企业级链路，接入遥测和调优误报都需要持续投入。</li>
+<li><strong>适用场景：</strong> 企业 Coding Agent 审计、客服 Agent 安全监控、红队评测、MCP 工具调用治理和 AI 安全研究。</li>
+<li><strong>关键数据：</strong> 语言 Python｜Stars 627｜Today +140｜Forks 66｜License Apache-2.0｜最近更新 2026-08-03｜Topics agent-security、ai-security、benchmark、claude-code｜Homepage <a class="link"   target="_blank" rel="noopener" href="https://arxiv.org/abs/2605.17380%E3%80%82" >https://arxiv.org/abs/2605.17380。<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+</ul>
+<h2 id="5-obra-x2F-superpowers"><a href="#5-obra-x2F-superpowers" class="headerlink" title="5. obra&#x2F;superpowers"></a>5. <a class="link"   target="_blank" rel="noopener" href="https://github.com/obra/superpowers" >obra&#x2F;superpowers<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></h2><p><img src="/images/github-trending/2026-08-05/05-obra__superpowers.png" alt="obra/superpowers"></p>
+<ul>
+<li><strong>项目简介：</strong> 一套给 Coding Agent 使用的软件开发方法论和可组合技能，试图把“先想清楚再写代码”变成默认行为，而不是靠用户每次提醒。</li>
+<li><strong>为什么火：</strong> 会生成代码的模型越来越多，真正拉开差距的是需求澄清、拆解、测试和审查能否稳定执行。superpowers 把整套研发节奏装进 Agent，26 万以上 Stars 后仍单日新增 617，说明开发者正在给 AI 补工程纪律。</li>
+<li><strong>技术亮点：</strong> 从 brainstorming、设计确认和实施计划开始，强调红绿重构式 TDD、YAGNI、任务分解和子 Agent 交叉审查；已适配 Claude Code、Codex、Cursor、Gemini CLI、Copilot CLI 等多种入口。流程更严谨也意味着小改动可能显得偏重，团队仍要按任务规模裁剪。</li>
+<li><strong>适用场景：</strong> 中大型功能开发、遗留系统重构、需要可审查计划的团队协作，以及希望减少 Coding Agent 跑偏的长任务。</li>
+<li><strong>关键数据：</strong> 语言 Shell｜Stars 266,364｜Today +617｜Forks 23,818｜License MIT｜最近更新 2026-08-04｜Topics ai、coding、sdlc、skills、subagent-driven-development｜Homepage —。</li>
+</ul>
+<h2 id="6-microsoft-x2F-generative-ai-for-beginners"><a href="#6-microsoft-x2F-generative-ai-for-beginners" class="headerlink" title="6. microsoft&#x2F;generative-ai-for-beginners"></a>6. <a class="link"   target="_blank" rel="noopener" href="https://github.com/microsoft/generative-ai-for-beginners" >microsoft&#x2F;generative-ai-for-beginners<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></h2><p><img src="/images/github-trending/2026-08-05/06-microsoft__generative-ai-for-beginners.png" alt="microsoft/generative-ai-for-beginners"></p>
+<ul>
+<li><strong>项目简介：</strong> 微软 Cloud Advocates 维护的 21 课生成式 AI 应用课程，从大模型基础和负责任 AI 一路讲到 Prompt、文本生成、聊天、向量检索与应用开发。</li>
+<li><strong>为什么火：</strong> AI 工具每周都在换，但初学者真正缺的是一条能从概念走到可运行示例的路线。课程同时提供 Python 与 TypeScript 示例，并依靠社区维护多语言版本，超过 11.6 万 Stars 后仍有 +784 的单日增长。</li>
+<li><strong>技术亮点：</strong> 课程区分 Learn 与 Build 两类章节，每课配套示例和延伸学习；代码可接 OpenAI API、Azure OpenAI 与 Microsoft Foundry Models。它适合建立完整地图，但涉及多家云服务，想纯本地学习需要自行替换模型和凭证环节。</li>
+<li><strong>适用场景：</strong> 生成式 AI 入门、自学路线、企业内训、高校备课，以及从 Prompt 练习走向完整应用的开发者。</li>
+<li><strong>关键数据：</strong> 语言 Jupyter Notebook｜Stars 116,194｜Today +784｜Forks 61,541｜License MIT｜最近更新 2026-08-04｜Topics ai、azure、chatgpt、dall-e、generative-ai｜Homepage —。</li>
+</ul>
+<h2 id="7-cypress-io-x2F-cypress"><a href="#7-cypress-io-x2F-cypress" class="headerlink" title="7. cypress-io&#x2F;cypress"></a>7. <a class="link"   target="_blank" rel="noopener" href="https://github.com/cypress-io/cypress" >cypress-io&#x2F;cypress<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></h2><p><img src="/images/github-trending/2026-08-05/07-cypress-io__cypress.png" alt="cypress-io/cypress"></p>
+<ul>
+<li><strong>项目简介：</strong> Cypress 是面向浏览器应用的自动化测试工具，覆盖端到端测试和组件测试，让开发者在真实页面上下文中编写、运行并调试用例。</li>
+<li><strong>为什么火：</strong> AI 可以一次生成很多页面和交互，回归测试反而更容易成为瓶颈。Cypress 今天只新增 6 Stars，排名更像成熟工具重新被看见，而不是突然爆红：代码产出越快，稳定验证越不能靠人工点页面。</li>
+<li><strong>技术亮点：</strong> 测试运行器能展示命令执行过程和页面状态，自动等待元素与网络条件，并可配合 Cypress Cloud 记录结果；生态覆盖 React、Angular、Vue、Svelte 等组件测试。代价是它有自己的执行模型，复杂多标签页、跨域和原生浏览器边界需要按 Cypress 规则处理。</li>
+<li><strong>适用场景：</strong> Web 端到端回归、组件交互测试、CI 质量门、前端团队调试偶发失败用例。</li>
+<li><strong>关键数据：</strong> 语言 TypeScript｜Stars 50,748｜Today +6｜Forks 3,626｜License MIT｜最近更新 2026-08-04｜Topics component-testing、end-to-end-testing、react-testing-library｜Homepage <a class="link"   target="_blank" rel="noopener" href="https://cypress.io./" >https://cypress.io。<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+</ul>
+<h2 id="8-lyogavin-x2F-airllm"><a href="#8-lyogavin-x2F-airllm" class="headerlink" title="8. lyogavin&#x2F;airllm"></a>8. <a class="link"   target="_blank" rel="noopener" href="https://github.com/lyogavin/airllm" >lyogavin&#x2F;airllm<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></h2><p><img src="/images/github-trending/2026-08-05/08-lyogavin__airllm.png" alt="lyogavin/airllm"></p>
+<ul>
+<li><strong>项目简介：</strong> AirLLM 通过按层、按专家加载权重，大幅压低大模型推理时的显存占用；项目给出的目标，是让 70B 模型在单张 4GB GPU 上运行。</li>
+<li><strong>为什么火：</strong> 本地推理最直接的门槛不是模型下载不下来，而是显存塞不下。AirLLM 把“换更贵的显卡”改成“用磁盘和加载时间换显存”，并扩展到 DeepSeek-V3、Qwen3 与超大稀疏 MoE 模型，Today +1,716 说明小显存跑大模型依旧是硬需求。</li>
+<li><strong>技术亮点：</strong> 常规模型按层流式装载，稀疏 MoE 模型则只搬运当前 token 实际路由到的专家；另有 4bit&#x2F;8bit 压缩选项。它能省显存，但无法消除模型权重的存储与带宽成本，推理速度通常远不及把模型完整放进显存。</li>
+<li><strong>适用场景：</strong> 个人工作站上的超大模型验证、低显存实验、教学演示，以及采购算力前的可行性测试。</li>
+<li><strong>关键数据：</strong> 语言 Jupyter Notebook｜Stars 28,228｜Today +1,716｜Forks 3,046｜License Apache-2.0｜最近更新 2026-07-29｜Topics chinese-llm、finetune、generative-ai、llm｜Homepage —。</li>
+</ul>
+<h2 id="9-webpack-x2F-webpack"><a href="#9-webpack-x2F-webpack" class="headerlink" title="9. webpack&#x2F;webpack"></a>9. <a class="link"   target="_blank" rel="noopener" href="https://github.com/webpack/webpack" >webpack&#x2F;webpack<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></h2><p><img src="/images/github-trending/2026-08-05/09-webpack__webpack.png" alt="webpack/webpack"></p>
+<ul>
+<li><strong>项目简介：</strong> webpack 是 JavaScript 生态的模块打包器，能把 JS、CSS、图片和其他资源经过 loader 与 plugin 处理，生成浏览器可部署的产物。</li>
+<li><strong>为什么火：</strong> 它今天只有 +8 Stars，却仍回到 Top 10。比起“新工具横空出世”，这更像工程基本盘的一次提醒：大量生产项目仍依赖 webpack 的代码分割、插件体系和成熟兼容链路，迁移成本不会因为新构建工具出现就自动消失。</li>
+<li><strong>技术亮点：</strong> 支持 CommonJS、AMD、ES Modules 等模块形式，借助 loader 转换多种资源，通过插件介入编译生命周期，并按需拆分代码。它的可配置性几乎没有上限，代价也是配置复杂、构建性能和升级兼容需要长期治理。</li>
+<li><strong>适用场景：</strong> 大型存量前端、需要精细定制编译流程的企业项目、插件生态依赖较深的 Web 应用。</li>
+<li><strong>关键数据：</strong> 语言 JavaScript｜Stars 65,912｜Today +8｜Forks 9,528｜License MIT｜最近更新 2026-08-04｜Topics build-tool、compiler、esm、javascript｜Homepage <a class="link"   target="_blank" rel="noopener" href="https://webpack.js.org./" >https://webpack.js.org。<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+</ul>
+<h2 id="10-gabime-x2F-spdlog"><a href="#10-gabime-x2F-spdlog" class="headerlink" title="10. gabime&#x2F;spdlog"></a>10. <a class="link"   target="_blank" rel="noopener" href="https://github.com/gabime/spdlog" >gabime&#x2F;spdlog<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></h2><p><img src="/images/github-trending/2026-08-05/10-gabime__spdlog.png" alt="gabime/spdlog"></p>
+<ul>
+<li><strong>项目简介：</strong> spdlog 是面向 C++ 的高性能日志库，既可直接以 header-only 方式接入，也可编译成库来缩短大型项目的构建时间。</li>
+<li><strong>为什么火：</strong> 日志很少出现在技术发布会的主角位，却决定线上故障能不能被定位。spdlog 以 +9 Stars 进入榜单，不像热点爆发，更像成熟 C++ 基础设施的持续吸引力：接口简单、包管理器覆盖广、性能预期稳定。</li>
+<li><strong>技术亮点：</strong> 基于 fmt 提供类型安全格式化，支持彩色控制台、文件轮转、异步日志、自定义 sink、运行时日志级别和回溯环形缓冲区。异步模式能降低业务线程阻塞，但队列容量、溢出策略和刷盘时机仍需按故障容忍度配置。</li>
+<li><strong>适用场景：</strong> C++ 服务、桌面软件、游戏引擎、嵌入式工具链，以及对日志延迟和吞吐有明确要求的系统。</li>
+<li><strong>关键数据：</strong> 语言 C++｜Stars 29,363｜Today +9｜Forks 5,371｜License 未明确｜最近更新 2026-07-24｜Topics cpp、cpp11、header-only、logging｜Homepage —。</li>
+</ul>
+<p>今天的榜单把两类项目摆在了一起：一类在解决 Agent 记忆、安全、文档和算力门槛，另一类早已不新鲜，却仍负责测试、构建和日志。</p>
+<p><strong>AI 能把开发速度推高，但决定软件能否留下来的，从来不是冲刺有多快，而是地基能不能扛住。</strong></p>
+<blockquote>
+<p>数据截至 2026-08-05 04:00（UTC+8），来源：GitHub Trending 当日榜单 + GitHub 公开仓库元数据。Stars 与 Today Stars 以当次榜单快照为准。</p>
+</blockquote>
+
+		</div>
+
+		
+		<div class="post-copyright-info w-full my-8 px-2 sm:px-6 md:px-8">
+			<div class="article-copyright-info-container">
+    <ul>
+        <li><strong>标题:</strong> GitHub 热榜今天露出一个反差：AI Agent 在冲刺，工程老兵在回潮</li>
+        <li><strong>作者:</strong> Nathan</li>
+        <li><strong>创建于
+                :</strong> 2026-08-05 04:00:00</li>
+        
+            <li>
+                <strong>更新于
+                    :</strong> 2026-08-05 04:04:08
+            </li>
+        
+        <li>
+            <strong>链接:</strong> https://hydraxman.github.io/2026/08/05/github-trending/github-trending-2026-08-05/
+        </li>
+        <li>
+            <strong>
+                版权声明:
+            </strong>
+            
+
+            
+                本文章采用 <a class="license" target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0">CC BY-NC-SA 4.0</a> 进行许可。
+            
+        </li>
+    </ul>
+</div>
+
+		</div>
+		
+
+		
+		<ul class="post-tags-box text-lg mt-1.5 flex-wrap justify-center flex md:hidden">
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/AI-Agent/">#AI Agent</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/%E5%BC%80%E6%BA%90%E9%A1%B9%E7%9B%AE/">#开源项目</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/GitHub-Trending/">#GitHub Trending</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/%E5%BC%80%E5%8F%91%E8%80%85%E5%B7%A5%E5%85%B7/">#开发者工具</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/%E5%B7%A5%E7%A8%8B%E6%95%88%E7%8E%87/">#工程效率</a>&nbsp;
+			</li>
+			
+		</ul>
+		
+
+		
+
+		
+		<div class="article-nav my-8 flex justify-between items-center px-2 sm:px-6 md:px-8">
+			
+			
+			<div class="article-next border-border-color shadow-redefine-flat shadow-shadow-color-2 rounded-medium px-4 py-2 hover:shadow-redefine-flat-hover hover:shadow-shadow-color-2">
+				<a class="next" rel="next" href="/2026/08/04/github-trending/github-trending-2026-08-04/">
+					<span class="title flex justify-center items-center">
+						<span class="post-nav-title-item truncate max-w-48">GitHub 热榜今天很现实：小显存、本地推理和 AI 工具链一起冲高</span>
+						<span class="post-nav-item">下一篇</span>
+					</span>
+					<span class="right arrow-icon flex justify-center items-center">
+						<i class="fa-solid fa-chevron-right"></i>
+					</span>
+				</a>
+			</div>
+			
+		</div>
+		
+
+
+		
+	</div>
+
+	
+	<div class="toc-content-container">
+		<div class="post-toc-wrap">
+	<div class="post-toc">
+		<div class="toc-title">目录</div>
+		<div class="page-title">GitHub 热榜今天露出一个反差：AI Agent 在冲刺，工程老兵在回潮</div>
+		<ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%8A%E6%97%A5-Top-10"><span class="nav-text">今日 Top 10</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-TencentCloud-x2F-TencentDB-Agent-Memory"><span class="nav-text">1. TencentCloud&#x2F;TencentDB-Agent-Memory</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-zhaoxuya520-x2F-reverse-skill"><span class="nav-text">2. zhaoxuya520&#x2F;reverse-skill</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-firecrawl-x2F-pdf-inspector"><span class="nav-text">3. firecrawl&#x2F;pdf-inspector</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-uber-x2F-ADR"><span class="nav-text">4. uber&#x2F;ADR</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-obra-x2F-superpowers"><span class="nav-text">5. obra&#x2F;superpowers</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-microsoft-x2F-generative-ai-for-beginners"><span class="nav-text">6. microsoft&#x2F;generative-ai-for-beginners</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7-cypress-io-x2F-cypress"><span class="nav-text">7. cypress-io&#x2F;cypress</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#8-lyogavin-x2F-airllm"><span class="nav-text">8. lyogavin&#x2F;airllm</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#9-webpack-x2F-webpack"><span class="nav-text">9. webpack&#x2F;webpack</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#10-gabime-x2F-spdlog"><span class="nav-text">10. gabime&#x2F;spdlog</span></a></li></ol>
+
+	</div>
+</div>
+	</div>
+	
+</div>
+
+			</div>
+
+			
+		</div>
+
+		<div class="main-content-footer">
+			<footer class="footer mt-5 py-5 h-auto text-base text-third-text-color relative border-t-2 border-t-border-color">
+    <div class="info-container py-3 text-center">
+        
+        <div class="text-center">
+            &copy;
+            
+              <span>2024</span>
+              -
+            
+            2026&nbsp;&nbsp;<i class="fa-solid fa-heart fa-beat" style="--fa-animation-duration: 0.5s; color: #333"></i>&nbsp;&nbsp;<a href="/">Nathan</a>
+            
+                
+                <p class="post-count space-x-0.5">
+                    <span>
+                        共撰写了 319 篇文章
+                    </span>
+                    
+                        <span>
+                            共 716k 字
+                        </span>
+                    
+                </p>
+            
+        </div>
+        
+        <div class="relative text-center lg:absolute lg:left-[20px] lg:top-1/2 lg:-translate-y-1/2 lg:text-left">
+            <span class="lg:block text-sm">由 <?xml version="1.0" encoding="utf-8"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg class="relative top-[2px] inline-block align-baseline" version="1.1" id="圖層_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="1rem" height="1rem" viewBox="0 0 512 512" enable-background="new 0 0 512 512" xml:space="preserve"><path fill="#0E83CD" d="M256.4,25.8l-200,115.5L56,371.5l199.6,114.7l200-115.5l0.4-230.2L256.4,25.8z M349,354.6l-18.4,10.7l-18.6-11V275H200v79.6l-18.4,10.7l-18.6-11v-197l18.5-10.6l18.5,10.8V237h112v-79.6l18.5-10.6l18.5,10.8V354.6z"/></svg><a target="_blank" class="text-base" href="https://hexo.io">Hexo</a> 驱动</span>
+            <span class="text-sm lg:block">主题&nbsp;<a class="text-base" target="_blank" href="https://github.com/EvanNotFound/hexo-theme-redefine">Redefine v2.9.0</a></span>
+        </div>
+        
+        
+            <div>
+                博客已运行 <span class="odometer" id="runtime_days" ></span> 天 <span class="odometer" id="runtime_hours"></span> 小时 <span class="odometer" id="runtime_minutes"></span> 分钟 <span class="odometer" id="runtime_seconds"></span> 秒
+            </div>
+        
+        
+            <script data-swup-reload-script>
+                try {
+                    function odometer_init() {
+                    const elements = document.querySelectorAll('.odometer');
+                    elements.forEach(el => {
+                        new Odometer({
+                            el,
+                            format: '( ddd).dd',
+                            duration: 200
+                        });
+                    });
+                    }
+                    odometer_init();
+                } catch (error) {}
+            </script>
+        
+        
+            
+                
+        
+                
+        
+        
+    </div>  
+</footer>
+		</div>
+	</div>
+
+	
+	<div class="post-tools">
+		<div class="post-tools-container">
+	<ul class="article-tools-list">
+		<!-- TOC aside toggle -->
+		
+		<li class="right-bottom-tools page-aside-toggle">
+			<i class="fa-regular fa-outdent"></i>
+		</li>
+		
+
+		<!-- go comment -->
+		
+	</ul>
+</div>
+	</div>
+	
+
+	<div class="right-side-tools-container">
+		<div class="side-tools-container">
+	<ul class="hidden-tools-list">
+		<li class="right-bottom-tools tool-font-adjust-plus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-plus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-font-adjust-minus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-minus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-dark-light-toggle flex justify-center items-center">
+			<i class="fa-regular fa-moon"></i>
+		</li>
+
+		<!-- rss -->
+		
+
+		
+
+		<li class="right-bottom-tools tool-scroll-to-bottom flex justify-center items-center">
+			<i class="fa-regular fa-arrow-down"></i>
+		</li>
+	</ul>
+
+	<ul class="visible-tools-list">
+		<li class="right-bottom-tools toggle-tools-list flex justify-center items-center">
+			<i class="fa-regular fa-cog fa-spin"></i>
+		</li>
+		
+		<li class="right-bottom-tools tool-scroll-to-top flex justify-center items-center">
+			<i class="arrow-up fas fa-arrow-up"></i>
+			<span class="percent"></span>
+		</li>
+		
+		
+	</ul>
+</div>
+	</div>
+
+	<div class="image-viewer-container" role="dialog" aria-modal="true" aria-label="图片查看器">
+	<button class="image-viewer-close" type="button" aria-label="关闭">
+		<i class="fa-solid fa-xmark"></i>
+	</button>
+	<button class="image-viewer-prev" type="button" aria-label="上一页">
+		<i class="fa-solid fa-chevron-left"></i>
+	</button>
+	<div class="image-viewer-frame">
+		<img src="" alt="">
+	</div>
+	<div class="image-viewer-exif-panel hidden absolute left-1/2 bottom-20 -translate-x-1/2 w-[min(92vw,420px)] max-h-[60vh] overflow-hidden rounded-2xl bg-background-color-transparent-80 p-4 text-left shadow-redefine-flat backdrop-blur-md" role="dialog" aria-label="EXIF" aria-hidden="true">
+		<div class="flex items-center justify-between mb-3">
+			<span class="text-sm font-semibold text-first-text-color">EXIF</span>
+			<button class="image-viewer-exif-close flex h-8 w-8 items-center justify-center rounded-full bg-background-color-transparent-80 text-first-text-color transition hover:bg-background-color-transparent-40" type="button" aria-label="关闭">
+				<i class="fa-solid fa-xmark text-[0.65rem]"></i>
+			</button>
+		</div>
+		<div class="image-viewer-exif-cards grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[50vh] overflow-y-auto pr-1 scrollbar-hide"></div>
+		<template class="image-viewer-exif-card-template">
+			<div class="rounded-lg bg-background-color-transparent-40 px-3 py-2">
+				<div class="image-viewer-exif-card-header flex items-center gap-2 mb-1">
+					<i class="image-viewer-exif-card-icon fa-solid fa-circle-info text-xs text-third-text-color"></i>
+					<div class="image-viewer-exif-card-title text-xs font-semibold text-first-text-color"></div>
+				</div>
+				<div class="image-viewer-exif-card-items flex flex-col gap-1"></div>
+			</div>
+		</template>
+	</div>
+	<button class="image-viewer-exif-toggle flex items-center gap-2 hidden absolute left-1/2 bottom-6 -translate-x-1/2 rounded-full border border-border-color bg-background-color-transparent-80 px-4 py-2 text-first-text-color backdrop-blur-md transition hover:bg-background-color-transparent-40" type="button" aria-label="EXIF" aria-expanded="false">
+		<i class="fa-solid fa-circle-info text-xs"></i>
+		<span class="text-xs font-semibold uppercase tracking-wider">EXIF</span>
+	</button>
+	<button class="image-viewer-next" type="button" aria-label="下一页">
+		<i class="fa-solid fa-chevron-right"></i>
+	</button>
+</div>
+
+
+	
+	<div class="search-pop-overlay">
+	<div class="popup search-popup">
+		<div class="search-header">
+			<span class="search-input-field-pre">
+				<i class="fa-solid fa-keyboard"></i>
+			</span>
+			<div class="search-input-container">
+				<input autocomplete="off" autocorrect="off" autocapitalize="off" placeholder="站内搜索您需要的内容..." spellcheck="false" type="search" class="search-input">
+			</div>
+			<span class="popup-btn-close">
+				<i class="fa-solid fa-times"></i>
+			</span>
+		</div>
+		<div id="search-result">
+			<div id="no-result">
+				<i class="fa-solid fa-spinner fa-spin-pulse fa-5x fa-fw"></i>
+			</div>
+		</div>
+	</div>
+</div>
+	
+
+</main>
+
+
+
+<script src="/js/build/libs/Swup.min.js"></script>
+
+<script src="/js/build/libs/SwupSlideTheme.min.js"></script>
+
+<script src="/js/build/libs/SwupScriptsPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupProgressPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupScrollPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupPreloadPlugin.min.js"></script>
+
+<script>
+    window.swup = new Swup({
+        plugins: [
+            new SwupScriptsPlugin({
+                optin: true,
+            }),
+            new SwupProgressPlugin(),
+            new SwupScrollPlugin({
+                offset: 80,
+            }),
+            new SwupSlideTheme({
+                mainElement: ".main-content-body",
+            }),
+            new SwupPreloadPlugin(),
+        ],
+        containers: ["#swup"],
+    });
+
+    window.dispatchEvent(
+        new CustomEvent("redefine:swup:ready", {
+            detail: {
+                swup: window.swup,
+            },
+        }),
+    );
+</script>
+
+
+
+
+	
+<script src="/js/build/main.js" type="module"></script>
+
+
+
+    
+<script src="/js/build/libs/odometer.min.js"></script>
+
+    
+<link rel="stylesheet" href="/assets/odometer-theme-minimal.css">
+
+
+
+
+
+
+
+  
+<script src="/js/build/libs/Typed.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+<script src="/js/build/libs/moment-with-locales.min.js" data-swup-reload-script=""></script>
+
+
+
+	
+</body>
+
+</html>
