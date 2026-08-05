@@ -1,0 +1,1392 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="keywords" content="计算机技术, 生活中的胡思乱想">
+    
+    
+    <meta name="author" content="Nathan">
+    
+    <!-- Completely eliminate flash of wrong theme -->
+    <script>
+        (function() {
+            const THEME_KEY = "REDEFINE-THEME-STATUS";
+            const DARK = "dark", LIGHT = "light";
+            
+            // Get preferred theme
+            function getTheme() {
+                try {
+                    const saved = localStorage.getItem(THEME_KEY);
+                    if (saved) {
+                        const { isDark } = JSON.parse(saved);
+                        return isDark ? DARK : LIGHT;
+                    }
+                } catch (e) {}
+                
+                return matchMedia("(prefers-color-scheme: dark)").matches ? DARK : LIGHT;
+            }
+            
+            // Apply theme to document
+            function applyTheme(theme) {
+                const isDark = theme === DARK;
+                const root = document.documentElement;
+                
+                // Set classes for compatibility
+                root.classList.add(theme);
+                root.classList.remove(isDark ? LIGHT : DARK);
+                root.style.colorScheme = theme;
+            }
+            
+            // Initial application
+            const theme = getTheme();
+            applyTheme(theme);
+            
+            // Listen for system preference changes
+            matchMedia("(prefers-color-scheme: dark)").addEventListener("change", ({ matches }) => {
+                // Only update if using system preference (no localStorage entry)
+                if (!localStorage.getItem(THEME_KEY)) {
+                    applyTheme(matches ? DARK : LIGHT);
+                }
+            });
+            
+            // Set body classes ASAP (before DOMContentLoaded)
+            (function() {
+                const addBodyClass = () => {
+                    const b = document.body;
+                    if (!b) return false;
+                    b.classList.add(theme + "-mode");
+                    return true;
+                };
+
+                // Try immediately
+                if (addBodyClass()) return;
+
+                // Observe until body exists
+                const mo = new MutationObserver(() => {
+                    if (addBodyClass()) mo.disconnect();
+                });
+                mo.observe(document.documentElement, { childList: true, subtree: true });
+            })();
+        })();
+    </script>
+    
+    <!-- preconnect -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    
+    <!--- Seo Part-->
+    
+    <link rel="canonical" href="https://hydraxman.github.io/2026/08/03/cherry-studio-agent-loop-deep-dive/"/>
+    <meta name="robots" content="index,follow">
+    <meta name="googlebot" content="index,follow">
+    <meta name="revisit-after" content="1 days">
+    
+    
+        
+        <meta name="description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Cherry Studio Agent 架构深度拆解：Honeycomb、Pi Agent 与 CLI 封装的真相">
+<meta property="og:url" content="https://hydraxman.github.io/2026/08/03/cherry-studio-agent-loop-deep-dive/index.html">
+<meta property="og:site_name" content="内森淼文">
+<meta property="og:description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://hydraxman.github.io/images/redefine-og.webp">
+<meta property="article:published_time" content="2026-08-03T02:40:00.000Z">
+<meta property="article:modified_time" content="2026-08-04T21:16:09.286Z">
+<meta property="article:author" content="Nathan">
+<meta property="article:tag" content="源码分析">
+<meta property="article:tag" content="AI Agent">
+<meta property="article:tag" content="Agent Loop">
+<meta property="article:tag" content="Cherry Studio">
+<meta property="article:tag" content="Pi Agent">
+<meta property="article:tag" content="Claude Agent SDK">
+<meta property="article:tag" content="Vercel AI SDK">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://hydraxman.github.io/images/redefine-og.webp">
+    
+    
+    <!--- Icon Part-->
+    <link rel="icon" type="image/png" href="/images/favicon.svg" sizes="192x192">
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.svg">
+    <meta name="theme-color" content="#ffffff">
+    <link rel="shortcut icon" href="/images/favicon.svg">
+    <!--- Page Info-->
+    
+    <title>
+        
+            Cherry Studio Agent 架构深度拆解：Honeycomb、Pi Agent 与 CLI 封装的真相 | 内森淼文
+        
+    </title>
+
+    
+<link rel="stylesheet" href="/fonts/Chillax/chillax.css">
+
+
+    <!--- Inject Part-->
+    
+        
+            
+    
+            
+    
+            
+                
+                    <link rel="stylesheet" href="/css/custom.css">
+                
+    
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    
+        
+<link rel="stylesheet" href="/css/build/tailwind.css">
+
+    
+
+    
+<link rel="stylesheet" href="/fonts/GeistMono/geist-mono.css">
+
+    
+<link rel="stylesheet" href="/fonts/Geist/geist.css">
+
+    <!--- Font Part-->
+    
+    
+    
+    
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&display=swap" rel="stylesheet">
+    
+    
+
+    <script id="hexo-configurations">
+    window.config = {"hostname":"hydraxman.github.io","root":"/","language":"zh-CN","path":"search.json"};
+    window.theme = {"articles":{"style":{"font_size":"16px","line_height":1.5,"image_border_radius":"14px","image_alignment":"center","image_caption":false,"link_icon":true,"delete_mask":false,"title_alignment":"left","headings_top_spacing":{"h1":"3.2rem","h2":"2.4rem","h3":"1.9rem","h4":"1.6rem","h5":"1.4rem","h6":"1.3rem"}},"word_count":{"enable":true,"count":true,"min2read":true},"author_label":{"enable":false,"auto":false,"list":[]},"code_block":{"copy":true,"style":"mac","highlight_theme":{"light":"github","dark":"vs2015"},"font":{"enable":false,"family":null,"url":null}},"toc":{"enable":true,"max_depth":3,"number":false,"expand":true,"init_open":true},"copyright":{"enable":true,"default":"cc_by_nc_sa"},"lazyload":true,"pangu_js":false,"recommendation":{"enable":false,"title":"推荐阅读","limit":3,"mobile_limit":2,"placeholder":"/images/wallhaven-wqery6-light.webp","skip_dirs":[]}},"colors":{"primary":"#ffffff","secondary":null,"default_mode":"light"},"global":{"fonts":{"chinese":{"enable":false,"family":null,"url":null},"english":{"enable":true,"family":"Inter","url":"https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"},"title":{"enable":true,"family":"Noto Serif","url":"https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&display=swap"}},"content_max_width":"1000px","sidebar_width":"210px","hover":{"shadow":true,"scale":false},"scroll_progress":{"bar":true,"percentage":true},"website_counter":{"url":"https://cn.vercount.one/js","enable":false,"site_pv":true,"site_uv":true,"post_pv":true},"single_page":true,"preloader":{"enable":false,"custom_message":null},"side_tools":{"gear_rotation":true,"auto_expand":false},"open_graph":{"enable":true,"image":"/images/redefine-og.webp","description":"Hexo Theme Redefine, Redefine Your Hexo Journey."},"google_analytics":{"enable":false,"id":null}},"home_banner":{"enable":true,"style":"fixed","image":{"light":"/images/banner-light.jpg","dark":"/images/banner-dark.jpg"},"title":"内森淼文","subtitle":{"text":["AI · 编程 · 科技见闻","Write Code, Read World"],"hitokoto":{"enable":false,"show_author":false,"api":"https://v1.hitokoto.cn"},"typing_speed":100,"backing_speed":80,"starting_delay":500,"backing_delay":1500,"loop":true,"smart_backspace":true},"text_color":{"light":"#fff","dark":"#d1d1b6"},"text_style":{"title_size":"2.8rem","subtitle_size":"1.5rem","line_height":1.2},"custom_font":{"enable":false,"family":null,"url":null},"social_links":{"enable":true,"style":"default","links":[{"icon":"fa-brands fa-github","url":"https://github.com/hydraxman"}],"qrs":[{"icon":"fa-brands fa-weixin","qr":null},{"icon":"/images/custom-icon.svg","qr":null}]}},"plugins":{"feed":{"enable":false},"aplayer":{"enable":false,"type":"fixed","audios":[{"name":null,"artist":null,"url":null,"cover":null,"lrc":null}]},"mermaid":{"enable":false,"version":"11.4.1","theme":{"light":"default","dark":"dark"}}},"version":"2.9.0","navbar":{"auto_hide":false,"color":{"left":"#333333","right":"#555555","transparency":35},"width":{"home":"1200px","pages":"1000px"},"links":{"Home":{"path":"/","icon":"fa-regular fa-house"},"Archives":{"path":"/archives","icon":"fa-regular fa-archive"},"Categories":{"path":"/categories","icon":"fa-regular fa-folder"},"Tags":{"path":"/tags","icon":"fa-regular fa-tags"},"About":{"path":"/about","icon":"fa-regular fa-user"}},"search":{"enable":true,"preload":true}},"page_templates":{"friends_column":2,"tags_style":"blur","masonry":{"batch_size":12,"initial_batch_size":24}},"home":{"sidebar":{"enable":true,"position":"left","first_item":"menu","announcement":"AI · 编程 · 科技","show_on_mobile":true,"links":{"Archives":{"path":"/archives","icon":"fa-regular fa-archive"},"Tags":{"path":"/tags","icon":"fa-regular fa-tags"},"Categories":{"path":"/categories","icon":"fa-regular fa-folder"}}},"article_date_format":"auto","excerpt_length":200,"categories":{"enable":true,"limit":3},"tags":{"enable":true,"limit":3}},"footer":{"runtime":true,"icon":"<i class=\"fa-solid fa-heart fa-beat\" style=\"--fa-animation-duration: 0.5s; color: #333\"></i>","start":"2024/01/01 00:00:00","statistics":true,"customize":null,"icp":{"enable":false,"number":null,"url":null}},"footerStart":"2024/01/01 00:00:00","mermaid":{"style":{"light":"default","dark":"dark"}}};
+    window.lang_ago = {"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"};
+    window.i18n = {"search":"站内搜索您需要的内容...","toc":"目录","prev":"上一页","next":"下一页","prev_posts":"上一篇","next_posts":"下一篇","page":"第 %d 页","recent_posts":"最新文章","share":"分享","powered_by":"由 %s 驱动","theme":"主题","rss_feed":"RSS Feed","category":"分类","categories":"分类","tag":"标签","tags":"标签","post":"文章","posts":"文章","tagcloud":"标签云","comment":"评论","comments":"评论","top":"置顶","sticky":"置顶","go-back-home":"回到首页","masonry_loading":"照片加载中...","image_viewer":"图片查看器","close":"关闭","exif":{"title":"EXIF","cards":{"camera":"相机","lens":"镜头","exposure":"曝光","other":"其他"},"fields":{"make":"品牌","model":"机型","date_taken":"拍摄时间","lens_model":"镜头","focal_length":"焦距","focus_mode":"对焦模式","shutter":"快门","aperture":"光圈","iso":"感光度","exposure_program":"曝光程序","exposure_compensation":"曝光补偿","metering_mode":"测光模式","flash":"闪光灯","white_balance":"白平衡","latitude":"纬度","longitude":"经度","altitude":"海拔"},"status":{"loading":"加载中...","no_exif":"无 EXIF 信息","library_missing":"EXIF 库未加载","image_source_missing":"图片地址不可用","unavailable":"EXIF 不可用（可能被 CORS 阻止或缺少元数据）","flag_unavailable":"EXIF 不可用"}},"home":"首页","archive":"归档","archives":"归档","about":"关于","links":"链接","link":"链接","friends":"友情链接","friend":"友情链接","timeline":"时间轴","shuoshuo":"说说","bookmarks":"书签","site_uv":"访问人数","site_pv":"总访问量","read_more":"阅读全文","wordcount":"字","min2read":"分钟","changelog":"更新日志","status":"状态","runtime":"博客已运行","days":"天","hours":"小时","minutes":"分钟","seconds":"秒","optimized_by":"并由 Evan 进行优化","rights":"版权所有","site_posts":"共撰写了 %s 篇文章","site_wordcount":"共 %s 字","copyright":{"title":"标题","author":"作者","link":"链接","create_time":"创建于","update_time":"更新于","license_title":"版权声明","license_content":"本文章采用 %s 进行许可。","all_rights_reserved":"版权所有 &#169 %s，禁止转载。","public_domain":"本文为公有领域作品，可自由转载、引用。"},"ago":{"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"},"create_time":"创建","update_time":"更新","expired":"这篇文章最后更新于 %s 天前，内容可能已经过时。"};
+    window.data = {"masonry":false};
+  </script>
+    
+    <!--- Fontawesome Part-->
+    
+<link rel="stylesheet" href="/fontawesome/fontawesome.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/brands.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/solid.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/regular.min.css">
+
+    
+    
+    
+    
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+	<div class="progress-bar-container">
+	
+	<span class="scroll-progress-bar"></span>
+	
+
+	
+	<span class="pjax-progress-bar"></span>
+	<!--        <span class="swup-progress-icon">-->
+	<!--            <i class="fa-solid fa-circle-notch fa-spin"></i>-->
+	<!--        </span>-->
+	
+</div>
+
+<main class="page-container" id="swup">
+
+	
+
+	<div class="main-content-container flex flex-col justify-between min-h-dvh">
+		<div class="main-content-header">
+			<header class="navbar-container px-6 md:px-12">
+    <div class="navbar-content transition-navbar ">
+        <div class="left">
+            
+            <a class="logo-title" href="/">
+                
+                内森淼文
+                
+            </a>
+        </div>
+
+        <div class="right">
+            <!-- PC -->
+            <div class="desktop">
+                <ul class="navbar-list">
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/"
+                                        >
+                                    <i class="fa-regular fa-house fa-fw"></i>
+                                    首页
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/archives"
+                                        >
+                                    <i class="fa-regular fa-archive fa-fw"></i>
+                                    归档
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/categories"
+                                        >
+                                    <i class="fa-regular fa-folder fa-fw"></i>
+                                    分类
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/tags"
+                                        >
+                                    <i class="fa-regular fa-tags fa-fw"></i>
+                                    标签
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/about"
+                                        >
+                                    <i class="fa-regular fa-user fa-fw"></i>
+                                    关于
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                    
+                        <li class="navbar-item search search-popup-trigger">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </li>
+                    
+                </ul>
+            </div>
+            <!-- Mobile -->
+            <div class="mobile">
+                
+                    <div class="icon-item search search-popup-trigger"><i class="fa-solid fa-magnifying-glass"></i>
+                    </div>
+                
+                <div class="icon-item navbar-bar">
+                    <div class="navbar-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile sheet -->
+    <div class="navbar-drawer h-dvh w-full absolute top-0 left-0 bg-background-color flex flex-col justify-between">
+        <ul class="drawer-navbar-list flex flex-col px-4 justify-center items-start">
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/"
+                        >
+                            <span>
+                                首页
+                            </span>
+                            
+                                <i class="fa-regular fa-house fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/archives"
+                        >
+                            <span>
+                                归档
+                            </span>
+                            
+                                <i class="fa-regular fa-archive fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/categories"
+                        >
+                            <span>
+                                分类
+                            </span>
+                            
+                                <i class="fa-regular fa-folder fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/tags"
+                        >
+                            <span>
+                                标签
+                            </span>
+                            
+                                <i class="fa-regular fa-tags fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/about"
+                        >
+                            <span>
+                                关于
+                            </span>
+                            
+                                <i class="fa-regular fa-user fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+
+            
+            
+                
+                    
+                    
+                    
+            
+        </ul>
+
+        <div class="statistics flex justify-around my-2.5">
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/tags">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">368</div>
+        <div class="label text-third-text-color text-sm">标签</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/categories">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">10</div>
+        <div class="label text-third-text-color text-sm">分类</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/archives">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">322</div>
+        <div class="label text-third-text-color text-sm">文章</div>
+    </a>
+</div>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+		</div>
+
+		<div class="main-content-body transition-fade-up">
+			
+
+			<div class="main-content">
+				<div class="post-page-container flex relative justify-between box-border w-full h-full">
+	<div class="article-content-container">
+
+		<div class="article-title relative w-full">
+			
+			
+			
+			<img src="/images/cherry-studio-agent-loop/mermaid-1.jpg" alt="Cherry Studio Agent 架构深度拆解：Honeycomb、Pi Agent 与 CLI 封装的真相" class="w-full h-60 sm:h-72 md:h-80 object-cover sm:rounded-t-large dark:brightness-75" />
+			
+			<div class="w-full flex items-center absolute bottom-0 justify-start">
+				<h1 class="article-title-cover text-center mx-6 my-6 text-second-text-color bg-background-color-transparent px-4 py-3 text-3xl sm:text-4xl md:text-5xl font-semibold backdrop-blur-lg rounded-xl border border-border-color ">Cherry Studio Agent 架构深度拆解：Honeycomb、Pi Agent 与 CLI 封装的真相</h1>
+			</div>
+			
+		</div>
+
+		
+		<div class="article-header flex flex-row gap-2 items-center px-2 sm:px-6 md:px-8">
+			<div class="avatar w-[46px] h-[46px] shrink-0 rounded-medium border border-border-color p-px">
+				<img src="/images/avatar.png">
+			</div>
+			<div class="info flex flex-col justify-between">
+				<div class="author flex items-center">
+					<span class="name text-default-text-color text-lg font-semibold">Nathan</span>
+					
+				</div>
+				<div class="meta-info">
+					<div class="article-meta-info">
+    <span class="article-date article-meta-item">
+        <i class="fa-regular fa-pen-fancy"></i>&nbsp;
+        <span class="desktop">2026-08-03 10:40</span>
+        <span class="mobile">2026-08-03 10:40</span>
+        <span class="hover-info">创建</span>
+    </span>
+    
+        <span class="article-date article-meta-item">
+            <i class="fa-regular fa-wrench"></i>&nbsp;
+            <span class="desktop">2026-08-05 05:16:09</span>
+            <span class="mobile">2026-08-05 05:16:09</span>
+            <span class="hover-info">更新</span>
+        </span>
+    
+
+    
+        <span class="article-categories article-meta-item">
+            <i class="fa-regular fa-folders"></i>&nbsp;
+            <ul>
+                
+                
+                    
+                        
+                        <li>
+                            <a href="/categories/%E6%B7%B1%E5%BA%A6%E5%88%86%E6%9E%90/">深度分析</a>&nbsp;
+                        </li>
+                    
+                    
+                
+            </ul>
+        </span>
+    
+    
+        <span class="article-tags article-meta-item">
+            <i class="fa-regular fa-tags"></i>&nbsp;
+            <ul>
+                
+                    <li>
+                        <a href="/tags/%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/">源码分析</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/AI-Agent/">AI Agent</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/Agent-Loop/">Agent Loop</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/Cherry-Studio/">Cherry Studio</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/Pi-Agent/">Pi Agent</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/Claude-Agent-SDK/">Claude Agent SDK</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/Vercel-AI-SDK/">Vercel AI SDK</a>&nbsp;
+                    </li>
+                
+            </ul>
+        </span>
+    
+
+    
+    
+        <span class="article-wordcount article-meta-item">
+            <i class="fa-regular fa-typewriter"></i>&nbsp;<span>4.9k 字</span>
+        </span>
+    
+    
+        <span class="article-min2read article-meta-item">
+            <i class="fa-regular fa-clock"></i>&nbsp;<span>19 分钟</span>
+        </span>
+    
+    
+</div>
+
+				</div>
+			</div>
+		</div>
+		
+
+		
+
+
+		<div class="article-content markdown-body px-2 sm:px-6 md:px-8 pb-8">
+			<p>Cherry Studio 常被概括成“一个能接很多模型、很多 CLI 的桌面客户端”。这个概括不算错，但远远不够。</p>
+<p>如果只看它的 <strong>Code Tools</strong> 页面，你会觉得它确实是在启动 Claude Code、Codex、Gemini CLI、Qwen Code；如果只看 <strong>Agent</strong> 页面，又会看到 Claude Agent SDK；如果继续往主进程深挖，则会发现另一套基于 Vercel AI SDK <code>ToolLoopAgent</code> 的通用 Agent Loop，以及 Cherry 自己实现的流管理、审批、持久化、Skills、MCP、Channel 和 OpenTelemetry Trace。</p>
+<p>这也造成了几个很容易混淆的问题：</p>
+<ol>
+<li>Cherry Studio 的 Agent Loop 是不是一个叫 <strong>Honeycomb</strong> 的框架？</li>
+<li>它是不是基于 <strong>Pi Agent</strong>？</li>
+<li>Agent Loop 是 Cherry 自己写的，还是第三方库提供的？</li>
+<li>Cherry Studio 是否只是给 Claude Code、Codex、Gemini CLI 等产品套了一个 GUI？</li>
+</ol>
+<p>本文基于以下公开快照进行分析：</p>
+<ul>
+<li>官方仓库：<a class="link"   target="_blank" rel="noopener" href="https://github.com/CherryHQ/cherry-studio" >CherryHQ&#x2F;cherry-studio<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li>源码快照：<code>bef6609d7e52c0379911271ff7a603d436a0913e</code></li>
+<li>稳定版：<a class="link"   target="_blank" rel="noopener" href="https://github.com/CherryHQ/cherry-studio/releases/tag/v1.9.12" >v1.9.12<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li>预发布版：<a class="link"   target="_blank" rel="noopener" href="https://github.com/CherryHQ/cherry-studio/releases/tag/v2.0.0-rc.3" >v2.0.0-rc.3<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li>Pi Runtime PR：<a class="link"   target="_blank" rel="noopener" href="https://github.com/CherryHQ/cherry-studio/pull/16630" >PR #16630<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li>AI SDK Agent Session PR：<a class="link"   target="_blank" rel="noopener" href="https://github.com/CherryHQ/cherry-studio/pull/17100" >PR #17100<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+</ul>
+<blockquote>
+<p>数据快照日期为 2026 年 8 月 3 日。Stars、PR 状态和分支内容会继续变化。</p>
+</blockquote>
+<h2 id="项目全貌：它首先是一个桌面-AI-工作台"><a href="#项目全貌：它首先是一个桌面-AI-工作台" class="headerlink" title="项目全貌：它首先是一个桌面 AI 工作台"></a>项目全貌：它首先是一个桌面 AI 工作台</h2><p>截至本次快照，官方仓库约有 <strong>49,303 Stars、4,691 Forks</strong>，采用 <strong>AGPL-3.0</strong>。稳定发布线为 <code>v1.9.12</code>，同时已发布 <code>v2.0.0-rc.3</code> 预览下一代架构；因此阅读源码时必须区分稳定版、RC、当前 <code>main</code> 和尚未合并的实验 PR。</p>
+<p>技术栈以 TypeScript 为主，桌面壳是 <strong>Electron 41</strong>，Renderer 使用 <strong>React 19</strong> 与 Tailwind CSS 4；v2 主进程数据层大量使用 <strong>SQLite（better-sqlite3）+ Drizzle ORM</strong>。AI 层则由 <code>@cherrystudio/ai-core</code>、Vercel AI SDK Provider、Claude Agent SDK、MCP Runtime 和自研 Provider Registry 组成。</p>
+<p>从产品能力看，它已经超出“聊天客户端”：</p>
+<ul>
+<li>多 Provider 与本地模型统一接入；</li>
+<li>300+ Assistant 预设和多模型并行对话；</li>
+<li>文件、PDF、Office、知识库、翻译与绘图；</li>
+<li>MCP、Skills、工具审批和工作区；</li>
+<li>Agent Channel、定时任务和自主模式；</li>
+<li>Code CLI 的下载、配置、启动与统一 Gateway；</li>
+<li>本地 Trace Viewer、Token&#x2F;Usage 统计和开发者诊断；</li>
+<li>Windows、macOS、Linux 三端发行。</li>
+</ul>
+<p>这决定了评判 Cherry Studio 时，不能只问“底层 Loop 是谁写的”，还要看它如何把模型、数据、文件、权限和桌面交互组织成一个完整产品。</p>
+<h2 id="先给结论"><a href="#先给结论" class="headerlink" title="先给结论"></a>先给结论</h2><h3 id="结论一：公开源码中不存在“Cherry-Honeycomb-Agent-框架”"><a href="#结论一：公开源码中不存在“Cherry-Honeycomb-Agent-框架”" class="headerlink" title="结论一：公开源码中不存在“Cherry Honeycomb Agent 框架”"></a>结论一：公开源码中不存在“Cherry Honeycomb Agent 框架”</h3><p>我检索了当前 <code>main</code>、<code>v1</code>、Pi Runtime 分支、包依赖、Issues 和官方文档，没有发现名为 <code>Honeycomb</code>、<code>honeycomb</code> 或“蜂巢”的 Agent Loop 实现。</p>
+<p>Cherry 官方仓库里与 Honeycomb 唯一直接相关的讨论是 <a class="link"   target="_blank" rel="noopener" href="https://github.com/CherryHQ/cherry-studio/issues/9763" >Issue #9763<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a>：用户观察到 <code>api.honeycomb.io</code> 的 OpenTelemetry 请求。维护者明确表示 Cherry 代码里没有这个域名，后续数据也显示请求来自嵌入页面中的 <code>claude.ai</code> 浏览器遥测。它讨论的是 <strong>Honeycomb.io 可观测平台</strong>，不是 Agent 框架。</p>
+<p>因此，除非“Honeycomb”是尚未公开的内部代号，否则从公开证据看：</p>
+<blockquote>
+<p><strong>Cherry Studio 没有一个名为 Honeycomb 的底层 Agent Loop。把 Honeycomb 说成 Cherry 的 Agent 框架，没有源码依据。</strong></p>
+</blockquote>
+<h3 id="结论二：当前发布架构不是基于-Pi-Agent"><a href="#结论二：当前发布架构不是基于-Pi-Agent" class="headerlink" title="结论二：当前发布架构不是基于 Pi Agent"></a>结论二：当前发布架构不是基于 Pi Agent</h3><p>当前 <code>main</code> 的运行时注册代码只注册了一个 Agent Session Driver：</p>
+<div class="code-container" data-rel="Ts"><figure class="iseeu highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> <span class="keyword">function</span> <span class="title function_">registerRuntimeDrivers</span>(<span class="params"></span>): <span class="built_in">void</span> &#123;</span><br><span class="line">  runtimeDriverRegistry.<span class="title function_">register</span>(<span class="keyword">new</span> <span class="title class_">ClaudeCodeRuntimeDriver</span>())</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></div>
+
+<p>源码：<a class="link"   target="_blank" rel="noopener" href="https://github.com/CherryHQ/cherry-studio/blob/bef6609d7e52c0379911271ff7a603d436a0913e/src/main/ai/runtime/registerDrivers.ts#L1-L14" >registerDrivers.ts<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></p>
+<p>Pi Agent 支持存在于仍未合并的 <a class="link"   target="_blank" rel="noopener" href="https://github.com/CherryHQ/cherry-studio/pull/16630" >PR #16630<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a>。该 PR 在调研时仍为 Open，且与 <code>main</code> 存在冲突。因此，Pi 是<strong>正在研发的第二运行时</strong>，不是当前发布版已经使用的统一底座。</p>
+<h3 id="结论三：Agent-Loop-不是“全自研”，也不是“零自研”"><a href="#结论三：Agent-Loop-不是“全自研”，也不是“零自研”" class="headerlink" title="结论三：Agent Loop 不是“全自研”，也不是“零自研”"></a>结论三：Agent Loop 不是“全自研”，也不是“零自研”</h3><p>最准确的说法是：</p>
+<blockquote>
+<p><strong>Cherry 自研 Agent 宿主与编排层，外部 SDK 提供具体循环执行内核。</strong></p>
+</blockquote>
+<p>在通用聊天路径中，Cherry 的 <code>Agent</code> 类负责参数组装、Hook 合成、工具包装、流转换、错误和终止状态分类，但真正反复执行“模型 → 工具 → 模型”的循环是 Vercel AI SDK 的 <code>ToolLoopAgent</code>。</p>
+<p>在 Agent Session 路径中，Cherry 自己管理会话、持久化、Steering、审批、恢复和 Trace，但当前具体 Agent 内核来自 Anthropic Claude Agent SDK。</p>
+<h3 id="结论四：Cherry-Studio-不只是-CLI-封装，但-Code-Tools-这一层确实主要是-CLI-封装"><a href="#结论四：Cherry-Studio-不只是-CLI-封装，但-Code-Tools-这一层确实主要是-CLI-封装" class="headerlink" title="结论四：Cherry Studio 不只是 CLI 封装，但 Code Tools 这一层确实主要是 CLI 封装"></a>结论四：Cherry Studio 不只是 CLI 封装，但 Code Tools 这一层确实主要是 CLI 封装</h3><ul>
+<li><strong>Code Tools</strong>：主要负责安装、配置并在终端启动外部 CLI。</li>
+<li><strong>Agent Session</strong>：不是简单启动命令，而是 Cherry 宿主对 Claude Agent SDK 生命周期的深度集成。</li>
+<li><strong>普通对话与通用工具调用</strong>：走 Cherry 的 AI Core 与 Vercel AI SDK，不依赖各家 CLI。</li>
+<li><strong>跨运行时能力</strong>：消息持久化、审批、工具目录、MCP、Skills、Channel、定时任务、Trace 和 Provider Gateway 都由 Cherry 自己提供。</li>
+</ul>
+<p>所以，“Cherry Studio 只是各家 CLI 的壳”这个判断，只适用于它的一块功能，不适用于整个系统。</p>
+<h2 id="一张图看懂-Cherry-Studio-的三条执行路径"><a href="#一张图看懂-Cherry-Studio-的三条执行路径" class="headerlink" title="一张图看懂 Cherry Studio 的三条执行路径"></a>一张图看懂 Cherry Studio 的三条执行路径</h2><p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/cherry-studio-agent-loop/mermaid-1.jpg"
+                      alt="mermaid-1"
+                ></p>
+<p>这张图最重要的地方，是把“入口”“宿主”和“执行内核”分开了。Cherry Studio 并不是只有一条 Agent 路径，因此不能拿某一个入口的实现代表整个项目。</p>
+<h2 id="第一层：通用-Agent-Loop-到底怎么跑"><a href="#第一层：通用-Agent-Loop-到底怎么跑" class="headerlink" title="第一层：通用 Agent Loop 到底怎么跑"></a>第一层：通用 Agent Loop 到底怎么跑</h2><p>Cherry 的通用 Loop 入口是：</p>
+<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">src/main/ai/runtime/aiSdk/Agent.ts</span><br></pre></td></tr></table></figure></div>
+
+<p>它在 <code>buildAiSdkAgent()</code> 中调用 <code>@cherrystudio/ai-core</code> 的 <code>createAgent()</code>：</p>
+<div class="code-container" data-rel="Ts"><figure class="iseeu highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">return</span> <span class="title function_">createAgent</span>(&#123;</span><br><span class="line">  providerId,</span><br><span class="line">  providerSettings,</span><br><span class="line">  modelId,</span><br><span class="line">  <span class="attr">tools</span>: toolsWithHooks,</span><br><span class="line">  <span class="attr">instructions</span>: system,</span><br><span class="line">  stopWhen,</span><br><span class="line">  prepareStep,</span><br><span class="line">  onStepFinish</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure></div>
+
+<p>而 <code>@cherrystudio/ai-core</code> 的 <code>createAgent()</code> 最终非常直接。当前源码快照使用的 Vercel AI SDK 版本为 <strong>6.0.143</strong>：</p>
+<div class="code-container" data-rel="Ts"><figure class="iseeu highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">ToolLoopAgent</span>(&#123;</span><br><span class="line">  ...agentSettings,</span><br><span class="line">  <span class="attr">model</span>: resolvedModel</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure></div>
+
+<p>源码证据：</p>
+<ul>
+<li><a class="link"   target="_blank" rel="noopener" href="https://github.com/CherryHQ/cherry-studio/blob/bef6609d7e52c0379911271ff7a603d436a0913e/src/main/ai/runtime/aiSdk/Agent.ts#L62-L103" >Agent.ts：Cherry 包装层<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://github.com/CherryHQ/cherry-studio/blob/bef6609d7e52c0379911271ff7a603d436a0913e/packages/aiCore/src/core/agents/createAgent.ts#L24-L45" >createAgent.ts：构造 Vercel ToolLoopAgent<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+</ul>
+<p>从历史看，这套主进程 AI Runtime 最初通过提交 <a class="link"   target="_blank" rel="noopener" href="https://github.com/CherryHQ/cherry-studio/commit/5706307451648bd3a169bff04e27bdcd45e98c78" >5706307<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a> 进入主线；之后提交 <a class="link"   target="_blank" rel="noopener" href="https://github.com/CherryHQ/cherry-studio/commit/b0a7e88445812e28e0148ef812591d849dda14ad" >b0a7e88<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a> 又补强了终止工具失败的错误语义。这也说明它是 Cherry v2 重构形成的通用运行层，不是从 Pi 分支移植而来。</p>
+<p>这给出了一个非常清晰的责任边界：</p>
+<table>
+<thead>
+<tr>
+<th>层次</th>
+<th>谁负责</th>
+<th>主要职责</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Provider 解析</td>
+<td>Cherry AI Core</td>
+<td>根据 Provider、Endpoint、模型和插件选择实际 Language Model</td>
+</tr>
+<tr>
+<td>Agent 参数与策略</td>
+<td>Cherry <code>Agent</code></td>
+<td>System Prompt、Tools、Stop 条件、Hooks、遥测参数</td>
+</tr>
+<tr>
+<td>多步工具循环</td>
+<td>Vercel AI SDK</td>
+<td><code>ToolLoopAgent</code> 执行模型调用、工具调用、结果回灌和下一 Step</td>
+</tr>
+<tr>
+<td>UI Stream 转换</td>
+<td>Cherry <code>Agent</code></td>
+<td>转成 <code>UIMessageChunk</code>，稳定 Message ID，保留错误信息</td>
+</tr>
+<tr>
+<td>终止与持久化</td>
+<td>Cherry</td>
+<td>判断成功、Abort、工具终止、步数上限，并写入会话</td>
+</tr>
+</tbody></table>
+<h3 id="“single-pass”不等于“只调用模型一次”"><a href="#“single-pass”不等于“只调用模型一次”" class="headerlink" title="“single-pass”不等于“只调用模型一次”"></a>“single-pass”不等于“只调用模型一次”</h3><p>Cherry 官方文档把 <code>Agent.stream()</code> 称为 <strong>single-pass</strong>。这很容易被误读。</p>
+<p>它的意思不是模型只执行一步，而是 Cherry 对 <code>aiAgent.stream()</code> 只发起一次调用，不在流中途自己插入新用户消息。至于这一次调用内部经历多少次“模型 → 工具 → 模型”，由 <code>ToolLoopAgent</code> 和 <code>stopWhen</code> 决定。</p>
+<p>换句话说：</p>
+<ul>
+<li>Cherry 外层：一次 Stream 调用；</li>
+<li>AI SDK 内层：多 Step Tool Loop；</li>
+<li>用户中途追加消息：由更上层的 <code>AiStreamManager</code> 在 Step 边界让出，再启动 continuation，而不是修改正在运行的历史。</li>
+</ul>
+<h2 id="Cherry-在-ToolLoopAgent-外面自己做了什么"><a href="#Cherry-在-ToolLoopAgent-外面自己做了什么" class="headerlink" title="Cherry 在 ToolLoopAgent 外面自己做了什么"></a>Cherry 在 ToolLoopAgent 外面自己做了什么</h2><p>如果 Cherry 只是简单调用 <code>new ToolLoopAgent()</code>，确实可以称为薄包装。但实际的 <code>Agent.ts</code> 做了不少关键工作。</p>
+<h3 id="1-Hook-合成"><a href="#1-Hook-合成" class="headerlink" title="1. Hook 合成"></a>1. Hook 合成</h3><p>Cherry 将三类 Hook 合并成确定顺序：</p>
+<ol>
+<li>内部 Observer，例如 Token Usage；</li>
+<li>Feature 注入的 Hook；</li>
+<li>调用者 Hook，例如分析统计。</li>
+</ol>
+<p><code>onStart</code>、<code>onStepFinish</code>、<code>onToolExecutionStart/End</code>、<code>onFinish</code> 等按顺序串行执行；单个 Hook 出错会记录但不阻断后续 Hook。<code>prepareStep</code> 则会把前一个 Hook 的输出继续传给下一个。</p>
+<h3 id="2-工具执行包装"><a href="#2-工具执行包装" class="headerlink" title="2. 工具执行包装"></a>2. 工具执行包装</h3><p>AI SDK v6 没有完整包围单个工具 <code>execute</code> 的生命周期事件，因此 Cherry 自己包了一层工具执行器，记录：</p>
+<ul>
+<li>Tool Call ID；</li>
+<li>Tool Name；</li>
+<li>Input；</li>
+<li>开始和结束事件；</li>
+<li>实际执行耗时；</li>
+<li>Tool Output。</li>
+</ul>
+<p>这不是重写 Agent Loop，但属于重要的宿主增强。</p>
+<h3 id="3-终止状态分类"><a href="#3-终止状态分类" class="headerlink" title="3. 终止状态分类"></a>3. 终止状态分类</h3><p>Cherry 不直接相信流里的 <code>finish</code> 就代表成功，而是先保留 Finish Chunk，再检查：</p>
+<ul>
+<li>是否 Abort；</li>
+<li>是否命中 Step Cap；</li>
+<li>是否出现可信的本地工具终止失败；</li>
+<li>是否是 Provider 或工具输入错误。</li>
+</ul>
+<p>只有分类完成后，才提交成功状态并持久化。这避免 UI 短暂显示成功、随后又变成失败。</p>
+<h3 id="4-一个尚未完成的地方：Retry"><a href="#4-一个尚未完成的地方：Retry" class="headerlink" title="4. 一个尚未完成的地方：Retry"></a>4. 一个尚未完成的地方：Retry</h3><p><code>onError</code> 已允许 Hook 返回 <code>retry</code>，但当前代码明确写着：</p>
+<div class="code-container" data-rel="Ts"><figure class="iseeu highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// retry is reserved for a future implementation</span></span><br></pre></td></tr></table></figure></div>
+
+<p>也就是说，Cherry 已预留重试策略接口，但通用 Agent Loop 目前仍会记录后终止，而不会真的重新执行。</p>
+<h2 id="通用-Loop-的完整时序"><a href="#通用-Loop-的完整时序" class="headerlink" title="通用 Loop 的完整时序"></a>通用 Loop 的完整时序</h2><p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/cherry-studio-agent-loop/mermaid-2.jpg"
+                      alt="mermaid-2"
+                ></p>
+<h2 id="第二层：Agent-Session-为什么不是普通-CLI-启动器"><a href="#第二层：Agent-Session-为什么不是普通-CLI-启动器" class="headerlink" title="第二层：Agent Session 为什么不是普通 CLI 启动器"></a>第二层：Agent Session 为什么不是普通 CLI 启动器</h2><p>Agent 页面走的是另一套路径。它的核心抽象是：</p>
+<ul>
+<li><code>AgentSessionRuntimeService</code>：Cherry 的宿主；</li>
+<li><code>AgentSessionRuntimeDriver</code>：具体执行内核的适配接口；</li>
+<li><code>AgentRuntimeConnection</code>：一个可发送、可重定向、可恢复的运行连接；</li>
+<li><code>AgentRuntimeEvent</code>：统一事件流。</li>
+</ul>
+<p>Driver 接口不关心底层是：</p>
+<ul>
+<li>长驻子进程；</li>
+<li>WebSocket；</li>
+<li>每轮一次 HTTP；</li>
+<li>Claude Agent SDK 的 <code>query()</code>；</li>
+<li>未来的 Pi Session。</li>
+</ul>
+<p>Cherry 自己维护的宿主状态包括：</p>
+<ul>
+<li>当前 Turn 和待处理 Turn；</li>
+<li>Assistant 占位消息；</li>
+<li>Resume Token；</li>
+<li>Steering 队列；</li>
+<li>Tool Approval；</li>
+<li>Context Usage；</li>
+<li>Compaction 状态；</li>
+<li>Background Task；</li>
+<li>持久化 Listener；</li>
+<li>Idle Timer 和连接重用。</li>
+</ul>
+<p>源码：<a class="link"   target="_blank" rel="noopener" href="https://github.com/CherryHQ/cherry-studio/blob/bef6609d7e52c0379911271ff7a603d436a0913e/src/main/ai/runtime/types.ts#L41-L242" >runtime&#x2F;types.ts<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></p>
+<p>这就是为什么不能把 Agent Session 简化为“执行一条 <code>claude</code> 命令”。Cherry 没有重写 Claude 的推理循环，但它实现了一套相当完整的 <strong>Agent Host Protocol</strong>。</p>
+<h3 id="当前-Driver：Claude-Agent-SDK"><a href="#当前-Driver：Claude-Agent-SDK" class="headerlink" title="当前 Driver：Claude Agent SDK"></a>当前 Driver：Claude Agent SDK</h3><p><code>ClaudeCodeRuntimeDriver</code> 直接导入：</p>
+<div class="code-container" data-rel="Ts"><figure class="iseeu highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; query <span class="keyword">as</span> createClaudeQuery &#125; <span class="keyword">from</span> <span class="string">&#x27;@anthropic-ai/claude-agent-sdk&#x27;</span></span><br></pre></td></tr></table></figure></div>
+
+<p>它负责把 Cherry 会话变成 Claude SDK Query，并把 SDK 事件转换为统一 Runtime Event：</p>
+<ul>
+<li>SDK Assistant&#x2F;User&#x2F;Stream Event → UI Chunk；</li>
+<li><code>system/init</code> → Resume Token；</li>
+<li><code>result</code> → Usage、Context Usage、Turn Complete；</li>
+<li><code>PreToolUse</code> → 中途 Steering 边界；</li>
+<li>Compact 事件 → Compaction Start&#x2F;Complete&#x2F;Error；</li>
+<li>Tool Hook → Trace Span 和耗时；</li>
+<li>SDK Error → 统一 Error Event。</li>
+</ul>
+<p>因此，Claude 模型如何进行多轮工具推理，主要由 Claude Agent SDK 决定；但会话如何落盘、UI 如何续接、用户如何审批、Steer 如何排序、Trace 如何归档，则是 Cherry 的职责。</p>
+<h2 id="Pi-Agent：是不是-Cherry-的底层？"><a href="#Pi-Agent：是不是-Cherry-的底层？" class="headerlink" title="Pi Agent：是不是 Cherry 的底层？"></a>Pi Agent：是不是 Cherry 的底层？</h2><p>截至快照时间，答案是：<strong>不是当前底层，是待合并的第二 Driver。</strong></p>
+<p><a class="link"   target="_blank" rel="noopener" href="https://github.com/CherryHQ/cherry-studio/pull/16630" >PR #16630<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a> 的目标，是把 Pi 作为 <code>claude-code</code> 之外的第二个 Agent Session Runtime。它选择的是 <strong>in-process SDK</strong>，不是 RPC 子进程。</p>
+<p>PR 分支依赖：</p>
+<ul>
+<li><code>@earendil-works/pi-coding-agent@0.80.3</code></li>
+<li><code>@earendil-works/pi-ai@0.80.3</code></li>
+<li>间接使用 <code>@earendil-works/pi-agent-core@0.80.3</code></li>
+</ul>
+<p>这里需要澄清包名：早期 Pi npm 包使用 <code>@mariozechner/pi-*</code>，仓库元数据指向 <code>badlogic/pi-mono</code>；2026 年 5 月 7 日，项目正式迁入 Earendil，当前 GitHub 旧地址已重定向到 <code>earendil-works/pi</code>，新包使用 <code>@earendil-works/pi-*</code>。它是 Pi 项目的迁移与新命名，不应误判为无关项目。官方说明见：<a class="link"   target="_blank" rel="noopener" href="https://pi.dev/news/2026/5/7/pi-has-a-new-home" >Pi Has a New Home at Earendil<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a>。</p>
+<h3 id="如果-Pi-PR-合并，谁负责什么"><a href="#如果-Pi-PR-合并，谁负责什么" class="headerlink" title="如果 Pi PR 合并，谁负责什么"></a>如果 Pi PR 合并，谁负责什么</h3><table>
+<thead>
+<tr>
+<th>能力</th>
+<th align="right">Pi SDK</th>
+<th align="right">Cherry Studio</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Agent 原生循环与 Session</td>
+<td align="right">✅</td>
+<td align="right">适配</td>
+</tr>
+<tr>
+<td>Pi 内置文件、Bash、编辑工具</td>
+<td align="right">✅</td>
+<td align="right">选择、展示和策略</td>
+</tr>
+<tr>
+<td>模型 Provider&#x2F;Key</td>
+<td align="right">接收注入</td>
+<td align="right">✅ 从 Cherry 配置注入内存 Registry</td>
+</tr>
+<tr>
+<td>Tool Approval</td>
+<td align="right">提供事件</td>
+<td align="right">✅ 自己实现 Permission Mode 与审批桥</td>
+</tr>
+<tr>
+<td>Skills</td>
+<td align="right">Pi Resource Loader</td>
+<td align="right">✅ 只注入 Cherry 管理的 Skill 路径</td>
+</tr>
+<tr>
+<td>MCP</td>
+<td align="right">Pi 无原生客户端</td>
+<td align="right">✅ 转为 Pi Custom Tools 并代理调用</td>
+</tr>
+<tr>
+<td>Soul&#x2F;自主工具</td>
+<td align="right">执行 Custom Tools</td>
+<td align="right">✅ 工具定义与信任边界</td>
+</tr>
+<tr>
+<td>Stream&#x2F;UI&#x2F;Persistence</td>
+<td align="right">产生事件</td>
+<td align="right">✅ 适配、落盘、展示</td>
+</tr>
+<tr>
+<td>Resume&#x2F;Steering&#x2F;Compaction</td>
+<td align="right">Pi 能力</td>
+<td align="right">✅ 映射到统一 Runtime Contract</td>
+</tr>
+</tbody></table>
+<p>因此，即便 Pi PR 未来合并，也应该表述为：</p>
+<blockquote>
+<p><strong>Cherry 用 Pi 作为一个可插拔执行内核，而不是把整个产品建立在 Pi 之上。Pi 负责 Agent Loop，Cherry 负责宿主、策略、资源和产品集成。</strong></p>
+</blockquote>
+<p>更重要的是，Cherry 同时还有一个基于 AI SDK 的第三 Driver PR：<a class="link"   target="_blank" rel="noopener" href="https://github.com/CherryHQ/cherry-studio/pull/17100" >PR #17100<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a>。它计划让任意兼容 Provider 直接驱动 Agent Session，提供文件、Bash、Skill、MCP、审批和 Compaction。这说明 Cherry 的长期方向不是押注某一个 Agent，而是构建 <strong>Pluggable Runtime Registry</strong>。</p>
+<h2 id="第三层：Code-Tools-确实是“CLI-管理器”"><a href="#第三层：Code-Tools-确实是“CLI-管理器”" class="headerlink" title="第三层：Code Tools 确实是“CLI 管理器”"></a>第三层：Code Tools 确实是“CLI 管理器”</h2><p>Cherry 的 <code>CodeCli</code> 枚举当前包含：</p>
+<ul>
+<li>Claude Code</li>
+<li>OpenAI Codex</li>
+<li>OpenCode</li>
+<li>OpenClaw</li>
+<li>Gemini CLI</li>
+<li>Qwen Code</li>
+<li>Kimi Code</li>
+<li>Qoder CLI</li>
+<li>GitHub Copilot CLI</li>
+</ul>
+<p>源码：<a class="link"   target="_blank" rel="noopener" href="https://github.com/CherryHQ/cherry-studio/blob/bef6609d7e52c0379911271ff7a603d436a0913e/src/shared/types/codeCli.ts#L1-L10" >codeCli.ts<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></p>
+<p><code>CodeCliService.run()</code> 的工作很典型：</p>
+<ol>
+<li>校验目录、Provider 和模型；</li>
+<li>通过 <code>BinaryManager</code> 查找或安装 CLI；</li>
+<li>写入各 CLI 的配置文件或环境变量；</li>
+<li>选择系统终端；</li>
+<li>拼装安全转义后的启动命令；</li>
+<li>在 macOS、Windows 或 Linux 终端中启动外部 CLI。</li>
+</ol>
+<p>源码：<a class="link"   target="_blank" rel="noopener" href="https://github.com/CherryHQ/cherry-studio/blob/bef6609d7e52c0379911271ff7a603d436a0913e/src/main/services/codeCli/CodeCliService.ts#L356-L431" >CodeCliService.ts<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></p>
+<p>所以如果问题限定为“Code Tools 页面是不是外部 Agent CLI 的封装”，答案是：<strong>基本是，而且官方文档也这样描述。</strong></p>
+<p>但这只是 Cherry Studio 的一个入口。它与 Agent Session Driver、通用 AI SDK Loop 不是同一套执行路径。</p>
+<p>还要特别区分 <strong>Codex CLI</strong> 与应用内的 <strong>OpenAI Codex Provider</strong>：前者由 <code>CodeCliService</code> 启动外部 <code>codex</code> 程序；后者由 Cherry 管理 OAuth，并通过自己的 Provider 适配层直接请求 ChatGPT Codex 后端。二者名字相似，但调用链、会话归属和运行时边界完全不同。当前 Codex、Gemini CLI 与 OpenCode 也都没有注册为 Agent Session Driver。</p>
+<h2 id="Honeycomb-误解可能从哪里来"><a href="#Honeycomb-误解可能从哪里来" class="headerlink" title="Honeycomb 误解可能从哪里来"></a>Honeycomb 误解可能从哪里来</h2><p>目前有三种可能：</p>
+<h3 id="1-把-Honeycomb-io-可观测平台误认为-Agent-框架"><a href="#1-把-Honeycomb-io-可观测平台误认为-Agent-框架" class="headerlink" title="1. 把 Honeycomb.io 可观测平台误认为 Agent 框架"></a>1. 把 Honeycomb.io 可观测平台误认为 Agent 框架</h3><p>Cherry 确实做了完整的 OpenTelemetry Trace，但当前代码使用的是自己的：</p>
+<ul>
+<li><code>AiTurnTrace</code> Root Span；</li>
+<li>AI SDK Span Adapter；</li>
+<li>Claude Code OTLP Adapter；</li>
+<li><code>TraceStorageService</code>；</li>
+<li>本地 JSONL Trace History；</li>
+<li>Renderer Trace Viewer。</li>
+</ul>
+<p>官方文档明确写道，AI SDK 调用会形成如下 Span Tree：</p>
+<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">chat.turn</span><br><span class="line">├── ai.streamText</span><br><span class="line">│   ├── ai.streamText.doStream</span><br><span class="line">│   ├── ai.toolCall</span><br><span class="line">│   └── ai.streamText.&lt;step&gt;</span><br></pre></td></tr></table></figure></div>
+
+<p>源码文档：<a class="link"   target="_blank" rel="noopener" href="https://github.com/CherryHQ/cherry-studio/blob/bef6609d7e52c0379911271ff7a603d436a0913e/docs/references/ai/observability.md#L7-L31" >observability.md<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></p>
+<p>这套系统基于 OpenTelemetry，但没有证据表明它把 Honeycomb 当作 Agent Runtime，甚至没有默认 Honeycomb Exporter。</p>
+<h3 id="2-把“蜂巢式多-Agent-编排”当成已经实现"><a href="#2-把“蜂巢式多-Agent-编排”当成已经实现" class="headerlink" title="2. 把“蜂巢式多 Agent 编排”当成已经实现"></a>2. 把“蜂巢式多 Agent 编排”当成已经实现</h3><p>官方 <a class="link"   target="_blank" rel="noopener" href="https://github.com/CherryHQ/cherry-studio/issues/13301" >Issue #13301<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a> 有多 Agent Workflow 和可视化编排设想，但它是 Feature Request，不是当前底层实现。</p>
+<h3 id="3-把-Pi-x2F-Claude-x2F-AI-SDK-多-Driver-架构起了一个非官方总称"><a href="#3-把-Pi-x2F-Claude-x2F-AI-SDK-多-Driver-架构起了一个非官方总称" class="headerlink" title="3. 把 Pi &#x2F; Claude &#x2F; AI SDK 多 Driver 架构起了一个非官方总称"></a>3. 把 Pi &#x2F; Claude &#x2F; AI SDK 多 Driver 架构起了一个非官方总称</h3><p>Cherry 的确在走可插拔 Runtime，但官方代码中的名称是 <code>RuntimeDriverRegistry</code>、<code>AgentSessionRuntimeDriver</code> 和 <code>AgentRuntimeConnection</code>，不是 Honeycomb。</p>
+<h2 id="Cherry-Studio-到底自研了多少"><a href="#Cherry-Studio-到底自研了多少" class="headerlink" title="Cherry Studio 到底自研了多少"></a>Cherry Studio 到底自研了多少</h2><p>可以用一句工程化的判断：</p>
+<blockquote>
+<p><strong>它没有重新发明模型 SDK，也没有重新发明每一种 Agent Loop；它重新发明的是“让不同 Agent 内核在同一个桌面产品中可管理、可持久化、可审批、可追踪、可切换”的宿主层。</strong></p>
+</blockquote>
+<p>Cherry 自己实现的关键部分包括：</p>
+<ul>
+<li>Electron Renderer 与主进程 IPC Transport；</li>
+<li><code>AiStreamManager</code> 的并发、订阅、广播和 continuation；</li>
+<li>多模型同时执行；</li>
+<li>Agent Session Host 与 Driver Contract；</li>
+<li>SQLite 消息和 Resume Token 持久化；</li>
+<li>Tool Approval 状态机；</li>
+<li>Provider Registry 与统一 Gateway；</li>
+<li>AI SDK &#x2F; Claude Code 两套 Tool Adapter；</li>
+<li>MCP Runtime 与内置 MCP Server；</li>
+<li>Skill 安装、选择和注入；</li>
+<li>Channel、定时任务、Heartbeat；</li>
+<li>OTel Root Span、Span Adapter、本地 Trace Viewer；</li>
+<li>Code CLI 的二进制、配置和终端生命周期管理。</li>
+</ul>
+<p>它复用的核心第三方内核包括：</p>
+<ul>
+<li>Vercel AI SDK <code>ToolLoopAgent</code>；</li>
+<li>Anthropic Claude Agent SDK；</li>
+<li>未来可能合并的 Pi SDK；</li>
+<li>各家外部 Code CLI。</li>
+</ul>
+<p>这是一种合理的工程取舍。Agent Loop 本身不是唯一壁垒，真正难的是把模型、工具、权限、会话、桌面 UI、文件系统、渠道和可观测性长期稳定地粘在一起。</p>
+<h2 id="架构优点"><a href="#架构优点" class="headerlink" title="架构优点"></a>架构优点</h2><h3 id="1-Host-与-Runtime-分离方向正确"><a href="#1-Host-与-Runtime-分离方向正确" class="headerlink" title="1. Host 与 Runtime 分离方向正确"></a>1. Host 与 Runtime 分离方向正确</h3><p><code>AgentSessionRuntimeDriver</code> 把具体 Agent 内核限制在 Driver 内部。理论上，只要实现统一 Connection 和 Event Contract，就可以接 Claude、Pi、AI SDK，甚至远端 Agent。</p>
+<h3 id="2-可观测性不是事后补丁"><a href="#2-可观测性不是事后补丁" class="headerlink" title="2. 可观测性不是事后补丁"></a>2. 可观测性不是事后补丁</h3><p>Cherry 为普通 AI SDK 请求和 Claude Agent SDK 分别实现 Adapter，再归一到同一个 Span 存储与 Trace Viewer。对于排查“模型慢、工具慢、审批卡住、哪一步消耗 Token”很有价值。</p>
+<h3 id="3-主进程拥有持久化与审批状态"><a href="#3-主进程拥有持久化与审批状态" class="headerlink" title="3. 主进程拥有持久化与审批状态"></a>3. 主进程拥有持久化与审批状态</h3><p>Renderer 关闭或崩溃不会直接丢失执行状态；UI 不是消息和审批的最终 Writer。这比把所有状态塞进 React 页面稳健得多。</p>
+<h3 id="4-Provider-和-Tool-层有复用意识"><a href="#4-Provider-和-Tool-层有复用意识" class="headerlink" title="4. Provider 和 Tool 层有复用意识"></a>4. Provider 和 Tool 层有复用意识</h3><p>普通 AI SDK 路径和 Claude Driver 能共享 Cherry 的 Web Search、知识库、绘图等业务核心，只在 Runtime 边缘做 Adapter，减少两套业务逻辑漂移。</p>
+<h2 id="架构风险与不足"><a href="#架构风险与不足" class="headerlink" title="架构风险与不足"></a>架构风险与不足</h2><h3 id="1-“可插拔-Runtime”目前仍比现实领先一步"><a href="#1-“可插拔-Runtime”目前仍比现实领先一步" class="headerlink" title="1. “可插拔 Runtime”目前仍比现实领先一步"></a>1. “可插拔 Runtime”目前仍比现实领先一步</h3><p>接口已经很丰富，但当前 <code>main</code> 只注册 Claude Code Driver。Pi 和 AI SDK Session Driver 都还在 Open PR 中。因此现在更准确的说法是：<strong>架构已经可插拔，发布矩阵还没有真正多运行时化。</strong></p>
+<h3 id="2-v1-x2F-v2-共存和多条执行路径增加认知成本"><a href="#2-v1-x2F-v2-共存和多条执行路径增加认知成本" class="headerlink" title="2. v1&#x2F;v2 共存和多条执行路径增加认知成本"></a>2. v1&#x2F;v2 共存和多条执行路径增加认知成本</h3><p>Assistant、Agent、Code Tools 的产品概念相近，但底层路径不同；用户容易以为它们只是不同 UI，开发者也容易把通用 <code>Agent</code> 与 Agent Session 混为一谈。</p>
+<h3 id="3-通用-Loop-的-Retry-仍未实现"><a href="#3-通用-Loop-的-Retry-仍未实现" class="headerlink" title="3. 通用 Loop 的 Retry 仍未实现"></a>3. 通用 Loop 的 Retry 仍未实现</h3><p>Hook 可以返回 <code>retry</code>，但代码仍是 TODO。真实生产场景中的 Provider 抖动、限流和可恢复工具错误，需要更清晰的重试策略。</p>
+<h3 id="4-Trace-的敏感数据风险需要重视"><a href="#4-Trace-的敏感数据风险需要重视" class="headerlink" title="4. Trace 的敏感数据风险需要重视"></a>4. Trace 的敏感数据风险需要重视</h3><p>开发者模式会开启 Claude Code 的 User Prompt、Tool Content 和 Raw API Body 遥测，并以明文 JSONL 保存在本地。官方文档明确说明当前不做 Redaction。调试价值很高，但导出 Trace 时必须按敏感文件处理。</p>
+<h3 id="5-Pi-方案的主进程权限边界较重"><a href="#5-Pi-方案的主进程权限边界较重" class="headerlink" title="5. Pi 方案的主进程权限边界较重"></a>5. Pi 方案的主进程权限边界较重</h3><p>Pi PR 选择 in-process SDK，文件和 Bash 工具运行在 Cherry 主进程权限域中，依赖审批 Hook 和策略约束，而不是 OS Sandbox。PR 已明确承认这一取舍。对于全自动 Agent，这是后续安全设计的重点。</p>
+<h3 id="6-AGPL-3-0-需要商业用户提前评估"><a href="#6-AGPL-3-0-需要商业用户提前评估" class="headerlink" title="6. AGPL-3.0 需要商业用户提前评估"></a>6. AGPL-3.0 需要商业用户提前评估</h3><p>社区版仓库使用 AGPL-3.0。内部修改、网络服务化、企业分发和闭源集成的义务，应由实际使用方式和法律意见判断，不能把“开源可用”直接等同于“可任意闭源商用”。</p>
+<h2 id="最终评析：它的真正定位是什么"><a href="#最终评析：它的真正定位是什么" class="headerlink" title="最终评析：它的真正定位是什么"></a>最终评析：它的真正定位是什么</h2><p>我认为 Cherry Studio 最准确的定位不是“Agent Framework”，也不是“CLI Launcher”，而是：</p>
+<blockquote>
+<p><strong>桌面端 AI Runtime Host + 多模型工作台 + Agent&#x2F;CLI 集成平台。</strong></p>
+</blockquote>
+<p>它的价值不在于拥有一个独一无二的推理循环，而在于同时容纳三类世界：</p>
+<ol>
+<li><strong>直接模型调用</strong>：通过 Provider Registry 与 Vercel AI SDK；</li>
+<li><strong>嵌入式 Agent Runtime</strong>：当前 Claude Agent SDK，未来可能是 Pi 和 AI SDK Session；</li>
+<li><strong>外部 Code Agent CLI</strong>：通过 Binary、配置和 Terminal 管理。</li>
+</ol>
+<p>因此，对文章开头四个问题，可以给出最终答案：</p>
+<table>
+<thead>
+<tr>
+<th>问题</th>
+<th>答案</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Honeycomb 是 Cherry 的 Agent Loop 框架吗？</td>
+<td><strong>不是。公开源码无此框架；Honeycomb 只出现于无关的遥测讨论。</strong></td>
+</tr>
+<tr>
+<td>Cherry 当前基于 Pi Agent 吗？</td>
+<td><strong>不是。Pi 是尚未合并的候选 Runtime Driver。</strong></td>
+</tr>
+<tr>
+<td>Agent Loop 是 Cherry 自研吗？</td>
+<td><strong>宿主与编排层自研；底层循环由 Vercel AI SDK、Claude Agent SDK，未来可能由 Pi SDK执行。</strong></td>
+</tr>
+<tr>
+<td>Cherry 只是 CLI 封装吗？</td>
+<td><strong>Code Tools 基本是；整个 Cherry Studio 不是。</strong></td>
+</tr>
+</tbody></table>
+<p>如果只看“谁负责 while loop”，Cherry 的原创度没那么高；如果看一个 Agent 产品真正需要的会话、权限、工具、数据、UI、渠道和 Trace，它已经做了相当厚的一层系统工程。</p>
+<p>这也是 Cherry Studio 接下来最值得观察的地方：不是它会不会再接一个 CLI，而是它能否让 Claude、Pi、AI SDK 甚至远端 Agent 在同一个 Runtime Contract 下真正做到可切换、可恢复、可观测，并保持一致的安全边界。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ol>
+<li><a class="link"   target="_blank" rel="noopener" href="https://github.com/CherryHQ/cherry-studio" >Cherry Studio 官方仓库<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://github.com/CherryHQ/cherry-studio/blob/bef6609d7e52c0379911271ff7a603d436a0913e/docs/references/ai/agent-loop.md" >Agent Loop 设计文档<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://github.com/CherryHQ/cherry-studio/blob/bef6609d7e52c0379911271ff7a603d436a0913e/docs/references/ai/agent-session-runtime.md" >Agent Session Runtime 设计文档<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://github.com/CherryHQ/cherry-studio/blob/bef6609d7e52c0379911271ff7a603d436a0913e/docs/references/ai/core-architecture.md" >Core Architecture<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://github.com/CherryHQ/cherry-studio/blob/bef6609d7e52c0379911271ff7a603d436a0913e/docs/references/ai/observability.md" >Observability<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://github.com/CherryHQ/cherry-studio/pull/16630" >Pi Runtime PR #16630<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://github.com/CherryHQ/cherry-studio/pull/17100" >AI SDK Agent Session PR #17100<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://github.com/CherryHQ/cherry-studio/issues/9763" >Honeycomb 遥测讨论 #9763<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://docs.cherry-ai.com/docs/advanced-basic/agent" >官方 Agent 使用文档<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://docs.cherry-ai.com/docs/en-us/advanced-basic/code-tools-shi-yong-jiao-cheng" >官方 Code Tools 文档<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://github.com/earendil-works/pi" >Pi 项目<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+</ol>
+
+		</div>
+
+		
+		<div class="post-copyright-info w-full my-8 px-2 sm:px-6 md:px-8">
+			<div class="article-copyright-info-container">
+    <ul>
+        <li><strong>标题:</strong> Cherry Studio Agent 架构深度拆解：Honeycomb、Pi Agent 与 CLI 封装的真相</li>
+        <li><strong>作者:</strong> Nathan</li>
+        <li><strong>创建于
+                :</strong> 2026-08-03 10:40:00</li>
+        
+            <li>
+                <strong>更新于
+                    :</strong> 2026-08-05 05:16:09
+            </li>
+        
+        <li>
+            <strong>链接:</strong> https://hydraxman.github.io/2026/08/03/cherry-studio-agent-loop-deep-dive/
+        </li>
+        <li>
+            <strong>
+                版权声明:
+            </strong>
+            
+
+            
+                本文章采用 <a class="license" target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0">CC BY-NC-SA 4.0</a> 进行许可。
+            
+        </li>
+    </ul>
+</div>
+
+		</div>
+		
+
+		
+		<ul class="post-tags-box text-lg mt-1.5 flex-wrap justify-center flex md:hidden">
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/">#源码分析</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/AI-Agent/">#AI Agent</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/Agent-Loop/">#Agent Loop</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/Cherry-Studio/">#Cherry Studio</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/Pi-Agent/">#Pi Agent</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/Claude-Agent-SDK/">#Claude Agent SDK</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/Vercel-AI-SDK/">#Vercel AI SDK</a>&nbsp;
+			</li>
+			
+		</ul>
+		
+
+		
+
+		
+		<div class="article-nav my-8 flex justify-between items-center px-2 sm:px-6 md:px-8">
+			
+			<div class="article-prev border-border-color shadow-redefine-flat shadow-shadow-color-2 rounded-medium px-4 py-2 hover:shadow-redefine-flat-hover hover:shadow-shadow-color-2">
+				<a class="prev" rel="prev" href="/2026/08/03/voice-cloning-cloud-open-source-comparison/">
+					<span class="left arrow-icon flex justify-center items-center">
+						<i class="fa-solid fa-chevron-left"></i>
+					</span>
+					<span class="title flex justify-center items-center">
+						<span class="post-nav-title-item truncate max-w-48">真人声音克隆技术全景：云平台、OpenAI与本地开源模型怎么选</span>
+						<span class="post-nav-item">上一篇</span>
+					</span>
+				</a>
+			</div>
+			
+			
+			<div class="article-next border-border-color shadow-redefine-flat shadow-shadow-color-2 rounded-medium px-4 py-2 hover:shadow-redefine-flat-hover hover:shadow-shadow-color-2">
+				<a class="next" rel="next" href="/2026/08/03/github-trending/github-trending-2026-08-03/">
+					<span class="title flex justify-center items-center">
+						<span class="post-nav-title-item truncate max-w-48">GitHub 热榜今天不卷新模型：大家在给 AI 补课、装眼睛和记忆｜2026-08-03</span>
+						<span class="post-nav-item">下一篇</span>
+					</span>
+					<span class="right arrow-icon flex justify-center items-center">
+						<i class="fa-solid fa-chevron-right"></i>
+					</span>
+				</a>
+			</div>
+			
+		</div>
+		
+
+
+		
+	</div>
+
+	
+	<div class="toc-content-container">
+		<div class="post-toc-wrap">
+	<div class="post-toc">
+		<div class="toc-title">目录</div>
+		<div class="page-title">Cherry Studio Agent 架构深度拆解：Honeycomb、Pi Agent 与 CLI 封装的真相</div>
+		<ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%A1%B9%E7%9B%AE%E5%85%A8%E8%B2%8C%EF%BC%9A%E5%AE%83%E9%A6%96%E5%85%88%E6%98%AF%E4%B8%80%E4%B8%AA%E6%A1%8C%E9%9D%A2-AI-%E5%B7%A5%E4%BD%9C%E5%8F%B0"><span class="nav-text">项目全貌：它首先是一个桌面 AI 工作台</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%88%E7%BB%99%E7%BB%93%E8%AE%BA"><span class="nav-text">先给结论</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%93%E8%AE%BA%E4%B8%80%EF%BC%9A%E5%85%AC%E5%BC%80%E6%BA%90%E7%A0%81%E4%B8%AD%E4%B8%8D%E5%AD%98%E5%9C%A8%E2%80%9CCherry-Honeycomb-Agent-%E6%A1%86%E6%9E%B6%E2%80%9D"><span class="nav-text">结论一：公开源码中不存在“Cherry Honeycomb Agent 框架”</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%93%E8%AE%BA%E4%BA%8C%EF%BC%9A%E5%BD%93%E5%89%8D%E5%8F%91%E5%B8%83%E6%9E%B6%E6%9E%84%E4%B8%8D%E6%98%AF%E5%9F%BA%E4%BA%8E-Pi-Agent"><span class="nav-text">结论二：当前发布架构不是基于 Pi Agent</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%93%E8%AE%BA%E4%B8%89%EF%BC%9AAgent-Loop-%E4%B8%8D%E6%98%AF%E2%80%9C%E5%85%A8%E8%87%AA%E7%A0%94%E2%80%9D%EF%BC%8C%E4%B9%9F%E4%B8%8D%E6%98%AF%E2%80%9C%E9%9B%B6%E8%87%AA%E7%A0%94%E2%80%9D"><span class="nav-text">结论三：Agent Loop 不是“全自研”，也不是“零自研”</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%93%E8%AE%BA%E5%9B%9B%EF%BC%9ACherry-Studio-%E4%B8%8D%E5%8F%AA%E6%98%AF-CLI-%E5%B0%81%E8%A3%85%EF%BC%8C%E4%BD%86-Code-Tools-%E8%BF%99%E4%B8%80%E5%B1%82%E7%A1%AE%E5%AE%9E%E4%B8%BB%E8%A6%81%E6%98%AF-CLI-%E5%B0%81%E8%A3%85"><span class="nav-text">结论四：Cherry Studio 不只是 CLI 封装，但 Code Tools 这一层确实主要是 CLI 封装</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E5%BC%A0%E5%9B%BE%E7%9C%8B%E6%87%82-Cherry-Studio-%E7%9A%84%E4%B8%89%E6%9D%A1%E6%89%A7%E8%A1%8C%E8%B7%AF%E5%BE%84"><span class="nav-text">一张图看懂 Cherry Studio 的三条执行路径</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E4%B8%80%E5%B1%82%EF%BC%9A%E9%80%9A%E7%94%A8-Agent-Loop-%E5%88%B0%E5%BA%95%E6%80%8E%E4%B9%88%E8%B7%91"><span class="nav-text">第一层：通用 Agent Loop 到底怎么跑</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E2%80%9Csingle-pass%E2%80%9D%E4%B8%8D%E7%AD%89%E4%BA%8E%E2%80%9C%E5%8F%AA%E8%B0%83%E7%94%A8%E6%A8%A1%E5%9E%8B%E4%B8%80%E6%AC%A1%E2%80%9D"><span class="nav-text">“single-pass”不等于“只调用模型一次”</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Cherry-%E5%9C%A8-ToolLoopAgent-%E5%A4%96%E9%9D%A2%E8%87%AA%E5%B7%B1%E5%81%9A%E4%BA%86%E4%BB%80%E4%B9%88"><span class="nav-text">Cherry 在 ToolLoopAgent 外面自己做了什么</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Hook-%E5%90%88%E6%88%90"><span class="nav-text">1. Hook 合成</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E5%B7%A5%E5%85%B7%E6%89%A7%E8%A1%8C%E5%8C%85%E8%A3%85"><span class="nav-text">2. 工具执行包装</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E7%BB%88%E6%AD%A2%E7%8A%B6%E6%80%81%E5%88%86%E7%B1%BB"><span class="nav-text">3. 终止状态分类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E4%B8%80%E4%B8%AA%E5%B0%9A%E6%9C%AA%E5%AE%8C%E6%88%90%E7%9A%84%E5%9C%B0%E6%96%B9%EF%BC%9ARetry"><span class="nav-text">4. 一个尚未完成的地方：Retry</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%80%9A%E7%94%A8-Loop-%E7%9A%84%E5%AE%8C%E6%95%B4%E6%97%B6%E5%BA%8F"><span class="nav-text">通用 Loop 的完整时序</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E4%BA%8C%E5%B1%82%EF%BC%9AAgent-Session-%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E6%98%AF%E6%99%AE%E9%80%9A-CLI-%E5%90%AF%E5%8A%A8%E5%99%A8"><span class="nav-text">第二层：Agent Session 为什么不是普通 CLI 启动器</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BD%93%E5%89%8D-Driver%EF%BC%9AClaude-Agent-SDK"><span class="nav-text">当前 Driver：Claude Agent SDK</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Pi-Agent%EF%BC%9A%E6%98%AF%E4%B8%8D%E6%98%AF-Cherry-%E7%9A%84%E5%BA%95%E5%B1%82%EF%BC%9F"><span class="nav-text">Pi Agent：是不是 Cherry 的底层？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A6%82%E6%9E%9C-Pi-PR-%E5%90%88%E5%B9%B6%EF%BC%8C%E8%B0%81%E8%B4%9F%E8%B4%A3%E4%BB%80%E4%B9%88"><span class="nav-text">如果 Pi PR 合并，谁负责什么</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E4%B8%89%E5%B1%82%EF%BC%9ACode-Tools-%E7%A1%AE%E5%AE%9E%E6%98%AF%E2%80%9CCLI-%E7%AE%A1%E7%90%86%E5%99%A8%E2%80%9D"><span class="nav-text">第三层：Code Tools 确实是“CLI 管理器”</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Honeycomb-%E8%AF%AF%E8%A7%A3%E5%8F%AF%E8%83%BD%E4%BB%8E%E5%93%AA%E9%87%8C%E6%9D%A5"><span class="nav-text">Honeycomb 误解可能从哪里来</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E6%8A%8A-Honeycomb-io-%E5%8F%AF%E8%A7%82%E6%B5%8B%E5%B9%B3%E5%8F%B0%E8%AF%AF%E8%AE%A4%E4%B8%BA-Agent-%E6%A1%86%E6%9E%B6"><span class="nav-text">1. 把 Honeycomb.io 可观测平台误认为 Agent 框架</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E6%8A%8A%E2%80%9C%E8%9C%82%E5%B7%A2%E5%BC%8F%E5%A4%9A-Agent-%E7%BC%96%E6%8E%92%E2%80%9D%E5%BD%93%E6%88%90%E5%B7%B2%E7%BB%8F%E5%AE%9E%E7%8E%B0"><span class="nav-text">2. 把“蜂巢式多 Agent 编排”当成已经实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E6%8A%8A-Pi-x2F-Claude-x2F-AI-SDK-%E5%A4%9A-Driver-%E6%9E%B6%E6%9E%84%E8%B5%B7%E4%BA%86%E4%B8%80%E4%B8%AA%E9%9D%9E%E5%AE%98%E6%96%B9%E6%80%BB%E7%A7%B0"><span class="nav-text">3. 把 Pi &#x2F; Claude &#x2F; AI SDK 多 Driver 架构起了一个非官方总称</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Cherry-Studio-%E5%88%B0%E5%BA%95%E8%87%AA%E7%A0%94%E4%BA%86%E5%A4%9A%E5%B0%91"><span class="nav-text">Cherry Studio 到底自研了多少</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9E%B6%E6%9E%84%E4%BC%98%E7%82%B9"><span class="nav-text">架构优点</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Host-%E4%B8%8E-Runtime-%E5%88%86%E7%A6%BB%E6%96%B9%E5%90%91%E6%AD%A3%E7%A1%AE"><span class="nav-text">1. Host 与 Runtime 分离方向正确</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E5%8F%AF%E8%A7%82%E6%B5%8B%E6%80%A7%E4%B8%8D%E6%98%AF%E4%BA%8B%E5%90%8E%E8%A1%A5%E4%B8%81"><span class="nav-text">2. 可观测性不是事后补丁</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E4%B8%BB%E8%BF%9B%E7%A8%8B%E6%8B%A5%E6%9C%89%E6%8C%81%E4%B9%85%E5%8C%96%E4%B8%8E%E5%AE%A1%E6%89%B9%E7%8A%B6%E6%80%81"><span class="nav-text">3. 主进程拥有持久化与审批状态</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-Provider-%E5%92%8C-Tool-%E5%B1%82%E6%9C%89%E5%A4%8D%E7%94%A8%E6%84%8F%E8%AF%86"><span class="nav-text">4. Provider 和 Tool 层有复用意识</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9E%B6%E6%9E%84%E9%A3%8E%E9%99%A9%E4%B8%8E%E4%B8%8D%E8%B6%B3"><span class="nav-text">架构风险与不足</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E2%80%9C%E5%8F%AF%E6%8F%92%E6%8B%94-Runtime%E2%80%9D%E7%9B%AE%E5%89%8D%E4%BB%8D%E6%AF%94%E7%8E%B0%E5%AE%9E%E9%A2%86%E5%85%88%E4%B8%80%E6%AD%A5"><span class="nav-text">1. “可插拔 Runtime”目前仍比现实领先一步</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-v1-x2F-v2-%E5%85%B1%E5%AD%98%E5%92%8C%E5%A4%9A%E6%9D%A1%E6%89%A7%E8%A1%8C%E8%B7%AF%E5%BE%84%E5%A2%9E%E5%8A%A0%E8%AE%A4%E7%9F%A5%E6%88%90%E6%9C%AC"><span class="nav-text">2. v1&#x2F;v2 共存和多条执行路径增加认知成本</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E9%80%9A%E7%94%A8-Loop-%E7%9A%84-Retry-%E4%BB%8D%E6%9C%AA%E5%AE%9E%E7%8E%B0"><span class="nav-text">3. 通用 Loop 的 Retry 仍未实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-Trace-%E7%9A%84%E6%95%8F%E6%84%9F%E6%95%B0%E6%8D%AE%E9%A3%8E%E9%99%A9%E9%9C%80%E8%A6%81%E9%87%8D%E8%A7%86"><span class="nav-text">4. Trace 的敏感数据风险需要重视</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-Pi-%E6%96%B9%E6%A1%88%E7%9A%84%E4%B8%BB%E8%BF%9B%E7%A8%8B%E6%9D%83%E9%99%90%E8%BE%B9%E7%95%8C%E8%BE%83%E9%87%8D"><span class="nav-text">5. Pi 方案的主进程权限边界较重</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-AGPL-3-0-%E9%9C%80%E8%A6%81%E5%95%86%E4%B8%9A%E7%94%A8%E6%88%B7%E6%8F%90%E5%89%8D%E8%AF%84%E4%BC%B0"><span class="nav-text">6. AGPL-3.0 需要商业用户提前评估</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%80%E7%BB%88%E8%AF%84%E6%9E%90%EF%BC%9A%E5%AE%83%E7%9A%84%E7%9C%9F%E6%AD%A3%E5%AE%9A%E4%BD%8D%E6%98%AF%E4%BB%80%E4%B9%88"><span class="nav-text">最终评析：它的真正定位是什么</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="nav-text">参考资料</span></a></li></ol>
+
+	</div>
+</div>
+	</div>
+	
+</div>
+
+			</div>
+
+			
+		</div>
+
+		<div class="main-content-footer">
+			<footer class="footer mt-5 py-5 h-auto text-base text-third-text-color relative border-t-2 border-t-border-color">
+    <div class="info-container py-3 text-center">
+        
+        <div class="text-center">
+            &copy;
+            
+              <span>2024</span>
+              -
+            
+            2026&nbsp;&nbsp;<i class="fa-solid fa-heart fa-beat" style="--fa-animation-duration: 0.5s; color: #333"></i>&nbsp;&nbsp;<a href="/">Nathan</a>
+            
+                
+                <p class="post-count space-x-0.5">
+                    <span>
+                        共撰写了 322 篇文章
+                    </span>
+                    
+                        <span>
+                            共 730.7k 字
+                        </span>
+                    
+                </p>
+            
+        </div>
+        
+        <div class="relative text-center lg:absolute lg:left-[20px] lg:top-1/2 lg:-translate-y-1/2 lg:text-left">
+            <span class="lg:block text-sm">由 <?xml version="1.0" encoding="utf-8"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg class="relative top-[2px] inline-block align-baseline" version="1.1" id="圖層_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="1rem" height="1rem" viewBox="0 0 512 512" enable-background="new 0 0 512 512" xml:space="preserve"><path fill="#0E83CD" d="M256.4,25.8l-200,115.5L56,371.5l199.6,114.7l200-115.5l0.4-230.2L256.4,25.8z M349,354.6l-18.4,10.7l-18.6-11V275H200v79.6l-18.4,10.7l-18.6-11v-197l18.5-10.6l18.5,10.8V237h112v-79.6l18.5-10.6l18.5,10.8V354.6z"/></svg><a target="_blank" class="text-base" href="https://hexo.io">Hexo</a> 驱动</span>
+            <span class="text-sm lg:block">主题&nbsp;<a class="text-base" target="_blank" href="https://github.com/EvanNotFound/hexo-theme-redefine">Redefine v2.9.0</a></span>
+        </div>
+        
+        
+            <div>
+                博客已运行 <span class="odometer" id="runtime_days" ></span> 天 <span class="odometer" id="runtime_hours"></span> 小时 <span class="odometer" id="runtime_minutes"></span> 分钟 <span class="odometer" id="runtime_seconds"></span> 秒
+            </div>
+        
+        
+            <script data-swup-reload-script>
+                try {
+                    function odometer_init() {
+                    const elements = document.querySelectorAll('.odometer');
+                    elements.forEach(el => {
+                        new Odometer({
+                            el,
+                            format: '( ddd).dd',
+                            duration: 200
+                        });
+                    });
+                    }
+                    odometer_init();
+                } catch (error) {}
+            </script>
+        
+        
+            
+                
+        
+                
+        
+        
+    </div>  
+</footer>
+		</div>
+	</div>
+
+	
+	<div class="post-tools">
+		<div class="post-tools-container">
+	<ul class="article-tools-list">
+		<!-- TOC aside toggle -->
+		
+		<li class="right-bottom-tools page-aside-toggle">
+			<i class="fa-regular fa-outdent"></i>
+		</li>
+		
+
+		<!-- go comment -->
+		
+	</ul>
+</div>
+	</div>
+	
+
+	<div class="right-side-tools-container">
+		<div class="side-tools-container">
+	<ul class="hidden-tools-list">
+		<li class="right-bottom-tools tool-font-adjust-plus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-plus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-font-adjust-minus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-minus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-dark-light-toggle flex justify-center items-center">
+			<i class="fa-regular fa-moon"></i>
+		</li>
+
+		<!-- rss -->
+		
+
+		
+
+		<li class="right-bottom-tools tool-scroll-to-bottom flex justify-center items-center">
+			<i class="fa-regular fa-arrow-down"></i>
+		</li>
+	</ul>
+
+	<ul class="visible-tools-list">
+		<li class="right-bottom-tools toggle-tools-list flex justify-center items-center">
+			<i class="fa-regular fa-cog fa-spin"></i>
+		</li>
+		
+		<li class="right-bottom-tools tool-scroll-to-top flex justify-center items-center">
+			<i class="arrow-up fas fa-arrow-up"></i>
+			<span class="percent"></span>
+		</li>
+		
+		
+	</ul>
+</div>
+	</div>
+
+	<div class="image-viewer-container" role="dialog" aria-modal="true" aria-label="图片查看器">
+	<button class="image-viewer-close" type="button" aria-label="关闭">
+		<i class="fa-solid fa-xmark"></i>
+	</button>
+	<button class="image-viewer-prev" type="button" aria-label="上一页">
+		<i class="fa-solid fa-chevron-left"></i>
+	</button>
+	<div class="image-viewer-frame">
+		<img src="" alt="">
+	</div>
+	<div class="image-viewer-exif-panel hidden absolute left-1/2 bottom-20 -translate-x-1/2 w-[min(92vw,420px)] max-h-[60vh] overflow-hidden rounded-2xl bg-background-color-transparent-80 p-4 text-left shadow-redefine-flat backdrop-blur-md" role="dialog" aria-label="EXIF" aria-hidden="true">
+		<div class="flex items-center justify-between mb-3">
+			<span class="text-sm font-semibold text-first-text-color">EXIF</span>
+			<button class="image-viewer-exif-close flex h-8 w-8 items-center justify-center rounded-full bg-background-color-transparent-80 text-first-text-color transition hover:bg-background-color-transparent-40" type="button" aria-label="关闭">
+				<i class="fa-solid fa-xmark text-[0.65rem]"></i>
+			</button>
+		</div>
+		<div class="image-viewer-exif-cards grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[50vh] overflow-y-auto pr-1 scrollbar-hide"></div>
+		<template class="image-viewer-exif-card-template">
+			<div class="rounded-lg bg-background-color-transparent-40 px-3 py-2">
+				<div class="image-viewer-exif-card-header flex items-center gap-2 mb-1">
+					<i class="image-viewer-exif-card-icon fa-solid fa-circle-info text-xs text-third-text-color"></i>
+					<div class="image-viewer-exif-card-title text-xs font-semibold text-first-text-color"></div>
+				</div>
+				<div class="image-viewer-exif-card-items flex flex-col gap-1"></div>
+			</div>
+		</template>
+	</div>
+	<button class="image-viewer-exif-toggle flex items-center gap-2 hidden absolute left-1/2 bottom-6 -translate-x-1/2 rounded-full border border-border-color bg-background-color-transparent-80 px-4 py-2 text-first-text-color backdrop-blur-md transition hover:bg-background-color-transparent-40" type="button" aria-label="EXIF" aria-expanded="false">
+		<i class="fa-solid fa-circle-info text-xs"></i>
+		<span class="text-xs font-semibold uppercase tracking-wider">EXIF</span>
+	</button>
+	<button class="image-viewer-next" type="button" aria-label="下一页">
+		<i class="fa-solid fa-chevron-right"></i>
+	</button>
+</div>
+
+
+	
+	<div class="search-pop-overlay">
+	<div class="popup search-popup">
+		<div class="search-header">
+			<span class="search-input-field-pre">
+				<i class="fa-solid fa-keyboard"></i>
+			</span>
+			<div class="search-input-container">
+				<input autocomplete="off" autocorrect="off" autocapitalize="off" placeholder="站内搜索您需要的内容..." spellcheck="false" type="search" class="search-input">
+			</div>
+			<span class="popup-btn-close">
+				<i class="fa-solid fa-times"></i>
+			</span>
+		</div>
+		<div id="search-result">
+			<div id="no-result">
+				<i class="fa-solid fa-spinner fa-spin-pulse fa-5x fa-fw"></i>
+			</div>
+		</div>
+	</div>
+</div>
+	
+
+</main>
+
+
+
+<script src="/js/build/libs/Swup.min.js"></script>
+
+<script src="/js/build/libs/SwupSlideTheme.min.js"></script>
+
+<script src="/js/build/libs/SwupScriptsPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupProgressPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupScrollPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupPreloadPlugin.min.js"></script>
+
+<script>
+    window.swup = new Swup({
+        plugins: [
+            new SwupScriptsPlugin({
+                optin: true,
+            }),
+            new SwupProgressPlugin(),
+            new SwupScrollPlugin({
+                offset: 80,
+            }),
+            new SwupSlideTheme({
+                mainElement: ".main-content-body",
+            }),
+            new SwupPreloadPlugin(),
+        ],
+        containers: ["#swup"],
+    });
+
+    window.dispatchEvent(
+        new CustomEvent("redefine:swup:ready", {
+            detail: {
+                swup: window.swup,
+            },
+        }),
+    );
+</script>
+
+
+
+
+	
+<script src="/js/build/main.js" type="module"></script>
+
+
+
+    
+<script src="/js/build/libs/odometer.min.js"></script>
+
+    
+<link rel="stylesheet" href="/assets/odometer-theme-minimal.css">
+
+
+
+
+
+
+
+  
+<script src="/js/build/libs/Typed.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+<script src="/js/build/libs/moment-with-locales.min.js" data-swup-reload-script=""></script>
+
+
+
+	
+</body>
+
+</html>
