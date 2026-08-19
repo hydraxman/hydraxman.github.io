@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="keywords" content="计算机技术, 生活中的胡思乱想">
+    
+    
+    <meta name="author" content="Nathan">
+    
+    <!-- Completely eliminate flash of wrong theme -->
+    <script>
+        (function() {
+            const THEME_KEY = "REDEFINE-THEME-STATUS";
+            const DARK = "dark", LIGHT = "light";
+            
+            // Get preferred theme
+            function getTheme() {
+                try {
+                    const saved = localStorage.getItem(THEME_KEY);
+                    if (saved) {
+                        const { isDark } = JSON.parse(saved);
+                        return isDark ? DARK : LIGHT;
+                    }
+                } catch (e) {}
+                
+                return matchMedia("(prefers-color-scheme: dark)").matches ? DARK : LIGHT;
+            }
+            
+            // Apply theme to document
+            function applyTheme(theme) {
+                const isDark = theme === DARK;
+                const root = document.documentElement;
+                
+                // Set classes for compatibility
+                root.classList.add(theme);
+                root.classList.remove(isDark ? LIGHT : DARK);
+                root.style.colorScheme = theme;
+            }
+            
+            // Initial application
+            const theme = getTheme();
+            applyTheme(theme);
+            
+            // Listen for system preference changes
+            matchMedia("(prefers-color-scheme: dark)").addEventListener("change", ({ matches }) => {
+                // Only update if using system preference (no localStorage entry)
+                if (!localStorage.getItem(THEME_KEY)) {
+                    applyTheme(matches ? DARK : LIGHT);
+                }
+            });
+            
+            // Set body classes ASAP (before DOMContentLoaded)
+            (function() {
+                const addBodyClass = () => {
+                    const b = document.body;
+                    if (!b) return false;
+                    b.classList.add(theme + "-mode");
+                    return true;
+                };
+
+                // Try immediately
+                if (addBodyClass()) return;
+
+                // Observe until body exists
+                const mo = new MutationObserver(() => {
+                    if (addBodyClass()) mo.disconnect();
+                });
+                mo.observe(document.documentElement, { childList: true, subtree: true });
+            })();
+        })();
+    </script>
+    
+    <!-- preconnect -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    
+    <!--- Seo Part-->
+    
+    <link rel="canonical" href="https://hydraxman.github.io/2026/08/14/deepseek-harness-architecture-deep-dive/"/>
+    <meta name="robots" content="index,follow">
+    <meta name="googlebot" content="index,follow">
+    <meta name="revisit-after" content="1 days">
+    
+    
+        
+        <meta name="description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="DeepSeek Harness 深度拆解：当 Agent Runtime 里“一切皆插件”">
+<meta property="og:url" content="https://hydraxman.github.io/2026/08/14/deepseek-harness-architecture-deep-dive/index.html">
+<meta property="og:site_name" content="内森淼文">
+<meta property="og:description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://hydraxman.github.io/images/redefine-og.webp">
+<meta property="article:published_time" content="2026-08-14T04:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-18T21:16:54.783Z">
+<meta property="article:author" content="Nathan">
+<meta property="article:tag" content="AI Agent">
+<meta property="article:tag" content="Coding Agent">
+<meta property="article:tag" content="ACP">
+<meta property="article:tag" content="MCP">
+<meta property="article:tag" content="DeepSeek">
+<meta property="article:tag" content="Agent Runtime">
+<meta property="article:tag" content="DeepSeek Harness">
+<meta property="article:tag" content="Cordis">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://hydraxman.github.io/images/redefine-og.webp">
+    
+    
+    <!--- Icon Part-->
+    <link rel="icon" type="image/png" href="/images/favicon.svg" sizes="192x192">
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.svg">
+    <meta name="theme-color" content="#ffffff">
+    <link rel="shortcut icon" href="/images/favicon.svg">
+    <!--- Page Info-->
+    
+    <title>
+        
+            DeepSeek Harness 深度拆解：当 Agent Runtime 里“一切皆插件” | 内森淼文
+        
+    </title>
+
+    
+<link rel="stylesheet" href="/fonts/Chillax/chillax.css">
+
+
+    <!--- Inject Part-->
+    
+        
+            
+    
+            
+    
+            
+                
+                    <link rel="stylesheet" href="/css/custom.css">
+                
+    
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    
+        
+<link rel="stylesheet" href="/css/build/tailwind.css">
+
+    
+
+    
+<link rel="stylesheet" href="/fonts/GeistMono/geist-mono.css">
+
+    
+<link rel="stylesheet" href="/fonts/Geist/geist.css">
+
+    <!--- Font Part-->
+    
+    
+    
+    
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&display=swap" rel="stylesheet">
+    
+    
+
+    <script id="hexo-configurations">
+    window.config = {"hostname":"hydraxman.github.io","root":"/","language":"zh-CN","path":"search.json"};
+    window.theme = {"articles":{"style":{"font_size":"16px","line_height":1.5,"image_border_radius":"14px","image_alignment":"center","image_caption":false,"link_icon":true,"delete_mask":false,"title_alignment":"left","headings_top_spacing":{"h1":"3.2rem","h2":"2.4rem","h3":"1.9rem","h4":"1.6rem","h5":"1.4rem","h6":"1.3rem"}},"word_count":{"enable":true,"count":true,"min2read":true},"author_label":{"enable":false,"auto":false,"list":[]},"code_block":{"copy":true,"style":"mac","highlight_theme":{"light":"github","dark":"vs2015"},"font":{"enable":false,"family":null,"url":null}},"toc":{"enable":true,"max_depth":3,"number":false,"expand":true,"init_open":true},"copyright":{"enable":true,"default":"cc_by_nc_sa"},"lazyload":true,"pangu_js":false,"recommendation":{"enable":false,"title":"推荐阅读","limit":3,"mobile_limit":2,"placeholder":"/images/wallhaven-wqery6-light.webp","skip_dirs":[]}},"colors":{"primary":"#ffffff","secondary":null,"default_mode":"light"},"global":{"fonts":{"chinese":{"enable":false,"family":null,"url":null},"english":{"enable":true,"family":"Inter","url":"https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"},"title":{"enable":true,"family":"Noto Serif","url":"https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&display=swap"}},"content_max_width":"1000px","sidebar_width":"210px","hover":{"shadow":true,"scale":false},"scroll_progress":{"bar":true,"percentage":true},"website_counter":{"url":"https://cn.vercount.one/js","enable":false,"site_pv":true,"site_uv":true,"post_pv":true},"single_page":true,"preloader":{"enable":false,"custom_message":null},"side_tools":{"gear_rotation":true,"auto_expand":false},"open_graph":{"enable":true,"image":"/images/redefine-og.webp","description":"Hexo Theme Redefine, Redefine Your Hexo Journey."},"google_analytics":{"enable":false,"id":null}},"home_banner":{"enable":true,"style":"fixed","image":{"light":"/images/banner-light.jpg","dark":"/images/banner-dark.jpg"},"title":"内森淼文","subtitle":{"text":["AI · 编程 · 科技见闻","Write Code, Read World"],"hitokoto":{"enable":false,"show_author":false,"api":"https://v1.hitokoto.cn"},"typing_speed":100,"backing_speed":80,"starting_delay":500,"backing_delay":1500,"loop":true,"smart_backspace":true},"text_color":{"light":"#fff","dark":"#d1d1b6"},"text_style":{"title_size":"2.8rem","subtitle_size":"1.5rem","line_height":1.2},"custom_font":{"enable":false,"family":null,"url":null},"social_links":{"enable":true,"style":"default","links":[{"icon":"fa-brands fa-github","url":"https://github.com/hydraxman"}],"qrs":[{"icon":"fa-brands fa-weixin","qr":null},{"icon":"/images/custom-icon.svg","qr":null}]}},"plugins":{"feed":{"enable":false},"aplayer":{"enable":false,"type":"fixed","audios":[{"name":null,"artist":null,"url":null,"cover":null,"lrc":null}]},"mermaid":{"enable":false,"version":"11.4.1","theme":{"light":"default","dark":"dark"}}},"version":"2.9.0","navbar":{"auto_hide":false,"color":{"left":"#333333","right":"#555555","transparency":35},"width":{"home":"1200px","pages":"1000px"},"links":{"Home":{"path":"/","icon":"fa-regular fa-house"},"Archives":{"path":"/archives","icon":"fa-regular fa-archive"},"Categories":{"path":"/categories","icon":"fa-regular fa-folder"},"Tags":{"path":"/tags","icon":"fa-regular fa-tags"},"About":{"path":"/about","icon":"fa-regular fa-user"}},"search":{"enable":true,"preload":true}},"page_templates":{"friends_column":2,"tags_style":"blur","masonry":{"batch_size":12,"initial_batch_size":24}},"home":{"sidebar":{"enable":true,"position":"left","first_item":"menu","announcement":"AI · 编程 · 科技","show_on_mobile":true,"links":{"Archives":{"path":"/archives","icon":"fa-regular fa-archive"},"Tags":{"path":"/tags","icon":"fa-regular fa-tags"},"Categories":{"path":"/categories","icon":"fa-regular fa-folder"}}},"article_date_format":"auto","excerpt_length":200,"categories":{"enable":true,"limit":3},"tags":{"enable":true,"limit":3}},"footer":{"runtime":true,"icon":"<i class=\"fa-solid fa-heart fa-beat\" style=\"--fa-animation-duration: 0.5s; color: #333\"></i>","start":"2024/01/01 00:00:00","statistics":true,"customize":null,"icp":{"enable":false,"number":null,"url":null}},"footerStart":"2024/01/01 00:00:00","mermaid":{"style":{"light":"default","dark":"dark"}}};
+    window.lang_ago = {"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"};
+    window.i18n = {"search":"站内搜索您需要的内容...","toc":"目录","prev":"上一页","next":"下一页","prev_posts":"上一篇","next_posts":"下一篇","page":"第 %d 页","recent_posts":"最新文章","share":"分享","powered_by":"由 %s 驱动","theme":"主题","rss_feed":"RSS Feed","category":"分类","categories":"分类","tag":"标签","tags":"标签","post":"文章","posts":"文章","tagcloud":"标签云","comment":"评论","comments":"评论","top":"置顶","sticky":"置顶","go-back-home":"回到首页","masonry_loading":"照片加载中...","image_viewer":"图片查看器","close":"关闭","exif":{"title":"EXIF","cards":{"camera":"相机","lens":"镜头","exposure":"曝光","other":"其他"},"fields":{"make":"品牌","model":"机型","date_taken":"拍摄时间","lens_model":"镜头","focal_length":"焦距","focus_mode":"对焦模式","shutter":"快门","aperture":"光圈","iso":"感光度","exposure_program":"曝光程序","exposure_compensation":"曝光补偿","metering_mode":"测光模式","flash":"闪光灯","white_balance":"白平衡","latitude":"纬度","longitude":"经度","altitude":"海拔"},"status":{"loading":"加载中...","no_exif":"无 EXIF 信息","library_missing":"EXIF 库未加载","image_source_missing":"图片地址不可用","unavailable":"EXIF 不可用（可能被 CORS 阻止或缺少元数据）","flag_unavailable":"EXIF 不可用"}},"home":"首页","archive":"归档","archives":"归档","about":"关于","links":"链接","link":"链接","friends":"友情链接","friend":"友情链接","timeline":"时间轴","shuoshuo":"说说","bookmarks":"书签","site_uv":"访问人数","site_pv":"总访问量","read_more":"阅读全文","wordcount":"字","min2read":"分钟","changelog":"更新日志","status":"状态","runtime":"博客已运行","days":"天","hours":"小时","minutes":"分钟","seconds":"秒","optimized_by":"并由 Evan 进行优化","rights":"版权所有","site_posts":"共撰写了 %s 篇文章","site_wordcount":"共 %s 字","copyright":{"title":"标题","author":"作者","link":"链接","create_time":"创建于","update_time":"更新于","license_title":"版权声明","license_content":"本文章采用 %s 进行许可。","all_rights_reserved":"版权所有 &#169 %s，禁止转载。","public_domain":"本文为公有领域作品，可自由转载、引用。"},"ago":{"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"},"create_time":"创建","update_time":"更新","expired":"这篇文章最后更新于 %s 天前，内容可能已经过时。"};
+    window.data = {"masonry":false};
+  </script>
+    
+    <!--- Fontawesome Part-->
+    
+<link rel="stylesheet" href="/fontawesome/fontawesome.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/brands.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/solid.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/regular.min.css">
+
+    
+    
+    
+    
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+	<div class="progress-bar-container">
+	
+	<span class="scroll-progress-bar"></span>
+	
+
+	
+	<span class="pjax-progress-bar"></span>
+	<!--        <span class="swup-progress-icon">-->
+	<!--            <i class="fa-solid fa-circle-notch fa-spin"></i>-->
+	<!--        </span>-->
+	
+</div>
+
+<main class="page-container" id="swup">
+
+	
+
+	<div class="main-content-container flex flex-col justify-between min-h-dvh">
+		<div class="main-content-header">
+			<header class="navbar-container px-6 md:px-12">
+    <div class="navbar-content transition-navbar ">
+        <div class="left">
+            
+            <a class="logo-title" href="/">
+                
+                内森淼文
+                
+            </a>
+        </div>
+
+        <div class="right">
+            <!-- PC -->
+            <div class="desktop">
+                <ul class="navbar-list">
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/"
+                                        >
+                                    <i class="fa-regular fa-house fa-fw"></i>
+                                    首页
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/archives"
+                                        >
+                                    <i class="fa-regular fa-archive fa-fw"></i>
+                                    归档
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/categories"
+                                        >
+                                    <i class="fa-regular fa-folder fa-fw"></i>
+                                    分类
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/tags"
+                                        >
+                                    <i class="fa-regular fa-tags fa-fw"></i>
+                                    标签
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/about"
+                                        >
+                                    <i class="fa-regular fa-user fa-fw"></i>
+                                    关于
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                    
+                        <li class="navbar-item search search-popup-trigger">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </li>
+                    
+                </ul>
+            </div>
+            <!-- Mobile -->
+            <div class="mobile">
+                
+                    <div class="icon-item search search-popup-trigger"><i class="fa-solid fa-magnifying-glass"></i>
+                    </div>
+                
+                <div class="icon-item navbar-bar">
+                    <div class="navbar-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile sheet -->
+    <div class="navbar-drawer h-dvh w-full absolute top-0 left-0 bg-background-color flex flex-col justify-between">
+        <ul class="drawer-navbar-list flex flex-col px-4 justify-center items-start">
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/"
+                        >
+                            <span>
+                                首页
+                            </span>
+                            
+                                <i class="fa-regular fa-house fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/archives"
+                        >
+                            <span>
+                                归档
+                            </span>
+                            
+                                <i class="fa-regular fa-archive fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/categories"
+                        >
+                            <span>
+                                分类
+                            </span>
+                            
+                                <i class="fa-regular fa-folder fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/tags"
+                        >
+                            <span>
+                                标签
+                            </span>
+                            
+                                <i class="fa-regular fa-tags fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/about"
+                        >
+                            <span>
+                                关于
+                            </span>
+                            
+                                <i class="fa-regular fa-user fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+
+            
+            
+                
+                    
+                    
+                    
+            
+        </ul>
+
+        <div class="statistics flex justify-around my-2.5">
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/tags">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">374</div>
+        <div class="label text-third-text-color text-sm">标签</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/categories">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">12</div>
+        <div class="label text-third-text-color text-sm">分类</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/archives">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">337</div>
+        <div class="label text-third-text-color text-sm">文章</div>
+    </a>
+</div>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+		</div>
+
+		<div class="main-content-body transition-fade-up">
+			
+
+			<div class="main-content">
+				<div class="post-page-container flex relative justify-between box-border w-full h-full">
+	<div class="article-content-container">
+
+		<div class="article-title relative w-full">
+			
+			
+			
+			<img src="/images/deepseek-harness-architecture-deep-dive/cover.png" alt="DeepSeek Harness 深度拆解：当 Agent Runtime 里“一切皆插件”" class="w-full h-60 sm:h-72 md:h-80 object-cover sm:rounded-t-large dark:brightness-75" />
+			
+			<div class="w-full flex items-center absolute bottom-0 justify-start">
+				<h1 class="article-title-cover text-center mx-6 my-6 text-second-text-color bg-background-color-transparent px-4 py-3 text-3xl sm:text-4xl md:text-5xl font-semibold backdrop-blur-lg rounded-xl border border-border-color ">DeepSeek Harness 深度拆解：当 Agent Runtime 里“一切皆插件”</h1>
+			</div>
+			
+		</div>
+
+		
+		<div class="article-header flex flex-row gap-2 items-center px-2 sm:px-6 md:px-8">
+			<div class="avatar w-[46px] h-[46px] shrink-0 rounded-medium border border-border-color p-px">
+				<img src="/images/avatar.png">
+			</div>
+			<div class="info flex flex-col justify-between">
+				<div class="author flex items-center">
+					<span class="name text-default-text-color text-lg font-semibold">Nathan</span>
+					
+				</div>
+				<div class="meta-info">
+					<div class="article-meta-info">
+    <span class="article-date article-meta-item">
+        <i class="fa-regular fa-pen-fancy"></i>&nbsp;
+        <span class="desktop">2026-08-14 12:00</span>
+        <span class="mobile">2026-08-14 12:00</span>
+        <span class="hover-info">创建</span>
+    </span>
+    
+        <span class="article-date article-meta-item">
+            <i class="fa-regular fa-wrench"></i>&nbsp;
+            <span class="desktop">2026-08-19 05:16:54</span>
+            <span class="mobile">2026-08-19 05:16:54</span>
+            <span class="hover-info">更新</span>
+        </span>
+    
+
+    
+        <span class="article-categories article-meta-item">
+            <i class="fa-regular fa-folders"></i>&nbsp;
+            <ul>
+                
+                
+                    
+                        
+                        <li>
+                            <a href="/categories/AI%E6%8A%80%E6%9C%AF/">AI技术</a>&nbsp;
+                        </li>
+                    
+                    
+                
+                    
+                        
+                            <li>></li>
+                        
+                        <li>
+                            <a href="/categories/AI%E6%8A%80%E6%9C%AF/Agent%E6%9E%B6%E6%9E%84/">Agent架构</a>&nbsp;
+                        </li>
+                    
+                    
+                
+            </ul>
+        </span>
+    
+    
+        <span class="article-tags article-meta-item">
+            <i class="fa-regular fa-tags"></i>&nbsp;
+            <ul>
+                
+                    <li>
+                        <a href="/tags/AI-Agent/">AI Agent</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/Coding-Agent/">Coding Agent</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/ACP/">ACP</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/MCP/">MCP</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/DeepSeek/">DeepSeek</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/Agent-Runtime/">Agent Runtime</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/DeepSeek-Harness/">DeepSeek Harness</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/Cordis/">Cordis</a>&nbsp;
+                    </li>
+                
+            </ul>
+        </span>
+    
+
+    
+    
+        <span class="article-wordcount article-meta-item">
+            <i class="fa-regular fa-typewriter"></i>&nbsp;<span>3k 字</span>
+        </span>
+    
+    
+        <span class="article-min2read article-meta-item">
+            <i class="fa-regular fa-clock"></i>&nbsp;<span>11 分钟</span>
+        </span>
+    
+    
+</div>
+
+				</div>
+			</div>
+		</div>
+		
+
+		
+
+
+		<div class="article-content markdown-body px-2 sm:px-6 md:px-8 pb-8">
+			<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/deepseek-harness-architecture-deep-dive/cover.png"
+                      alt="DeepSeek Harness 模块化 Agent Runtime"
+                ></p>
+<p>如果把 AI Agent 比作一台电脑，模型只是处理器。文件系统、终端、浏览器、会话记录、权限控制和界面，才决定这台“电脑”能不能真正完成工作。</p>
+<p>DeepSeek Harness 做了一件很特别的事：它把这些能力全部拆成插件。你可以替换模型，调整工具，换掉存储方式，增加新的界面，甚至让 Agent 临时挂载一段新能力，而不需要重写整个运行循环。</p>
+<p>这篇文章不要求你先读源码。读完后，你应该能回答四个问题：</p>
+<ul>
+<li>DeepSeek Harness 和普通的 Coding Agent 有什么区别？</li>
+<li>一个任务在它内部是怎样跑起来的？</li>
+<li>你可以怎样使用和扩展它？</li>
+<li>当前版本适不适合放进生产环境？</li>
+</ul>
+<h2 id="普通用户为什么要关心-Harness"><a href="#普通用户为什么要关心-Harness" class="headerlink" title="普通用户为什么要关心 Harness"></a>普通用户为什么要关心 Harness</h2><p>很多 Agent 产品把功能固定在应用里。你可以聊天、运行命令、修改文件，但很难替换底层模型、执行环境或权限策略。团队想接入自己的工具时，往往要绕过原来的架构。</p>
+<p>DeepSeek Harness 的思路更接近“组装运行时”。同一个 Agent 核心可以服务四种入口：</p>
+<ul>
+<li>在浏览器里作为 Coding Agent 使用；</li>
+<li>在命令行里执行一次性任务；</li>
+<li>通过 ACP 接入其他 Agent 客户端；</li>
+<li>通过 SDK 嵌入自己的自动化系统。</li>
+</ul>
+<p>它适合三类人：</p>
+<ol>
+<li>想研究 Agent Runtime，而不满足于只调用一个聊天 API 的开发者；</li>
+<li>需要替换模型、工具、存储或执行环境的团队；</li>
+<li>想开发 Agent 插件、工作流、Subagent 或自定义界面的工程师。</li>
+</ol>
+<p>如果你只想找一个开箱即用、接口长期稳定的日常助手，现阶段的 DeepSeek Harness 反而可能太重。它仍处于 Developer Preview，架构能力走在稳定性前面。</p>
+<h2 id="先跑起来：5分钟看见-Web-UI"><a href="#先跑起来：5分钟看见-Web-UI" class="headerlink" title="先跑起来：5分钟看见 Web UI"></a>先跑起来：5分钟看见 Web UI</h2><p>准备一个可用的 Node.js 环境。源码当前声明支持 Node.js 22.19，或者 Node.js 24 及以上版本。</p>
+<p>最简单的启动方式只有一条命令：</p>
+<div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npx @deepseek-ai/dsh web</span><br></pre></td></tr></table></figure></div>
+
+<p>浏览器访问：</p>
+<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://127.0.0.1:3080</span><br></pre></td></tr></table></figure></div>
+
+<p>DeepSeek 的模型凭据可以来自启动环境、项目目录的 <code>.env</code>、用户目录的 <code>.env</code>，或者 Harness 自己的凭据文件。第一次体验时，建议使用环境变量或 Web 设置页，不要把密钥写进项目源码。</p>
+<p>Web 服务默认只监听本机回环地址。产品命令会拒绝 <code>--host 0.0.0.0</code>，因为 Harness 能执行命令和修改文件，不应该直接暴露到局域网或公网。</p>
+<p>如果你不需要界面，只想让 Agent 完成一次任务，可以使用 Headless profile：</p>
+<div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npx @deepseek-ai/dsh --profile headless <span class="string">&quot;阅读当前项目，并解释启动入口&quot;</span></span><br></pre></td></tr></table></figure></div>
+
+<p>任务完成后，Headless 会输出最后一条有效回答，并把 Session 写入持久化存储。</p>
+<h2 id="它的核心不是一个大类，而是一棵插件树"><a href="#它的核心不是一个大类，而是一棵插件树" class="headerlink" title="它的核心不是一个大类，而是一棵插件树"></a>它的核心不是一个大类，而是一棵插件树</h2><p>DeepSeek Harness 的启动过程可以理解为五层装配：</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/deepseek-harness-architecture-deep-dive/architecture.jpg"
+                      alt="DeepSeek Harness 总体架构"
+                ></p>
+<h3 id="第一层：入口"><a href="#第一层：入口" class="headerlink" title="第一层：入口"></a>第一层：入口</h3><p>Web UI、Headless CLI、ACP 和 JSON-RPC SDK 只是不同入口。它们最后都把输入交给同一套 Agent 与 Session 服务。</p>
+<p>这意味着 Web 不是另一套后端，ACP 也不是单独实现的 Agent。你从哪个入口进来，底层使用的运行循环和会话日志仍然一致。</p>
+<h3 id="第二层：Profile-与-Bundle"><a href="#第二层：Profile-与-Bundle" class="headerlink" title="第二层：Profile 与 Bundle"></a>第二层：Profile 与 Bundle</h3><p>Profile 决定这次启动要加载哪些 Bundle。官方自带的 Web profile 可以简化为：</p>
+<div class="code-container" data-rel="Text"><figure class="iseeu highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dsh-base + dsh-web-app</span><br></pre></td></tr></table></figure></div>
+
+<p><code>dsh-base</code> 提供 Agent、Session、模型、工具、Skills、Subagent、权限和持久化。<code>dsh-web-app</code> 再加上 HTTP Server、API Gateway 和浏览器插件。</p>
+<p>你可以继续叠加自己的 patch。需要注意的是，同一个插件配置被后层覆盖时，替换的是整个 <code>config</code>，不是递归合并。只改一个字段时，也要保留其他仍然需要的字段。</p>
+<h3 id="第三层：Cordis-插件内核"><a href="#第三层：Cordis-插件内核" class="headerlink" title="第三层：Cordis 插件内核"></a>第三层：Cordis 插件内核</h3><p>Cordis 管理插件树、服务依赖、事件和生命周期。插件可以注册工具、Prompt、监听器或界面组件；卸载插件时，这些注册会自动撤销。</p>
+<p>这让 Harness 可以在不复制 AgentLoop 的情况下替换能力。例如 Shell 工具不需要知道命令最终跑在本机、Windows ACL 沙箱，还是 E2B 远程环境。它只调用统一的执行接口。</p>
+<h3 id="第四层：Agent-执行脊柱"><a href="#第四层：Agent-执行脊柱" class="headerlink" title="第四层：Agent 执行脊柱"></a>第四层：Agent 执行脊柱</h3><p>Agent Registry、AgentLoop、Session、System Prompt、Tool Registry 和 LLM Adapter 组成主执行链。</p>
+<p>这里最重要的原则是：模型上下文来自 Session 日志，而不是藏在某个临时数组里。进程重启后，只要 Session 仍在，就能重新推导模型应该看到的消息。</p>
+<h3 id="第五层：能力插件"><a href="#第五层：能力插件" class="headerlink" title="第五层：能力插件"></a>第五层：能力插件</h3><p>文件系统、Shell、PTY、LSP、Skills、MCP、Subagent、Workflow、Approval、Sandbox 和持久化都位于能力层。团队可以按需要启用或替换。</p>
+<h2 id="一个任务怎样变成多个-Step"><a href="#一个任务怎样变成多个-Step" class="headerlink" title="一个任务怎样变成多个 Step"></a>一个任务怎样变成多个 Step</h2><p>在 Harness 里，一次用户任务叫一个 Turn。一个 Turn 可以包含多个 Step。</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/deepseek-harness-architecture-deep-dive/turn-flow.jpg"
+                      alt="DeepSeek Harness 一轮 Turn 的真实调用链"
+                ></p>
+<p>执行过程可以压缩成下面几步：</p>
+<ol>
+<li>用户输入进入 Inbox；</li>
+<li>Agent 打开一个 Turn；</li>
+<li>系统组装 Prompt 和可用工具；</li>
+<li>Session 推导模型历史；</li>
+<li>模型开始流式输出；</li>
+<li>如果模型调用工具，Harness 执行工具并记录结果；</li>
+<li>工具结果进入下一个 Step；</li>
+<li>没有后续工作时，Turn 结束。</li>
+</ol>
+<p>这解释了为什么一个问题可能触发多次模型请求。第一次请求决定读取文件，第二次请求根据文件内容决定修改方案，第三次请求再检查结果。对用户来说是一个任务，对 AgentLoop 来说是同一个 Turn 里的多个 Step。</p>
+<p>并行工具也有秩序。可并行的调用会进入有上限的执行池；必须独占的调用会形成屏障。即使工具完成的先后顺序不同，Session 仍按模型原始调用顺序记录结果，避免恢复会话时出现上下文漂移。</p>
+<h2 id="Session-日志为什么重要"><a href="#Session-日志为什么重要" class="headerlink" title="Session 日志为什么重要"></a>Session 日志为什么重要</h2><p>Harness 会把 Turn、Step、用户消息、模型流式片段、完整回答、工具调用和工具结果写入同一条事件日志。</p>
+<p>这条日志同时服务三件事：</p>
+<ul>
+<li>Web UI 根据它还原对话；</li>
+<li>AgentLoop 根据它重建下一次模型请求；</li>
+<li>持久化层根据它恢复、导出或查询 Session。</li>
+</ul>
+<p>模型输出的流式片段不会直接成为最终事实。Harness 会先收集片段，再提交完整的 <code>assistant/message</code>。如果请求重试，未提交的内容不会混进正式对话。</p>
+<p>对于长任务，这种设计比单纯保存聊天文本更可靠。工具到底执行过什么、哪个 Step 被取消、模型在什么配置下生成回答，都能从事件中还原。</p>
+<h2 id="“一切皆插件”到底能换什么"><a href="#“一切皆插件”到底能换什么" class="headerlink" title="“一切皆插件”到底能换什么"></a>“一切皆插件”到底能换什么</h2><p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/deepseek-harness-architecture-deep-dive/plugin-seams.jpg"
+                      alt="插件 Seam、执行边界与可逆卸载"
+                ></p>
+<p>Harness 把一种能力拆成三个角色：</p>
+<ul>
+<li>Service Definition 定义统一接口；</li>
+<li>Service Provider 提供具体实现；</li>
+<li>Consumer 把能力呈现为 Tool、UI 或 API。</li>
+</ul>
+<p>以文件系统为例，模型面对的是文件工具，工具面对的是统一文件接口，Provider 决定文件来自本机还是远程 Sandbox。</p>
+<p>这种拆法带来几个实用场景：</p>
+<ul>
+<li>把默认模型换成其他 Provider，而不改 AgentLoop；</li>
+<li>把 Shell、PTY 和 LSP 一起迁移到远程执行环境；</li>
+<li>给特定 Agent 增加一组 Skills，而不影响其他 Session；</li>
+<li>通过 MCP 挂载外部工具；</li>
+<li>给 Web UI 增加新的设置页或工具结果卡片。</li>
+</ul>
+<p>外部插件可以这样安装：</p>
+<div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dsh plugin --profile web add &lt;package-or-git-spec&gt;</span><br></pre></td></tr></table></figure></div>
+
+<p>插件会作为新的 Bundle 层加入 profile。安装第三方插件前要审查来源，因为插件运行在宿主进程里，权限远高于普通 Prompt。</p>
+<h2 id="Agent-还能临时扩展自己"><a href="#Agent-还能临时扩展自己" class="headerlink" title="Agent 还能临时扩展自己"></a>Agent 还能临时扩展自己</h2><p>Harness 提供一个可选的 <code>cordis</code> Agent Preset。启用后，Agent 会获得五个特殊工具：</p>
+<ul>
+<li>检查当前插件和服务；</li>
+<li>定义一个临时插件；</li>
+<li>运行插件；</li>
+<li>停止插件；</li>
+<li>删除临时定义。</li>
+</ul>
+<p>它可以根据任务临时增加工具、Prompt 或 UI 组件，然后在任务结束后撤回。</p>
+<p>这项能力默认不会出现在 Standard 或 Headless profile 中。动态插件只保存在当前进程内，重启后消失，也不会自动写入配置文件。它使用的 <code>node:vm</code> 不是严格安全边界，权限等级应按 Bash 工具对待。</p>
+<p>普通用户可以先忽略这项能力。它更适合插件开发者验证想法，而不是在无人值守的生产任务中随意开放。</p>
+<h2 id="当前已经覆盖哪些能力"><a href="#当前已经覆盖哪些能力" class="headerlink" title="当前已经覆盖哪些能力"></a>当前已经覆盖哪些能力</h2><table>
+<thead>
+<tr>
+<th>使用场景</th>
+<th>Harness 提供的能力</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>代码与项目操作</td>
+<td>文件读写、Shell、PTY、LSP、工作区管理</td>
+</tr>
+<tr>
+<td>上下文扩展</td>
+<td>Skills、MCP、Agent Instructions、压缩与引用</td>
+</tr>
+<tr>
+<td>多 Agent 编排</td>
+<td>Subagent、Fork、Workflow、后台 Jobs、Goal</td>
+</tr>
+<tr>
+<td>产品接入</td>
+<td>Web、Headless、ACP、JSON-RPC SDK</td>
+</tr>
+<tr>
+<td>安全控制</td>
+<td>Approval、Permission Preset、Sandbox、凭据管理</td>
+</tr>
+<tr>
+<td>持久化</td>
+<td>JSONL Session、附件、投影缓存、可选 SQLite 查询</td>
+</tr>
+</tbody></table>
+<p>这些能力不会在每个入口全部打开。</p>
+<p>ACP 目前主要面向自动化，只支持创建新 Session、发送文本、取消任务、接收已提交回答和处理一次性权限请求。它还不支持恢复、删除、Fork Session，也不暴露完整的编辑器、终端、MCP 和计划界面。</p>
+<p>MCP 客户端同样不是默认启用项。MCP Server 的启动命令属于宿主可信代码，不受 Agent Sandbox 保护。接入前应像审查本地程序一样审查它。</p>
+<h2 id="三个必须知道的安全边界"><a href="#三个必须知道的安全边界" class="headerlink" title="三个必须知道的安全边界"></a>三个必须知道的安全边界</h2><h3 id="Sandbox-主要限制写入，不等于完全隔离"><a href="#Sandbox-主要限制写入，不等于完全隔离" class="headerlink" title="Sandbox 主要限制写入，不等于完全隔离"></a>Sandbox 主要限制写入，不等于完全隔离</h3><p>默认 <code>workspace-write</code> 会限制文件修改范围，但不会屏蔽所有读取、网络访问和进程可见性。</p>
+<p>本地 Sandbox 会按系统选择实现：Linux 使用 bwrap 或 Landlock，macOS 使用 Seatbelt，Windows 使用 ACL restricted token。不同平台的隔离强度并不完全相同。</p>
+<h3 id="本地凭据文件挡不住同一用户进程"><a href="#本地凭据文件挡不住同一用户进程" class="headerlink" title="本地凭据文件挡不住同一用户进程"></a>本地凭据文件挡不住同一用户进程</h3><p>Harness 会把凭据文件设成用户私有权限，但 Agent 工具与 Harness 运行在同一个系统用户下。文件权限能阻止其他用户，不能阻止同一 UID 的工具主动读取。</p>
+<p>高敏感场景应使用独立系统用户、容器、远程凭据代理或系统 Keychain，而不是只依赖本地 YAML 文件。</p>
+<h3 id="插件与配置要按代码审查"><a href="#插件与配置要按代码审查" class="headerlink" title="插件与配置要按代码审查"></a>插件与配置要按代码审查</h3><p>Cordis 配置支持 JavaScript 表达式，插件可以注册服务、运行命令、访问文件和修改界面。第三方插件、Bundle 与 MCP Server 都属于代码供应链，不是普通提示词。</p>
+<p>固定版本、检查生命周期脚本、阅读权限范围，再放进隔离环境验证，是更稳妥的安装方式。</p>
+<h2 id="现在该不该用"><a href="#现在该不该用" class="headerlink" title="现在该不该用"></a>现在该不该用</h2><p>适合现在开始尝试：</p>
+<ul>
+<li>学习 Agent Runtime 的完整架构；</li>
+<li>开发工具、Skills、Subagent 或插件；</li>
+<li>在本地工作区试验 Coding Agent；</li>
+<li>固定版本后嵌入内部原型。</li>
+</ul>
+<p>暂时不建议直接承担：</p>
+<ul>
+<li>不可丢失的关键生产任务；</li>
+<li>无认证的公网服务；</li>
+<li>存放高敏感凭据的共享环境；</li>
+<li>无人审核的第三方插件生态。</li>
+</ul>
+<p>第一次使用时，保持默认本地地址和审批策略，选择一个可丢弃的测试项目，并备份 Session 数据。等你熟悉 profile、权限和持久化以后，再逐步增加 MCP、Subagent 或远程执行环境。</p>
+<h2 id="版本说明"><a href="#版本说明" class="headerlink" title="版本说明"></a>版本说明</h2><p>DeepSeek Harness 仍是 Developer Preview。本文对应公开仓库 <code>master</code> 的 <code>0.1.0-rc.5</code> 代码；同一时间 npm 的最新包已经是 <code>0.1.0-rc.6</code>，而且暂时没有 Git Tag 或 GitHub Release 可以把两者精确对应起来。</p>
+<p>这意味着升级前应先看变更，插件和 Session 格式也不应假定长期兼容。想稳定试用时，固定 npm 版本或 Git commit，比直接追随 <code>latest</code> 更稳妥。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a class="link"   target="_blank" rel="noopener" href="https://github.com/deepseek-ai/deepseek-harness" >DeepSeek Harness 官方仓库<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://github.com/deepseek-ai/deepseek-harness/blob/47f943859bef60e4160492346772ded9b24f765a/README.zh.md" >中文 README<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://github.com/deepseek-ai/deepseek-harness/blob/47f943859bef60e4160492346772ded9b24f765a/docs/architecture.md" >总体架构<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://github.com/deepseek-ai/deepseek-harness/blob/47f943859bef60e4160492346772ded9b24f765a/packages/core/agent-loop/src/agent.ts" >ReactLoopAgent<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://github.com/deepseek-ai/deepseek-harness/blob/47f943859bef60e4160492346772ded9b24f765a/apps/cli/reference/README.md" >CLI 行为参考<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://github.com/deepseek-ai/deepseek-harness/blob/47f943859bef60e4160492346772ded9b24f765a/packages/acp/acp/README.md" >ACP Adapter<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://github.com/deepseek-ai/deepseek-harness/blob/47f943859bef60e4160492346772ded9b24f765a/packages/sandbox/sandbox-local/README.md" >Sandbox 本地 Provider<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://github.com/deepseek-ai/deepseek-harness/blob/47f943859bef60e4160492346772ded9b24f765a/packages/credentials/credentials-local/README.md" >凭据 Provider<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+</ul>
+
+		</div>
+
+		
+		<div class="post-copyright-info w-full my-8 px-2 sm:px-6 md:px-8">
+			<div class="article-copyright-info-container">
+    <ul>
+        <li><strong>标题:</strong> DeepSeek Harness 深度拆解：当 Agent Runtime 里“一切皆插件”</li>
+        <li><strong>作者:</strong> Nathan</li>
+        <li><strong>创建于
+                :</strong> 2026-08-14 12:00:00</li>
+        
+            <li>
+                <strong>更新于
+                    :</strong> 2026-08-19 05:16:54
+            </li>
+        
+        <li>
+            <strong>链接:</strong> https://hydraxman.github.io/2026/08/14/deepseek-harness-architecture-deep-dive/
+        </li>
+        <li>
+            <strong>
+                版权声明:
+            </strong>
+            
+
+            
+                本文章采用 <a class="license" target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0">CC BY-NC-SA 4.0</a> 进行许可。
+            
+        </li>
+    </ul>
+</div>
+
+		</div>
+		
+
+		
+		<ul class="post-tags-box text-lg mt-1.5 flex-wrap justify-center flex md:hidden">
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/AI-Agent/">#AI Agent</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/Coding-Agent/">#Coding Agent</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/ACP/">#ACP</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/MCP/">#MCP</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/DeepSeek/">#DeepSeek</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/Agent-Runtime/">#Agent Runtime</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/DeepSeek-Harness/">#DeepSeek Harness</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/Cordis/">#Cordis</a>&nbsp;
+			</li>
+			
+		</ul>
+		
+
+		
+
+		
+		<div class="article-nav my-8 flex justify-between items-center px-2 sm:px-6 md:px-8">
+			
+			<div class="article-prev border-border-color shadow-redefine-flat shadow-shadow-color-2 rounded-medium px-4 py-2 hover:shadow-redefine-flat-hover hover:shadow-shadow-color-2">
+				<a class="prev" rel="prev" href="/2026/08/15/github-trending/github-trending-2026-08-15/">
+					<span class="left arrow-icon flex justify-center items-center">
+						<i class="fa-solid fa-chevron-left"></i>
+					</span>
+					<span class="title flex justify-center items-center">
+						<span class="post-nav-title-item truncate max-w-48">GitHub 热榜今天拼的不是模型：Agent 开始接管浏览器、桌面和团队工作流</span>
+						<span class="post-nav-item">上一篇</span>
+					</span>
+				</a>
+			</div>
+			
+			
+			<div class="article-next border-border-color shadow-redefine-flat shadow-shadow-color-2 rounded-medium px-4 py-2 hover:shadow-redefine-flat-hover hover:shadow-shadow-color-2">
+				<a class="next" rel="next" href="/2026/08/14/github-trending/github-trending-2026-08-14/">
+					<span class="title flex justify-center items-center">
+						<span class="post-nav-title-item truncate max-w-48">GitHub 热榜今天不只追大模型：小模型、Agent 技能与工作流一起上位</span>
+						<span class="post-nav-item">下一篇</span>
+					</span>
+					<span class="right arrow-icon flex justify-center items-center">
+						<i class="fa-solid fa-chevron-right"></i>
+					</span>
+				</a>
+			</div>
+			
+		</div>
+		
+
+
+		
+	</div>
+
+	
+	<div class="toc-content-container">
+		<div class="post-toc-wrap">
+	<div class="post-toc">
+		<div class="toc-title">目录</div>
+		<div class="page-title">DeepSeek Harness 深度拆解：当 Agent Runtime 里“一切皆插件”</div>
+		<ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%99%AE%E9%80%9A%E7%94%A8%E6%88%B7%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E5%85%B3%E5%BF%83-Harness"><span class="nav-text">普通用户为什么要关心 Harness</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%88%E8%B7%91%E8%B5%B7%E6%9D%A5%EF%BC%9A5%E5%88%86%E9%92%9F%E7%9C%8B%E8%A7%81-Web-UI"><span class="nav-text">先跑起来：5分钟看见 Web UI</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%83%E7%9A%84%E6%A0%B8%E5%BF%83%E4%B8%8D%E6%98%AF%E4%B8%80%E4%B8%AA%E5%A4%A7%E7%B1%BB%EF%BC%8C%E8%80%8C%E6%98%AF%E4%B8%80%E6%A3%B5%E6%8F%92%E4%BB%B6%E6%A0%91"><span class="nav-text">它的核心不是一个大类，而是一棵插件树</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E4%B8%80%E5%B1%82%EF%BC%9A%E5%85%A5%E5%8F%A3"><span class="nav-text">第一层：入口</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E4%BA%8C%E5%B1%82%EF%BC%9AProfile-%E4%B8%8E-Bundle"><span class="nav-text">第二层：Profile 与 Bundle</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E4%B8%89%E5%B1%82%EF%BC%9ACordis-%E6%8F%92%E4%BB%B6%E5%86%85%E6%A0%B8"><span class="nav-text">第三层：Cordis 插件内核</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E5%9B%9B%E5%B1%82%EF%BC%9AAgent-%E6%89%A7%E8%A1%8C%E8%84%8A%E6%9F%B1"><span class="nav-text">第四层：Agent 执行脊柱</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E4%BA%94%E5%B1%82%EF%BC%9A%E8%83%BD%E5%8A%9B%E6%8F%92%E4%BB%B6"><span class="nav-text">第五层：能力插件</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E4%B8%AA%E4%BB%BB%E5%8A%A1%E6%80%8E%E6%A0%B7%E5%8F%98%E6%88%90%E5%A4%9A%E4%B8%AA-Step"><span class="nav-text">一个任务怎样变成多个 Step</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Session-%E6%97%A5%E5%BF%97%E4%B8%BA%E4%BB%80%E4%B9%88%E9%87%8D%E8%A6%81"><span class="nav-text">Session 日志为什么重要</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E2%80%9C%E4%B8%80%E5%88%87%E7%9A%86%E6%8F%92%E4%BB%B6%E2%80%9D%E5%88%B0%E5%BA%95%E8%83%BD%E6%8D%A2%E4%BB%80%E4%B9%88"><span class="nav-text">“一切皆插件”到底能换什么</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Agent-%E8%BF%98%E8%83%BD%E4%B8%B4%E6%97%B6%E6%89%A9%E5%B1%95%E8%87%AA%E5%B7%B1"><span class="nav-text">Agent 还能临时扩展自己</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BD%93%E5%89%8D%E5%B7%B2%E7%BB%8F%E8%A6%86%E7%9B%96%E5%93%AA%E4%BA%9B%E8%83%BD%E5%8A%9B"><span class="nav-text">当前已经覆盖哪些能力</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E4%B8%AA%E5%BF%85%E9%A1%BB%E7%9F%A5%E9%81%93%E7%9A%84%E5%AE%89%E5%85%A8%E8%BE%B9%E7%95%8C"><span class="nav-text">三个必须知道的安全边界</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Sandbox-%E4%B8%BB%E8%A6%81%E9%99%90%E5%88%B6%E5%86%99%E5%85%A5%EF%BC%8C%E4%B8%8D%E7%AD%89%E4%BA%8E%E5%AE%8C%E5%85%A8%E9%9A%94%E7%A6%BB"><span class="nav-text">Sandbox 主要限制写入，不等于完全隔离</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%AC%E5%9C%B0%E5%87%AD%E6%8D%AE%E6%96%87%E4%BB%B6%E6%8C%A1%E4%B8%8D%E4%BD%8F%E5%90%8C%E4%B8%80%E7%94%A8%E6%88%B7%E8%BF%9B%E7%A8%8B"><span class="nav-text">本地凭据文件挡不住同一用户进程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8F%92%E4%BB%B6%E4%B8%8E%E9%85%8D%E7%BD%AE%E8%A6%81%E6%8C%89%E4%BB%A3%E7%A0%81%E5%AE%A1%E6%9F%A5"><span class="nav-text">插件与配置要按代码审查</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%8E%B0%E5%9C%A8%E8%AF%A5%E4%B8%8D%E8%AF%A5%E7%94%A8"><span class="nav-text">现在该不该用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%89%88%E6%9C%AC%E8%AF%B4%E6%98%8E"><span class="nav-text">版本说明</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="nav-text">参考资料</span></a></li></ol>
+
+	</div>
+</div>
+	</div>
+	
+</div>
+
+			</div>
+
+			
+		</div>
+
+		<div class="main-content-footer">
+			<footer class="footer mt-5 py-5 h-auto text-base text-third-text-color relative border-t-2 border-t-border-color">
+    <div class="info-container py-3 text-center">
+        
+        <div class="text-center">
+            &copy;
+            
+              <span>2024</span>
+              -
+            
+            2026&nbsp;&nbsp;<i class="fa-solid fa-heart fa-beat" style="--fa-animation-duration: 0.5s; color: #333"></i>&nbsp;&nbsp;<a href="/">Nathan</a>
+            
+                
+                <p class="post-count space-x-0.5">
+                    <span>
+                        共撰写了 337 篇文章
+                    </span>
+                    
+                        <span>
+                            共 780k 字
+                        </span>
+                    
+                </p>
+            
+        </div>
+        
+        <div class="relative text-center lg:absolute lg:left-[20px] lg:top-1/2 lg:-translate-y-1/2 lg:text-left">
+            <span class="lg:block text-sm">由 <?xml version="1.0" encoding="utf-8"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg class="relative top-[2px] inline-block align-baseline" version="1.1" id="圖層_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="1rem" height="1rem" viewBox="0 0 512 512" enable-background="new 0 0 512 512" xml:space="preserve"><path fill="#0E83CD" d="M256.4,25.8l-200,115.5L56,371.5l199.6,114.7l200-115.5l0.4-230.2L256.4,25.8z M349,354.6l-18.4,10.7l-18.6-11V275H200v79.6l-18.4,10.7l-18.6-11v-197l18.5-10.6l18.5,10.8V237h112v-79.6l18.5-10.6l18.5,10.8V354.6z"/></svg><a target="_blank" class="text-base" href="https://hexo.io">Hexo</a> 驱动</span>
+            <span class="text-sm lg:block">主题&nbsp;<a class="text-base" target="_blank" href="https://github.com/EvanNotFound/hexo-theme-redefine">Redefine v2.9.0</a></span>
+        </div>
+        
+        
+            <div>
+                博客已运行 <span class="odometer" id="runtime_days" ></span> 天 <span class="odometer" id="runtime_hours"></span> 小时 <span class="odometer" id="runtime_minutes"></span> 分钟 <span class="odometer" id="runtime_seconds"></span> 秒
+            </div>
+        
+        
+            <script data-swup-reload-script>
+                try {
+                    function odometer_init() {
+                    const elements = document.querySelectorAll('.odometer');
+                    elements.forEach(el => {
+                        new Odometer({
+                            el,
+                            format: '( ddd).dd',
+                            duration: 200
+                        });
+                    });
+                    }
+                    odometer_init();
+                } catch (error) {}
+            </script>
+        
+        
+            
+                
+        
+                
+        
+        
+    </div>  
+</footer>
+		</div>
+	</div>
+
+	
+	<div class="post-tools">
+		<div class="post-tools-container">
+	<ul class="article-tools-list">
+		<!-- TOC aside toggle -->
+		
+		<li class="right-bottom-tools page-aside-toggle">
+			<i class="fa-regular fa-outdent"></i>
+		</li>
+		
+
+		<!-- go comment -->
+		
+	</ul>
+</div>
+	</div>
+	
+
+	<div class="right-side-tools-container">
+		<div class="side-tools-container">
+	<ul class="hidden-tools-list">
+		<li class="right-bottom-tools tool-font-adjust-plus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-plus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-font-adjust-minus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-minus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-dark-light-toggle flex justify-center items-center">
+			<i class="fa-regular fa-moon"></i>
+		</li>
+
+		<!-- rss -->
+		
+
+		
+
+		<li class="right-bottom-tools tool-scroll-to-bottom flex justify-center items-center">
+			<i class="fa-regular fa-arrow-down"></i>
+		</li>
+	</ul>
+
+	<ul class="visible-tools-list">
+		<li class="right-bottom-tools toggle-tools-list flex justify-center items-center">
+			<i class="fa-regular fa-cog fa-spin"></i>
+		</li>
+		
+		<li class="right-bottom-tools tool-scroll-to-top flex justify-center items-center">
+			<i class="arrow-up fas fa-arrow-up"></i>
+			<span class="percent"></span>
+		</li>
+		
+		
+	</ul>
+</div>
+	</div>
+
+	<div class="image-viewer-container" role="dialog" aria-modal="true" aria-label="图片查看器">
+	<button class="image-viewer-close" type="button" aria-label="关闭">
+		<i class="fa-solid fa-xmark"></i>
+	</button>
+	<button class="image-viewer-prev" type="button" aria-label="上一页">
+		<i class="fa-solid fa-chevron-left"></i>
+	</button>
+	<div class="image-viewer-frame">
+		<img src="" alt="">
+	</div>
+	<div class="image-viewer-exif-panel hidden absolute left-1/2 bottom-20 -translate-x-1/2 w-[min(92vw,420px)] max-h-[60vh] overflow-hidden rounded-2xl bg-background-color-transparent-80 p-4 text-left shadow-redefine-flat backdrop-blur-md" role="dialog" aria-label="EXIF" aria-hidden="true">
+		<div class="flex items-center justify-between mb-3">
+			<span class="text-sm font-semibold text-first-text-color">EXIF</span>
+			<button class="image-viewer-exif-close flex h-8 w-8 items-center justify-center rounded-full bg-background-color-transparent-80 text-first-text-color transition hover:bg-background-color-transparent-40" type="button" aria-label="关闭">
+				<i class="fa-solid fa-xmark text-[0.65rem]"></i>
+			</button>
+		</div>
+		<div class="image-viewer-exif-cards grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[50vh] overflow-y-auto pr-1 scrollbar-hide"></div>
+		<template class="image-viewer-exif-card-template">
+			<div class="rounded-lg bg-background-color-transparent-40 px-3 py-2">
+				<div class="image-viewer-exif-card-header flex items-center gap-2 mb-1">
+					<i class="image-viewer-exif-card-icon fa-solid fa-circle-info text-xs text-third-text-color"></i>
+					<div class="image-viewer-exif-card-title text-xs font-semibold text-first-text-color"></div>
+				</div>
+				<div class="image-viewer-exif-card-items flex flex-col gap-1"></div>
+			</div>
+		</template>
+	</div>
+	<button class="image-viewer-exif-toggle flex items-center gap-2 hidden absolute left-1/2 bottom-6 -translate-x-1/2 rounded-full border border-border-color bg-background-color-transparent-80 px-4 py-2 text-first-text-color backdrop-blur-md transition hover:bg-background-color-transparent-40" type="button" aria-label="EXIF" aria-expanded="false">
+		<i class="fa-solid fa-circle-info text-xs"></i>
+		<span class="text-xs font-semibold uppercase tracking-wider">EXIF</span>
+	</button>
+	<button class="image-viewer-next" type="button" aria-label="下一页">
+		<i class="fa-solid fa-chevron-right"></i>
+	</button>
+</div>
+
+
+	
+	<div class="search-pop-overlay">
+	<div class="popup search-popup">
+		<div class="search-header">
+			<span class="search-input-field-pre">
+				<i class="fa-solid fa-keyboard"></i>
+			</span>
+			<div class="search-input-container">
+				<input autocomplete="off" autocorrect="off" autocapitalize="off" placeholder="站内搜索您需要的内容..." spellcheck="false" type="search" class="search-input">
+			</div>
+			<span class="popup-btn-close">
+				<i class="fa-solid fa-times"></i>
+			</span>
+		</div>
+		<div id="search-result">
+			<div id="no-result">
+				<i class="fa-solid fa-spinner fa-spin-pulse fa-5x fa-fw"></i>
+			</div>
+		</div>
+	</div>
+</div>
+	
+
+</main>
+
+
+
+<script src="/js/build/libs/Swup.min.js"></script>
+
+<script src="/js/build/libs/SwupSlideTheme.min.js"></script>
+
+<script src="/js/build/libs/SwupScriptsPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupProgressPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupScrollPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupPreloadPlugin.min.js"></script>
+
+<script>
+    window.swup = new Swup({
+        plugins: [
+            new SwupScriptsPlugin({
+                optin: true,
+            }),
+            new SwupProgressPlugin(),
+            new SwupScrollPlugin({
+                offset: 80,
+            }),
+            new SwupSlideTheme({
+                mainElement: ".main-content-body",
+            }),
+            new SwupPreloadPlugin(),
+        ],
+        containers: ["#swup"],
+    });
+
+    window.dispatchEvent(
+        new CustomEvent("redefine:swup:ready", {
+            detail: {
+                swup: window.swup,
+            },
+        }),
+    );
+</script>
+
+
+
+
+	
+<script src="/js/build/main.js" type="module"></script>
+
+
+
+    
+<script src="/js/build/libs/odometer.min.js"></script>
+
+    
+<link rel="stylesheet" href="/assets/odometer-theme-minimal.css">
+
+
+
+
+
+
+
+  
+<script src="/js/build/libs/Typed.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+<script src="/js/build/libs/moment-with-locales.min.js" data-swup-reload-script=""></script>
+
+
+
+	
+</body>
+
+</html>
