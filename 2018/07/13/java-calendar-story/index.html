@@ -454,7 +454,7 @@
         <div class="label text-third-text-color text-sm">分类</div>
     </a>
     <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/archives">
-        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">341</div>
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">343</div>
         <div class="label text-third-text-color text-sm">文章</div>
     </a>
 </div>
@@ -579,127 +579,144 @@
 
 <p>这件事的缘起很简单，我在实现计算两个日期天数距离逻辑的过程中，发现了一个很诡异的事情，同样的起始日期，用python和Java计算出的结果居然不一样！</p>
 <p>例如，计算一个1990年1月1日到1990年9月4日之间的天数，用python计算如图：</p>
-<p><img  
+<img  
                      lazyload
                      src="/images/loading.svg"
                      data-src="/2018/07/13/java-calendar-story/1.png"
-                      alt="clipboard.png"
-                ></p>
+                      class="" title="clipboard.png"
+                >
+
 <p>得出天数为246。可以看到，python的API设计简单。</p>
 <p>用Java计算则不同了，众所周知Java推荐的Calendar API不是一般的麻烦，实现函数如下：</p>
-<p><img  
+<img  
                      lazyload
                      src="/images/loading.svg"
                      data-src="/2018/07/13/java-calendar-story/2.png"
-                      alt="clipboard.png"
-                ></p>
+                      class="" title="clipboard.png"
+                >
+
 <p>按照这个逻辑测试如下：</p>
-<p><img  
+<img  
                      lazyload
                      src="/images/loading.svg"
                      data-src="/2018/07/13/java-calendar-story/3.png"
-                      alt="clipboard.png"
-                ></p>
-<p><img  
+                      class="" title="clipboard.png"
+                >
+
+<img  
                      lazyload
                      src="/images/loading.svg"
                      data-src="/2018/07/13/java-calendar-story/5.png"
-                      alt="clipboard.png"
-                ></p>
+                      class="" title="clipboard.png"
+                >
+
 <p>WTF!?得出的天数居然是245天？为什么和Python算出来的不一样？我马上实际数了一下，应该是246天，Python算的结果是对的！</p>
 <p>仔细核对了程序实现，没毛病啊？难道有精读损失？</p>
 <h2 id="狐疑（懵逼）"><a href="#狐疑（懵逼）" class="headerlink" title="狐疑（懵逼）"></a>狐疑（懵逼）</h2><p>进而加入如下输出：</p>
-<p><img  
+<img  
                      lazyload
                      src="/images/loading.svg"
                      data-src="/2018/07/13/java-calendar-story/6.png"
-                      alt="clipboard.png"
-                ></p>
-<p><img  
+                      class="" title="clipboard.png"
+                >
+
+
+<img  
                      lazyload
                      src="/images/loading.svg"
                      data-src="/2018/07/13/java-calendar-story/7.png"
-                      alt="clipboard.png"
-                ></p>
+                      class="" title="clipboard.png"
+                >
+
 <p>什么鬼？这0.0416666667天跑哪里去了？需知：</p>
-<p><img  
+<img  
                      lazyload
                      src="/images/loading.svg"
                      data-src="/2018/07/13/java-calendar-story/8.png"
-                      alt="clipboard.png"
-                ></p>
+                      class="" title="clipboard.png"
+                >
+
 <p>也就是说，Java计算的时间和实际正好差了一个小时！</p>
 <p>无独有偶，各种百度后，居然发现了和我有类似疑问的兄弟：<br><a class="link"   target="_blank" rel="noopener" href="https://ask.csdn.net/questions/241889" >https://ask.csdn.net/questions/241889<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a><br>然而这个提问下并没有靠谱的答案！</p>
 <p>这样看，似乎很像时区上出了问题，然而并不是，前后Calendar对象的时区完全一致！都是Asia&#x2F;Shanghai！</p>
 <p>由此难免要想，难道Java代码有Bug？把这一个小时给吃了？好吃吗？啥味道？</p>
 <p>然而，用同样的函数，计算990年1月1日到1990年12月4日之间的天数，有一切正常了！</p>
-<p><img  
+<img  
                      lazyload
                      src="/images/loading.svg"
                      data-src="/2018/07/13/java-calendar-story/9.png"
-                      alt="clipboard.png"
-                ></p>
+                      class="" title="clipboard.png"
+                >
+
 <p>心中万马奔腾啊！</p>
-<p><img  
+<img  
                      lazyload
                      src="/images/loading.svg"
                      data-src="/2018/07/13/java-calendar-story/10.png"
-                      alt="clipboard.png"
-                ></p>
+                      class="" title="clipboard.png"
+                >
+
 <p>经过一番探索，我又写了如下代码：</p>
-<p><img  
+<img  
                      lazyload
                      src="/images/loading.svg"
                      data-src="/2018/07/13/java-calendar-story/11.png"
-                      alt="clipboard.png"
-                ></p>
+                      class="" title="clipboard.png"
+                >
+
 <p>惊奇地发现：</p>
-<p><img  
+<img  
                      lazyload
                      src="/images/loading.svg"
                      data-src="/2018/07/13/java-calendar-story/12.png"
-                      alt="clipboard.png"
-                ></p>
+                      class="" title="clipboard.png"
+                >
+
 <p>进而又发现：</p>
-<p><img  
+<img  
                      lazyload
                      src="/images/loading.svg"
                      data-src="/2018/07/13/java-calendar-story/13.png"
-                      alt="clipboard.png"
-                ></p>
+                      class="" title="clipboard.png"
+                >
+
 <p>由此我灵机一动，又写了一段代码，找到从1900年至今所有当天长度非24小时的日期！</p>
-<p><img  
+<img  
                      lazyload
                      src="/images/loading.svg"
                      data-src="/2018/07/13/java-calendar-story/14.png"
-                      alt="clipboard.png"
-                ></p>
+                      class="" title="clipboard.png"
+                >
+
 <p>此中必有蹊跷！</p>
 <h2 id="豁然"><a href="#豁然" class="headerlink" title="豁然"></a>豁然</h2><p>然而这对于没文化的我来说，实在是一件不可理喻的事情。只能从源码入手了！</p>
 <p>找源码的过程就不再赘述了，总之，时间的偏移来自于一个zoneOffsets的数组，而这个数组中除了因为时区而产生的偏移外，还有一个神秘的DST_OFFSET！</p>
-<p><img  
+<img  
                      lazyload
                      src="/images/loading.svg"
                      data-src="/2018/07/13/java-calendar-story/15.png"
-                      alt="clipboard.png"
-                ></p>
+                      class="" title="clipboard.png"
+                >
+
 <p>找到这里，这个谜团即将揭晓了！</p>
 <p>啥是DST_OFFSET呢？</p>
-<p><img  
+<img  
                      lazyload
                      src="/images/loading.svg"
                      data-src="/2018/07/13/java-calendar-story/16.png"
-                      alt="clipboard.png"
-                ></p>
+                      class="" title="clipboard.png"
+                >
+
 <p>没错，daylight saving offset，也就是夏令时！</p>
 <p>也就是说，中国的1990年4月15日这天里，人为地将时间拨快了一个小时，1990年9月16日这天再拨慢回来。进一步说，中国的1990年4月15日这天确实是23个小时，1990年9月16日这天也确实是25小时，Java没搞错！</p>
 <p>也就是说之前找到的所有非24小时的日期，都是中国政府（或国民政府）施行夏令时调整的日期，这段历史断断续续地持续了半个多世纪！而Java的Calendar API将其忠实地记录了下来。</p>
-<p><img  
+<img  
                      lazyload
                      src="/images/loading.svg"
                      data-src="/2018/07/13/java-calendar-story/17.png"
-                      alt="clipboard.png"
-                ></p>
+                      class="" title="clipboard.png"
+                >
+
 <p>关于夏令时详情见<a class="link"   target="_blank" rel="noopener" href="https://baike.baidu.com/item/%E5%A4%8F%E4%BB%A4%E6%97%B6/1809579?fr=aladdin" >百度百科<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a>。<br>哈哈哈，真相揭晓，好感慨好激动。所以说，这并不是Java的bug，而正是Java严谨的体现！Calendar API确实设计的很烂很不友好，但并不代表其中有bug，相反地，这也正体现了其中的工程师精神。</p>
 <p>这就引出了一段已经被淡忘的历史，很多90年出生的朋友可以问问父母，90年和91年是我国至今为止实行夏令时的最后两年，我国曾经也想向美国等西欧国家学习，充分利用太阳下的时光！年轻的小朋友问问你们的父母，一定能勾起他们的一段回忆！</p>
 <p>这就是隐藏在Java代码中的一段历史，一段已经被遗忘的人文故事！</p>
@@ -831,11 +848,11 @@
                 
                 <p class="post-count space-x-0.5">
                     <span>
-                        共撰写了 341 篇文章
+                        共撰写了 343 篇文章
                     </span>
                     
                         <span>
-                            共 793.2k 字
+                            共 801.1k 字
                         </span>
                     
                 </p>
