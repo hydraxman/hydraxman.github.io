@@ -1,0 +1,25 @@
+flowchart TD
+    A[User Input<br/>GitHub URL / Local Folder / ZIP / PR URL] --> B[Browser Shell<br/>Single index.html<br/>React 18 + D3 + Babel CDN]
+
+    B --> C{Source Adapter}
+    C --> D[GitHub API Adapter<br/>repo tree / file content<br/>optional in-memory token]
+    C --> E[Local File Adapter<br/>File System Access API<br/>drag-drop / folder / zip]
+
+    D --> F[File Filter<br/>ignore dirs + glob excludes<br/>soft/hard limits]
+    E --> F
+
+    F --> G[Parser Layer]
+    G --> H[Tree-sitter WASM<br/>selected languages]
+    G --> I[Acorn / Babel<br/>JS/TS/HTML scripts]
+    G --> J[Regex fallback<br/>broad language coverage]
+    G --> K[Markdown Link Parser<br/>Obsidian wiki links]
+
+    H --> L[Analysis Pipeline<br/>functions / deps / calls<br/>layers / churn / ownership]
+    I --> L
+    J --> L
+    K --> L
+
+    L --> M[Risk Engines<br/>blast radius<br/>security scan<br/>patterns / anti-patterns<br/>health score]
+    M --> N[Interactive Map<br/>D3 force graph<br/>modes: folder/layer/churn/blast]
+    M --> O[Exports<br/>JSON / Markdown / TXT / SVG]
+    M --> P[CodeFlow Card Action<br/>Node VM loads same analyzer<br/>README SVG + PR receipt]

@@ -1,0 +1,18 @@
+graph TD
+  Title["Warp 源码模块组成\n从启动入口到终端、UI、Agent 与隐私控制"]
+
+  Entry["1. OSS 启动入口\napp/src/bin/oss.rs\n设置 channel=Oss\n关闭托管遥测、崩溃上报、自动更新等能力"]
+
+  Core["2. 应用核心\napp/src/lib.rs\nrun / initialize_app / launch\n统一调度 GUI、CLI、worker、terminal server"]
+
+  Terminal["3. 终端运行时\napp/src/terminal/local_tty/spawner.rs\n管理 PTY 伪终端\n兼容 bash / zsh / fish / SSH"]
+
+  Block["4. Block 模型\nmodel/blocks.rs + model/block.rs\n把命令、输出、cwd、exit code、状态\n组织成可复盘的执行单元"]
+
+  UI["5. WarpUI 渲染层\ncrates/warpui + warpui_core\nView / Element / winit / wgpu / Metal\n把 Block 渲染成富 UI"]
+
+  Agent["6. Agent 与 MCP\nai/agent_sdk + driver/harness + mcp\n接入 Claude、Codex、Gemini、MCP 工具\nBlock 可作为 Agent 上下文"]
+
+  Privacy["7. 隐私与遥测边界\nprivacy.rs + telemetry\n发送前检查用户偏好和隐私快照"]
+
+  Title --> Entry --> Core --> Terminal --> Block --> UI --> Agent --> Privacy

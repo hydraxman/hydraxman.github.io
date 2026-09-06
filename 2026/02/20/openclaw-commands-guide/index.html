@@ -1,0 +1,1241 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="keywords" content="计算机技术, 生活中的胡思乱想">
+    
+    
+    <meta name="author" content="Nathan">
+    
+    <!-- Completely eliminate flash of wrong theme -->
+    <script>
+        (function() {
+            const THEME_KEY = "REDEFINE-THEME-STATUS";
+            const DARK = "dark", LIGHT = "light";
+            
+            // Get preferred theme
+            function getTheme() {
+                try {
+                    const saved = localStorage.getItem(THEME_KEY);
+                    if (saved) {
+                        const { isDark } = JSON.parse(saved);
+                        return isDark ? DARK : LIGHT;
+                    }
+                } catch (e) {}
+                
+                return matchMedia("(prefers-color-scheme: dark)").matches ? DARK : LIGHT;
+            }
+            
+            // Apply theme to document
+            function applyTheme(theme) {
+                const isDark = theme === DARK;
+                const root = document.documentElement;
+                
+                // Set classes for compatibility
+                root.classList.add(theme);
+                root.classList.remove(isDark ? LIGHT : DARK);
+                root.style.colorScheme = theme;
+            }
+            
+            // Initial application
+            const theme = getTheme();
+            applyTheme(theme);
+            
+            // Listen for system preference changes
+            matchMedia("(prefers-color-scheme: dark)").addEventListener("change", ({ matches }) => {
+                // Only update if using system preference (no localStorage entry)
+                if (!localStorage.getItem(THEME_KEY)) {
+                    applyTheme(matches ? DARK : LIGHT);
+                }
+            });
+            
+            // Set body classes ASAP (before DOMContentLoaded)
+            (function() {
+                const addBodyClass = () => {
+                    const b = document.body;
+                    if (!b) return false;
+                    b.classList.add(theme + "-mode");
+                    return true;
+                };
+
+                // Try immediately
+                if (addBodyClass()) return;
+
+                // Observe until body exists
+                const mo = new MutationObserver(() => {
+                    if (addBodyClass()) mo.disconnect();
+                });
+                mo.observe(document.documentElement, { childList: true, subtree: true });
+            })();
+        })();
+    </script>
+    
+    <!-- preconnect -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    
+    <!--- Seo Part-->
+    
+    <link rel="canonical" href="https://hydraxman.github.io/2026/02/20/openclaw-commands-guide/"/>
+    <meta name="robots" content="index,follow">
+    <meta name="googlebot" content="index,follow">
+    <meta name="revisit-after" content="1 days">
+    
+    
+        
+        <meta name="description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="一个框架打通10个聊天平台，我的AI助手从此不下班">
+<meta property="og:url" content="https://hydraxman.github.io/2026/02/20/openclaw-commands-guide/index.html">
+<meta property="og:site_name" content="内森淼文">
+<meta property="og:description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://hydraxman.github.io/images/redefine-og.webp">
+<meta property="article:published_time" content="2026-02-20T07:00:00.000Z">
+<meta property="article:modified_time" content="2026-09-06T01:12:32.525Z">
+<meta property="article:author" content="Nathan">
+<meta property="article:tag" content="AI">
+<meta property="article:tag" content="OpenClaw">
+<meta property="article:tag" content="工具">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://hydraxman.github.io/images/redefine-og.webp">
+    
+    
+    <!--- Icon Part-->
+    <link rel="icon" type="image/png" href="/images/favicon.svg" sizes="192x192">
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.svg">
+    <meta name="theme-color" content="#ffffff">
+    <link rel="shortcut icon" href="/images/favicon.svg">
+    <!--- Page Info-->
+    
+    <title>
+        
+            一个框架打通10个聊天平台，我的AI助手从此不下班 | 内森淼文
+        
+    </title>
+
+    
+<link rel="stylesheet" href="/fonts/Chillax/chillax.css">
+
+
+    <!--- Inject Part-->
+    
+        
+            
+    
+            
+    
+            
+                
+                    <link rel="stylesheet" href="/css/custom.css">
+                
+    
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    
+        
+<link rel="stylesheet" href="/css/build/tailwind.css">
+
+    
+
+    
+<link rel="stylesheet" href="/fonts/GeistMono/geist-mono.css">
+
+    
+<link rel="stylesheet" href="/fonts/Geist/geist.css">
+
+    <!--- Font Part-->
+    
+    
+    
+    
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&display=swap" rel="stylesheet">
+    
+    
+
+    <script id="hexo-configurations">
+    window.config = {"hostname":"hydraxman.github.io","root":"/","language":"zh-CN","path":"search.json"};
+    window.theme = {"articles":{"style":{"font_size":"16px","line_height":1.5,"image_border_radius":"14px","image_alignment":"center","image_caption":false,"link_icon":true,"delete_mask":false,"title_alignment":"left","headings_top_spacing":{"h1":"3.2rem","h2":"2.4rem","h3":"1.9rem","h4":"1.6rem","h5":"1.4rem","h6":"1.3rem"}},"word_count":{"enable":true,"count":true,"min2read":true},"author_label":{"enable":false,"auto":false,"list":[]},"code_block":{"copy":true,"style":"mac","highlight_theme":{"light":"github","dark":"vs2015"},"font":{"enable":false,"family":null,"url":null}},"toc":{"enable":true,"max_depth":3,"number":false,"expand":true,"init_open":true},"copyright":{"enable":true,"default":"cc_by_nc_sa"},"lazyload":true,"pangu_js":false,"recommendation":{"enable":false,"title":"推荐阅读","limit":3,"mobile_limit":2,"placeholder":"/images/wallhaven-wqery6-light.webp","skip_dirs":[]}},"colors":{"primary":"#ffffff","secondary":null,"default_mode":"light"},"global":{"fonts":{"chinese":{"enable":false,"family":null,"url":null},"english":{"enable":true,"family":"Inter","url":"https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"},"title":{"enable":true,"family":"Noto Serif","url":"https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&display=swap"}},"content_max_width":"1000px","sidebar_width":"210px","hover":{"shadow":true,"scale":false},"scroll_progress":{"bar":true,"percentage":true},"website_counter":{"url":"https://cn.vercount.one/js","enable":false,"site_pv":true,"site_uv":true,"post_pv":true},"single_page":true,"preloader":{"enable":false,"custom_message":null},"side_tools":{"gear_rotation":true,"auto_expand":false},"open_graph":{"enable":true,"image":"/images/redefine-og.webp","description":"Hexo Theme Redefine, Redefine Your Hexo Journey."},"google_analytics":{"enable":false,"id":null}},"home_banner":{"enable":true,"style":"fixed","image":{"light":"/images/banner-light.jpg","dark":"/images/banner-dark.jpg"},"title":"内森淼文","subtitle":{"text":["AI · 编程 · 科技见闻","Write Code, Read World"],"hitokoto":{"enable":false,"show_author":false,"api":"https://v1.hitokoto.cn"},"typing_speed":100,"backing_speed":80,"starting_delay":500,"backing_delay":1500,"loop":true,"smart_backspace":true},"text_color":{"light":"#fff","dark":"#d1d1b6"},"text_style":{"title_size":"2.8rem","subtitle_size":"1.5rem","line_height":1.2},"custom_font":{"enable":false,"family":null,"url":null},"social_links":{"enable":true,"style":"default","links":[{"icon":"fa-brands fa-github","url":"https://github.com/hydraxman"}],"qrs":[{"icon":"fa-brands fa-weixin","qr":null},{"icon":"/images/custom-icon.svg","qr":null}]}},"plugins":{"feed":{"enable":false},"aplayer":{"enable":false,"type":"fixed","audios":[{"name":null,"artist":null,"url":null,"cover":null,"lrc":null}]},"mermaid":{"enable":false,"version":"11.4.1","theme":{"light":"default","dark":"dark"}}},"version":"2.9.0","navbar":{"auto_hide":false,"color":{"left":"#333333","right":"#555555","transparency":35},"width":{"home":"1200px","pages":"1000px"},"links":{"Home":{"path":"/","icon":"fa-regular fa-house"},"Archives":{"path":"/archives","icon":"fa-regular fa-archive"},"Categories":{"path":"/categories","icon":"fa-regular fa-folder"},"Tags":{"path":"/tags","icon":"fa-regular fa-tags"},"About":{"path":"/about","icon":"fa-regular fa-user"}},"search":{"enable":true,"preload":true}},"page_templates":{"friends_column":2,"tags_style":"blur","masonry":{"batch_size":12,"initial_batch_size":24}},"home":{"sidebar":{"enable":true,"position":"left","first_item":"menu","announcement":"AI · 编程 · 科技","show_on_mobile":true,"links":{"Archives":{"path":"/archives","icon":"fa-regular fa-archive"},"Tags":{"path":"/tags","icon":"fa-regular fa-tags"},"Categories":{"path":"/categories","icon":"fa-regular fa-folder"}}},"article_date_format":"auto","excerpt_length":200,"categories":{"enable":true,"limit":3},"tags":{"enable":true,"limit":3}},"footer":{"runtime":true,"icon":"<i class=\"fa-solid fa-heart fa-beat\" style=\"--fa-animation-duration: 0.5s; color: #333\"></i>","start":"2024/01/01 00:00:00","statistics":true,"customize":null,"icp":{"enable":false,"number":null,"url":null}},"footerStart":"2024/01/01 00:00:00","mermaid":{"style":{"light":"default","dark":"dark"}}};
+    window.lang_ago = {"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"};
+    window.i18n = {"search":"站内搜索您需要的内容...","toc":"目录","prev":"上一页","next":"下一页","prev_posts":"上一篇","next_posts":"下一篇","page":"第 %d 页","recent_posts":"最新文章","share":"分享","powered_by":"由 %s 驱动","theme":"主题","rss_feed":"RSS Feed","category":"分类","categories":"分类","tag":"标签","tags":"标签","post":"文章","posts":"文章","tagcloud":"标签云","comment":"评论","comments":"评论","top":"置顶","sticky":"置顶","go-back-home":"回到首页","masonry_loading":"照片加载中...","image_viewer":"图片查看器","close":"关闭","exif":{"title":"EXIF","cards":{"camera":"相机","lens":"镜头","exposure":"曝光","other":"其他"},"fields":{"make":"品牌","model":"机型","date_taken":"拍摄时间","lens_model":"镜头","focal_length":"焦距","focus_mode":"对焦模式","shutter":"快门","aperture":"光圈","iso":"感光度","exposure_program":"曝光程序","exposure_compensation":"曝光补偿","metering_mode":"测光模式","flash":"闪光灯","white_balance":"白平衡","latitude":"纬度","longitude":"经度","altitude":"海拔"},"status":{"loading":"加载中...","no_exif":"无 EXIF 信息","library_missing":"EXIF 库未加载","image_source_missing":"图片地址不可用","unavailable":"EXIF 不可用（可能被 CORS 阻止或缺少元数据）","flag_unavailable":"EXIF 不可用"}},"home":"首页","archive":"归档","archives":"归档","about":"关于","links":"链接","link":"链接","friends":"友情链接","friend":"友情链接","timeline":"时间轴","shuoshuo":"说说","bookmarks":"书签","site_uv":"访问人数","site_pv":"总访问量","read_more":"阅读全文","wordcount":"字","min2read":"分钟","changelog":"更新日志","status":"状态","runtime":"博客已运行","days":"天","hours":"小时","minutes":"分钟","seconds":"秒","optimized_by":"并由 Evan 进行优化","rights":"版权所有","site_posts":"共撰写了 %s 篇文章","site_wordcount":"共 %s 字","copyright":{"title":"标题","author":"作者","link":"链接","create_time":"创建于","update_time":"更新于","license_title":"版权声明","license_content":"本文章采用 %s 进行许可。","all_rights_reserved":"版权所有 &#169 %s，禁止转载。","public_domain":"本文为公有领域作品，可自由转载、引用。"},"ago":{"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"},"create_time":"创建","update_time":"更新","expired":"这篇文章最后更新于 %s 天前，内容可能已经过时。"};
+    window.data = {"masonry":false};
+  </script>
+    
+    <!--- Fontawesome Part-->
+    
+<link rel="stylesheet" href="/fontawesome/fontawesome.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/brands.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/solid.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/regular.min.css">
+
+    
+    
+    
+    
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+	<div class="progress-bar-container">
+	
+	<span class="scroll-progress-bar"></span>
+	
+
+	
+	<span class="pjax-progress-bar"></span>
+	<!--        <span class="swup-progress-icon">-->
+	<!--            <i class="fa-solid fa-circle-notch fa-spin"></i>-->
+	<!--        </span>-->
+	
+</div>
+
+<main class="page-container" id="swup">
+
+	
+
+	<div class="main-content-container flex flex-col justify-between min-h-dvh">
+		<div class="main-content-header">
+			<header class="navbar-container px-6 md:px-12">
+    <div class="navbar-content transition-navbar ">
+        <div class="left">
+            
+            <a class="logo-title" href="/">
+                
+                内森淼文
+                
+            </a>
+        </div>
+
+        <div class="right">
+            <!-- PC -->
+            <div class="desktop">
+                <ul class="navbar-list">
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/"
+                                        >
+                                    <i class="fa-regular fa-house fa-fw"></i>
+                                    首页
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/archives"
+                                        >
+                                    <i class="fa-regular fa-archive fa-fw"></i>
+                                    归档
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/categories"
+                                        >
+                                    <i class="fa-regular fa-folder fa-fw"></i>
+                                    分类
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/tags"
+                                        >
+                                    <i class="fa-regular fa-tags fa-fw"></i>
+                                    标签
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/about"
+                                        >
+                                    <i class="fa-regular fa-user fa-fw"></i>
+                                    关于
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                    
+                        <li class="navbar-item search search-popup-trigger">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </li>
+                    
+                </ul>
+            </div>
+            <!-- Mobile -->
+            <div class="mobile">
+                
+                    <div class="icon-item search search-popup-trigger"><i class="fa-solid fa-magnifying-glass"></i>
+                    </div>
+                
+                <div class="icon-item navbar-bar">
+                    <div class="navbar-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile sheet -->
+    <div class="navbar-drawer h-dvh w-full absolute top-0 left-0 bg-background-color flex flex-col justify-between">
+        <ul class="drawer-navbar-list flex flex-col px-4 justify-center items-start">
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/"
+                        >
+                            <span>
+                                首页
+                            </span>
+                            
+                                <i class="fa-regular fa-house fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/archives"
+                        >
+                            <span>
+                                归档
+                            </span>
+                            
+                                <i class="fa-regular fa-archive fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/categories"
+                        >
+                            <span>
+                                分类
+                            </span>
+                            
+                                <i class="fa-regular fa-folder fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/tags"
+                        >
+                            <span>
+                                标签
+                            </span>
+                            
+                                <i class="fa-regular fa-tags fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/about"
+                        >
+                            <span>
+                                关于
+                            </span>
+                            
+                                <i class="fa-regular fa-user fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+
+            
+            
+                
+                    
+                    
+                    
+            
+        </ul>
+
+        <div class="statistics flex justify-around my-2.5">
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/tags">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">391</div>
+        <div class="label text-third-text-color text-sm">标签</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/categories">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">13</div>
+        <div class="label text-third-text-color text-sm">分类</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/archives">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">363</div>
+        <div class="label text-third-text-color text-sm">文章</div>
+    </a>
+</div>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+		</div>
+
+		<div class="main-content-body transition-fade-up">
+			
+
+			<div class="main-content">
+				<div class="post-page-container flex relative justify-between box-border w-full h-full">
+	<div class="article-content-container">
+
+		<div class="article-title relative w-full">
+			
+			
+			
+			<img src="/images/openclaw-commands-cover.png" alt="一个框架打通10个聊天平台，我的AI助手从此不下班" class="w-full h-60 sm:h-72 md:h-80 object-cover sm:rounded-t-large dark:brightness-75" />
+			
+			<div class="w-full flex items-center absolute bottom-0 justify-start">
+				<h1 class="article-title-cover text-center mx-6 my-6 text-second-text-color bg-background-color-transparent px-4 py-3 text-3xl sm:text-4xl md:text-5xl font-semibold backdrop-blur-lg rounded-xl border border-border-color ">一个框架打通10个聊天平台，我的AI助手从此不下班</h1>
+			</div>
+			
+		</div>
+
+		
+		<div class="article-header flex flex-row gap-2 items-center px-2 sm:px-6 md:px-8">
+			<div class="avatar w-[46px] h-[46px] shrink-0 rounded-medium border border-border-color p-px">
+				<img src="/images/avatar.png">
+			</div>
+			<div class="info flex flex-col justify-between">
+				<div class="author flex items-center">
+					<span class="name text-default-text-color text-lg font-semibold">Nathan</span>
+					
+				</div>
+				<div class="meta-info">
+					<div class="article-meta-info">
+    <span class="article-date article-meta-item">
+        <i class="fa-regular fa-pen-fancy"></i>&nbsp;
+        <span class="desktop">2026-02-20 15:00</span>
+        <span class="mobile">2026-02-20 15:00</span>
+        <span class="hover-info">创建</span>
+    </span>
+    
+        <span class="article-date article-meta-item">
+            <i class="fa-regular fa-wrench"></i>&nbsp;
+            <span class="desktop">2026-09-06 09:12:32</span>
+            <span class="mobile">2026-09-06 09:12:32</span>
+            <span class="hover-info">更新</span>
+        </span>
+    
+
+    
+        <span class="article-categories article-meta-item">
+            <i class="fa-regular fa-folders"></i>&nbsp;
+            <ul>
+                
+                
+                    
+                        
+                        <li>
+                            <a href="/categories/%E6%8A%80%E6%9C%AF%E5%AE%9E%E6%88%98/">技术实战</a>&nbsp;
+                        </li>
+                    
+                    
+                
+            </ul>
+        </span>
+    
+    
+        <span class="article-tags article-meta-item">
+            <i class="fa-regular fa-tags"></i>&nbsp;
+            <ul>
+                
+                    <li>
+                        <a href="/tags/AI/">AI</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/OpenClaw/">OpenClaw</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/%E5%B7%A5%E5%85%B7/">工具</a>&nbsp;
+                    </li>
+                
+            </ul>
+        </span>
+    
+
+    
+    
+        <span class="article-wordcount article-meta-item">
+            <i class="fa-regular fa-typewriter"></i>&nbsp;<span>3.5k 字</span>
+        </span>
+    
+    
+        <span class="article-min2read article-meta-item">
+            <i class="fa-regular fa-clock"></i>&nbsp;<span>13 分钟</span>
+        </span>
+    
+    
+</div>
+
+				</div>
+			</div>
+		</div>
+		
+
+		
+
+
+		<div class="article-content markdown-body px-2 sm:px-6 md:px-8 pb-8">
+			<p>如果你还在为每个聊天平台单独配置 AI 助手而头疼，那你一定要认识一下 <strong>OpenClaw</strong> —— 一个开源的 AI 助手框架，能同时连接 WhatsApp、Telegram、Discord、飞书、Slack 等十多个平台，统一管理你的 AI 助手。</p>
+<p>本文将全面梳理 OpenClaw 的命令体系和实用技巧，从安装到进阶，帮你快速上手。🚀</p>
+<h2 id="1️⃣-安装与初始化"><a href="#1️⃣-安装与初始化" class="headerlink" title="1️⃣ 安装与初始化"></a>1️⃣ 安装与初始化</h2><p><strong>macOS &#x2F; Linux 一行搞定：</strong></p>
+<div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl -fsSL https://openclaw.ai/install.sh | bash</span><br></pre></td></tr></table></figure></div>
+
+<p><strong>Windows PowerShell：</strong></p>
+<div class="code-container" data-rel="Powershell"><figure class="iseeu highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">iwr</span> <span class="literal">-useb</span> https://openclaw.ai/install.ps1 | <span class="built_in">iex</span></span><br></pre></td></tr></table></figure></div>
+
+<p>安装完成后，运行初始化向导：</p>
+<div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openclaw onboard --install-daemon</span><br></pre></td></tr></table></figure></div>
+
+<p>这会引导你完成守护进程安装、模型配置和首个频道的接入。如果你只想做基础配置，也可以用：</p>
+<div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openclaw setup</span><br></pre></td></tr></table></figure></div>
+
+<blockquote>
+<p>💡 <strong>小贴士：</strong> <code>onboard</code> 向导会自动检测你的环境，推荐最佳配置方案，新手强烈建议走一遍。</p>
+</blockquote>
+<h2 id="2️⃣-Gateway-管理"><a href="#2️⃣-Gateway-管理" class="headerlink" title="2️⃣ Gateway 管理"></a>2️⃣ Gateway 管理</h2><p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/img1_arch.png"
+                      alt="OpenClaw Architecture"
+                ></p>
+<p>Gateway 是 OpenClaw 的核心守护进程，所有消息收发、模型调用都经过它。</p>
+<div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看状态</span></span><br><span class="line">openclaw gateway status</span><br><span class="line"></span><br><span class="line"><span class="comment"># 启动 / 停止 / 重启</span></span><br><span class="line">openclaw gateway start</span><br><span class="line">openclaw gateway stop</span><br><span class="line">openclaw gateway restart</span><br><span class="line"></span><br><span class="line"><span class="comment"># 前台运行（调试用，可指定端口）</span></span><br><span class="line">openclaw gateway run --port 18789</span><br><span class="line"></span><br><span class="line"><span class="comment"># 健康检查</span></span><br><span class="line">openclaw gateway health</span><br></pre></td></tr></table></figure></div>
+
+<p>配置文件位于 <code>~/.openclaw/openclaw.json</code>，采用 <strong>JSON5 格式</strong>（支持注释和尾逗号），修改后 Gateway 会自动热重载，无需手动重启。</p>
+<h2 id="3️⃣-频道管理"><a href="#3️⃣-频道管理" class="headerlink" title="3️⃣ 频道管理"></a>3️⃣ 频道管理</h2><p>频道（Channels）是 OpenClaw 连接各聊天平台的桥梁。</p>
+<div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看所有频道</span></span><br><span class="line">openclaw channels list</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看频道状态</span></span><br><span class="line">openclaw channels status</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加 / 移除频道</span></span><br><span class="line">openclaw channels add</span><br><span class="line">openclaw channels remove</span><br><span class="line"></span><br><span class="line"><span class="comment"># WhatsApp 扫码登录</span></span><br><span class="line">openclaw channels login</span><br></pre></td></tr></table></figure></div>
+
+<p><strong>目前支持的平台：</strong></p>
+<ul>
+<li>📱 WhatsApp</li>
+<li>✈️ Telegram</li>
+<li>🎮 Discord</li>
+<li>💼 Slack</li>
+<li>🔒 Signal</li>
+<li>💬 iMessage</li>
+<li>🐦 飞书（Lark）</li>
+<li>📧 Google Chat</li>
+<li>🏢 Microsoft Teams</li>
+</ul>
+<p>一个 OpenClaw 实例可以同时连接多个平台，消息统一处理，上下文共享。</p>
+<h2 id="4️⃣-模型管理"><a href="#4️⃣-模型管理" class="headerlink" title="4️⃣ 模型管理"></a>4️⃣ 模型管理</h2><p>OpenClaw 支持多家 AI 模型提供商，灵活切换。</p>
+<div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看可用模型</span></span><br><span class="line">openclaw models list</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看模型状态</span></span><br><span class="line">openclaw models status</span><br><span class="line"></span><br><span class="line"><span class="comment"># 设置默认模型</span></span><br><span class="line">openclaw models <span class="built_in">set</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 扫描本地和远程可用模型</span></span><br><span class="line">openclaw models scan</span><br><span class="line"></span><br><span class="line"><span class="comment"># 认证管理</span></span><br><span class="line">openclaw models auth add</span><br><span class="line">openclaw models auth setup-token</span><br><span class="line">openclaw models auth paste-token</span><br><span class="line"></span><br><span class="line"><span class="comment"># Fallback 链（主模型不可用时自动切换）</span></span><br><span class="line">openclaw models fallbacks add</span><br><span class="line">openclaw models fallbacks remove</span><br><span class="line">openclaw models fallbacks clear</span><br></pre></td></tr></table></figure></div>
+
+<p><strong>支持的模型提供商：</strong></p>
+<ul>
+<li>Anthropic（Claude 系列）</li>
+<li>OpenAI（GPT 系列）</li>
+<li>Google（Gemini 系列）</li>
+<li>GitHub Copilot</li>
+<li>以及更多第三方兼容接口</li>
+</ul>
+<blockquote>
+<p>💡 <strong>小贴士：</strong> 配置 fallback 链可以大幅提升可用性。比如主用 Claude Opus，fallback 到 GPT-5，再 fallback 到 Gemini，确保永远有模型可用。</p>
+</blockquote>
+<h2 id="5️⃣-Skills-技能系统"><a href="#5️⃣-Skills-技能系统" class="headerlink" title="5️⃣ Skills 技能系统"></a>5️⃣ Skills 技能系统</h2><p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/img1_skills.png"
+                      alt="Skills &amp; Plugins Ecosystem"
+                ></p>
+<p>Skills 是 OpenClaw 的扩展能力系统，让 AI 助手获得各种工具能力。</p>
+<div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看已安装技能</span></span><br><span class="line">openclaw skills list</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看技能详情</span></span><br><span class="line">openclaw skills info &lt;skill-name&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 检查技能健康状态</span></span><br><span class="line">openclaw skills check</span><br></pre></td></tr></table></figure></div>
+
+<p><strong>技能加载优先级（从高到低）：</strong></p>
+<ol>
+<li><code>workspace/skills/</code> — 工作区技能（项目级）</li>
+<li><code>~/.openclaw/skills/</code> — 本地技能（用户级）</li>
+<li><code>bundled</code> — 内置技能（随 OpenClaw 安装）</li>
+</ol>
+<p><strong>安装社区技能：</strong></p>
+<div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">npx clawhub install &lt;skill-name&gt;</span><br><span class="line">npx clawhub update &lt;skill-name&gt;</span><br></pre></td></tr></table></figure></div>
+
+<p><strong>常用内置技能一览：</strong></p>
+<ul>
+<li>🌤️ <code>weather</code> — 天气查询</li>
+<li>🐙 <code>github</code> — GitHub 操作</li>
+<li>🐻 <code>bear-notes</code> — Bear 笔记集成</li>
+<li>⏰ <code>apple-reminders</code> — Apple 提醒事项</li>
+<li>🎮 <code>discord</code> — Discord 高级操作</li>
+<li>🤖 <code>coding-agent</code> — 编程代理</li>
+</ul>
+<h2 id="6️⃣-Cron-定时任务"><a href="#6️⃣-Cron-定时任务" class="headerlink" title="6️⃣ Cron 定时任务"></a>6️⃣ Cron 定时任务</h2><p>OpenClaw 内置了强大的定时任务系统。</p>
+<div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看定时任务</span></span><br><span class="line">openclaw cron list</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加任务</span></span><br><span class="line">openclaw cron add</span><br><span class="line"></span><br><span class="line"><span class="comment"># 编辑 / 删除</span></span><br><span class="line">openclaw cron edit &lt;<span class="built_in">id</span>&gt;</span><br><span class="line">openclaw cron <span class="built_in">rm</span> &lt;<span class="built_in">id</span>&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 启用 / 禁用</span></span><br><span class="line">openclaw cron <span class="built_in">enable</span> &lt;<span class="built_in">id</span>&gt;</span><br><span class="line">openclaw cron <span class="built_in">disable</span> &lt;<span class="built_in">id</span>&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 手动触发</span></span><br><span class="line">openclaw cron run &lt;<span class="built_in">id</span>&gt;</span><br></pre></td></tr></table></figure></div>
+
+<p><strong>三种调度方式：</strong></p>
+<ul>
+<li><strong>at</strong> — 一次性任务，指定具体时间执行</li>
+<li><strong>every</strong> — 循环任务，如 <code>every 30m</code>、<code>every 2h</code></li>
+<li><strong>cron</strong> — 标准 cron 表达式，如 <code>0 9 * * 1</code>（每周一早九点）</li>
+</ul>
+<blockquote>
+<p>💡 <strong>应用场景：</strong> 定时检查邮件、每日天气播报、定期备份提醒、周报自动生成等。</p>
+</blockquote>
+<h2 id="7️⃣-Sessions-会话管理"><a href="#7️⃣-Sessions-会话管理" class="headerlink" title="7️⃣ Sessions 会话管理"></a>7️⃣ Sessions 会话管理</h2><div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看当前活跃会话</span></span><br><span class="line">openclaw sessions</span><br><span class="line"></span><br><span class="line"><span class="comment"># 发送单次消息（不进入交互模式）</span></span><br><span class="line">openclaw agent --message <span class="string">&quot;帮我查一下明天的天气&quot;</span></span><br></pre></td></tr></table></figure></div>
+
+<p>Sessions 命令可以查看各频道的活跃会话、消息计数和上下文状态，调试时非常有用。</p>
+<h2 id="8️⃣-Browser-浏览器控制"><a href="#8️⃣-Browser-浏览器控制" class="headerlink" title="8️⃣ Browser 浏览器控制"></a>8️⃣ Browser 浏览器控制</h2><p>OpenClaw 可以控制本地浏览器，实现网页自动化。</p>
+<div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 浏览器管理</span></span><br><span class="line">openclaw browser start</span><br><span class="line">openclaw browser stop</span><br><span class="line">openclaw browser status</span><br><span class="line"></span><br><span class="line"><span class="comment"># 浏览器操作</span></span><br><span class="line">openclaw browser open &lt;url&gt;</span><br><span class="line">openclaw browser navigate &lt;url&gt;</span><br><span class="line">openclaw browser screenshot</span><br><span class="line">openclaw browser snapshot</span><br></pre></td></tr></table></figure></div>
+
+<p><strong>支持的浏览器：</strong> Chrome、Brave、Edge、Chromium</p>
+<p>这意味着你可以让 AI 助手帮你填表单、抓取网页内容、截图对比等，非常强大。</p>
+<h2 id="9️⃣-Nodes-节点管理"><a href="#9️⃣-Nodes-节点管理" class="headerlink" title="9️⃣ Nodes 节点管理"></a>9️⃣ Nodes 节点管理</h2><p>Nodes 让你把手机、平板等设备作为 OpenClaw 的远程节点。</p>
+<div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看节点状态</span></span><br><span class="line">openclaw nodes status</span><br><span class="line"></span><br><span class="line"><span class="comment"># 列出所有节点</span></span><br><span class="line">openclaw nodes list</span><br><span class="line"></span><br><span class="line"><span class="comment"># 审批新节点</span></span><br><span class="line">openclaw nodes approve</span><br></pre></td></tr></table></figure></div>
+
+<p><strong>支持的节点类型：</strong></p>
+<ul>
+<li>📱 iOS 设备</li>
+<li>🤖 Android 设备</li>
+<li>💻 macOS 设备</li>
+</ul>
+<p><strong>节点能力：</strong></p>
+<ul>
+<li>📷 <strong>Camera</strong> — 远程拍照</li>
+<li>🖼️ <strong>Canvas</strong> — 推送 UI 卡片到设备</li>
+<li>🎬 <strong>Screen Recording</strong> — 屏幕录制</li>
+<li>📍 <strong>Location</strong> — 获取设备位置</li>
+</ul>
+<h2 id="🔟-Plugins-插件系统"><a href="#🔟-Plugins-插件系统" class="headerlink" title="🔟 Plugins 插件系统"></a>🔟 Plugins 插件系统</h2><p>插件是比 Skills 更底层的扩展机制。</p>
+<div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看已安装插件</span></span><br><span class="line">openclaw plugins list</span><br><span class="line"></span><br><span class="line"><span class="comment"># 安装 / 启用 / 禁用</span></span><br><span class="line">openclaw plugins install &lt;name&gt;</span><br><span class="line">openclaw plugins <span class="built_in">enable</span> &lt;name&gt;</span><br><span class="line">openclaw plugins <span class="built_in">disable</span> &lt;name&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 插件健康检查</span></span><br><span class="line">openclaw plugins doctor</span><br></pre></td></tr></table></figure></div>
+
+<p>插件可以注册：</p>
+<ul>
+<li><strong>Agent Tools</strong> — 新的工具能力</li>
+<li><strong>Channels</strong> — 新的聊天平台支持</li>
+<li><strong>Hooks</strong> — 消息处理钩子</li>
+</ul>
+<h2 id="1️⃣1️⃣-常用插件与社区技能详解"><a href="#1️⃣1️⃣-常用插件与社区技能详解" class="headerlink" title="1️⃣1️⃣ 常用插件与社区技能详解"></a>1️⃣1️⃣ 常用插件与社区技能详解</h2><p>OpenClaw 的生态分两层：<strong>Plugins（插件）</strong> 提供底层能力，<strong>Skills（技能）</strong> 教 AI 如何使用工具。这里推荐一些最实用的。</p>
+<h3 id="📌-官方-x2F-社区插件"><a href="#📌-官方-x2F-社区插件" class="headerlink" title="📌 官方&#x2F;社区插件"></a>📌 官方&#x2F;社区插件</h3><p><strong>Microsoft Todo 插件</strong><br>让 AI 直接管理你的待办事项，支持创建、更新、删除、移动任务，跨列表操作。</p>
+<div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 安装后在 openclaw.json 中配置 Azure Client ID</span></span><br><span class="line">openclaw plugins install openclaw-microsoft-todo</span><br></pre></td></tr></table></figure></div>
+
+<p><strong>飞书（Feishu）插件</strong><br>一套完整的飞书集成，包含 5 个子技能：</p>
+<ul>
+<li><code>feishu-doc</code> — 读写飞书文档</li>
+<li><code>feishu-wiki</code> — 知识库导航和搜索</li>
+<li><code>feishu-drive</code> — 云盘文件管理</li>
+<li><code>feishu-perm</code> — 文档权限管理</li>
+<li><code>feishu-bitable</code> — 多维表格 CRUD（6 个工具）</li>
+</ul>
+<p><strong>Voice Call 插件</strong><br>让 AI 发起语音通话，支持实时对话。</p>
+<h3 id="📌-实用内置技能"><a href="#📌-实用内置技能" class="headerlink" title="📌 实用内置技能"></a>📌 实用内置技能</h3><p><strong>🐙 GitHub (<code>github</code>)</strong><br>通过 <code>gh</code> CLI 操作 GitHub，支持 Issue、PR、CI Run、API 查询。日常开发必备。</p>
+<div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"># 示例对话</span><br><span class="line">&quot;帮我看看 repo 有没有新的 PR&quot;</span><br><span class="line">&quot;创建一个 issue，标题是 xxx&quot;</span><br></pre></td></tr></table></figure></div>
+
+<p><strong>🧩 Coding Agent (<code>coding-agent</code>)</strong><br>在后台运行 Codex CLI、Claude Code、OpenCode 等编程代理。适合让 AI 自主完成复杂编程任务。</p>
+<p><strong>🌤️ Weather (<code>weather</code>)</strong><br>无需 API Key 即可查询天气和预报。</p>
+<p><strong>⏰ Apple Reminders (<code>apple-reminders</code>)</strong><br>macOS 上管理 Apple 提醒事项，支持列表、日期筛选、增删改查。</p>
+<p><strong>🐻 Bear Notes (<code>bear-notes</code>)</strong><br>通过 <code>grizzly</code> CLI 创建、搜索和管理 Bear 笔记。</p>
+<p><strong>📦 ClawHub (<code>clawhub</code>)</strong><br>技能市场客户端，搜索、安装、更新社区技能：</p>
+<div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">npx clawhub install &lt;skill-slug&gt;   <span class="comment"># 安装</span></span><br><span class="line">npx clawhub update --all            <span class="comment"># 全部更新</span></span><br><span class="line">npx clawhub <span class="built_in">sync</span> --all              <span class="comment"># 同步发布</span></span><br></pre></td></tr></table></figure></div>
+
+<p><strong>📸 CamSnap (<code>camsnap</code>)</strong><br>从 RTSP&#x2F;ONVIF 摄像头抓取画面或录制短片。智能家居场景利器。</p>
+<p><strong>🎵 Spotify Player (<code>spotify-player</code>)</strong><br>终端控制 Spotify 播放、搜索、音量。</p>
+<p><strong>📧 Himalaya (<code>himalaya</code>)</strong><br>CLI 管理邮件（IMAP&#x2F;SMTP），支持多账户、搜索、回复、转发。</p>
+<p><strong>📋 Trello (<code>trello</code>)</strong><br>通过 REST API 管理 Trello 看板、列表和卡片。</p>
+<p><strong>📝 Notion (<code>notion</code>)</strong><br>Notion API 集成，创建和管理页面、数据库。</p>
+<h3 id="📌-自定义技能（Workspace-Skills）"><a href="#📌-自定义技能（Workspace-Skills）" class="headerlink" title="📌 自定义技能（Workspace Skills）"></a>📌 自定义技能（Workspace Skills）</h3><p>你也可以创建自己的技能，只需在 <code>workspace/skills/</code> 下创建一个目录，放入 <code>SKILL.md</code>：</p>
+<div class="code-container" data-rel="Markdown"><figure class="iseeu highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">---</span><br><span class="line">name: my-custom-skill</span><br><span class="line"><span class="section">description: 描述你的技能做什么</span></span><br><span class="line"><span class="section">---</span></span><br><span class="line"></span><br><span class="line"><span class="section"># 使用说明</span></span><br><span class="line">（AI 会读这个文件来学习如何使用你的技能）</span><br></pre></td></tr></table></figure></div>
+
+<p>比如你可以创建：</p>
+<ul>
+<li>微信公众号发布技能（调用微信 API）</li>
+<li>定时新闻摘要技能（RSS + AI 总结）</li>
+<li>图片生成技能（调用 DALL-E &#x2F; GPT-Image）</li>
+<li>视频生成技能（调用 Sora）</li>
+</ul>
+<blockquote>
+<p>💡 <strong>小贴士：</strong> 用 <code>skill-creator</code> 内置技能可以让 AI 帮你设计和创建新技能，省去手动编写的麻烦。</p>
+</blockquote>
+<h2 id="1️⃣2️⃣-实用命令合集"><a href="#1️⃣2️⃣-实用命令合集" class="headerlink" title="1️⃣2️⃣ 实用命令合集"></a>1️⃣2️⃣ 实用命令合集</h2><div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 全面诊断（一键查看所有组件状态）</span></span><br><span class="line">openclaw status --all</span><br><span class="line"></span><br><span class="line"><span class="comment"># 健康检查 + 自动修复</span></span><br><span class="line">openclaw doctor</span><br><span class="line"></span><br><span class="line"><span class="comment"># 实时日志（调试利器）</span></span><br><span class="line">openclaw logs --follow</span><br><span class="line"></span><br><span class="line"><span class="comment"># 安全审计</span></span><br><span class="line">openclaw security audit</span><br><span class="line"></span><br><span class="line"><span class="comment"># 终端 UI（交互式管理）</span></span><br><span class="line">openclaw tui</span><br><span class="line"></span><br><span class="line"><span class="comment"># Web 控制台</span></span><br><span class="line">openclaw dashboard</span><br></pre></td></tr></table></figure></div>
+
+<blockquote>
+<p>💡 <strong>排错首选：</strong> 遇到问题先跑 <code>openclaw doctor</code>，它会自动检测常见问题并提供修复建议。</p>
+</blockquote>
+<h2 id="1️⃣3️⃣-常用技巧"><a href="#1️⃣3️⃣-常用技巧" class="headerlink" title="1️⃣3️⃣ 常用技巧"></a>1️⃣3️⃣ 常用技巧</h2><h3 id="配置热重载"><a href="#配置热重载" class="headerlink" title="配置热重载"></a>配置热重载</h3><p>直接编辑 <code>~/.openclaw/openclaw.json</code>，Gateway 会自动感知变更并重载配置，无需重启服务。</p>
+<h3 id="Memory-向量搜索"><a href="#Memory-向量搜索" class="headerlink" title="Memory 向量搜索"></a>Memory 向量搜索</h3><div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openclaw memory search <span class="string">&quot;上周讨论的项目方案&quot;</span></span><br></pre></td></tr></table></figure></div>
+
+<p>OpenClaw 会把历史对话存入向量数据库，支持语义搜索，帮你找回任何聊过的内容。</p>
+<h3 id="多-Agent-架构"><a href="#多-Agent-架构" class="headerlink" title="多 Agent 架构"></a>多 Agent 架构</h3><div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 添加新 agent</span></span><br><span class="line">openclaw agents add</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看所有 agent</span></span><br><span class="line">openclaw agents list</span><br><span class="line"></span><br><span class="line"><span class="comment"># 删除 agent</span></span><br><span class="line">openclaw agents delete</span><br></pre></td></tr></table></figure></div>
+
+<p>你可以为不同场景创建不同的 Agent，各自拥有独立的人设和记忆。</p>
+<h3 id="Workspace-文件结构"><a href="#Workspace-文件结构" class="headerlink" title="Workspace 文件结构"></a>Workspace 文件结构</h3><p>OpenClaw 的工作区有一套约定的文件结构：</p>
+<ul>
+<li><strong>SOUL.md</strong> — Agent 的人设定义</li>
+<li><strong>USER.md</strong> — 用户信息档案</li>
+<li><strong>MEMORY.md</strong> — 长期记忆</li>
+<li><strong>HEARTBEAT.md</strong> — 心跳任务配置</li>
+<li><strong>AGENTS.md</strong> — 工作区规则</li>
+</ul>
+<p>这些文件都是 Markdown 格式，随时可以编辑调整。</p>
+<h3 id="Slash-命令"><a href="#Slash-命令" class="headerlink" title="Slash 命令"></a>Slash 命令</h3><p>在任何频道中，你可以使用斜杠命令快速操作：</p>
+<ul>
+<li><code>/status</code> — 查看系统状态</li>
+<li><code>/config</code> — 查看&#x2F;修改配置</li>
+<li><code>/debug</code> — 调试模式</li>
+</ul>
+<h3 id="环境变量"><a href="#环境变量" class="headerlink" title="环境变量"></a>环境变量</h3><div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 自定义 OpenClaw 主目录</span></span><br><span class="line"><span class="built_in">export</span> OPENCLAW_HOME=~/my-openclaw</span><br><span class="line"></span><br><span class="line"><span class="comment"># 自定义状态目录</span></span><br><span class="line"><span class="built_in">export</span> OPENCLAW_STATE_DIR=/var/lib/openclaw</span><br><span class="line"></span><br><span class="line"><span class="comment"># 自定义配置文件路径</span></span><br><span class="line"><span class="built_in">export</span> OPENCLAW_CONFIG_PATH=~/config/openclaw.json</span><br></pre></td></tr></table></figure></div>
+
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>前面讲了很多命令和技能，但 OpenClaw 的真正威力在于<strong>把它们组合起来</strong>。下面用三个实战场景，展示如何把零散的能力串联成完整的解决方案。</p>
+<hr>
+<h2 id="🎯-实战场景一：7×24-稳定运行方案"><a href="#🎯-实战场景一：7×24-稳定运行方案" class="headerlink" title="🎯 实战场景一：7×24 稳定运行方案"></a>🎯 实战场景一：7×24 稳定运行方案</h2><p><strong>痛点：</strong> AI 助手跑着跑着就断了，模型 API 偶尔抽风，第二天起床发现 Gateway 挂了。</p>
+<p><strong>解决方案：Cron 定时重启 + 模型 Fallback 链 + Doctor 自检</strong></p>
+<p><strong>第一步：配置模型 Fallback 链</strong></p>
+<div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 主模型挂了自动切到备用</span></span><br><span class="line">openclaw models fallbacks add claude-opus-4.6</span><br><span class="line">openclaw models fallbacks add gpt-5.3-codex</span><br><span class="line">openclaw models fallbacks add gemini-3.1-pro</span><br></pre></td></tr></table></figure></div>
+
+<p>这样即使 Claude API 出问题，会自动降级到 GPT，再降级到 Gemini，保证永不断线。</p>
+<p><strong>第二步：设置定时重启</strong></p>
+<p>通过 Cron 系统配置每天多次自动重启，清理内存、刷新连接：</p>
+<div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 每天 0:00 / 8:00 / 17:00 自动重启</span></span><br><span class="line">openclaw cron add</span><br></pre></td></tr></table></figure></div>
+
+<p>在 AI 对话中也可以直接让助手帮你创建：</p>
+<blockquote>
+<p>“帮我设置每天 0 点、8 点、17 点自动重启 Gateway”</p>
+</blockquote>
+<p><strong>第三步：Heartbeat 心跳巡检</strong></p>
+<p>编辑工作区的 <code>HEARTBEAT.md</code>，让 AI 每次心跳时自动执行健康检查：</p>
+<div class="code-container" data-rel="Markdown"><figure class="iseeu highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="section"># HEARTBEAT.md</span></span><br><span class="line"><span class="bullet">-</span> 检查 Gateway 状态</span><br><span class="line"><span class="bullet">-</span> 检查各频道连接是否正常</span><br><span class="line"><span class="bullet">-</span> 如果发现异常，立即通知我</span><br></pre></td></tr></table></figure></div>
+
+<p>AI 助手每 30 分钟轮询一次，发现问题会主动告警。</p>
+<p><strong>效果：</strong> 模型自动降级 + 定时重启 + 心跳监控，三层保障让你的 AI 助手 7×24 稳定运行，晚上睡觉也不用担心。</p>
+<hr>
+<h2 id="🎯-实战场景二：自动化内容工厂"><a href="#🎯-实战场景二：自动化内容工厂" class="headerlink" title="🎯 实战场景二：自动化内容工厂"></a>🎯 实战场景二：自动化内容工厂</h2><p><strong>痛点：</strong> 每天要发公众号文章、写技术博客、跟踪 GitHub 热门项目，太费时间。</p>
+<p><strong>解决方案：Cron 定时触发 + Skills 组合 + 多平台分发</strong></p>
+<p><strong>第一步：安装必要技能</strong></p>
+<div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># GitHub Trending 抓取</span></span><br><span class="line">npx clawhub install github-trending</span><br><span class="line"></span><br><span class="line"><span class="comment"># 微信公众号发布</span></span><br><span class="line"><span class="comment"># 放到 workspace/skills/ 目录即可</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># GPT 图片生成（封面图）</span></span><br><span class="line">npx clawhub install gpt-image-gen</span><br></pre></td></tr></table></figure></div>
+
+<p><strong>第二步：创建每日自动发布任务</strong></p>
+<p>通过 Cron 设置每天早上 9:30 自动执行：</p>
+<div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openclaw cron add</span><br></pre></td></tr></table></figure></div>
+
+<p>任务内容：</p>
+<ol>
+<li>🕷️ 抓取 GitHub Trending Top 10 项目</li>
+<li>🔍 逐个分析项目（读 README、分析技术栈）</li>
+<li>✍️ 自动生成文章（Markdown 格式）</li>
+<li>🎨 生成封面图（gpt-image-gen）</li>
+<li>📤 发布到微信公众号草稿箱</li>
+<li>📝 同步部署到 Hexo 博客</li>
+</ol>
+<p><strong>第三步：多平台分发</strong></p>
+<p>同一内容可以同时推送到多个频道：</p>
+<ul>
+<li>微信公众号 → 通过 wechat-publisher 技能</li>
+<li>飞书 → 通过飞书频道直接发送摘要</li>
+<li>Hexo 博客 → 通过 <code>hexo generate &amp;&amp; hexo deploy</code></li>
+</ul>
+<p><strong>效果：</strong> 每天早上 9:30，AI 自动完成从”抓取→分析→写作→配图→发布”的全流程，你只需要打开草稿箱确认一下就好。一个人 &#x3D; 一个内容团队。</p>
+<hr>
+<h2 id="🎯-实战场景三：生活场景智能化"><a href="#🎯-实战场景三：生活场景智能化" class="headerlink" title="🎯 实战场景三：生活场景智能化"></a>🎯 实战场景三：生活场景智能化</h2><p><strong>痛点：</strong> 每天要查天气、看日历、管理待办、记单词……信息分散在各种 App 里。</p>
+<p><strong>解决方案：Skills 组合 + 飞书&#x2F;微信统一入口 + 定时推送</strong></p>
+<p><strong>第一步：接入生活类技能</strong></p>
+<div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 待办事项（Microsoft Todo / Apple Reminders）</span></span><br><span class="line">openclaw plugins install openclaw-microsoft-todo</span><br><span class="line"></span><br><span class="line"><span class="comment"># 天气查询（内置，无需安装）</span></span><br><span class="line"><span class="comment"># weather 技能自带</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 生词管理（自定义技能）</span></span><br><span class="line"><span class="comment"># 放到 workspace/skills/vocabulary/</span></span><br></pre></td></tr></table></figure></div>
+
+<p><strong>第二步：配置每日早安推送</strong></p>
+<p>设置每天早上 10 点的 Cron 任务，自动汇总今日信息：</p>
+<ol>
+<li>☀️ 今日天气和穿衣建议</li>
+<li>📰 全球科技新闻 Top 5</li>
+<li>📈 美股 &#x2F; 港股昨日行情</li>
+<li>📋 今日待办事项（从 Microsoft Todo 拉取）</li>
+<li>📝 3 个昨日新学的英语单词复习</li>
+<li>🎂 家人朋友生日提醒</li>
+</ol>
+<p>一条消息，发到飞书或微信，开启元气满满的一天。</p>
+<p><strong>第三步：随时随地对话式操作</strong></p>
+<p>不需要打开任何 App，直接在聊天窗口说：</p>
+<ul>
+<li>“帮我加个待办：明天下午 3 点开会”</li>
+<li>“今天天气怎么样？”</li>
+<li>“记一下这个单词：resilience”</li>
+<li>“帮我看看下周有什么日程”</li>
+</ul>
+<p>AI 助手会调用对应的技能，直接完成操作并回复结果。</p>
+<p><strong>第四步：手机变身能力节点</strong></p>
+<p>通过 Nodes 系统，手机可以成为 AI 的”手脚”：</p>
+<div class="code-container" data-rel="Bash"><figure class="iseeu highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openclaw nodes approve  <span class="comment"># 审批手机节点</span></span><br></pre></td></tr></table></figure></div>
+
+<ul>
+<li>📷 远程拍照：”帮我看看家里猫在干嘛”</li>
+<li>📍 位置查询：”我现在在哪里？”</li>
+<li>🖼️ Canvas 推送：AI 把天气卡片推到手机屏幕</li>
+</ul>
+<p><strong>效果：</strong> 一个聊天窗口 &#x3D; 天气 + 日历 + 待办 + 新闻 + 学习 + 智能家居。不再需要在十几个 App 之间切换，所有信息和操作都汇聚到一个对话框里。</p>
+<hr>
+<p>OpenClaw 的哲学很简单：<strong>命令是积木，技能是零件，组合起来才是产品。</strong> 找到你自己的场景，搭建属于你的 AI 工作流吧。</p>
+<hr>
+<p><em>本文由 TechHome 编辑部整理发布，转载请注明出处。</em></p>
+
+		</div>
+
+		
+		<div class="post-copyright-info w-full my-8 px-2 sm:px-6 md:px-8">
+			<div class="article-copyright-info-container">
+    <ul>
+        <li><strong>标题:</strong> 一个框架打通10个聊天平台，我的AI助手从此不下班</li>
+        <li><strong>作者:</strong> Nathan</li>
+        <li><strong>创建于
+                :</strong> 2026-02-20 15:00:00</li>
+        
+            <li>
+                <strong>更新于
+                    :</strong> 2026-09-06 09:12:32
+            </li>
+        
+        <li>
+            <strong>链接:</strong> https://hydraxman.github.io/2026/02/20/openclaw-commands-guide/
+        </li>
+        <li>
+            <strong>
+                版权声明:
+            </strong>
+            
+
+            
+                本文章采用 <a class="license" target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0">CC BY-NC-SA 4.0</a> 进行许可。
+            
+        </li>
+    </ul>
+</div>
+
+		</div>
+		
+
+		
+		<ul class="post-tags-box text-lg mt-1.5 flex-wrap justify-center flex md:hidden">
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/AI/">#AI</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/OpenClaw/">#OpenClaw</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/%E5%B7%A5%E5%85%B7/">#工具</a>&nbsp;
+			</li>
+			
+		</ul>
+		
+
+		
+
+		
+		<div class="article-nav my-8 flex justify-between items-center px-2 sm:px-6 md:px-8">
+			
+			<div class="article-prev border-border-color shadow-redefine-flat shadow-shadow-color-2 rounded-medium px-4 py-2 hover:shadow-redefine-flat-hover hover:shadow-shadow-color-2">
+				<a class="prev" rel="prev" href="/2026/02/20/ai-models-feb-2026/">
+					<span class="left arrow-icon flex justify-center items-center">
+						<i class="fa-solid fa-chevron-left"></i>
+					</span>
+					<span class="title flex justify-center items-center">
+						<span class="post-nav-title-item truncate max-w-48">Claude、GPT、Gemini 二月大乱斗：到底谁才是真正的王者？</span>
+						<span class="post-nav-item">上一篇</span>
+					</span>
+				</a>
+			</div>
+			
+			
+			<div class="article-next border-border-color shadow-redefine-flat shadow-shadow-color-2 rounded-medium px-4 py-2 hover:shadow-redefine-flat-hover hover:shadow-shadow-color-2">
+				<a class="next" rel="next" href="/2026/02/19/2026-02-19-morning-news/">
+					<span class="title flex justify-center items-center">
+						<span class="post-nav-title-item truncate max-w-48">2026年02月19日早间要闻</span>
+						<span class="post-nav-item">下一篇</span>
+					</span>
+					<span class="right arrow-icon flex justify-center items-center">
+						<i class="fa-solid fa-chevron-right"></i>
+					</span>
+				</a>
+			</div>
+			
+		</div>
+		
+
+
+		
+	</div>
+
+	
+	<div class="toc-content-container">
+		<div class="post-toc-wrap">
+	<div class="post-toc">
+		<div class="toc-title">目录</div>
+		<div class="page-title">一个框架打通10个聊天平台，我的AI助手从此不下班</div>
+		<ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1%EF%B8%8F%E2%83%A3-%E5%AE%89%E8%A3%85%E4%B8%8E%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="nav-text">1️⃣ 安装与初始化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2%EF%B8%8F%E2%83%A3-Gateway-%E7%AE%A1%E7%90%86"><span class="nav-text">2️⃣ Gateway 管理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3%EF%B8%8F%E2%83%A3-%E9%A2%91%E9%81%93%E7%AE%A1%E7%90%86"><span class="nav-text">3️⃣ 频道管理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4%EF%B8%8F%E2%83%A3-%E6%A8%A1%E5%9E%8B%E7%AE%A1%E7%90%86"><span class="nav-text">4️⃣ 模型管理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5%EF%B8%8F%E2%83%A3-Skills-%E6%8A%80%E8%83%BD%E7%B3%BB%E7%BB%9F"><span class="nav-text">5️⃣ Skills 技能系统</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6%EF%B8%8F%E2%83%A3-Cron-%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1"><span class="nav-text">6️⃣ Cron 定时任务</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7%EF%B8%8F%E2%83%A3-Sessions-%E4%BC%9A%E8%AF%9D%E7%AE%A1%E7%90%86"><span class="nav-text">7️⃣ Sessions 会话管理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#8%EF%B8%8F%E2%83%A3-Browser-%E6%B5%8F%E8%A7%88%E5%99%A8%E6%8E%A7%E5%88%B6"><span class="nav-text">8️⃣ Browser 浏览器控制</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#9%EF%B8%8F%E2%83%A3-Nodes-%E8%8A%82%E7%82%B9%E7%AE%A1%E7%90%86"><span class="nav-text">9️⃣ Nodes 节点管理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%F0%9F%94%9F-Plugins-%E6%8F%92%E4%BB%B6%E7%B3%BB%E7%BB%9F"><span class="nav-text">🔟 Plugins 插件系统</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1%EF%B8%8F%E2%83%A31%EF%B8%8F%E2%83%A3-%E5%B8%B8%E7%94%A8%E6%8F%92%E4%BB%B6%E4%B8%8E%E7%A4%BE%E5%8C%BA%E6%8A%80%E8%83%BD%E8%AF%A6%E8%A7%A3"><span class="nav-text">1️⃣1️⃣ 常用插件与社区技能详解</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%F0%9F%93%8C-%E5%AE%98%E6%96%B9-x2F-%E7%A4%BE%E5%8C%BA%E6%8F%92%E4%BB%B6"><span class="nav-text">📌 官方&#x2F;社区插件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%F0%9F%93%8C-%E5%AE%9E%E7%94%A8%E5%86%85%E7%BD%AE%E6%8A%80%E8%83%BD"><span class="nav-text">📌 实用内置技能</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%F0%9F%93%8C-%E8%87%AA%E5%AE%9A%E4%B9%89%E6%8A%80%E8%83%BD%EF%BC%88Workspace-Skills%EF%BC%89"><span class="nav-text">📌 自定义技能（Workspace Skills）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1%EF%B8%8F%E2%83%A32%EF%B8%8F%E2%83%A3-%E5%AE%9E%E7%94%A8%E5%91%BD%E4%BB%A4%E5%90%88%E9%9B%86"><span class="nav-text">1️⃣2️⃣ 实用命令合集</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1%EF%B8%8F%E2%83%A33%EF%B8%8F%E2%83%A3-%E5%B8%B8%E7%94%A8%E6%8A%80%E5%B7%A7"><span class="nav-text">1️⃣3️⃣ 常用技巧</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E7%83%AD%E9%87%8D%E8%BD%BD"><span class="nav-text">配置热重载</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Memory-%E5%90%91%E9%87%8F%E6%90%9C%E7%B4%A2"><span class="nav-text">Memory 向量搜索</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%9A-Agent-%E6%9E%B6%E6%9E%84"><span class="nav-text">多 Agent 架构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Workspace-%E6%96%87%E4%BB%B6%E7%BB%93%E6%9E%84"><span class="nav-text">Workspace 文件结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Slash-%E5%91%BD%E4%BB%A4"><span class="nav-text">Slash 命令</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F"><span class="nav-text">环境变量</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-text">总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%F0%9F%8E%AF-%E5%AE%9E%E6%88%98%E5%9C%BA%E6%99%AF%E4%B8%80%EF%BC%9A7%C3%9724-%E7%A8%B3%E5%AE%9A%E8%BF%90%E8%A1%8C%E6%96%B9%E6%A1%88"><span class="nav-text">🎯 实战场景一：7×24 稳定运行方案</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%F0%9F%8E%AF-%E5%AE%9E%E6%88%98%E5%9C%BA%E6%99%AF%E4%BA%8C%EF%BC%9A%E8%87%AA%E5%8A%A8%E5%8C%96%E5%86%85%E5%AE%B9%E5%B7%A5%E5%8E%82"><span class="nav-text">🎯 实战场景二：自动化内容工厂</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%F0%9F%8E%AF-%E5%AE%9E%E6%88%98%E5%9C%BA%E6%99%AF%E4%B8%89%EF%BC%9A%E7%94%9F%E6%B4%BB%E5%9C%BA%E6%99%AF%E6%99%BA%E8%83%BD%E5%8C%96"><span class="nav-text">🎯 实战场景三：生活场景智能化</span></a></li></ol>
+
+	</div>
+</div>
+	</div>
+	
+</div>
+
+			</div>
+
+			
+		</div>
+
+		<div class="main-content-footer">
+			<footer class="footer mt-5 py-5 h-auto text-base text-third-text-color relative border-t-2 border-t-border-color">
+    <div class="info-container py-3 text-center">
+        
+        <div class="text-center">
+            &copy;
+            
+              <span>2024</span>
+              -
+            
+            2026&nbsp;&nbsp;<i class="fa-solid fa-heart fa-beat" style="--fa-animation-duration: 0.5s; color: #333"></i>&nbsp;&nbsp;<a href="/">Nathan</a>
+            
+                
+                <p class="post-count space-x-0.5">
+                    <span>
+                        共撰写了 363 篇文章
+                    </span>
+                    
+                        <span>
+                            共 876.9k 字
+                        </span>
+                    
+                </p>
+            
+        </div>
+        
+        <div class="relative text-center lg:absolute lg:left-[20px] lg:top-1/2 lg:-translate-y-1/2 lg:text-left">
+            <span class="lg:block text-sm">由 <?xml version="1.0" encoding="utf-8"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg class="relative top-[2px] inline-block align-baseline" version="1.1" id="圖層_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="1rem" height="1rem" viewBox="0 0 512 512" enable-background="new 0 0 512 512" xml:space="preserve"><path fill="#0E83CD" d="M256.4,25.8l-200,115.5L56,371.5l199.6,114.7l200-115.5l0.4-230.2L256.4,25.8z M349,354.6l-18.4,10.7l-18.6-11V275H200v79.6l-18.4,10.7l-18.6-11v-197l18.5-10.6l18.5,10.8V237h112v-79.6l18.5-10.6l18.5,10.8V354.6z"/></svg><a target="_blank" class="text-base" href="https://hexo.io">Hexo</a> 驱动</span>
+            <span class="text-sm lg:block">主题&nbsp;<a class="text-base" target="_blank" href="https://github.com/EvanNotFound/hexo-theme-redefine">Redefine v2.9.0</a></span>
+        </div>
+        
+        
+            <div>
+                博客已运行 <span class="odometer" id="runtime_days" ></span> 天 <span class="odometer" id="runtime_hours"></span> 小时 <span class="odometer" id="runtime_minutes"></span> 分钟 <span class="odometer" id="runtime_seconds"></span> 秒
+            </div>
+        
+        
+            <script data-swup-reload-script>
+                try {
+                    function odometer_init() {
+                    const elements = document.querySelectorAll('.odometer');
+                    elements.forEach(el => {
+                        new Odometer({
+                            el,
+                            format: '( ddd).dd',
+                            duration: 200
+                        });
+                    });
+                    }
+                    odometer_init();
+                } catch (error) {}
+            </script>
+        
+        
+            
+                
+        
+                
+        
+        
+    </div>  
+</footer>
+		</div>
+	</div>
+
+	
+	<div class="post-tools">
+		<div class="post-tools-container">
+	<ul class="article-tools-list">
+		<!-- TOC aside toggle -->
+		
+		<li class="right-bottom-tools page-aside-toggle">
+			<i class="fa-regular fa-outdent"></i>
+		</li>
+		
+
+		<!-- go comment -->
+		
+	</ul>
+</div>
+	</div>
+	
+
+	<div class="right-side-tools-container">
+		<div class="side-tools-container">
+	<ul class="hidden-tools-list">
+		<li class="right-bottom-tools tool-font-adjust-plus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-plus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-font-adjust-minus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-minus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-dark-light-toggle flex justify-center items-center">
+			<i class="fa-regular fa-moon"></i>
+		</li>
+
+		<!-- rss -->
+		
+
+		
+
+		<li class="right-bottom-tools tool-scroll-to-bottom flex justify-center items-center">
+			<i class="fa-regular fa-arrow-down"></i>
+		</li>
+	</ul>
+
+	<ul class="visible-tools-list">
+		<li class="right-bottom-tools toggle-tools-list flex justify-center items-center">
+			<i class="fa-regular fa-cog fa-spin"></i>
+		</li>
+		
+		<li class="right-bottom-tools tool-scroll-to-top flex justify-center items-center">
+			<i class="arrow-up fas fa-arrow-up"></i>
+			<span class="percent"></span>
+		</li>
+		
+		
+	</ul>
+</div>
+	</div>
+
+	<div class="image-viewer-container" role="dialog" aria-modal="true" aria-label="图片查看器">
+	<button class="image-viewer-close" type="button" aria-label="关闭">
+		<i class="fa-solid fa-xmark"></i>
+	</button>
+	<button class="image-viewer-prev" type="button" aria-label="上一页">
+		<i class="fa-solid fa-chevron-left"></i>
+	</button>
+	<div class="image-viewer-frame">
+		<img src="" alt="">
+	</div>
+	<div class="image-viewer-exif-panel hidden absolute left-1/2 bottom-20 -translate-x-1/2 w-[min(92vw,420px)] max-h-[60vh] overflow-hidden rounded-2xl bg-background-color-transparent-80 p-4 text-left shadow-redefine-flat backdrop-blur-md" role="dialog" aria-label="EXIF" aria-hidden="true">
+		<div class="flex items-center justify-between mb-3">
+			<span class="text-sm font-semibold text-first-text-color">EXIF</span>
+			<button class="image-viewer-exif-close flex h-8 w-8 items-center justify-center rounded-full bg-background-color-transparent-80 text-first-text-color transition hover:bg-background-color-transparent-40" type="button" aria-label="关闭">
+				<i class="fa-solid fa-xmark text-[0.65rem]"></i>
+			</button>
+		</div>
+		<div class="image-viewer-exif-cards grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[50vh] overflow-y-auto pr-1 scrollbar-hide"></div>
+		<template class="image-viewer-exif-card-template">
+			<div class="rounded-lg bg-background-color-transparent-40 px-3 py-2">
+				<div class="image-viewer-exif-card-header flex items-center gap-2 mb-1">
+					<i class="image-viewer-exif-card-icon fa-solid fa-circle-info text-xs text-third-text-color"></i>
+					<div class="image-viewer-exif-card-title text-xs font-semibold text-first-text-color"></div>
+				</div>
+				<div class="image-viewer-exif-card-items flex flex-col gap-1"></div>
+			</div>
+		</template>
+	</div>
+	<button class="image-viewer-exif-toggle flex items-center gap-2 hidden absolute left-1/2 bottom-6 -translate-x-1/2 rounded-full border border-border-color bg-background-color-transparent-80 px-4 py-2 text-first-text-color backdrop-blur-md transition hover:bg-background-color-transparent-40" type="button" aria-label="EXIF" aria-expanded="false">
+		<i class="fa-solid fa-circle-info text-xs"></i>
+		<span class="text-xs font-semibold uppercase tracking-wider">EXIF</span>
+	</button>
+	<button class="image-viewer-next" type="button" aria-label="下一页">
+		<i class="fa-solid fa-chevron-right"></i>
+	</button>
+</div>
+
+
+	
+	<div class="search-pop-overlay">
+	<div class="popup search-popup">
+		<div class="search-header">
+			<span class="search-input-field-pre">
+				<i class="fa-solid fa-keyboard"></i>
+			</span>
+			<div class="search-input-container">
+				<input autocomplete="off" autocorrect="off" autocapitalize="off" placeholder="站内搜索您需要的内容..." spellcheck="false" type="search" class="search-input">
+			</div>
+			<span class="popup-btn-close">
+				<i class="fa-solid fa-times"></i>
+			</span>
+		</div>
+		<div id="search-result">
+			<div id="no-result">
+				<i class="fa-solid fa-spinner fa-spin-pulse fa-5x fa-fw"></i>
+			</div>
+		</div>
+	</div>
+</div>
+	
+
+</main>
+
+
+
+<script src="/js/build/libs/Swup.min.js"></script>
+
+<script src="/js/build/libs/SwupSlideTheme.min.js"></script>
+
+<script src="/js/build/libs/SwupScriptsPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupProgressPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupScrollPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupPreloadPlugin.min.js"></script>
+
+<script>
+    window.swup = new Swup({
+        plugins: [
+            new SwupScriptsPlugin({
+                optin: true,
+            }),
+            new SwupProgressPlugin(),
+            new SwupScrollPlugin({
+                offset: 80,
+            }),
+            new SwupSlideTheme({
+                mainElement: ".main-content-body",
+            }),
+            new SwupPreloadPlugin(),
+        ],
+        containers: ["#swup"],
+    });
+
+    window.dispatchEvent(
+        new CustomEvent("redefine:swup:ready", {
+            detail: {
+                swup: window.swup,
+            },
+        }),
+    );
+</script>
+
+
+
+
+	
+<script src="/js/build/main.js" type="module"></script>
+
+
+
+    
+<script src="/js/build/libs/odometer.min.js"></script>
+
+    
+<link rel="stylesheet" href="/assets/odometer-theme-minimal.css">
+
+
+
+
+
+
+
+  
+<script src="/js/build/libs/Typed.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+<script src="/js/build/libs/moment-with-locales.min.js" data-swup-reload-script=""></script>
+
+
+
+	
+</body>
+
+</html>
