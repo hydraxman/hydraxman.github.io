@@ -1,0 +1,1220 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="keywords" content="计算机技术, 生活中的胡思乱想">
+    
+    
+    <meta name="author" content="Nathan">
+    
+    <!-- Completely eliminate flash of wrong theme -->
+    <script>
+        (function() {
+            const THEME_KEY = "REDEFINE-THEME-STATUS";
+            const DARK = "dark", LIGHT = "light";
+            
+            // Get preferred theme
+            function getTheme() {
+                try {
+                    const saved = localStorage.getItem(THEME_KEY);
+                    if (saved) {
+                        const { isDark } = JSON.parse(saved);
+                        return isDark ? DARK : LIGHT;
+                    }
+                } catch (e) {}
+                
+                return matchMedia("(prefers-color-scheme: dark)").matches ? DARK : LIGHT;
+            }
+            
+            // Apply theme to document
+            function applyTheme(theme) {
+                const isDark = theme === DARK;
+                const root = document.documentElement;
+                
+                // Set classes for compatibility
+                root.classList.add(theme);
+                root.classList.remove(isDark ? LIGHT : DARK);
+                root.style.colorScheme = theme;
+            }
+            
+            // Initial application
+            const theme = getTheme();
+            applyTheme(theme);
+            
+            // Listen for system preference changes
+            matchMedia("(prefers-color-scheme: dark)").addEventListener("change", ({ matches }) => {
+                // Only update if using system preference (no localStorage entry)
+                if (!localStorage.getItem(THEME_KEY)) {
+                    applyTheme(matches ? DARK : LIGHT);
+                }
+            });
+            
+            // Set body classes ASAP (before DOMContentLoaded)
+            (function() {
+                const addBodyClass = () => {
+                    const b = document.body;
+                    if (!b) return false;
+                    b.classList.add(theme + "-mode");
+                    return true;
+                };
+
+                // Try immediately
+                if (addBodyClass()) return;
+
+                // Observe until body exists
+                const mo = new MutationObserver(() => {
+                    if (addBodyClass()) mo.disconnect();
+                });
+                mo.observe(document.documentElement, { childList: true, subtree: true });
+            })();
+        })();
+    </script>
+    
+    <!-- preconnect -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    
+    <!--- Seo Part-->
+    
+    <link rel="canonical" href="https://hydraxman.github.io/2026/09/13/huggingface-trending/huggingface-trending-2026-09-13/"/>
+    <meta name="robots" content="index,follow">
+    <meta name="googlebot" content="index,follow">
+    <meta name="revisit-after" content="1 days">
+    
+    
+        
+        <meta name="description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Hugging Face 热榜：大模型压缓存，小模型做助手，Qwen 一条谱系占三席">
+<meta property="og:url" content="https://hydraxman.github.io/2026/09/13/huggingface-trending/huggingface-trending-2026-09-13/index.html">
+<meta property="og:site_name" content="内森淼文">
+<meta property="og:description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://hydraxman.github.io/images/redefine-og.webp">
+<meta property="article:published_time" content="2026-09-12T20:01:00.000Z">
+<meta property="article:modified_time" content="2026-09-12T20:08:06.535Z">
+<meta property="article:author" content="Nathan">
+<meta property="article:tag" content="AI模型">
+<meta property="article:tag" content="本地部署">
+<meta property="article:tag" content="Hugging Face">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://hydraxman.github.io/images/redefine-og.webp">
+    
+    
+    <!--- Icon Part-->
+    <link rel="icon" type="image/png" href="/images/favicon.svg" sizes="192x192">
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.svg">
+    <meta name="theme-color" content="#ffffff">
+    <link rel="shortcut icon" href="/images/favicon.svg">
+    <!--- Page Info-->
+    
+    <title>
+        
+            Hugging Face 热榜：大模型压缓存，小模型做助手，Qwen 一条谱系占三席 | 内森淼文
+        
+    </title>
+
+    
+<link rel="stylesheet" href="/fonts/Chillax/chillax.css">
+
+
+    <!--- Inject Part-->
+    
+        
+            
+    
+            
+    
+            
+                
+                    <link rel="stylesheet" href="/css/custom.css">
+                
+    
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    
+        
+<link rel="stylesheet" href="/css/build/tailwind.css">
+
+    
+
+    
+<link rel="stylesheet" href="/fonts/GeistMono/geist-mono.css">
+
+    
+<link rel="stylesheet" href="/fonts/Geist/geist.css">
+
+    <!--- Font Part-->
+    
+    
+    
+    
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&display=swap" rel="stylesheet">
+    
+    
+
+    <script id="hexo-configurations">
+    window.config = {"hostname":"hydraxman.github.io","root":"/","language":"zh-CN","path":"search.json"};
+    window.theme = {"articles":{"style":{"font_size":"16px","line_height":1.5,"image_border_radius":"14px","image_alignment":"center","image_caption":false,"link_icon":true,"delete_mask":false,"title_alignment":"left","headings_top_spacing":{"h1":"3.2rem","h2":"2.4rem","h3":"1.9rem","h4":"1.6rem","h5":"1.4rem","h6":"1.3rem"}},"word_count":{"enable":true,"count":true,"min2read":true},"author_label":{"enable":false,"auto":false,"list":[]},"code_block":{"copy":true,"style":"mac","highlight_theme":{"light":"github","dark":"vs2015"},"font":{"enable":false,"family":null,"url":null}},"toc":{"enable":true,"max_depth":3,"number":false,"expand":true,"init_open":true},"copyright":{"enable":true,"default":"cc_by_nc_sa"},"lazyload":true,"pangu_js":false,"recommendation":{"enable":false,"title":"推荐阅读","limit":3,"mobile_limit":2,"placeholder":"/images/wallhaven-wqery6-light.webp","skip_dirs":[]}},"colors":{"primary":"#ffffff","secondary":null,"default_mode":"light"},"global":{"fonts":{"chinese":{"enable":false,"family":null,"url":null},"english":{"enable":true,"family":"Inter","url":"https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"},"title":{"enable":true,"family":"Noto Serif","url":"https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&display=swap"}},"content_max_width":"1000px","sidebar_width":"210px","hover":{"shadow":true,"scale":false},"scroll_progress":{"bar":true,"percentage":true},"website_counter":{"url":"https://cn.vercount.one/js","enable":false,"site_pv":true,"site_uv":true,"post_pv":true},"single_page":true,"preloader":{"enable":false,"custom_message":null},"side_tools":{"gear_rotation":true,"auto_expand":false},"open_graph":{"enable":true,"image":"/images/redefine-og.webp","description":"Hexo Theme Redefine, Redefine Your Hexo Journey."},"google_analytics":{"enable":false,"id":null}},"home_banner":{"enable":true,"style":"fixed","image":{"light":"/images/banner-light.jpg","dark":"/images/banner-dark.jpg"},"title":"内森淼文","subtitle":{"text":["AI · 编程 · 科技见闻","Write Code, Read World"],"hitokoto":{"enable":false,"show_author":false,"api":"https://v1.hitokoto.cn"},"typing_speed":100,"backing_speed":80,"starting_delay":500,"backing_delay":1500,"loop":true,"smart_backspace":true},"text_color":{"light":"#fff","dark":"#d1d1b6"},"text_style":{"title_size":"2.8rem","subtitle_size":"1.5rem","line_height":1.2},"custom_font":{"enable":false,"family":null,"url":null},"social_links":{"enable":true,"style":"default","links":[{"icon":"fa-brands fa-github","url":"https://github.com/hydraxman"}],"qrs":[{"icon":"fa-brands fa-weixin","qr":null},{"icon":"/images/custom-icon.svg","qr":null}]}},"plugins":{"feed":{"enable":false},"aplayer":{"enable":false,"type":"fixed","audios":[{"name":null,"artist":null,"url":null,"cover":null,"lrc":null}]},"mermaid":{"enable":false,"version":"11.4.1","theme":{"light":"default","dark":"dark"}}},"version":"2.9.0","navbar":{"auto_hide":false,"color":{"left":"#333333","right":"#555555","transparency":35},"width":{"home":"1200px","pages":"1000px"},"links":{"Home":{"path":"/","icon":"fa-regular fa-house"},"Archives":{"path":"/archives","icon":"fa-regular fa-archive"},"Categories":{"path":"/categories","icon":"fa-regular fa-folder"},"Tags":{"path":"/tags","icon":"fa-regular fa-tags"},"About":{"path":"/about","icon":"fa-regular fa-user"}},"search":{"enable":true,"preload":true}},"page_templates":{"friends_column":2,"tags_style":"blur","masonry":{"batch_size":12,"initial_batch_size":24}},"home":{"sidebar":{"enable":true,"position":"left","first_item":"menu","announcement":"AI · 编程 · 科技","show_on_mobile":true,"links":{"Archives":{"path":"/archives","icon":"fa-regular fa-archive"},"Tags":{"path":"/tags","icon":"fa-regular fa-tags"},"Categories":{"path":"/categories","icon":"fa-regular fa-folder"}}},"article_date_format":"auto","excerpt_length":200,"categories":{"enable":true,"limit":3},"tags":{"enable":true,"limit":3}},"footer":{"runtime":true,"icon":"<i class=\"fa-solid fa-heart fa-beat\" style=\"--fa-animation-duration: 0.5s; color: #333\"></i>","start":"2024/01/01 00:00:00","statistics":true,"customize":null,"icp":{"enable":false,"number":null,"url":null}},"footerStart":"2024/01/01 00:00:00","mermaid":{"style":{"light":"default","dark":"dark"}}};
+    window.lang_ago = {"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"};
+    window.i18n = {"search":"站内搜索您需要的内容...","toc":"目录","prev":"上一页","next":"下一页","prev_posts":"上一篇","next_posts":"下一篇","page":"第 %d 页","recent_posts":"最新文章","share":"分享","powered_by":"由 %s 驱动","theme":"主题","rss_feed":"RSS Feed","category":"分类","categories":"分类","tag":"标签","tags":"标签","post":"文章","posts":"文章","tagcloud":"标签云","comment":"评论","comments":"评论","top":"置顶","sticky":"置顶","go-back-home":"回到首页","masonry_loading":"照片加载中...","image_viewer":"图片查看器","close":"关闭","exif":{"title":"EXIF","cards":{"camera":"相机","lens":"镜头","exposure":"曝光","other":"其他"},"fields":{"make":"品牌","model":"机型","date_taken":"拍摄时间","lens_model":"镜头","focal_length":"焦距","focus_mode":"对焦模式","shutter":"快门","aperture":"光圈","iso":"感光度","exposure_program":"曝光程序","exposure_compensation":"曝光补偿","metering_mode":"测光模式","flash":"闪光灯","white_balance":"白平衡","latitude":"纬度","longitude":"经度","altitude":"海拔"},"status":{"loading":"加载中...","no_exif":"无 EXIF 信息","library_missing":"EXIF 库未加载","image_source_missing":"图片地址不可用","unavailable":"EXIF 不可用（可能被 CORS 阻止或缺少元数据）","flag_unavailable":"EXIF 不可用"}},"home":"首页","archive":"归档","archives":"归档","about":"关于","links":"链接","link":"链接","friends":"友情链接","friend":"友情链接","timeline":"时间轴","shuoshuo":"说说","bookmarks":"书签","site_uv":"访问人数","site_pv":"总访问量","read_more":"阅读全文","wordcount":"字","min2read":"分钟","changelog":"更新日志","status":"状态","runtime":"博客已运行","days":"天","hours":"小时","minutes":"分钟","seconds":"秒","optimized_by":"并由 Evan 进行优化","rights":"版权所有","site_posts":"共撰写了 %s 篇文章","site_wordcount":"共 %s 字","copyright":{"title":"标题","author":"作者","link":"链接","create_time":"创建于","update_time":"更新于","license_title":"版权声明","license_content":"本文章采用 %s 进行许可。","all_rights_reserved":"版权所有 &#169 %s，禁止转载。","public_domain":"本文为公有领域作品，可自由转载、引用。"},"ago":{"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"},"create_time":"创建","update_time":"更新","expired":"这篇文章最后更新于 %s 天前，内容可能已经过时。"};
+    window.data = {"masonry":false};
+  </script>
+    
+    <!--- Fontawesome Part-->
+    
+<link rel="stylesheet" href="/fontawesome/fontawesome.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/brands.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/solid.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/regular.min.css">
+
+    
+    
+    
+    
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+	<div class="progress-bar-container">
+	
+	<span class="scroll-progress-bar"></span>
+	
+
+	
+	<span class="pjax-progress-bar"></span>
+	<!--        <span class="swup-progress-icon">-->
+	<!--            <i class="fa-solid fa-circle-notch fa-spin"></i>-->
+	<!--        </span>-->
+	
+</div>
+
+<main class="page-container" id="swup">
+
+	
+
+	<div class="main-content-container flex flex-col justify-between min-h-dvh">
+		<div class="main-content-header">
+			<header class="navbar-container px-6 md:px-12">
+    <div class="navbar-content transition-navbar ">
+        <div class="left">
+            
+            <a class="logo-title" href="/">
+                
+                内森淼文
+                
+            </a>
+        </div>
+
+        <div class="right">
+            <!-- PC -->
+            <div class="desktop">
+                <ul class="navbar-list">
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/"
+                                        >
+                                    <i class="fa-regular fa-house fa-fw"></i>
+                                    首页
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/archives"
+                                        >
+                                    <i class="fa-regular fa-archive fa-fw"></i>
+                                    归档
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/categories"
+                                        >
+                                    <i class="fa-regular fa-folder fa-fw"></i>
+                                    分类
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/tags"
+                                        >
+                                    <i class="fa-regular fa-tags fa-fw"></i>
+                                    标签
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/about"
+                                        >
+                                    <i class="fa-regular fa-user fa-fw"></i>
+                                    关于
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                    
+                        <li class="navbar-item search search-popup-trigger">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </li>
+                    
+                </ul>
+            </div>
+            <!-- Mobile -->
+            <div class="mobile">
+                
+                    <div class="icon-item search search-popup-trigger"><i class="fa-solid fa-magnifying-glass"></i>
+                    </div>
+                
+                <div class="icon-item navbar-bar">
+                    <div class="navbar-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile sheet -->
+    <div class="navbar-drawer h-dvh w-full absolute top-0 left-0 bg-background-color flex flex-col justify-between">
+        <ul class="drawer-navbar-list flex flex-col px-4 justify-center items-start">
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/"
+                        >
+                            <span>
+                                首页
+                            </span>
+                            
+                                <i class="fa-regular fa-house fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/archives"
+                        >
+                            <span>
+                                归档
+                            </span>
+                            
+                                <i class="fa-regular fa-archive fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/categories"
+                        >
+                            <span>
+                                分类
+                            </span>
+                            
+                                <i class="fa-regular fa-folder fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/tags"
+                        >
+                            <span>
+                                标签
+                            </span>
+                            
+                                <i class="fa-regular fa-tags fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/about"
+                        >
+                            <span>
+                                关于
+                            </span>
+                            
+                                <i class="fa-regular fa-user fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+
+            
+            
+                
+                    
+                    
+                    
+            
+        </ul>
+
+        <div class="statistics flex justify-around my-2.5">
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/tags">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">391</div>
+        <div class="label text-third-text-color text-sm">标签</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/categories">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">16</div>
+        <div class="label text-third-text-color text-sm">分类</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/archives">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">377</div>
+        <div class="label text-third-text-color text-sm">文章</div>
+    </a>
+</div>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+		</div>
+
+		<div class="main-content-body transition-fade-up">
+			
+
+			<div class="main-content">
+				<div class="post-page-container flex relative justify-between box-border w-full h-full">
+	<div class="article-content-container">
+
+		<div class="article-title relative w-full">
+			
+			
+			
+			<img src="/images/huggingface-trending/2026-09-13/cover.png" alt="Hugging Face 热榜：大模型压缓存，小模型做助手，Qwen 一条谱系占三席" class="w-full h-60 sm:h-72 md:h-80 object-cover sm:rounded-t-large dark:brightness-75" />
+			
+			<div class="w-full flex items-center absolute bottom-0 justify-start">
+				<h1 class="article-title-cover text-center mx-6 my-6 text-second-text-color bg-background-color-transparent px-4 py-3 text-3xl sm:text-4xl md:text-5xl font-semibold backdrop-blur-lg rounded-xl border border-border-color ">Hugging Face 热榜：大模型压缓存，小模型做助手，Qwen 一条谱系占三席</h1>
+			</div>
+			
+		</div>
+
+		
+		<div class="article-header flex flex-row gap-2 items-center px-2 sm:px-6 md:px-8">
+			<div class="avatar w-[46px] h-[46px] shrink-0 rounded-medium border border-border-color p-px">
+				<img src="/images/avatar.png">
+			</div>
+			<div class="info flex flex-col justify-between">
+				<div class="author flex items-center">
+					<span class="name text-default-text-color text-lg font-semibold">Nathan</span>
+					
+				</div>
+				<div class="meta-info">
+					<div class="article-meta-info">
+    <span class="article-date article-meta-item">
+        <i class="fa-regular fa-pen-fancy"></i>&nbsp;
+        <span class="desktop">2026-09-13 04:01</span>
+        <span class="mobile">2026-09-13 04:01</span>
+        <span class="hover-info">创建</span>
+    </span>
+    
+        <span class="article-date article-meta-item">
+            <i class="fa-regular fa-wrench"></i>&nbsp;
+            <span class="desktop">2026-09-13 04:08:06</span>
+            <span class="mobile">2026-09-13 04:08:06</span>
+            <span class="hover-info">更新</span>
+        </span>
+    
+
+    
+        <span class="article-categories article-meta-item">
+            <i class="fa-regular fa-folders"></i>&nbsp;
+            <ul>
+                
+                
+                    
+                        
+                        <li>
+                            <a href="/categories/AI%E6%A8%A1%E5%9E%8B%E8%A7%82%E5%AF%9F/">AI模型观察</a>&nbsp;
+                        </li>
+                    
+                    
+                
+            </ul>
+        </span>
+    
+    
+        <span class="article-tags article-meta-item">
+            <i class="fa-regular fa-tags"></i>&nbsp;
+            <ul>
+                
+                    <li>
+                        <a href="/tags/AI%E6%A8%A1%E5%9E%8B/">AI模型</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/%E6%9C%AC%E5%9C%B0%E9%83%A8%E7%BD%B2/">本地部署</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/Hugging-Face/">Hugging Face</a>&nbsp;
+                    </li>
+                
+            </ul>
+        </span>
+    
+
+    
+    
+        <span class="article-wordcount article-meta-item">
+            <i class="fa-regular fa-typewriter"></i>&nbsp;<span>4.5k 字</span>
+        </span>
+    
+    
+        <span class="article-min2read article-meta-item">
+            <i class="fa-regular fa-clock"></i>&nbsp;<span>17 分钟</span>
+        </span>
+    
+    
+</div>
+
+				</div>
+			</div>
+		</div>
+		
+
+		
+
+
+		<div class="article-content markdown-body px-2 sm:px-6 md:px-8 pb-8">
+			<p>DeepSeek-V4.1-Flash 排第一，MiniCPM5-2B 紧随其后：2026 年 9 月 13 日的 Hugging Face 模型热榜，把服务端大模型与本地小助手摆在了一起。前者着力压缩长输入的缓存开销，后者希望在更小的模型上完成代码、推理与工具调用。它们服务的硬件条件不同，却都绕不开一次任务要占用多少资源。</p>
+<p>Qwen3.8-27B 原版与两套 GGUF 量化版共占三席，这比“十个全新模型”的读法更有参考价值。Nex 的两个版本关注长任务与视觉交互，Edge0 尝试从存储按需读取专家权重，LTX-2.5 则带来音视频生成。选择模型时，部署格式、权限边界和许可证，往往与能力描述同样影响能否落地。</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/huggingface-trending/2026-09-13/cover.png"
+                      alt="Hugging Face Trending 2026-09-13"
+                ></p>
+<h2 id="Top-10-模型一览"><a href="#Top-10-模型一览" class="headerlink" title="Top 10 模型一览"></a>Top 10 模型一览</h2><p>统计时间为北京时间 2026 年 9 月 13 日 04:01。Trend Score 是 Hugging Face 的趋势排序分数，不是质量分、下载日增量或 Likes 日增量。Downloads 按官方页面的最近一个月口径展示，统计特定文件的请求，不等于独立用户或历史累计下载；GGUF 多文件下载可能重复计数。Likes 是独立的点赞字段。各节“为什么热”解释上榜项目的关注价值，不把榜单当成用户动机调查。</p>
+<table>
+<thead>
+<tr>
+<th>排名</th>
+<th>模型</th>
+<th>任务</th>
+<th align="right">Trend Score</th>
+<th align="right">Downloads</th>
+<th align="right">Likes</th>
+<th>许可证</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td><a class="link"   target="_blank" rel="noopener" href="https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash" >deepseek-ai&#x2F;DeepSeek-V4.1-Flash<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></td>
+<td>图文转文本</td>
+<td align="right">1,818</td>
+<td align="right">140,636</td>
+<td align="right">1,982</td>
+<td>MIT</td>
+</tr>
+<tr>
+<td>2</td>
+<td><a class="link"   target="_blank" rel="noopener" href="https://huggingface.co/openbmb/MiniCPM5-2B" >openbmb&#x2F;MiniCPM5-2B<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></td>
+<td>文本生成</td>
+<td align="right">1,051</td>
+<td align="right">102,334</td>
+<td align="right">1,248</td>
+<td>Apache-2.0</td>
+</tr>
+<tr>
+<td>3</td>
+<td><a class="link"   target="_blank" rel="noopener" href="https://huggingface.co/nex-agi/Nex-N2.5-mini" >nex-agi&#x2F;Nex-N2.5-mini<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></td>
+<td>文本生成／视觉交互</td>
+<td align="right">570</td>
+<td align="right">3,581</td>
+<td align="right">725</td>
+<td>Apache-2.0</td>
+</tr>
+<tr>
+<td>4</td>
+<td><a class="link"   target="_blank" rel="noopener" href="https://huggingface.co/Qwen/Qwen3.8-27B" >Qwen&#x2F;Qwen3.8-27B<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></td>
+<td>图文转文本</td>
+<td align="right">549</td>
+<td align="right">7,726,687</td>
+<td align="right">14,851</td>
+<td>Apache-2.0</td>
+</tr>
+<tr>
+<td>5</td>
+<td><a class="link"   target="_blank" rel="noopener" href="https://huggingface.co/XHToken/Spark-X2.5-4B" >XHToken&#x2F;Spark-X2.5-4B<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></td>
+<td>文本生成</td>
+<td align="right">525</td>
+<td align="right">19,733</td>
+<td align="right">1,132</td>
+<td>Apache-2.0</td>
+</tr>
+<tr>
+<td>6</td>
+<td><a class="link"   target="_blank" rel="noopener" href="https://huggingface.co/ISTA-DASLab/Qwen3.8-27B-GSQ-RCO-GGUF" >ISTA-DASLab&#x2F;Qwen3.8-27B-GSQ-RCO-GGUF<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></td>
+<td>图文转文本／GGUF</td>
+<td align="right">471</td>
+<td align="right">729,683</td>
+<td align="right">882</td>
+<td>Apache-2.0</td>
+</tr>
+<tr>
+<td>7</td>
+<td><a class="link"   target="_blank" rel="noopener" href="https://huggingface.co/nex-agi/Nex-N2.5-Pro" >nex-agi&#x2F;Nex-N2.5-Pro<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></td>
+<td>文本生成／视觉交互</td>
+<td align="right">471</td>
+<td align="right">30,081</td>
+<td align="right">615</td>
+<td>Apache-2.0</td>
+</tr>
+<tr>
+<td>8</td>
+<td><a class="link"   target="_blank" rel="noopener" href="https://huggingface.co/Edge0/Edge0-35B-A3B-preview" >Edge0&#x2F;Edge0-35B-A3B-preview<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></td>
+<td>文本生成／MLX</td>
+<td align="right">373</td>
+<td align="right">1,596</td>
+<td align="right">390</td>
+<td>Apache-2.0</td>
+</tr>
+<tr>
+<td>9</td>
+<td><a class="link"   target="_blank" rel="noopener" href="https://huggingface.co/Lightricks/LTX-2.5" >Lightricks&#x2F;LTX-2.5<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></td>
+<td>图生视频／音视频生成</td>
+<td align="right">350</td>
+<td align="right">1,601,007</td>
+<td align="right">3,594</td>
+<td>LTX-2.x 社区许可</td>
+</tr>
+<tr>
+<td>10</td>
+<td><a class="link"   target="_blank" rel="noopener" href="https://huggingface.co/unsloth/Qwen3.8-27B-GGUF" >unsloth&#x2F;Qwen3.8-27B-GGUF<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></td>
+<td>对话（标签）／GGUF</td>
+<td align="right">339</td>
+<td align="right">11,529,203</td>
+<td align="right">3,941</td>
+<td>Apache-2.0</td>
+</tr>
+</tbody></table>
+<p>任务列结合模型卡用途；Nex 的官方主任务标签为文本生成，Unsloth 条目的主任务字段未标注，但带有对话标签。图文模型接收图像并输出文字，图生视频则从图片生成动态画面。</p>
+<h2 id="1-deepseek-ai-x2F-DeepSeek-V4-1-Flash"><a href="#1-deepseek-ai-x2F-DeepSeek-V4-1-Flash" class="headerlink" title="1. deepseek-ai&#x2F;DeepSeek-V4.1-Flash"></a>1. <a class="link"   target="_blank" rel="noopener" href="https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash" >deepseek-ai&#x2F;DeepSeek-V4.1-Flash<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></h2><ul>
+<li><p><strong>模型简介：</strong>DeepSeek 的多模态混合专家模型，能接收图片与文字、生成文字。混合专家（MoE）让每一步只调用部分参数；模型卡给出的主干规模仍达 552B，即 5520 亿参数，不能把它当成一台普通电脑就能运行的小模型。</p>
+</li>
+<li><p><strong>为什么热：</strong>以 1,818 趋势分排在首位，关注点落在长输入的成本：读入材料和逐字回答采用不同的激活规模，适合讨论长文档、多步骤助手的推理开销。榜首反映近期关注，不等于任务成功率第一。</p>
+</li>
+<li><p><strong>技术特点：</strong>原生支持最长 100 万 token 上下文；token 是模型处理文本的基本单位，不等同于汉字。因果编码器—解码器把读入与生成分开，预填充阶段每 token 激活 8B 参数，解码阶段激活 16B。模型卡称全局 KV 缓存降到每 token 890 字节；KV 缓存是保留已读内容中间状态的内存，这个数字不代表全部显存占用。</p>
+</li>
+<li><p><strong>适用场景：</strong>适合有服务端算力、需要处理大量输入的文档助手与图文分析团队。部署时应同时测量读入时间、生成速度和完整内存占用。</p>
+</li>
+<li><p><strong>关键数据：</strong>Trend Score 1,818；Downloads 140,636；Likes 1,982。库：transformers；最近更新：2026-09-10。</p>
+</li>
+<li><p><strong>许可与风险：</strong>MIT，模型卡明确覆盖仓库与权重；保留版权和许可声明。长上下文上限不保证每处信息都能正确检索，图片与文字输出仍须核验。</p>
+</li>
+</ul>
+<p><img src="/images/huggingface-trending/2026-09-13/01-deepseek-ai__DeepSeek-V4.1-Flash.png" alt="deepseek-ai/DeepSeek-V4.1-Flash 模型卡"></p>
+<h2 id="2-openbmb-x2F-MiniCPM5-2B"><a href="#2-openbmb-x2F-MiniCPM5-2B" class="headerlink" title="2. openbmb&#x2F;MiniCPM5-2B"></a>2. <a class="link"   target="_blank" rel="noopener" href="https://huggingface.co/openbmb/MiniCPM5-2B" >openbmb&#x2F;MiniCPM5-2B<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></h2><ul>
+<li><p><strong>模型简介：</strong>OpenBMB 面向本地助手和资源受限设备的稠密语言模型。名称写着 2B，规格表给出的总参数是 2,516,756,480，其中非嵌入参数为 1,981,982,720；评估内存时应看前者，不能只按名称估算。</p>
+</li>
+<li><p><strong>为什么热：</strong>排名第二，同时拥有 102,334 Downloads。它让小规模模型也能参与工具调用与长材料处理；对希望把简单任务留在本地的开发者，这比只比较大模型跑分更有直接用途。</p>
+</li>
+<li><p><strong>技术特点：</strong>使用标准 LlamaForCausalLM 架构，42 层，原生上下文 131,072 token。这一条目是经过强化学习与策略蒸馏的 BF16 最终版；模型卡另列 GGUF、MLX 等版本，不应把其他版本的大小与硬件要求套到这里。</p>
+</li>
+<li><p><strong>适用场景：</strong>本地写作、代码辅助、工具调用原型。可先用短上下文的真实任务测试稳定性，再逐步增加材料长度。</p>
+</li>
+<li><p><strong>关键数据：</strong>Trend Score 1,051；Downloads 102,334；Likes 1,248。库：transformers；最近更新：2026-09-12。</p>
+</li>
+<li><p><strong>许可与风险：</strong>Apache-2.0。小模型的公开比较成绩不意味着可以无监督处理支付、删除文件等操作；工具权限、确认步骤和输出校验仍由应用负责。</p>
+</li>
+</ul>
+<p><img src="/images/huggingface-trending/2026-09-13/02-openbmb__MiniCPM5-2B.png" alt="openbmb/MiniCPM5-2B 模型卡"></p>
+<h2 id="3-nex-agi-x2F-Nex-N2-5-mini"><a href="#3-nex-agi-x2F-Nex-N2-5-mini" class="headerlink" title="3. nex-agi&#x2F;Nex-N2.5-mini"></a>3. <a class="link"   target="_blank" rel="noopener" href="https://huggingface.co/nex-agi/Nex-N2.5-mini" >nex-agi&#x2F;Nex-N2.5-mini<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></h2><ul>
+<li><p><strong>模型简介：</strong>Nex-N2.5 家族的 mini 版本，模型卡强调长任务、电脑操作和浏览器交互。它与 Pro 延续 Nex-N2 的多模态基础，能利用屏幕等视觉反馈推进任务。</p>
+</li>
+<li><p><strong>为什么热：</strong>趋势分高于同家族 Pro，但 Downloads 只有 3,581。这个反差说明近期关注与实际下载规模并不同步，也不足以证明 mini 更好用。</p>
+</li>
+<li><p><strong>技术特点：</strong>训练重点包括持续行动、自我纠错和执行后检查。mini、Pro、Max 共用家族说明，其中 1.6 万亿参数明确属于 Max，不能移植为 mini 的规格；此卡也没有给出 mini 的独立参数总量。</p>
+</li>
+<li><p><strong>适用场景：</strong>有测试环境的浏览器助手、桌面交互实验和需根据截图修正动作的任务。应先检验页面变化、弹窗与失败恢复。</p>
+</li>
+<li><p><strong>关键数据：</strong>Trend Score 570；Downloads 3,581；Likes 725。库：transformers；最近更新：2026-09-08。</p>
+</li>
+<li><p><strong>许可与风险：</strong>Apache-2.0。模型能力描述不等于具备账户授权；网页内容可能带来提示注入，操作敏感页面时需要独立的权限边界与人工确认。</p>
+</li>
+</ul>
+<p><img src="/images/huggingface-trending/2026-09-13/03-nex-agi__Nex-N2.5-mini.png" alt="nex-agi/Nex-N2.5-mini 模型卡"></p>
+<h2 id="4-Qwen-x2F-Qwen3-8-27B"><a href="#4-Qwen-x2F-Qwen3-8-27B" class="headerlink" title="4. Qwen&#x2F;Qwen3.8-27B"></a>4. <a class="link"   target="_blank" rel="noopener" href="https://huggingface.co/Qwen/Qwen3.8-27B" >Qwen&#x2F;Qwen3.8-27B<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></h2><ul>
+<li><p><strong>模型简介：</strong>Qwen 的 27B 稠密视觉语言模型，支持图像、视频理解和多步骤任务。它是本榜两套 GGUF 量化版本的基础，因此三个上榜仓库不能算作三次独立基础模型突破。</p>
+</li>
+<li><p><strong>为什么热：</strong>14,851 Likes 和 7,726,687 Downloads 显示它在本榜已有较大的关注与下载规模。原版和量化版同时上榜，给开发者的实际问题是选哪种部署形态。</p>
+</li>
+<li><p><strong>技术特点：</strong>语言模型参数量 27B，64 层；原生上下文 262,144 token，可通过扩展配置支持到 100 万 token。默认开启思考模式，并提供推理深度与历史思考保留控制；原生长度与扩展长度需要分开看。</p>
+</li>
+<li><p><strong>适用场景：</strong>自建图文问答、文档图表理解、视频内容分析。需要修改训练或服务配置的团队可从原版入手，桌面体验则可比较后面的量化版本。</p>
+</li>
+<li><p><strong>关键数据：</strong>Trend Score 549；Downloads 7,726,687；Likes 14,851。库：transformers；最近更新：2026-08-14。</p>
+</li>
+<li><p><strong>许可与风险：</strong>Apache-2.0。扩展上下文和长视频采样涉及额外配置与资源消耗；量化版的评测不能直接代替原版结果，反之亦然。</p>
+</li>
+</ul>
+<p><img src="/images/huggingface-trending/2026-09-13/04-Qwen__Qwen3.8-27B.png" alt="Qwen/Qwen3.8-27B 模型卡"></p>
+<h2 id="5-XHToken-x2F-Spark-X2-5-4B"><a href="#5-XHToken-x2F-Spark-X2-5-4B" class="headerlink" title="5. XHToken&#x2F;Spark-X2.5-4B"></a>5. <a class="link"   target="_blank" rel="noopener" href="https://huggingface.co/XHToken/Spark-X2.5-4B" >XHToken&#x2F;Spark-X2.5-4B<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></h2><ul>
+<li><p><strong>模型简介：</strong>Spark-X2.5 系列的通用语言模型，面向对话、写作、翻译、代码与工具使用。此条目由 Spark-X2.5-4B-Base 后训练而来，不是基础预训练权重条目。</p>
+</li>
+<li><p><strong>为什么热：</strong>排名第五。其值得关注的部署取向，是让小规模模型承载长材料和助手任务；支持列表包含多种推理框架，但兼容性仍需落实到具体版本与设备。</p>
+</li>
+<li><p><strong>技术特点：</strong>采用一个全注意力层搭配三个滑动窗口注意力层：部分层看全局，其他层重点处理邻近内容，以减少长输入开销。模型卡给出原生最长 100 万 token 上下文，并说明支持 200 多种语言。</p>
+</li>
+<li><p><strong>适用场景：</strong>多语言写作与翻译助手、长资料问答、需要自建推理服务的轻量代码助手。先测试目标语言、格式遵从和工具参数正确性。</p>
+</li>
+<li><p><strong>关键数据：</strong>Trend Score 525；Downloads 19,733；Likes 1,132。库：transformers；最近更新：2026-09-03。</p>
+</li>
+<li><p><strong>许可与风险：</strong>Apache-2.0。官方服务示例也提示超长上下文需要足够设备内存；仓库带自定义代码，启用前应审查并固定版本，不能把框架兼容列表理解成任意硬件即装即用。</p>
+</li>
+</ul>
+<p><img src="/images/huggingface-trending/2026-09-13/05-XHToken__Spark-X2.5-4B.png" alt="XHToken/Spark-X2.5-4B 模型卡"></p>
+<h2 id="6-ISTA-DASLab-x2F-Qwen3-8-27B-GSQ-RCO-GGUF"><a href="#6-ISTA-DASLab-x2F-Qwen3-8-27B-GSQ-RCO-GGUF" class="headerlink" title="6. ISTA-DASLab&#x2F;Qwen3.8-27B-GSQ-RCO-GGUF"></a>6. <a class="link"   target="_blank" rel="noopener" href="https://huggingface.co/ISTA-DASLab/Qwen3.8-27B-GSQ-RCO-GGUF" >ISTA-DASLab&#x2F;Qwen3.8-27B-GSQ-RCO-GGUF<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></h2><ul>
+<li><p><strong>模型简介：</strong>ISTA-DASLab 对 Qwen3.8-27B 制作的非均匀 GGUF 量化权重。GGUF 是常见本地推理模型文件格式；量化用更少位数保存权重，减少文件和内存压力。</p>
+</li>
+<li><p><strong>为什么热：</strong>与原版同榜，凸显模型分发与压缩本身也能吸引关注。趋势分与 Pro 同为 471，排名沿用官方榜单顺序，不据此推导性能高低。</p>
+</li>
+<li><p><strong>技术特点：</strong>GSQ 负责低位数标量量化，RCO 在总大小预算下给不同权重张量分配精度。卡中列出 8.4、9.3、10.1、11.8 GB 四档文件，以及图文使用所需的 0.9 GB 视觉编码与投影文件；文件大小不是整机运行内存。</p>
+</li>
+<li><p><strong>适用场景：</strong>使用 llama.cpp、Ollama 或 LM Studio、需要按内存预算选择量化档位的本地用户。图文任务要同时考虑视觉组件。</p>
+</li>
+<li><p><strong>关键数据：</strong>Trend Score 471；Downloads 729,683；Likes 882。库：gguf；最近更新：2026-09-02。</p>
+</li>
+<li><p><strong>许可与风险：</strong>量化权重继承 Qwen3.8-27B 的 Apache-2.0；量化工具本身遵循其代码仓库许可。卡中“无损”描述限于列出的任务结果，不能推广为所有输入都无质量损失。</p>
+</li>
+</ul>
+<p><img src="/images/huggingface-trending/2026-09-13/06-ISTA-DASLab__Qwen3.8-27B-GSQ-RCO-GGUF.png" alt="ISTA-DASLab/Qwen3.8-27B-GSQ-RCO-GGUF 模型卡"></p>
+<h2 id="7-nex-agi-x2F-Nex-N2-5-Pro"><a href="#7-nex-agi-x2F-Nex-N2-5-Pro" class="headerlink" title="7. nex-agi&#x2F;Nex-N2.5-Pro"></a>7. <a class="link"   target="_blank" rel="noopener" href="https://huggingface.co/nex-agi/Nex-N2.5-Pro" >nex-agi&#x2F;Nex-N2.5-Pro<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></h2><ul>
+<li><p><strong>模型简介：</strong>Nex-N2.5 的 Pro 版本，与 mini 一同面向电脑操作、浏览器和视觉反馈驱动的长任务。家族说明将文本专用的 Max 单独区分，Pro 不应被误写为 Max 的参数规模。</p>
+</li>
+<li><p><strong>为什么热：</strong>30,081 Downloads 高于 mini，而趋势分较低。选型时应把这看成两个不同的统计维度，不能用单次榜位代替成本与稳定性对比。</p>
+</li>
+<li><p><strong>技术特点：</strong>家族卡将 Pro 的编码、助手工作流与视觉理解结果分列展示，并公开推理部署与采样建议。各项成绩来自作者设定的测试环境；模型卡没有给出 Pro 的独立参数总量，不能从名称或架构标签补出数字。</p>
+</li>
+<li><p><strong>适用场景：</strong>需要比较 mini 与 Pro 在长任务成功率、延迟和成本上差别的团队。适合用同一组网页操作或代码任务做对照，而非只看家族宣传图。</p>
+</li>
+<li><p><strong>关键数据：</strong>Trend Score 471；Downloads 30,081；Likes 615。库：transformers；最近更新：2026-09-11。</p>
+</li>
+<li><p><strong>许可与风险：</strong>Apache-2.0。更长的自主执行链条会扩大误操作后果；生产应用应限制可访问的数据与工具，并给失败恢复和审批留下明确入口。</p>
+</li>
+</ul>
+<p><img src="/images/huggingface-trending/2026-09-13/07-nex-agi__Nex-N2.5-Pro.png" alt="nex-agi/Nex-N2.5-Pro 模型卡"></p>
+<h2 id="8-Edge0-x2F-Edge0-35B-A3B-preview"><a href="#8-Edge0-x2F-Edge0-35B-A3B-preview" class="headerlink" title="8. Edge0&#x2F;Edge0-35B-A3B-preview"></a>8. <a class="link"   target="_blank" rel="noopener" href="https://huggingface.co/Edge0/Edge0-35B-A3B-preview" >Edge0&#x2F;Edge0-35B-A3B-preview<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></h2><ul>
+<li><p><strong>模型简介：</strong>基于 Qwen3.5-MoE 35B-A3B 的早期部署变体，随附 4-bit 权重和适配器。它借助 edge0 将专家权重按需从存储读入内存，而不是把整套权重常驻内存。</p>
+</li>
+<li><p><strong>为什么热：</strong>“低内存运行较大模型”是其最直观的吸引力，但 3 GiB 的宣传口径需要连同测试条件阅读：这不是所有设备、所有上下文都成立的总内存承诺。</p>
+</li>
+<li><p><strong>技术特点：</strong>预路由器提前预测下一步所需专家，重叠加载与计算；Recover-LoRA 用低秩适配器恢复部分量化损失。作者在 24 GB Mac mini M4 Pro 的短上下文测试中报告 2.9 GiB 峰值活跃内存、14.9–17.7 token&#x2F;秒解码速度，权重从 SSD 流式读取。</p>
+</li>
+<li><p><strong>适用场景：</strong>Apple Silicon 设备上的内存受限推理实验，尤其适合愿意测量存储速度与内存取舍的开发者。MLX 是主要面向 Apple 芯片的机器学习框架。</p>
+</li>
+<li><p><strong>关键数据：</strong>Trend Score 373；Downloads 1,596；Likes 390。库：mlx；最近更新：2026-09-10。</p>
+</li>
+<li><p><strong>许可与风险：</strong>模型卡与所链接框架许可为 Apache-2.0；基础模型关系仍需随分发保留。预览版明确承认工具调用、多步规划和长程自主任务较弱；长上下文还会增加缓存，不能把这套演示称作通用手机实测。</p>
+</li>
+</ul>
+<p><img src="/images/huggingface-trending/2026-09-13/08-Edge0__Edge0-35B-A3B-preview.png" alt="Edge0/Edge0-35B-A3B-preview 模型卡"></p>
+<h2 id="9-Lightricks-x2F-LTX-2-5"><a href="#9-Lightricks-x2F-LTX-2-5" class="headerlink" title="9. Lightricks&#x2F;LTX-2.5"></a>9. <a class="link"   target="_blank" rel="noopener" href="https://huggingface.co/Lightricks/LTX-2.5" >Lightricks&#x2F;LTX-2.5<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></h2><ul>
+<li><p><strong>模型简介：</strong>Lightricks 的音视频生成模型，支持从文字、图片或视频输入生成同步画面与音频。在以语言模型为主的榜单中，它提供了另一类本地部署需求。</p>
+</li>
+<li><p><strong>为什么热：</strong>1,601,007 Downloads、3,594 Likes 让它在本榜保持可观的下载与关注规模。吸引创作者的重点是能否自托管、微调和维持跨镜头的一致性，而不只是单段演示画面的观感。</p>
+</li>
+<li><p><strong>技术特点：</strong>模型卡介绍原生多镜头生成、新的视频解码器与可选时长预测，并区分完整模型、蒸馏模型及不同量化文件。某些 ComfyUI 专用文件不能直接用于普通 PyTorch 推理，应按执行环境选组件。</p>
+</li>
+<li><p><strong>适用场景：</strong>需要控制镜头、角色一致性、声音和本地素材的创作团队。生成结果中的人脸、文字、运动和声音同步仍需逐段审查。</p>
+</li>
+<li><p><strong>关键数据：</strong>Trend Score 350；Downloads 1,601,007；Likes 3,594。库：diffusion-single-file；最近更新：2026-09-01。</p>
+</li>
+<li><p><strong>许可与风险：</strong>采用 LTX-2.x 自定义社区许可，且仓库为 gated，需要同意访问条件。按完整条款，合并关联实体计算的年收入达到 1,000 万美元，即进入商业实体门槛；除严格限定的非商业用途外需付费许可。向这类实体转交微调权重也涉及单独授权与通知义务，小于门槛仍须遵守使用限制。素材、肖像和声音权利不能由模型许可代替。</p>
+</li>
+</ul>
+<p><img src="/images/huggingface-trending/2026-09-13/09-Lightricks__LTX-2.5.png" alt="Lightricks/LTX-2.5 模型卡"></p>
+<h2 id="10-unsloth-x2F-Qwen3-8-27B-GGUF"><a href="#10-unsloth-x2F-Qwen3-8-27B-GGUF" class="headerlink" title="10. unsloth&#x2F;Qwen3.8-27B-GGUF"></a>10. <a class="link"   target="_blank" rel="noopener" href="https://huggingface.co/unsloth/Qwen3.8-27B-GGUF" >unsloth&#x2F;Qwen3.8-27B-GGUF<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></h2><ul>
+<li><p><strong>模型简介：</strong>Unsloth 发布的 Qwen3.8-27B GGUF 版本，基础模型仍是 Qwen3.8-27B。其价值在量化与本地使用适配，不能按新增基础模型来计数。</p>
+</li>
+<li><p><strong>为什么热：</strong>Downloads 达 11,529,203，是这份榜单中最高的一项，但趋势分只有 339。大下载规模和当前趋势热度并非同一个指标；GGUF 多文件请求还可能重复计数。</p>
+</li>
+<li><p><strong>技术特点：</strong>模型卡介绍 Dynamic 3.0 GGUF、思考开关、开发者角色支持和嵌套工具参数解析改进。卡中的 27B 与上下文规格描述的是基础模型；实际资源开销还取决于选用的量化文件及上下文设置。</p>
+</li>
+<li><p><strong>适用场景：</strong>希望用本地桌面工具试用 Qwen3.8 的用户，以及需要在多档 GGUF 之间比较体积和输出质量的开发者。</p>
+</li>
+<li><p><strong>关键数据：</strong>Trend Score 339；Downloads 11,529,203；Likes 3,941。库：未标注（GGUF 标签）；最近更新：2026-08-20。</p>
+</li>
+<li><p><strong>许可与风险：</strong>Apache-2.0，基础模型许可仍适用。更高精度与同体积优于其他量化方案的说法来自发布者，不能当成独立评测结论；工具解析改善也不代表每次调用都正确。</p>
+</li>
+</ul>
+<p><img src="/images/huggingface-trending/2026-09-13/10-unsloth__Qwen3.8-27B-GGUF.png" alt="unsloth/Qwen3.8-27B-GGUF 模型卡"></p>
+<h2 id="按任务选，而不是按榜位选"><a href="#按任务选，而不是按榜位选" class="headerlink" title="按任务选，而不是按榜位选"></a>按任务选，而不是按榜位选</h2><p>本地轻量助手可以先比较 MiniCPM5 与 Spark 的目标任务表现；已有 Qwen3.8 工作流的用户，更值得比较原版、ISTA-DASLab 与 Unsloth 的量化方案。Edge0 的低活跃内存适合做部署实验，但其预览版明确不擅长复杂助手任务，不能因为内存数字亮眼就直接替换生产系统。</p>
+<p>长任务团队可对照 Nex 的两个版本与 DeepSeek 的服务端方案，保持相同工具权限、任务输入和验收条件，再记录成功率、用时与资源开销。音视频团队则应先确认 LTX 的访问条件、实体收入口径和素材授权，再决定自托管或微调。</p>
+<h2 id="官方来源"><a href="#官方来源" class="headerlink" title="官方来源"></a>官方来源</h2><ul>
+<li><a class="link"   target="_blank" rel="noopener" href="https://huggingface.co/models?sort=trending" >Hugging Face Models 趋势榜<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://huggingface.co/docs/hub/models-download-stats" >Hugging Face 模型下载统计说明<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash/blob/dba1be0a40aa45a94ad051997016db3960a90277/README.md" >deepseek-ai&#x2F;DeepSeek-V4.1-Flash 模型卡<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://huggingface.co/openbmb/MiniCPM5-2B/blob/12a3808a956f869c767195e9266b59c4d21d92e2/README.md" >openbmb&#x2F;MiniCPM5-2B 模型卡<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://huggingface.co/nex-agi/Nex-N2.5-mini/blob/87420286149d9cce9bd46cd335ef9bda33c37c1b/README.md" >nex-agi&#x2F;Nex-N2.5-mini 模型卡<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://huggingface.co/Qwen/Qwen3.8-27B/blob/1d4bf0f2ff6012fd82039f2fa52739d0dd7c60c0/README.md" >Qwen&#x2F;Qwen3.8-27B 模型卡<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://huggingface.co/XHToken/Spark-X2.5-4B/blob/5e10fcc0286756aebf7c41dc52c1e42d95c70281/README.md" >XHToken&#x2F;Spark-X2.5-4B 模型卡<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://huggingface.co/ISTA-DASLab/Qwen3.8-27B-GSQ-RCO-GGUF/blob/d562806dbafae37109975e970aae91b43e73b440/README.md" >ISTA-DASLab&#x2F;Qwen3.8-27B-GSQ-RCO-GGUF 模型卡<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://huggingface.co/nex-agi/Nex-N2.5-Pro/blob/0f389abfca976dcbab5c7638268d01cfe8ace4fe/README.md" >nex-agi&#x2F;Nex-N2.5-Pro 模型卡<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://huggingface.co/Edge0/Edge0-35B-A3B-preview/blob/1ff9f4478890faec0368c5463b621d1036d5b518/README.md" >Edge0&#x2F;Edge0-35B-A3B-preview 模型卡<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://huggingface.co/Lightricks/LTX-2.5/blob/5e6e71018ee1756ed329b697a7b4aedc934dfce9/README.md" >Lightricks&#x2F;LTX-2.5 模型卡<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://huggingface.co/unsloth/Qwen3.8-27B-GGUF/blob/4ca720788d1e01f1bff70c033e0d0028fd02e502/README.md" >unsloth&#x2F;Qwen3.8-27B-GGUF 模型卡<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+</ul>
+
+		</div>
+
+		
+		<div class="post-copyright-info w-full my-8 px-2 sm:px-6 md:px-8">
+			<div class="article-copyright-info-container">
+    <ul>
+        <li><strong>标题:</strong> Hugging Face 热榜：大模型压缓存，小模型做助手，Qwen 一条谱系占三席</li>
+        <li><strong>作者:</strong> Nathan</li>
+        <li><strong>创建于
+                :</strong> 2026-09-13 04:01:00</li>
+        
+            <li>
+                <strong>更新于
+                    :</strong> 2026-09-13 04:08:06
+            </li>
+        
+        <li>
+            <strong>链接:</strong> https://hydraxman.github.io/2026/09/13/huggingface-trending/huggingface-trending-2026-09-13/
+        </li>
+        <li>
+            <strong>
+                版权声明:
+            </strong>
+            
+
+            
+                本文章采用 <a class="license" target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0">CC BY-NC-SA 4.0</a> 进行许可。
+            
+        </li>
+    </ul>
+</div>
+
+		</div>
+		
+
+		
+		<ul class="post-tags-box text-lg mt-1.5 flex-wrap justify-center flex md:hidden">
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/AI%E6%A8%A1%E5%9E%8B/">#AI模型</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/%E6%9C%AC%E5%9C%B0%E9%83%A8%E7%BD%B2/">#本地部署</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/Hugging-Face/">#Hugging Face</a>&nbsp;
+			</li>
+			
+		</ul>
+		
+
+		
+
+		
+		<div class="article-nav my-8 flex justify-between items-center px-2 sm:px-6 md:px-8">
+			
+			
+			<div class="article-next border-border-color shadow-redefine-flat shadow-shadow-color-2 rounded-medium px-4 py-2 hover:shadow-redefine-flat-hover hover:shadow-shadow-color-2">
+				<a class="next" rel="next" href="/2026/09/13/github-trending/github-trending-2026-09-13/">
+					<span class="title flex justify-center items-center">
+						<span class="post-nav-title-item truncate max-w-48">GitHub 热榜：公开数据汇成一颗地球，自托管工具走进日常</span>
+						<span class="post-nav-item">下一篇</span>
+					</span>
+					<span class="right arrow-icon flex justify-center items-center">
+						<i class="fa-solid fa-chevron-right"></i>
+					</span>
+				</a>
+			</div>
+			
+		</div>
+		
+
+
+		
+	</div>
+
+	
+	<div class="toc-content-container">
+		<div class="post-toc-wrap">
+	<div class="post-toc">
+		<div class="toc-title">目录</div>
+		<div class="page-title">Hugging Face 热榜：大模型压缓存，小模型做助手，Qwen 一条谱系占三席</div>
+		<ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Top-10-%E6%A8%A1%E5%9E%8B%E4%B8%80%E8%A7%88"><span class="nav-text">Top 10 模型一览</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-deepseek-ai-x2F-DeepSeek-V4-1-Flash"><span class="nav-text">1. deepseek-ai&#x2F;DeepSeek-V4.1-Flash</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-openbmb-x2F-MiniCPM5-2B"><span class="nav-text">2. openbmb&#x2F;MiniCPM5-2B</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-nex-agi-x2F-Nex-N2-5-mini"><span class="nav-text">3. nex-agi&#x2F;Nex-N2.5-mini</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-Qwen-x2F-Qwen3-8-27B"><span class="nav-text">4. Qwen&#x2F;Qwen3.8-27B</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-XHToken-x2F-Spark-X2-5-4B"><span class="nav-text">5. XHToken&#x2F;Spark-X2.5-4B</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-ISTA-DASLab-x2F-Qwen3-8-27B-GSQ-RCO-GGUF"><span class="nav-text">6. ISTA-DASLab&#x2F;Qwen3.8-27B-GSQ-RCO-GGUF</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7-nex-agi-x2F-Nex-N2-5-Pro"><span class="nav-text">7. nex-agi&#x2F;Nex-N2.5-Pro</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#8-Edge0-x2F-Edge0-35B-A3B-preview"><span class="nav-text">8. Edge0&#x2F;Edge0-35B-A3B-preview</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#9-Lightricks-x2F-LTX-2-5"><span class="nav-text">9. Lightricks&#x2F;LTX-2.5</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#10-unsloth-x2F-Qwen3-8-27B-GGUF"><span class="nav-text">10. unsloth&#x2F;Qwen3.8-27B-GGUF</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8C%89%E4%BB%BB%E5%8A%A1%E9%80%89%EF%BC%8C%E8%80%8C%E4%B8%8D%E6%98%AF%E6%8C%89%E6%A6%9C%E4%BD%8D%E9%80%89"><span class="nav-text">按任务选，而不是按榜位选</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%98%E6%96%B9%E6%9D%A5%E6%BA%90"><span class="nav-text">官方来源</span></a></li></ol>
+
+	</div>
+</div>
+	</div>
+	
+</div>
+
+			</div>
+
+			
+		</div>
+
+		<div class="main-content-footer">
+			<footer class="footer mt-5 py-5 h-auto text-base text-third-text-color relative border-t-2 border-t-border-color">
+    <div class="info-container py-3 text-center">
+        
+        <div class="text-center">
+            &copy;
+            
+              <span>2024</span>
+              -
+            
+            2026&nbsp;&nbsp;<i class="fa-solid fa-heart fa-beat" style="--fa-animation-duration: 0.5s; color: #333"></i>&nbsp;&nbsp;<a href="/">Nathan</a>
+            
+                
+                <p class="post-count space-x-0.5">
+                    <span>
+                        共撰写了 377 篇文章
+                    </span>
+                    
+                        <span>
+                            共 939.4k 字
+                        </span>
+                    
+                </p>
+            
+        </div>
+        
+        <div class="relative text-center lg:absolute lg:left-[20px] lg:top-1/2 lg:-translate-y-1/2 lg:text-left">
+            <span class="lg:block text-sm">由 <?xml version="1.0" encoding="utf-8"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg class="relative top-[2px] inline-block align-baseline" version="1.1" id="圖層_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="1rem" height="1rem" viewBox="0 0 512 512" enable-background="new 0 0 512 512" xml:space="preserve"><path fill="#0E83CD" d="M256.4,25.8l-200,115.5L56,371.5l199.6,114.7l200-115.5l0.4-230.2L256.4,25.8z M349,354.6l-18.4,10.7l-18.6-11V275H200v79.6l-18.4,10.7l-18.6-11v-197l18.5-10.6l18.5,10.8V237h112v-79.6l18.5-10.6l18.5,10.8V354.6z"/></svg><a target="_blank" class="text-base" href="https://hexo.io">Hexo</a> 驱动</span>
+            <span class="text-sm lg:block">主题&nbsp;<a class="text-base" target="_blank" href="https://github.com/EvanNotFound/hexo-theme-redefine">Redefine v2.9.0</a></span>
+        </div>
+        
+        
+            <div>
+                博客已运行 <span class="odometer" id="runtime_days" ></span> 天 <span class="odometer" id="runtime_hours"></span> 小时 <span class="odometer" id="runtime_minutes"></span> 分钟 <span class="odometer" id="runtime_seconds"></span> 秒
+            </div>
+        
+        
+            <script data-swup-reload-script>
+                try {
+                    function odometer_init() {
+                    const elements = document.querySelectorAll('.odometer');
+                    elements.forEach(el => {
+                        new Odometer({
+                            el,
+                            format: '( ddd).dd',
+                            duration: 200
+                        });
+                    });
+                    }
+                    odometer_init();
+                } catch (error) {}
+            </script>
+        
+        
+            
+                
+        
+                
+        
+        
+    </div>  
+</footer>
+		</div>
+	</div>
+
+	
+	<div class="post-tools">
+		<div class="post-tools-container">
+	<ul class="article-tools-list">
+		<!-- TOC aside toggle -->
+		
+		<li class="right-bottom-tools page-aside-toggle">
+			<i class="fa-regular fa-outdent"></i>
+		</li>
+		
+
+		<!-- go comment -->
+		
+	</ul>
+</div>
+	</div>
+	
+
+	<div class="right-side-tools-container">
+		<div class="side-tools-container">
+	<ul class="hidden-tools-list">
+		<li class="right-bottom-tools tool-font-adjust-plus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-plus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-font-adjust-minus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-minus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-dark-light-toggle flex justify-center items-center">
+			<i class="fa-regular fa-moon"></i>
+		</li>
+
+		<!-- rss -->
+		
+
+		
+
+		<li class="right-bottom-tools tool-scroll-to-bottom flex justify-center items-center">
+			<i class="fa-regular fa-arrow-down"></i>
+		</li>
+	</ul>
+
+	<ul class="visible-tools-list">
+		<li class="right-bottom-tools toggle-tools-list flex justify-center items-center">
+			<i class="fa-regular fa-cog fa-spin"></i>
+		</li>
+		
+		<li class="right-bottom-tools tool-scroll-to-top flex justify-center items-center">
+			<i class="arrow-up fas fa-arrow-up"></i>
+			<span class="percent"></span>
+		</li>
+		
+		
+	</ul>
+</div>
+	</div>
+
+	<div class="image-viewer-container" role="dialog" aria-modal="true" aria-label="图片查看器">
+	<button class="image-viewer-close" type="button" aria-label="关闭">
+		<i class="fa-solid fa-xmark"></i>
+	</button>
+	<button class="image-viewer-prev" type="button" aria-label="上一页">
+		<i class="fa-solid fa-chevron-left"></i>
+	</button>
+	<div class="image-viewer-frame">
+		<img src="" alt="">
+	</div>
+	<div class="image-viewer-exif-panel hidden absolute left-1/2 bottom-20 -translate-x-1/2 w-[min(92vw,420px)] max-h-[60vh] overflow-hidden rounded-2xl bg-background-color-transparent-80 p-4 text-left shadow-redefine-flat backdrop-blur-md" role="dialog" aria-label="EXIF" aria-hidden="true">
+		<div class="flex items-center justify-between mb-3">
+			<span class="text-sm font-semibold text-first-text-color">EXIF</span>
+			<button class="image-viewer-exif-close flex h-8 w-8 items-center justify-center rounded-full bg-background-color-transparent-80 text-first-text-color transition hover:bg-background-color-transparent-40" type="button" aria-label="关闭">
+				<i class="fa-solid fa-xmark text-[0.65rem]"></i>
+			</button>
+		</div>
+		<div class="image-viewer-exif-cards grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[50vh] overflow-y-auto pr-1 scrollbar-hide"></div>
+		<template class="image-viewer-exif-card-template">
+			<div class="rounded-lg bg-background-color-transparent-40 px-3 py-2">
+				<div class="image-viewer-exif-card-header flex items-center gap-2 mb-1">
+					<i class="image-viewer-exif-card-icon fa-solid fa-circle-info text-xs text-third-text-color"></i>
+					<div class="image-viewer-exif-card-title text-xs font-semibold text-first-text-color"></div>
+				</div>
+				<div class="image-viewer-exif-card-items flex flex-col gap-1"></div>
+			</div>
+		</template>
+	</div>
+	<button class="image-viewer-exif-toggle flex items-center gap-2 hidden absolute left-1/2 bottom-6 -translate-x-1/2 rounded-full border border-border-color bg-background-color-transparent-80 px-4 py-2 text-first-text-color backdrop-blur-md transition hover:bg-background-color-transparent-40" type="button" aria-label="EXIF" aria-expanded="false">
+		<i class="fa-solid fa-circle-info text-xs"></i>
+		<span class="text-xs font-semibold uppercase tracking-wider">EXIF</span>
+	</button>
+	<button class="image-viewer-next" type="button" aria-label="下一页">
+		<i class="fa-solid fa-chevron-right"></i>
+	</button>
+</div>
+
+
+	
+	<div class="search-pop-overlay">
+	<div class="popup search-popup">
+		<div class="search-header">
+			<span class="search-input-field-pre">
+				<i class="fa-solid fa-keyboard"></i>
+			</span>
+			<div class="search-input-container">
+				<input autocomplete="off" autocorrect="off" autocapitalize="off" placeholder="站内搜索您需要的内容..." spellcheck="false" type="search" class="search-input">
+			</div>
+			<span class="popup-btn-close">
+				<i class="fa-solid fa-times"></i>
+			</span>
+		</div>
+		<div id="search-result">
+			<div id="no-result">
+				<i class="fa-solid fa-spinner fa-spin-pulse fa-5x fa-fw"></i>
+			</div>
+		</div>
+	</div>
+</div>
+	
+
+</main>
+
+
+
+<script src="/js/build/libs/Swup.min.js"></script>
+
+<script src="/js/build/libs/SwupSlideTheme.min.js"></script>
+
+<script src="/js/build/libs/SwupScriptsPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupProgressPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupScrollPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupPreloadPlugin.min.js"></script>
+
+<script>
+    window.swup = new Swup({
+        plugins: [
+            new SwupScriptsPlugin({
+                optin: true,
+            }),
+            new SwupProgressPlugin(),
+            new SwupScrollPlugin({
+                offset: 80,
+            }),
+            new SwupSlideTheme({
+                mainElement: ".main-content-body",
+            }),
+            new SwupPreloadPlugin(),
+        ],
+        containers: ["#swup"],
+    });
+
+    window.dispatchEvent(
+        new CustomEvent("redefine:swup:ready", {
+            detail: {
+                swup: window.swup,
+            },
+        }),
+    );
+</script>
+
+
+
+
+	
+<script src="/js/build/main.js" type="module"></script>
+
+
+
+    
+<script src="/js/build/libs/odometer.min.js"></script>
+
+    
+<link rel="stylesheet" href="/assets/odometer-theme-minimal.css">
+
+
+
+
+
+
+
+  
+<script src="/js/build/libs/Typed.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+<script src="/js/build/libs/moment-with-locales.min.js" data-swup-reload-script=""></script>
+
+
+
+	
+</body>
+
+</html>
