@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="keywords" content="计算机技术, 生活中的胡思乱想">
+    
+    
+    <meta name="author" content="Nathan">
+    
+    <!-- Completely eliminate flash of wrong theme -->
+    <script>
+        (function() {
+            const THEME_KEY = "REDEFINE-THEME-STATUS";
+            const DARK = "dark", LIGHT = "light";
+            
+            // Get preferred theme
+            function getTheme() {
+                try {
+                    const saved = localStorage.getItem(THEME_KEY);
+                    if (saved) {
+                        const { isDark } = JSON.parse(saved);
+                        return isDark ? DARK : LIGHT;
+                    }
+                } catch (e) {}
+                
+                return matchMedia("(prefers-color-scheme: dark)").matches ? DARK : LIGHT;
+            }
+            
+            // Apply theme to document
+            function applyTheme(theme) {
+                const isDark = theme === DARK;
+                const root = document.documentElement;
+                
+                // Set classes for compatibility
+                root.classList.add(theme);
+                root.classList.remove(isDark ? LIGHT : DARK);
+                root.style.colorScheme = theme;
+            }
+            
+            // Initial application
+            const theme = getTheme();
+            applyTheme(theme);
+            
+            // Listen for system preference changes
+            matchMedia("(prefers-color-scheme: dark)").addEventListener("change", ({ matches }) => {
+                // Only update if using system preference (no localStorage entry)
+                if (!localStorage.getItem(THEME_KEY)) {
+                    applyTheme(matches ? DARK : LIGHT);
+                }
+            });
+            
+            // Set body classes ASAP (before DOMContentLoaded)
+            (function() {
+                const addBodyClass = () => {
+                    const b = document.body;
+                    if (!b) return false;
+                    b.classList.add(theme + "-mode");
+                    return true;
+                };
+
+                // Try immediately
+                if (addBodyClass()) return;
+
+                // Observe until body exists
+                const mo = new MutationObserver(() => {
+                    if (addBodyClass()) mo.disconnect();
+                });
+                mo.observe(document.documentElement, { childList: true, subtree: true });
+            })();
+        })();
+    </script>
+    
+    <!-- preconnect -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    
+    <!--- Seo Part-->
+    
+    <link rel="canonical" href="https://hydraxman.github.io/2026/09/28/huggingface-trending/huggingface-trending-2026-09-28/"/>
+    <meta name="robots" content="index,follow">
+    <meta name="googlebot" content="index,follow">
+    <meta name="revisit-after" content="1 days">
+    
+    
+        
+        <meta name="description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Hugging Face 热榜：Qwen 图像家族占三席，榜首却是决策小模型">
+<meta property="og:url" content="https://hydraxman.github.io/2026/09/28/huggingface-trending/huggingface-trending-2026-09-28/index.html">
+<meta property="og:site_name" content="内森淼文">
+<meta property="og:description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://hydraxman.github.io/images/redefine-og.webp">
+<meta property="article:published_time" content="2026-09-27T20:00:00.000Z">
+<meta property="article:modified_time" content="2026-09-27T20:07:02.784Z">
+<meta property="article:author" content="Nathan">
+<meta property="article:tag" content="AI模型">
+<meta property="article:tag" content="Hugging Face">
+<meta property="article:tag" content="开源模型">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://hydraxman.github.io/images/redefine-og.webp">
+    
+    
+    <!--- Icon Part-->
+    <link rel="icon" type="image/png" href="/images/favicon.svg" sizes="192x192">
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.svg">
+    <meta name="theme-color" content="#ffffff">
+    <link rel="shortcut icon" href="/images/favicon.svg">
+    <!--- Page Info-->
+    
+    <title>
+        
+            Hugging Face 热榜：Qwen 图像家族占三席，榜首却是决策小模型 | 内森淼文
+        
+    </title>
+
+    
+<link rel="stylesheet" href="/fonts/Chillax/chillax.css">
+
+
+    <!--- Inject Part-->
+    
+        
+            
+    
+            
+    
+            
+                
+                    <link rel="stylesheet" href="/css/custom.css">
+                
+    
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    
+        
+<link rel="stylesheet" href="/css/build/tailwind.css">
+
+    
+
+    
+<link rel="stylesheet" href="/fonts/GeistMono/geist-mono.css">
+
+    
+<link rel="stylesheet" href="/fonts/Geist/geist.css">
+
+    <!--- Font Part-->
+    
+    
+    
+    
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&display=swap" rel="stylesheet">
+    
+    
+
+    <script id="hexo-configurations">
+    window.config = {"hostname":"hydraxman.github.io","root":"/","language":"zh-CN","path":"search.json"};
+    window.theme = {"articles":{"style":{"font_size":"16px","line_height":1.5,"image_border_radius":"14px","image_alignment":"center","image_caption":false,"link_icon":true,"delete_mask":false,"title_alignment":"left","headings_top_spacing":{"h1":"3.2rem","h2":"2.4rem","h3":"1.9rem","h4":"1.6rem","h5":"1.4rem","h6":"1.3rem"}},"word_count":{"enable":true,"count":true,"min2read":true},"author_label":{"enable":false,"auto":false,"list":[]},"code_block":{"copy":true,"style":"mac","highlight_theme":{"light":"github","dark":"vs2015"},"font":{"enable":false,"family":null,"url":null}},"toc":{"enable":true,"max_depth":3,"number":false,"expand":true,"init_open":true},"copyright":{"enable":true,"default":"cc_by_nc_sa"},"lazyload":true,"pangu_js":false,"recommendation":{"enable":false,"title":"推荐阅读","limit":3,"mobile_limit":2,"placeholder":"/images/wallhaven-wqery6-light.webp","skip_dirs":[]}},"colors":{"primary":"#ffffff","secondary":null,"default_mode":"light"},"global":{"fonts":{"chinese":{"enable":false,"family":null,"url":null},"english":{"enable":true,"family":"Inter","url":"https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"},"title":{"enable":true,"family":"Noto Serif","url":"https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&display=swap"}},"content_max_width":"1000px","sidebar_width":"210px","hover":{"shadow":true,"scale":false},"scroll_progress":{"bar":true,"percentage":true},"website_counter":{"url":"https://cn.vercount.one/js","enable":false,"site_pv":true,"site_uv":true,"post_pv":true},"single_page":true,"preloader":{"enable":false,"custom_message":null},"side_tools":{"gear_rotation":true,"auto_expand":false},"open_graph":{"enable":true,"image":"/images/redefine-og.webp","description":"Hexo Theme Redefine, Redefine Your Hexo Journey."},"google_analytics":{"enable":false,"id":null}},"home_banner":{"enable":true,"style":"fixed","image":{"light":"/images/banner-light.jpg","dark":"/images/banner-dark.jpg"},"title":"内森淼文","subtitle":{"text":["AI · 编程 · 科技见闻","Write Code, Read World"],"hitokoto":{"enable":false,"show_author":false,"api":"https://v1.hitokoto.cn"},"typing_speed":100,"backing_speed":80,"starting_delay":500,"backing_delay":1500,"loop":true,"smart_backspace":true},"text_color":{"light":"#fff","dark":"#d1d1b6"},"text_style":{"title_size":"2.8rem","subtitle_size":"1.5rem","line_height":1.2},"custom_font":{"enable":false,"family":null,"url":null},"social_links":{"enable":true,"style":"default","links":[{"icon":"fa-brands fa-github","url":"https://github.com/hydraxman"}],"qrs":[{"icon":"fa-brands fa-weixin","qr":null},{"icon":"/images/custom-icon.svg","qr":null}]}},"plugins":{"feed":{"enable":false},"aplayer":{"enable":false,"type":"fixed","audios":[{"name":null,"artist":null,"url":null,"cover":null,"lrc":null}]},"mermaid":{"enable":false,"version":"11.4.1","theme":{"light":"default","dark":"dark"}}},"version":"2.9.0","navbar":{"auto_hide":false,"color":{"left":"#333333","right":"#555555","transparency":35},"width":{"home":"1200px","pages":"1000px"},"links":{"Home":{"path":"/","icon":"fa-regular fa-house"},"Archives":{"path":"/archives","icon":"fa-regular fa-archive"},"Categories":{"path":"/categories","icon":"fa-regular fa-folder"},"Tags":{"path":"/tags","icon":"fa-regular fa-tags"},"About":{"path":"/about","icon":"fa-regular fa-user"}},"search":{"enable":true,"preload":true}},"page_templates":{"friends_column":2,"tags_style":"blur","masonry":{"batch_size":12,"initial_batch_size":24}},"home":{"sidebar":{"enable":true,"position":"left","first_item":"menu","announcement":"AI · 编程 · 科技","show_on_mobile":true,"links":{"Archives":{"path":"/archives","icon":"fa-regular fa-archive"},"Tags":{"path":"/tags","icon":"fa-regular fa-tags"},"Categories":{"path":"/categories","icon":"fa-regular fa-folder"}}},"article_date_format":"auto","excerpt_length":200,"categories":{"enable":true,"limit":3},"tags":{"enable":true,"limit":3}},"footer":{"runtime":true,"icon":"<i class=\"fa-solid fa-heart fa-beat\" style=\"--fa-animation-duration: 0.5s; color: #333\"></i>","start":"2024/01/01 00:00:00","statistics":true,"customize":null,"icp":{"enable":false,"number":null,"url":null}},"footerStart":"2024/01/01 00:00:00","mermaid":{"style":{"light":"default","dark":"dark"}}};
+    window.lang_ago = {"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"};
+    window.i18n = {"search":"站内搜索您需要的内容...","toc":"目录","prev":"上一页","next":"下一页","prev_posts":"上一篇","next_posts":"下一篇","page":"第 %d 页","recent_posts":"最新文章","share":"分享","powered_by":"由 %s 驱动","theme":"主题","rss_feed":"RSS Feed","category":"分类","categories":"分类","tag":"标签","tags":"标签","post":"文章","posts":"文章","tagcloud":"标签云","comment":"评论","comments":"评论","top":"置顶","sticky":"置顶","go-back-home":"回到首页","masonry_loading":"照片加载中...","image_viewer":"图片查看器","close":"关闭","exif":{"title":"EXIF","cards":{"camera":"相机","lens":"镜头","exposure":"曝光","other":"其他"},"fields":{"make":"品牌","model":"机型","date_taken":"拍摄时间","lens_model":"镜头","focal_length":"焦距","focus_mode":"对焦模式","shutter":"快门","aperture":"光圈","iso":"感光度","exposure_program":"曝光程序","exposure_compensation":"曝光补偿","metering_mode":"测光模式","flash":"闪光灯","white_balance":"白平衡","latitude":"纬度","longitude":"经度","altitude":"海拔"},"status":{"loading":"加载中...","no_exif":"无 EXIF 信息","library_missing":"EXIF 库未加载","image_source_missing":"图片地址不可用","unavailable":"EXIF 不可用（可能被 CORS 阻止或缺少元数据）","flag_unavailable":"EXIF 不可用"}},"home":"首页","archive":"归档","archives":"归档","about":"关于","links":"链接","link":"链接","friends":"友情链接","friend":"友情链接","timeline":"时间轴","shuoshuo":"说说","bookmarks":"书签","site_uv":"访问人数","site_pv":"总访问量","read_more":"阅读全文","wordcount":"字","min2read":"分钟","changelog":"更新日志","status":"状态","runtime":"博客已运行","days":"天","hours":"小时","minutes":"分钟","seconds":"秒","optimized_by":"并由 Evan 进行优化","rights":"版权所有","site_posts":"共撰写了 %s 篇文章","site_wordcount":"共 %s 字","copyright":{"title":"标题","author":"作者","link":"链接","create_time":"创建于","update_time":"更新于","license_title":"版权声明","license_content":"本文章采用 %s 进行许可。","all_rights_reserved":"版权所有 &#169 %s，禁止转载。","public_domain":"本文为公有领域作品，可自由转载、引用。"},"ago":{"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"},"create_time":"创建","update_time":"更新","expired":"这篇文章最后更新于 %s 天前，内容可能已经过时。"};
+    window.data = {"masonry":false};
+  </script>
+    
+    <!--- Fontawesome Part-->
+    
+<link rel="stylesheet" href="/fontawesome/fontawesome.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/brands.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/solid.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/regular.min.css">
+
+    
+    
+    
+    
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+	<div class="progress-bar-container">
+	
+	<span class="scroll-progress-bar"></span>
+	
+
+	
+	<span class="pjax-progress-bar"></span>
+	<!--        <span class="swup-progress-icon">-->
+	<!--            <i class="fa-solid fa-circle-notch fa-spin"></i>-->
+	<!--        </span>-->
+	
+</div>
+
+<main class="page-container" id="swup">
+
+	
+
+	<div class="main-content-container flex flex-col justify-between min-h-dvh">
+		<div class="main-content-header">
+			<header class="navbar-container px-6 md:px-12">
+    <div class="navbar-content transition-navbar ">
+        <div class="left">
+            
+            <a class="logo-title" href="/">
+                
+                内森淼文
+                
+            </a>
+        </div>
+
+        <div class="right">
+            <!-- PC -->
+            <div class="desktop">
+                <ul class="navbar-list">
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/"
+                                        >
+                                    <i class="fa-regular fa-house fa-fw"></i>
+                                    首页
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/archives"
+                                        >
+                                    <i class="fa-regular fa-archive fa-fw"></i>
+                                    归档
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/categories"
+                                        >
+                                    <i class="fa-regular fa-folder fa-fw"></i>
+                                    分类
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/tags"
+                                        >
+                                    <i class="fa-regular fa-tags fa-fw"></i>
+                                    标签
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/about"
+                                        >
+                                    <i class="fa-regular fa-user fa-fw"></i>
+                                    关于
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                    
+                        <li class="navbar-item search search-popup-trigger">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </li>
+                    
+                </ul>
+            </div>
+            <!-- Mobile -->
+            <div class="mobile">
+                
+                    <div class="icon-item search search-popup-trigger"><i class="fa-solid fa-magnifying-glass"></i>
+                    </div>
+                
+                <div class="icon-item navbar-bar">
+                    <div class="navbar-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile sheet -->
+    <div class="navbar-drawer h-dvh w-full absolute top-0 left-0 bg-background-color flex flex-col justify-between">
+        <ul class="drawer-navbar-list flex flex-col px-4 justify-center items-start">
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/"
+                        >
+                            <span>
+                                首页
+                            </span>
+                            
+                                <i class="fa-regular fa-house fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/archives"
+                        >
+                            <span>
+                                归档
+                            </span>
+                            
+                                <i class="fa-regular fa-archive fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/categories"
+                        >
+                            <span>
+                                分类
+                            </span>
+                            
+                                <i class="fa-regular fa-folder fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/tags"
+                        >
+                            <span>
+                                标签
+                            </span>
+                            
+                                <i class="fa-regular fa-tags fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/about"
+                        >
+                            <span>
+                                关于
+                            </span>
+                            
+                                <i class="fa-regular fa-user fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+
+            
+            
+                
+                    
+                    
+                    
+            
+        </ul>
+
+        <div class="statistics flex justify-around my-2.5">
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/tags">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">395</div>
+        <div class="label text-third-text-color text-sm">标签</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/categories">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">16</div>
+        <div class="label text-third-text-color text-sm">分类</div>
+    </a>
+    <a class="item tag-count-item flex flex-col justify-center items-center w-20" href="/archives">
+        <div class="number text-2xl sm:text-xl text-second-text-color font-semibold">397</div>
+        <div class="label text-third-text-color text-sm">文章</div>
+    </a>
+</div>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+		</div>
+
+		<div class="main-content-body transition-fade-up">
+			
+
+			<div class="main-content">
+				<div class="post-page-container flex relative justify-between box-border w-full h-full">
+	<div class="article-content-container">
+
+		<div class="article-title relative w-full">
+			
+			
+			
+			<img src="/images/huggingface-trending/2026-09-28/cover.png" alt="Hugging Face 热榜：Qwen 图像家族占三席，榜首却是决策小模型" class="w-full h-60 sm:h-72 md:h-80 object-cover sm:rounded-t-large dark:brightness-75" />
+			
+			<div class="w-full flex items-center absolute bottom-0 justify-start">
+				<h1 class="article-title-cover text-center mx-6 my-6 text-second-text-color bg-background-color-transparent px-4 py-3 text-3xl sm:text-4xl md:text-5xl font-semibold backdrop-blur-lg rounded-xl border border-border-color ">Hugging Face 热榜：Qwen 图像家族占三席，榜首却是决策小模型</h1>
+			</div>
+			
+		</div>
+
+		
+		<div class="article-header flex flex-row gap-2 items-center px-2 sm:px-6 md:px-8">
+			<div class="avatar w-[46px] h-[46px] shrink-0 rounded-medium border border-border-color p-px">
+				<img src="/images/avatar.png">
+			</div>
+			<div class="info flex flex-col justify-between">
+				<div class="author flex items-center">
+					<span class="name text-default-text-color text-lg font-semibold">Nathan</span>
+					
+				</div>
+				<div class="meta-info">
+					<div class="article-meta-info">
+    <span class="article-date article-meta-item">
+        <i class="fa-regular fa-pen-fancy"></i>&nbsp;
+        <span class="desktop">2026-09-28 04:00</span>
+        <span class="mobile">2026-09-28 04:00</span>
+        <span class="hover-info">创建</span>
+    </span>
+    
+        <span class="article-date article-meta-item">
+            <i class="fa-regular fa-wrench"></i>&nbsp;
+            <span class="desktop">2026-09-28 04:07:02</span>
+            <span class="mobile">2026-09-28 04:07:02</span>
+            <span class="hover-info">更新</span>
+        </span>
+    
+
+    
+        <span class="article-categories article-meta-item">
+            <i class="fa-regular fa-folders"></i>&nbsp;
+            <ul>
+                
+                
+                    
+                        
+                        <li>
+                            <a href="/categories/Hugging-Face-Trending/">Hugging Face Trending</a>&nbsp;
+                        </li>
+                    
+                    
+                
+            </ul>
+        </span>
+    
+    
+        <span class="article-tags article-meta-item">
+            <i class="fa-regular fa-tags"></i>&nbsp;
+            <ul>
+                
+                    <li>
+                        <a href="/tags/AI%E6%A8%A1%E5%9E%8B/">AI模型</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/Hugging-Face/">Hugging Face</a>&nbsp;
+                    </li>
+                
+                    <li>
+                        | <a href="/tags/%E5%BC%80%E6%BA%90%E6%A8%A1%E5%9E%8B/">开源模型</a>&nbsp;
+                    </li>
+                
+            </ul>
+        </span>
+    
+
+    
+    
+        <span class="article-wordcount article-meta-item">
+            <i class="fa-regular fa-typewriter"></i>&nbsp;<span>4.7k 字</span>
+        </span>
+    
+    
+        <span class="article-min2read article-meta-item">
+            <i class="fa-regular fa-clock"></i>&nbsp;<span>17 分钟</span>
+        </span>
+    
+    
+</div>
+
+				</div>
+			</div>
+		</div>
+		
+
+		
+
+
+		<div class="article-content markdown-body px-2 sm:px-6 md:px-8 pb-8">
+			<p>Qwen-Image-2.1 的原模型、量化版和 ComfyUI 重打包版，占据了 9 月 28 日 Hugging Face 模型热榜前十的三个位置。榜首却属于 Laya：一个专门做分类、路由和评分的小模型。图像工作流与短决策服务，同时进入了这份关注度榜单。</p>
+<p>对部署者来说，模型能做什么、采用哪种格式、是否允许商用，需要分开判断。图像家族的三个条目均标为自定义许可；Audio8 虽标为 Apache-2.0，其初始化来源中却存在研究许可组件。公开可见的权重与完整的商业授权并不是同一件事。</p>
+<p><img  
+                     lazyload
+                     src="/images/loading.svg"
+                     data-src="/images/huggingface-trending/2026-09-28/cover.png"
+                      alt="Hugging Face Trending 2026-09-28"
+                ></p>
+<h2 id="今日模型榜"><a href="#今日模型榜" class="headerlink" title="今日模型榜"></a>今日模型榜</h2><p>数据时间：北京时间 2026-09-28 04:02。Trend Score 是 Hugging Face 的趋势排序分数，<strong>不是模型质量分，也不是今日新增下载或点赞</strong>。Downloads 为 Hub 最近一个月的下载统计，按指定文件请求计数，不是历史累计下载，也不等于独立用户；GGUF 仓库下载多个文件时可能重复计数。Likes 是单独的点赞指标。下表许可证列保留 Hub 标签，具体约束见各节。</p>
+<table>
+<thead>
+<tr>
+<th>排名</th>
+<th>模型</th>
+<th>任务</th>
+<th align="right">Trend Score</th>
+<th align="right">Downloads</th>
+<th align="right">Likes</th>
+<th>许可证</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td><a class="link"   target="_blank" rel="noopener" href="https://huggingface.co/convaiinnovations/laya" >convaiinnovations&#x2F;laya<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></td>
+<td>text-classification</td>
+<td align="right">2,875</td>
+<td align="right">0</td>
+<td align="right">4,066</td>
+<td>apache-2.0</td>
+</tr>
+<tr>
+<td>2</td>
+<td><a class="link"   target="_blank" rel="noopener" href="https://huggingface.co/abenzerps/Qwen-Image-2.1-Uncensored-GGUF" >abenzerps&#x2F;Qwen-Image-2.1-Uncensored-GGUF<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></td>
+<td>text-to-image</td>
+<td align="right">1,748</td>
+<td align="right">964,220</td>
+<td align="right">2,053</td>
+<td>other</td>
+</tr>
+<tr>
+<td>3</td>
+<td><a class="link"   target="_blank" rel="noopener" href="https://huggingface.co/Qwen/Qwen-Image-2.1" >Qwen&#x2F;Qwen-Image-2.1<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></td>
+<td>text-to-image</td>
+<td align="right">1,689</td>
+<td align="right">52,804</td>
+<td align="right">2,475</td>
+<td>other</td>
+</tr>
+<tr>
+<td>4</td>
+<td><a class="link"   target="_blank" rel="noopener" href="https://huggingface.co/XingChen-AGI/Xing4.0-29B-A4B" >XingChen-AGI&#x2F;Xing4.0-29B-A4B<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></td>
+<td>text-generation</td>
+<td align="right">921</td>
+<td align="right">45,028</td>
+<td align="right">1,780</td>
+<td>apache-2.0</td>
+</tr>
+<tr>
+<td>5</td>
+<td><a class="link"   target="_blank" rel="noopener" href="https://huggingface.co/Edge0/Audio8-ASR-Infinite" >Edge0&#x2F;Audio8-ASR-Infinite<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></td>
+<td>automatic-speech-recognition</td>
+<td align="right">867</td>
+<td align="right">19,434</td>
+<td align="right">977</td>
+<td>apache-2.0</td>
+</tr>
+<tr>
+<td>6</td>
+<td><a class="link"   target="_blank" rel="noopener" href="https://huggingface.co/prism-ml/Ternary-Bonsai-2-27B-gguf" >prism-ml&#x2F;Ternary-Bonsai-2-27B-gguf<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></td>
+<td>text-generation</td>
+<td align="right">652</td>
+<td align="right">3,343,748</td>
+<td align="right">2,181</td>
+<td>apache-2.0</td>
+</tr>
+<tr>
+<td>7</td>
+<td><a class="link"   target="_blank" rel="noopener" href="https://huggingface.co/Altworld/Hemmingway-1" >Altworld&#x2F;Hemmingway-1<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></td>
+<td>text-generation</td>
+<td align="right">645</td>
+<td align="right">5,904</td>
+<td align="right">730</td>
+<td>cc-by-nc-4.0</td>
+</tr>
+<tr>
+<td>8</td>
+<td><a class="link"   target="_blank" rel="noopener" href="https://huggingface.co/XiaomiMiMo/MiMo-V2.6-Pro-RL" >XiaomiMiMo&#x2F;MiMo-V2.6-Pro-RL<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></td>
+<td>text-generation</td>
+<td align="right">538</td>
+<td align="right">75,079</td>
+<td align="right">551</td>
+<td>mit</td>
+</tr>
+<tr>
+<td>9</td>
+<td><a class="link"   target="_blank" rel="noopener" href="https://huggingface.co/Comfy-Org/Qwen-Image-2.1" >Comfy-Org&#x2F;Qwen-Image-2.1<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></td>
+<td>未标注</td>
+<td align="right">530</td>
+<td align="right">3,987,373</td>
+<td align="right">801</td>
+<td>other</td>
+</tr>
+<tr>
+<td>10</td>
+<td><a class="link"   target="_blank" rel="noopener" href="https://huggingface.co/XiaomiMiMo/MiMo-V2.6-Distill-Qwen-9B" >XiaomiMiMo&#x2F;MiMo-V2.6-Distill-Qwen-9B<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></td>
+<td>image-text-to-text</td>
+<td align="right">508</td>
+<td align="right">8,839</td>
+<td align="right">519</td>
+<td>mit</td>
+</tr>
+</tbody></table>
+<h2 id="1-convaiinnovations-x2F-laya"><a href="#1-convaiinnovations-x2F-laya" class="headerlink" title="1. convaiinnovations&#x2F;laya"></a>1. <a class="link"   target="_blank" rel="noopener" href="https://huggingface.co/convaiinnovations/laya" >convaiinnovations&#x2F;laya<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></h2><p><strong>模型简介：</strong> Laya 把邮件、工单或一段状态描述变成分类与评分结果，输出选项及其概率，不负责写长篇回答。它适合放在业务流程入口，决定请求交给谁。</p>
+<p><strong>为什么热：</strong> 榜首的吸引力在于把高频、短决策从通用聊天模型中拆出来。4,066 个 Likes 表明关注度较高，但页面明确提示下载未被追踪；Downloads 为 0 不能解释成无人使用。</p>
+<p><strong>技术特点：</strong> 模型卡区分了三个检查点：英语根模型为 421M 参数、512 token 上下文；多语版本为 322M，默认 1,024 token，可显式扩到 8,192。这里的 token 是模型处理文本的基本单位。训练奖励鼓励概率校准，但概率可信程度仍受语言和业务分布影响。</p>
+<p><strong>适用场景：</strong> 适合邮件分流、客服优先级判断、内容审核前置筛选。中文业务应选择多语检查点，并用真实样本校准阈值；医疗或金融等高风险决策应保留人工复核。</p>
+<p><strong>关键数据：</strong> Trend Score 2,875；Downloads 0；Likes 4,066。任务标签：text-classification；库：transformers；更新日期：2026-09-24；访问门槛：未设置 gated 限制。</p>
+<p><strong>许可与风险：</strong> 模型卡声明 Apache-2.0，本仓库没有单独的许可证文件。模型不生成自由文本，也仍可能选错类别；卡片自己记录了英语检查点对部分非拉丁文字高置信度误判的情况。不要把“不生成文本”理解成“不会犯错”。</p>
+<p><img src="/images/huggingface-trending/2026-09-28/01-convaiinnovations__laya.png" alt="convaiinnovations/laya 模型卡"></p>
+<h2 id="2-abenzerps-x2F-Qwen-Image-2-1-Uncensored-GGUF"><a href="#2-abenzerps-x2F-Qwen-Image-2-1-Uncensored-GGUF" class="headerlink" title="2. abenzerps&#x2F;Qwen-Image-2.1-Uncensored-GGUF"></a>2. <a class="link"   target="_blank" rel="noopener" href="https://huggingface.co/abenzerps/Qwen-Image-2.1-Uncensored-GGUF" >abenzerps&#x2F;Qwen-Image-2.1-Uncensored-GGUF<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></h2><p><strong>模型简介：</strong> 这是 abenzerps 基于 Qwen-Image-2.1 制作的量化与内容过滤变体。GGUF 是便于本地推理工具读取的权重封装，降低精度可以减小文件，但不代表训练出了另一套基础模型。</p>
+<p><strong>为什么热：</strong> 它排在原模型之前，凸显了本地部署格式的吸引力。模型卡提供多种精度和配套文件，减少手工搭配的麻烦；964,220 次 Downloads 仍是文件请求统计，不能当成独立安装人数。</p>
+<p><strong>技术特点：</strong> 卡片推荐 Q4_K_M，扩散模型文件约 4.60 GB；配套 Int8 文本编码器另约 9.35 GB，还需要图像编解码组件。只看主权重大小会低估整套流程的内存需求，CPU 卸载也可能改变延迟。</p>
+<p><strong>适用场景：</strong> 适合已经熟悉 ComfyUI 节点与显存管理的本地图像实验者。应先验证现有节点是否支持这种模型结构，再比较量化档位的画质和速度。</p>
+<p><strong>关键数据：</strong> Trend Score 1,748；Downloads 964,220；Likes 2,053。任务标签：text-to-image；库：gguf；更新日期：2026-09-27；访问门槛：未设置 gated 限制。</p>
+<p><strong>许可与风险：</strong> 标记为 other，模型卡声明 Qwen Research License；上游许可仅授予研究或评估用途，商用需另获授权。作者声明没有内置安全检查器，部署方需另设内容审核、肖像与版权保护。格式转换及“Uncensored”命名不解除上游义务。</p>
+<p><img src="/images/huggingface-trending/2026-09-28/02-abenzerps__Qwen-Image-2.1-Uncensored-GGUF.png" alt="abenzerps/Qwen-Image-2.1-Uncensored-GGUF 模型卡"></p>
+<h2 id="3-Qwen-x2F-Qwen-Image-2-1"><a href="#3-Qwen-x2F-Qwen-Image-2-1" class="headerlink" title="3. Qwen&#x2F;Qwen-Image-2.1"></a>3. <a class="link"   target="_blank" rel="noopener" href="https://huggingface.co/Qwen/Qwen-Image-2.1" >Qwen&#x2F;Qwen-Image-2.1<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></h2><p><strong>模型简介：</strong> Qwen 官方的统一图像生成与编辑模型，可从文字生成图像，也可修改已有图像。原生 RGBA 支持意味着输出能包含透明通道，便于把主体直接放进设计稿。</p>
+<p><strong>为什么热：</strong> 本体、量化版与 ComfyUI 重打包版同时进入前十，说明这条产品线已覆盖不同部署入口。三席反映同一模型家族的传播与适配，不能算成三次基础能力突破。</p>
+<p><strong>技术特点：</strong> 模型卡明确 7B 参数仅指视觉生成组件，并列出 32 层单流扩散 Transformer；不能据此声称整个系统只有 7B。编辑最多支持 10 张参考图，也支持用圈选、涂画或遮罩指定局部区域。</p>
+<p><strong>适用场景：</strong> 适合透明素材制作、产品图修改、参考图约束下的设计试验。对商用设计团队，授权审批应早于把模型接进日常出图流程。</p>
+<p><strong>关键数据：</strong> Trend Score 1,689；Downloads 52,804；Likes 2,475。任务标签：text-to-image；库：diffusers；更新日期：2026-09-21；访问门槛：未设置 gated 限制。</p>
+<p><strong>许可与风险：</strong> Hub 标签为 other。固定版本的 Qwen Research License 把非商业用途限定为研究或评估，商用须另行申请；再分发需保留协议、修改说明及 Notice。开放权重不等于无条件商业使用，生成的文字、人物与商品细节仍需核对。</p>
+<p><img src="/images/huggingface-trending/2026-09-28/03-Qwen__Qwen-Image-2.1.png" alt="Qwen/Qwen-Image-2.1 模型卡"></p>
+<h2 id="4-XingChen-AGI-x2F-Xing4-0-29B-A4B"><a href="#4-XingChen-AGI-x2F-Xing4-0-29B-A4B" class="headerlink" title="4. XingChen-AGI&#x2F;Xing4.0-29B-A4B"></a>4. <a class="link"   target="_blank" rel="noopener" href="https://huggingface.co/XingChen-AGI/Xing4.0-29B-A4B" >XingChen-AGI&#x2F;Xing4.0-29B-A4B<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></h2><p><strong>模型简介：</strong> 中国电信人工智能团队发布的 Xing4.0 面向代码、工具调用与复杂工程任务。模型卡给出的总参数为 29B，每个 token 激活约 4B。</p>
+<p><strong>为什么热：</strong> 它提供了一条面向昇腾训练平台的模型路线，同时强调主流推理框架兼容性。对已有国产算力栈的团队，这比单独一个聊天成绩更有选型意义；榜单没有证明这些能力是热度变化的唯一原因。</p>
+<p><strong>技术特点：</strong> 模型采用混合专家结构，也就是每一步只调用部分专家网络。卡片列出 40 层、64 个路由专家，并声明原生 256K 上下文可扩到 512K；扩展上限不能视作所有服务默认启用的长度。</p>
+<p><strong>适用场景：</strong> 适合代码助手、企业知识问答及领域微调评估。已有 vLLM、SGLang 或 KTransformers 服务的团队，可先检查目标版本对模型的适配，再做长任务测试。</p>
+<p><strong>关键数据：</strong> Trend Score 921；Downloads 45,028；Likes 1,780。任务标签：text-generation；库：transformers；更新日期：2026-09-18；访问门槛：未设置 gated 限制。</p>
+<p><strong>许可与风险：</strong> 模型卡声明 Apache-2.0，仓库无单独许可证文件。4B 激活参数不等于只需容纳 4B 权重；长上下文还会增加缓存与运行开销。涉及自定义模型代码时应先审阅代码，再授予运行权限。</p>
+<p><img src="/images/huggingface-trending/2026-09-28/04-XingChen-AGI__Xing4.0-29B-A4B.png" alt="XingChen-AGI/Xing4.0-29B-A4B 模型卡"></p>
+<h2 id="5-Edge0-x2F-Audio8-ASR-Infinite"><a href="#5-Edge0-x2F-Audio8-ASR-Infinite" class="headerlink" title="5. Edge0&#x2F;Audio8-ASR-Infinite"></a>5. <a class="link"   target="_blank" rel="noopener" href="https://huggingface.co/Edge0/Audio8-ASR-Infinite" >Edge0&#x2F;Audio8-ASR-Infinite<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></h2><p><strong>模型简介：</strong> Audio8 是中英双语流式语音识别模型：音频到达时持续输出文字，而不必等整段录音结束。当前模型卡仍把它标为预览版本。</p>
+<p><strong>为什么热：</strong> 它针对会议字幕、语音交互这类对等待时间敏感的场景，提供可选的音频时钟与输出延迟。持续处理长音频的设计比“Infinite”这个名字更值得关注。</p>
+<p><strong>技术特点：</strong> 卡片给出 80、120、160 毫秒三档音频时钟，以及 240—560 毫秒的转写延迟配置。原生上下文是 30 秒，长时间运行依赖滚动键值缓存与适配的 vLLM；这不等于模型能一直记住完整录音。</p>
+<p><strong>适用场景：</strong> 适合中英实时字幕和语音助手原型。应在真实噪声、口音与多人交替说话条件下测试错误率，并区分模型设定延迟与网络、采集、后处理后的端到端延迟。</p>
+<p><strong>关键数据：</strong> Trend Score 867；Downloads 19,434；Likes 977。任务标签：automatic-speech-recognition；库：transformers；更新日期：2026-09-24；访问门槛：未设置 gated 限制。</p>
+<p><strong>许可与风险：</strong> 本模型标为 Apache-2.0，但卡片声明解码器及输出头初始化自 Qwen2.5-3B-Instruct，其上游是仅研究或评估的 Qwen Research License。衍生卡的宽松标签不能证明已消除这项限制，商用前必须向发布方确认授权链；音频塔来源名称也不足以唯一确定初始化版本。</p>
+<p><img src="/images/huggingface-trending/2026-09-28/05-Edge0__Audio8-ASR-Infinite.png" alt="Edge0/Audio8-ASR-Infinite 模型卡"></p>
+<h2 id="6-prism-ml-x2F-Ternary-Bonsai-2-27B-gguf"><a href="#6-prism-ml-x2F-Ternary-Bonsai-2-27B-gguf" class="headerlink" title="6. prism-ml&#x2F;Ternary-Bonsai-2-27B-gguf"></a>6. <a class="link"   target="_blank" rel="noopener" href="https://huggingface.co/prism-ml/Ternary-Bonsai-2-27B-gguf" >prism-ml&#x2F;Ternary-Bonsai-2-27B-gguf<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></h2><p><strong>模型简介：</strong> Prism ML 把 Qwen3.8-27B 的语言权重转换为三值低比特表示，重点是减少本地推理的存储与带宽开销，基础架构并未改变。</p>
+<p><strong>为什么热：</strong> 3,343,748 次 Downloads 让它成为榜内下载量较高的条目。它面向想在笔记本或单卡上运行较大模型的用户，但下载多不能证明所有任务都保留了原模型表现。</p>
+<p><strong>技术特点：</strong> 三值表示将权重主要编码为负一、零、正一，再配合缩放因子。卡片列出 PTQ1_0 与 PQ2_0 两种封装，语言模型分别约 5.95 GB 和 7.21 GB；前者更省空间，后者解包更简单，哪个更快取决于硬件与算子。</p>
+<p><strong>适用场景：</strong> 适合离线助手和隐私敏感的本地推理评估。需使用支持该三值格式及旋转变换的运行时；看图还要额外加载视觉组件，不能把语言模型文件大小当作完整运行内存。</p>
+<p><strong>关键数据：</strong> Trend Score 652；Downloads 3,343,748；Likes 2,181。任务标签：text-generation；库：llama.cpp；更新日期：2026-09-25；访问门槛：未设置 gated 限制。</p>
+<p><strong>许可与风险：</strong> 仓库 LICENSE 与 NOTICE 声明 Apache-2.0，并注明基础 Qwen3.8-27B 的来源；该基础模型许可证亦为 Apache-2.0。保留归属与许可通知。卡片中的能力保留比例来自作者的特定评测集合，不宜推广成所有任务的质量保证。</p>
+<p><img src="/images/huggingface-trending/2026-09-28/06-prism-ml__Ternary-Bonsai-2-27B-gguf.png" alt="prism-ml/Ternary-Bonsai-2-27B-gguf 模型卡"></p>
+<h2 id="7-Altworld-x2F-Hemmingway-1"><a href="#7-Altworld-x2F-Hemmingway-1" class="headerlink" title="7. Altworld&#x2F;Hemmingway-1"></a>7. <a class="link"   target="_blank" rel="noopener" href="https://huggingface.co/Altworld/Hemmingway-1" >Altworld&#x2F;Hemmingway-1<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></h2><p><strong>模型简介：</strong> Altworld 基于 Qwen3.8-27B 微调的英语优先写作模型，强调直接给出邮件、消息等可用文本，减少答案前后的解释性包装。</p>
+<p><strong>为什么热：</strong> 它把差异化放在日常沟通语气，而非泛化能力榜单。对于经常要删掉模型客套话的用户，这个定位很具体；作者自己设计的写作评测不能当成独立行业排名。</p>
+<p><strong>技术特点：</strong> 模型卡给出 27B 参数和 262,144 token 上下文，提供 Transformers 与 vLLM 用法。它是写作取向的微调版本，不能因为长上下文就假定长篇叙事更强；作者也承认部分故事任务会输给专门的故事模型。</p>
+<p><strong>适用场景：</strong> 适合个人英文邮件、沟通草稿与写作风格比较。可用同一组真实消息，对照是否保留事实、符合语气并减少人工修改。</p>
+<p><strong>关键数据：</strong> Trend Score 645；Downloads 5,904；Likes 730。任务标签：text-generation；库：transformers；更新日期：2026-09-22；访问门槛：未设置 gated 限制。</p>
+<p><strong>许可与风险：</strong> CC BY-NC 4.0 要求署名并限制非商业使用，许可文件明确把付费服务、付费产品内使用及经营业务纳入另行书面授权范围；基础 Qwen 的 Apache-2.0 不会覆盖掉新增限制。文风像真人不代表事实可靠，不应用来直接作医疗、法律或金融决策。</p>
+<p><img src="/images/huggingface-trending/2026-09-28/07-Altworld__Hemmingway-1.png" alt="Altworld/Hemmingway-1 模型卡"></p>
+<h2 id="8-XiaomiMiMo-x2F-MiMo-V2-6-Pro-RL"><a href="#8-XiaomiMiMo-x2F-MiMo-V2-6-Pro-RL" class="headerlink" title="8. XiaomiMiMo&#x2F;MiMo-V2.6-Pro-RL"></a>8. <a class="link"   target="_blank" rel="noopener" href="https://huggingface.co/XiaomiMiMo/MiMo-V2.6-Pro-RL" >XiaomiMiMo&#x2F;MiMo-V2.6-Pro-RL<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></h2><p><strong>模型简介：</strong> 小米 MiMo 的旗舰强化学习检查点，覆盖文本、图像、视频与音频，并面向代码及长流程智能体任务。强化学习在这里指通过任务反馈调整模型的行动策略。</p>
+<p><strong>为什么热：</strong> 它把多类任务放进同一次混合训练，并让评分机制区分“同样通过测试、但完成质量不同”的方案。这条路线对研究智能体训练的人有价值，榜单热度本身仍不能证明它能自主持续进化。</p>
+<p><strong>技术特点：</strong> 模型卡给出 1.02T 总参数、42B 激活参数和 1M token 上下文。混合专家减少每步激活计算，但并不移除庞大的总权重；卡片中的部署例子采用多卡甚至多节点。</p>
+<p><strong>适用场景：</strong> 适合具备集群资源的团队研究多模态智能体、工具规划及训练反馈。个人开发者更适合先通过服务评估任务效果，再判断是否承担自部署成本。</p>
+<p><strong>关键数据：</strong> Trend Score 538；Downloads 75,079；Likes 551。任务标签：text-generation；库：transformers；更新日期：2026-09-22；访问门槛：未设置 gated 限制。</p>
+<p><strong>许可与风险：</strong> 模型卡声明 MIT，仓库没有独立许可证文件。低激活参数量不能等同于小显存要求；模型给出的工具行动仍需最小权限、沙箱和人工审批。作者的评测与训练描述也不是对开放环境长期可靠性的承诺。</p>
+<p><img src="/images/huggingface-trending/2026-09-28/08-XiaomiMiMo__MiMo-V2.6-Pro-RL.png" alt="XiaomiMiMo/MiMo-V2.6-Pro-RL 模型卡"></p>
+<h2 id="9-Comfy-Org-x2F-Qwen-Image-2-1"><a href="#9-Comfy-Org-x2F-Qwen-Image-2-1" class="headerlink" title="9. Comfy-Org&#x2F;Qwen-Image-2.1"></a>9. <a class="link"   target="_blank" rel="noopener" href="https://huggingface.co/Comfy-Org/Qwen-Image-2.1" >Comfy-Org&#x2F;Qwen-Image-2.1<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></h2><p><strong>模型简介：</strong> Comfy-Org 提供面向 ComfyUI 的 Qwen-Image-2.1 重打包文件，方便把扩散模型、文本编码器和图像编解码组件放入对应目录。它不是新的基础模型。</p>
+<p><strong>为什么热：</strong> 3,987,373 次 Downloads 高于榜内原模型仓库的同口径数值，显示可直接接入节点流程的发行入口受到关注。多个文件与不同格式的计数方式仍会影响比较，不能把它换算成用户份额。</p>
+<p><strong>技术特点：</strong> 模型卡列出 BF16 与 Int8 等文件，并给出文生图、图像编辑和去背景工作流链接。还包含提示词增强模型入口；这些组件各有来源，部署时应按实际使用的文件配套。</p>
+<p><strong>适用场景：</strong> 适合习惯图形化节点工作流的图像创作者。应核对节点版本、模型目录和所选精度；缺少一个编码器也可能使完整流程无法工作。</p>
+<p><strong>关键数据：</strong> Trend Score 530；Downloads 3,987,373；Likes 801。任务标签：未标注；库：diffusion-single-file；更新日期：2026-09-23；访问门槛：未设置 gated 限制。</p>
+<p><strong>许可与风险：</strong> Hub 没有任务标签，表格保留“未标注”，用途由模型卡说明。许可证标签为 other，并指向 Qwen Research License，商用需另行授权；重打包不会改变原权重的使用边界，另选提示词增强组件时还需核对对应条款。</p>
+<p><img src="/images/huggingface-trending/2026-09-28/09-Comfy-Org__Qwen-Image-2.1.png" alt="Comfy-Org/Qwen-Image-2.1 模型卡"></p>
+<h2 id="10-XiaomiMiMo-x2F-MiMo-V2-6-Distill-Qwen-9B"><a href="#10-XiaomiMiMo-x2F-MiMo-V2-6-Distill-Qwen-9B" class="headerlink" title="10. XiaomiMiMo&#x2F;MiMo-V2.6-Distill-Qwen-9B"></a>10. <a class="link"   target="_blank" rel="noopener" href="https://huggingface.co/XiaomiMiMo/MiMo-V2.6-Distill-Qwen-9B" >XiaomiMiMo&#x2F;MiMo-V2.6-Distill-Qwen-9B<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></h2><p><strong>模型简介：</strong> 小米以 MiMo 生成的数据，对 Qwen3.5-9B 做监督微调得到的 9B 智能体模型。蒸馏把教师模型的示范用于训练较小模型；这里发布的是监督微调检查点。</p>
+<p><strong>为什么热：</strong> 它为不具备旗舰集群资源的研究者提供更小的起点。与同榜 Pro-RL 相比，价值在于规模与实验成本的不同，不能把两者当成能力等价的大小版本。</p>
+<p><strong>技术特点：</strong> 卡片说明加权训练混合包含 77.4B token，其中 27.2B token 参与损失计算，二者分别表示总训练文本量与实际用于学习目标的部分。训练任务包括代码、通用智能体、视觉及安全研究。</p>
+<p><strong>适用场景：</strong> 适合研究智能体强化学习、工具调用与代码任务的团队。可先按卡片要求启用思考模式，并确认服务使用 MiMo 聊天模板，避免把格式配置错误误判成模型能力不足。</p>
+<p><strong>关键数据：</strong> Trend Score 508；Downloads 8,839；Likes 519。任务标签：image-text-to-text；库：transformers；更新日期：2026-09-22；访问门槛：未设置 gated 限制。</p>
+<p><strong>许可与风险：</strong> 衍生卡声明 MIT，基础 Qwen3.5-9B 采用 Apache-2.0，分发时仍需保留基础组件的许可义务。卡片含内部评测集结果，不能与其他运行条件的分数直接比较；涉及网络安全任务只能在已授权环境中验证。</p>
+<p><img src="/images/huggingface-trending/2026-09-28/10-XiaomiMiMo__MiMo-V2.6-Distill-Qwen-9B.png" alt="XiaomiMiMo/MiMo-V2.6-Distill-Qwen-9B 模型卡"></p>
+<h2 id="选型时先确认什么"><a href="#选型时先确认什么" class="headerlink" title="选型时先确认什么"></a>选型时先确认什么</h2><p>做图像工作流，先确认 Qwen Research License 是否覆盖用途；做实时转写，先厘清 Audio8 的基础组件授权。研究本地推理可比较 Bonsai 两种封装在目标硬件上的延迟与内存，英语写作则要接受 Hemmingway-1 的非商业限制。无论选哪一个，先用自己的任务样本验证错误率、运行成本与人工修改量，再决定是否替换现有服务。</p>
+<h2 id="官方来源"><a href="#官方来源" class="headerlink" title="官方来源"></a>官方来源</h2><ul>
+<li><a class="link"   target="_blank" rel="noopener" href="https://huggingface.co/models?sort=trending" >Hugging Face Models Trending<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://huggingface.co/docs/hub/models-download-stats" >Hugging Face 下载统计说明<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://huggingface.co/convaiinnovations/laya/blob/55cf4c4ebb4ebe31b2550e8bdf3bd21b99753851/README.md" >convaiinnovations&#x2F;laya Model Card<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://huggingface.co/abenzerps/Qwen-Image-2.1-Uncensored-GGUF/blob/7cd41e760c62e49af2073c869bc2b66bdac86258/README.md" >abenzerps&#x2F;Qwen-Image-2.1-Uncensored-GGUF Model Card<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://huggingface.co/Qwen/Qwen-Image-2.1/blob/790c92633540aa0cb11d9abf19eb46d861714758/README.md" >Qwen&#x2F;Qwen-Image-2.1 Model Card<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://huggingface.co/XingChen-AGI/Xing4.0-29B-A4B/blob/baae3c3e813cad5f888f1f485cfff659c89076c5/README.md" >XingChen-AGI&#x2F;Xing4.0-29B-A4B Model Card<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://huggingface.co/Edge0/Audio8-ASR-Infinite/blob/7476824bc222e4ad509d286e8cae8b8d3f371129/README.md" >Edge0&#x2F;Audio8-ASR-Infinite Model Card<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://huggingface.co/prism-ml/Ternary-Bonsai-2-27B-gguf/blob/b072e1d3b35a0a630cece372c2127528e0994386/README.md" >prism-ml&#x2F;Ternary-Bonsai-2-27B-gguf Model Card<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://huggingface.co/Altworld/Hemmingway-1/blob/b987f1800da287b3016862948743a253fbf80553/README.md" >Altworld&#x2F;Hemmingway-1 Model Card<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://huggingface.co/XiaomiMiMo/MiMo-V2.6-Pro-RL/blob/73875d00b30a89ef8cc353a0b60b0e9f9561952d/README.md" >XiaomiMiMo&#x2F;MiMo-V2.6-Pro-RL Model Card<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://huggingface.co/Comfy-Org/Qwen-Image-2.1/blob/9a44dbdb47cefd046be9c0a13476192f34c8db8e/README.md" >Comfy-Org&#x2F;Qwen-Image-2.1 Model Card<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://huggingface.co/XiaomiMiMo/MiMo-V2.6-Distill-Qwen-9B/blob/2367e865d009c13ac81713a2878291d33ab28177/README.md" >XiaomiMiMo&#x2F;MiMo-V2.6-Distill-Qwen-9B Model Card<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://huggingface.co/Qwen/Qwen-Image-2.1/blob/790c92633540aa0cb11d9abf19eb46d861714758/LICENSE" >Qwen-Image-2.1 许可<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+<li><a class="link"   target="_blank" rel="noopener" href="https://huggingface.co/Qwen/Qwen2.5-3B-Instruct/blob/aa8e72537993ba99e69dfaafa59ed015b17504d1/LICENSE" >Audio8 解码器来源 Qwen2.5-3B-Instruct 许可<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></li>
+</ul>
+
+		</div>
+
+		
+		<div class="post-copyright-info w-full my-8 px-2 sm:px-6 md:px-8">
+			<div class="article-copyright-info-container">
+    <ul>
+        <li><strong>标题:</strong> Hugging Face 热榜：Qwen 图像家族占三席，榜首却是决策小模型</li>
+        <li><strong>作者:</strong> Nathan</li>
+        <li><strong>创建于
+                :</strong> 2026-09-28 04:00:00</li>
+        
+            <li>
+                <strong>更新于
+                    :</strong> 2026-09-28 04:07:02
+            </li>
+        
+        <li>
+            <strong>链接:</strong> https://hydraxman.github.io/2026/09/28/huggingface-trending/huggingface-trending-2026-09-28/
+        </li>
+        <li>
+            <strong>
+                版权声明:
+            </strong>
+            
+
+            
+                本文章采用 <a class="license" target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0">CC BY-NC-SA 4.0</a> 进行许可。
+            
+        </li>
+    </ul>
+</div>
+
+		</div>
+		
+
+		
+		<ul class="post-tags-box text-lg mt-1.5 flex-wrap justify-center flex md:hidden">
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/AI%E6%A8%A1%E5%9E%8B/">#AI模型</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/Hugging-Face/">#Hugging Face</a>&nbsp;
+			</li>
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/%E5%BC%80%E6%BA%90%E6%A8%A1%E5%9E%8B/">#开源模型</a>&nbsp;
+			</li>
+			
+		</ul>
+		
+
+		
+
+		
+		<div class="article-nav my-8 flex justify-between items-center px-2 sm:px-6 md:px-8">
+			
+			<div class="article-prev border-border-color shadow-redefine-flat shadow-shadow-color-2 rounded-medium px-4 py-2 hover:shadow-redefine-flat-hover hover:shadow-shadow-color-2">
+				<a class="prev" rel="prev" href="/2026/09/28/github-trending/github-trending-2026-09-28/">
+					<span class="left arrow-icon flex justify-center items-center">
+						<i class="fa-solid fa-chevron-left"></i>
+					</span>
+					<span class="title flex justify-center items-center">
+						<span class="post-nav-title-item truncate max-w-48">AI 团队、长期记忆与本地工具：今天 GitHub 热榜的 9 个项目</span>
+						<span class="post-nav-item">上一篇</span>
+					</span>
+				</a>
+			</div>
+			
+			
+			<div class="article-next border-border-color shadow-redefine-flat shadow-shadow-color-2 rounded-medium px-4 py-2 hover:shadow-redefine-flat-hover hover:shadow-shadow-color-2">
+				<a class="next" rel="next" href="/2026/09/27/github-trending/github-trending-2026-09-27/">
+					<span class="title flex justify-center items-center">
+						<span class="post-nav-title-item truncate max-w-48">智能体走进办公室：管理、记忆与文档成了热门开源项目｜GitHub Trending 9月27日</span>
+						<span class="post-nav-item">下一篇</span>
+					</span>
+					<span class="right arrow-icon flex justify-center items-center">
+						<i class="fa-solid fa-chevron-right"></i>
+					</span>
+				</a>
+			</div>
+			
+		</div>
+		
+
+
+		
+	</div>
+
+	
+	<div class="toc-content-container">
+		<div class="post-toc-wrap">
+	<div class="post-toc">
+		<div class="toc-title">目录</div>
+		<div class="page-title">Hugging Face 热榜：Qwen 图像家族占三席，榜首却是决策小模型</div>
+		<ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%8A%E6%97%A5%E6%A8%A1%E5%9E%8B%E6%A6%9C"><span class="nav-text">今日模型榜</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-convaiinnovations-x2F-laya"><span class="nav-text">1. convaiinnovations&#x2F;laya</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-abenzerps-x2F-Qwen-Image-2-1-Uncensored-GGUF"><span class="nav-text">2. abenzerps&#x2F;Qwen-Image-2.1-Uncensored-GGUF</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-Qwen-x2F-Qwen-Image-2-1"><span class="nav-text">3. Qwen&#x2F;Qwen-Image-2.1</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-XingChen-AGI-x2F-Xing4-0-29B-A4B"><span class="nav-text">4. XingChen-AGI&#x2F;Xing4.0-29B-A4B</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-Edge0-x2F-Audio8-ASR-Infinite"><span class="nav-text">5. Edge0&#x2F;Audio8-ASR-Infinite</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-prism-ml-x2F-Ternary-Bonsai-2-27B-gguf"><span class="nav-text">6. prism-ml&#x2F;Ternary-Bonsai-2-27B-gguf</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7-Altworld-x2F-Hemmingway-1"><span class="nav-text">7. Altworld&#x2F;Hemmingway-1</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#8-XiaomiMiMo-x2F-MiMo-V2-6-Pro-RL"><span class="nav-text">8. XiaomiMiMo&#x2F;MiMo-V2.6-Pro-RL</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#9-Comfy-Org-x2F-Qwen-Image-2-1"><span class="nav-text">9. Comfy-Org&#x2F;Qwen-Image-2.1</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#10-XiaomiMiMo-x2F-MiMo-V2-6-Distill-Qwen-9B"><span class="nav-text">10. XiaomiMiMo&#x2F;MiMo-V2.6-Distill-Qwen-9B</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%80%89%E5%9E%8B%E6%97%B6%E5%85%88%E7%A1%AE%E8%AE%A4%E4%BB%80%E4%B9%88"><span class="nav-text">选型时先确认什么</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%98%E6%96%B9%E6%9D%A5%E6%BA%90"><span class="nav-text">官方来源</span></a></li></ol>
+
+	</div>
+</div>
+	</div>
+	
+</div>
+
+			</div>
+
+			
+		</div>
+
+		<div class="main-content-footer">
+			<footer class="footer mt-5 py-5 h-auto text-base text-third-text-color relative border-t-2 border-t-border-color">
+    <div class="info-container py-3 text-center">
+        
+        <div class="text-center">
+            &copy;
+            
+              <span>2024</span>
+              -
+            
+            2026&nbsp;&nbsp;<i class="fa-solid fa-heart fa-beat" style="--fa-animation-duration: 0.5s; color: #333"></i>&nbsp;&nbsp;<a href="/">Nathan</a>
+            
+                
+                <p class="post-count space-x-0.5">
+                    <span>
+                        共撰写了 397 篇文章
+                    </span>
+                    
+                        <span>
+                            共 1029.3k 字
+                        </span>
+                    
+                </p>
+            
+        </div>
+        
+        <div class="relative text-center lg:absolute lg:left-[20px] lg:top-1/2 lg:-translate-y-1/2 lg:text-left">
+            <span class="lg:block text-sm">由 <?xml version="1.0" encoding="utf-8"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg class="relative top-[2px] inline-block align-baseline" version="1.1" id="圖層_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="1rem" height="1rem" viewBox="0 0 512 512" enable-background="new 0 0 512 512" xml:space="preserve"><path fill="#0E83CD" d="M256.4,25.8l-200,115.5L56,371.5l199.6,114.7l200-115.5l0.4-230.2L256.4,25.8z M349,354.6l-18.4,10.7l-18.6-11V275H200v79.6l-18.4,10.7l-18.6-11v-197l18.5-10.6l18.5,10.8V237h112v-79.6l18.5-10.6l18.5,10.8V354.6z"/></svg><a target="_blank" class="text-base" href="https://hexo.io">Hexo</a> 驱动</span>
+            <span class="text-sm lg:block">主题&nbsp;<a class="text-base" target="_blank" href="https://github.com/EvanNotFound/hexo-theme-redefine">Redefine v2.9.0</a></span>
+        </div>
+        
+        
+            <div>
+                博客已运行 <span class="odometer" id="runtime_days" ></span> 天 <span class="odometer" id="runtime_hours"></span> 小时 <span class="odometer" id="runtime_minutes"></span> 分钟 <span class="odometer" id="runtime_seconds"></span> 秒
+            </div>
+        
+        
+            <script data-swup-reload-script>
+                try {
+                    function odometer_init() {
+                    const elements = document.querySelectorAll('.odometer');
+                    elements.forEach(el => {
+                        new Odometer({
+                            el,
+                            format: '( ddd).dd',
+                            duration: 200
+                        });
+                    });
+                    }
+                    odometer_init();
+                } catch (error) {}
+            </script>
+        
+        
+            
+                
+        
+                
+        
+        
+    </div>  
+</footer>
+		</div>
+	</div>
+
+	
+	<div class="post-tools">
+		<div class="post-tools-container">
+	<ul class="article-tools-list">
+		<!-- TOC aside toggle -->
+		
+		<li class="right-bottom-tools page-aside-toggle">
+			<i class="fa-regular fa-outdent"></i>
+		</li>
+		
+
+		<!-- go comment -->
+		
+	</ul>
+</div>
+	</div>
+	
+
+	<div class="right-side-tools-container">
+		<div class="side-tools-container">
+	<ul class="hidden-tools-list">
+		<li class="right-bottom-tools tool-font-adjust-plus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-plus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-font-adjust-minus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-minus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-dark-light-toggle flex justify-center items-center">
+			<i class="fa-regular fa-moon"></i>
+		</li>
+
+		<!-- rss -->
+		
+
+		
+
+		<li class="right-bottom-tools tool-scroll-to-bottom flex justify-center items-center">
+			<i class="fa-regular fa-arrow-down"></i>
+		</li>
+	</ul>
+
+	<ul class="visible-tools-list">
+		<li class="right-bottom-tools toggle-tools-list flex justify-center items-center">
+			<i class="fa-regular fa-cog fa-spin"></i>
+		</li>
+		
+		<li class="right-bottom-tools tool-scroll-to-top flex justify-center items-center">
+			<i class="arrow-up fas fa-arrow-up"></i>
+			<span class="percent"></span>
+		</li>
+		
+		
+	</ul>
+</div>
+	</div>
+
+	<div class="image-viewer-container" role="dialog" aria-modal="true" aria-label="图片查看器">
+	<button class="image-viewer-close" type="button" aria-label="关闭">
+		<i class="fa-solid fa-xmark"></i>
+	</button>
+	<button class="image-viewer-prev" type="button" aria-label="上一页">
+		<i class="fa-solid fa-chevron-left"></i>
+	</button>
+	<div class="image-viewer-frame">
+		<img src="" alt="">
+	</div>
+	<div class="image-viewer-exif-panel hidden absolute left-1/2 bottom-20 -translate-x-1/2 w-[min(92vw,420px)] max-h-[60vh] overflow-hidden rounded-2xl bg-background-color-transparent-80 p-4 text-left shadow-redefine-flat backdrop-blur-md" role="dialog" aria-label="EXIF" aria-hidden="true">
+		<div class="flex items-center justify-between mb-3">
+			<span class="text-sm font-semibold text-first-text-color">EXIF</span>
+			<button class="image-viewer-exif-close flex h-8 w-8 items-center justify-center rounded-full bg-background-color-transparent-80 text-first-text-color transition hover:bg-background-color-transparent-40" type="button" aria-label="关闭">
+				<i class="fa-solid fa-xmark text-[0.65rem]"></i>
+			</button>
+		</div>
+		<div class="image-viewer-exif-cards grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[50vh] overflow-y-auto pr-1 scrollbar-hide"></div>
+		<template class="image-viewer-exif-card-template">
+			<div class="rounded-lg bg-background-color-transparent-40 px-3 py-2">
+				<div class="image-viewer-exif-card-header flex items-center gap-2 mb-1">
+					<i class="image-viewer-exif-card-icon fa-solid fa-circle-info text-xs text-third-text-color"></i>
+					<div class="image-viewer-exif-card-title text-xs font-semibold text-first-text-color"></div>
+				</div>
+				<div class="image-viewer-exif-card-items flex flex-col gap-1"></div>
+			</div>
+		</template>
+	</div>
+	<button class="image-viewer-exif-toggle flex items-center gap-2 hidden absolute left-1/2 bottom-6 -translate-x-1/2 rounded-full border border-border-color bg-background-color-transparent-80 px-4 py-2 text-first-text-color backdrop-blur-md transition hover:bg-background-color-transparent-40" type="button" aria-label="EXIF" aria-expanded="false">
+		<i class="fa-solid fa-circle-info text-xs"></i>
+		<span class="text-xs font-semibold uppercase tracking-wider">EXIF</span>
+	</button>
+	<button class="image-viewer-next" type="button" aria-label="下一页">
+		<i class="fa-solid fa-chevron-right"></i>
+	</button>
+</div>
+
+
+	
+	<div class="search-pop-overlay">
+	<div class="popup search-popup">
+		<div class="search-header">
+			<span class="search-input-field-pre">
+				<i class="fa-solid fa-keyboard"></i>
+			</span>
+			<div class="search-input-container">
+				<input autocomplete="off" autocorrect="off" autocapitalize="off" placeholder="站内搜索您需要的内容..." spellcheck="false" type="search" class="search-input">
+			</div>
+			<span class="popup-btn-close">
+				<i class="fa-solid fa-times"></i>
+			</span>
+		</div>
+		<div id="search-result">
+			<div id="no-result">
+				<i class="fa-solid fa-spinner fa-spin-pulse fa-5x fa-fw"></i>
+			</div>
+		</div>
+	</div>
+</div>
+	
+
+</main>
+
+
+
+<script src="/js/build/libs/Swup.min.js"></script>
+
+<script src="/js/build/libs/SwupSlideTheme.min.js"></script>
+
+<script src="/js/build/libs/SwupScriptsPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupProgressPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupScrollPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupPreloadPlugin.min.js"></script>
+
+<script>
+    window.swup = new Swup({
+        plugins: [
+            new SwupScriptsPlugin({
+                optin: true,
+            }),
+            new SwupProgressPlugin(),
+            new SwupScrollPlugin({
+                offset: 80,
+            }),
+            new SwupSlideTheme({
+                mainElement: ".main-content-body",
+            }),
+            new SwupPreloadPlugin(),
+        ],
+        containers: ["#swup"],
+    });
+
+    window.dispatchEvent(
+        new CustomEvent("redefine:swup:ready", {
+            detail: {
+                swup: window.swup,
+            },
+        }),
+    );
+</script>
+
+
+
+
+	
+<script src="/js/build/main.js" type="module"></script>
+
+
+
+    
+<script src="/js/build/libs/odometer.min.js"></script>
+
+    
+<link rel="stylesheet" href="/assets/odometer-theme-minimal.css">
+
+
+
+
+
+
+
+  
+<script src="/js/build/libs/Typed.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+<script src="/js/build/libs/moment-with-locales.min.js" data-swup-reload-script=""></script>
+
+
+
+	
+</body>
+
+</html>
